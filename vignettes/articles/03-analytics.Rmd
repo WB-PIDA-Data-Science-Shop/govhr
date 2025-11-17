@@ -94,7 +94,7 @@ wagebill_annual |>
   )
 ```
 
-Now imagine you want to unpack the wage bill. Suppose you are interested in a decomposition by establshment. You can quickly do that with our function, like this:
+Now imagine you want to unpack the wage bill. Suppose you are interested in a decomposition by establishment. You can quickly do that with our function, like this:
 
 ```{r}
 wagebill_annual_org <-

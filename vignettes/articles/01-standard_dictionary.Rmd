@@ -1,5 +1,5 @@
 ---
-title: "HRMIS Standard Data Dictionary"
+title: "HR Standard Data Dictionary"
 output: 
   html_document:
     toc: true
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Overview
 
-This article describes the standard dictionary for human resource management information system (HRMIS) data, organized into three main modules: Organization, Worker, and Contract. These modules are designed to organize and standardize information about public sector personnel across different countries and administrative levels.
+This article describes a standard dictionary for human resource management information system (HRMIS) data, organized into three main modules: Organization, Worker, and Contract. These modules are designed to organize and standardize information about public sector personnel across different countries and administrative levels.
 
 # Module 1: Organization
 
