@@ -70,10 +70,11 @@ By following this procedure, governments and World Bank teams can unlock a commo
 ## The Raw Data
 
 
-For this vignette, we apply synthetic data assumed from Brazil HRMIS system provided at the contract level. See the data below:
+For this vignette, we apply our tools to data provided by Brazil HRMIS system provided at the contract level. We randomly sample 5 percent of the original data. See the data below:
 
 ```{r dataview}
-
+bra_hrmis <- govhr::bra_hrmis |> 
+  sample_frac(0.05)
 
 reactable(
   head(bra_hrmis, 1e3)
@@ -196,15 +197,21 @@ class_occup_df <- copy(occup_df)[,
   .(id = .I, text = occupation_english)
 ]
 
-class_occup_df <- classify_occupation(class_occup_df,
-                                      isco_level = 4,
-                                      lang       = "en", 
-                                      num_leaves = 1)
+class_occup_df <- classify_occupation(
+  class_occup_df,
+  isco_level = 4,
+  lang = "en",
+  num_leaves = 1
+)
 
 
-datatable(head(class_occup_df, 
-               n = nrow(class_occup_df)), 
-          options = list(pageLength = 10)) 
+datatable(
+  head(
+    class_occup_df, 
+    n = nrow(class_occup_df)), 
+    options = list(pageLength = 10
+  )
+) 
 
 ```
  
@@ -489,8 +496,10 @@ bra_hrmis_org <-
          org_type = NA,
          org_parent = NA,
          org_child = NA) |>
-  dplyr::select(org_id, org_name_native, ref_date, org_type, org_parent, org_child,
-                country_code, country_name, adm1_name, adm1_code) |>
+  dplyr::select(
+    org_id, org_name_native, ref_date, org_type, org_parent, org_child,
+    country_code, country_name, adm1_name, adm1_code
+  ) |>
   unique() |>
   mutate(org_name_en = polyglotr::google_translate(org_name_native, target_language = "en"))
 

@@ -1,7 +1,7 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+# govhr <a href="https://wb-pida-data-science-shop.github.io/govhr/"><img src="man/figures/logo.png" align="right" height="120" alt="govhr website" /></a>
 
-# govhr <img src="spielplatz/logo/govhr.png" align="right" height="138" /></a>
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
 <!-- badges: start -->
 
