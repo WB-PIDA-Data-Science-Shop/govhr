@@ -1,4 +1,4 @@
-# govhr
+# govhr ![](spielplatz/logo/govhr.png)
 
 The goal of `govhr` is to provide a set of open-source tools that:
 
@@ -18,8 +18,8 @@ You can install the development version of `govhr` from
 [GitHub](https://github.com/WB-PIDA-Data-Science-Shop/govhr) with:
 
 ``` r
-# install.packages("remotes")
-remotes::install_github("WB-PIDA-Data-Science-Shop/govhr")
+# install.packages("pak")
+pak::pak("WB-PIDA-Data-Science-Shop/govhr")
 ```
 
 ## Example
