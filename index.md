@@ -1,4 +1,4 @@
-# govhr ![](spielplatz/logo/govhr.png)
+# govhr
 
 The goal of `govhr` is to provide a set of open-source tools that:
 

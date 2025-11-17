@@ -2,11 +2,11 @@
 
 ### All vignettes
 
+- [HR Standard Data
+  Dictionary](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.md):
+- [HR Data
+  Harmonization](https://wb-pida-data-science-shop.github.io/govhr/articles/02-harmonization.md):
 - [HR
-  Analytics](https://wb-pida-data-science-shop.github.io/govhr/articles/analytics.md):
-- [HRMIS
-  Harmonization](https://wb-pida-data-science-shop.github.io/govhr/articles/harmonization.md):
-- [HRMIS Standard Data
-  Dictionary](https://wb-pida-data-science-shop.github.io/govhr/articles/standard_dictionary.md):
+  Analytics](https://wb-pida-data-science-shop.github.io/govhr/articles/03-analytics.md):
 - [HR Analytics Standard
-  Report](https://wb-pida-data-science-shop.github.io/govhr/articles/standard_report.md):
+  Report](https://wb-pida-data-science-shop.github.io/govhr/articles/04-standard_report.md):
