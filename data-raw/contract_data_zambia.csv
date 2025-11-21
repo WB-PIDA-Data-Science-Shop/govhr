@@ -1,4 +1,4 @@
-contract_id,worker_id,org_id,ref_date,base_salary_lcu,gross_salary_lcu,net_salary_lcu,contract_type,occupation_native,occupation_english,occupation_isconame,occupation_iscocode,start_date,end_date,whours,paygrade,seniority,country_code,country_name,adm1_name,adm1_code
+contract_id,personnel_id,est_id,ref_date,base_salary_lcu,gross_salary_lcu,net_salary_lcu,contract_type,occupation_native,occupation_english,occupation_isconame,occupation_iscocode,start_date,end_date,whours,paygrade,seniority,country_code,country_name,adm1_name,adm1_code
 C000001,W03583,ORG0194,2/28/2024,3785.42,4252.66,4252.66,Permanent,Analyste,Technician,Technicians,2421,8/17/2017,3/2/2027,32.6,P1,16,ZMB,Zambia,Western Province,ZMB03
 C000002,W01347,ORG0343,8/9/2024,3332.56,3943.97,3943.97,Short-term,Comptable,Engineer,Technicians,2421,3/4/2023,9/1/2028,30.3,G7,29,ZMB,Zambia,Lusaka Province,ZMB02
 C000003,W05219,ORG0141,4/22/2024,3814.12,6319.51,4325.23,Permanent,Analyste,Analyst,Engineers,2411,8/14/2021,6/9/2028,32.8,G5,15,ZMB,Zambia,Central Province,ZMB03

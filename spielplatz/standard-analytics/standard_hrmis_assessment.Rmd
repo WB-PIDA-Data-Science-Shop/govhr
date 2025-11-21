@@ -30,8 +30,8 @@ theme_set(
 devtools::load_all()
 
 # read-in data ------------------------------------------------------------
-worker <- read_rds(
-  here("inst", "extdata", "bra_hrmis_worker.rds")
+personnel <- read_rds(
+  here("inst", "extdata", "bra_hrmis_personnel.rds")
 )
 
 contract <- read_rds(
@@ -121,7 +121,7 @@ Guidance questions for the assessment:
 1. What wage growth is typical for public sector employees in different occupational groups over the course of their career? How of much of this wage growth is dependent on promotions and how much can occur “within grade”?
 2. Does the annual performance management system distinguish between high and low performers? Are promotion decisions largely seniority based and/or automatic?
 3. Are there performance bonus schemes and if so what occupation groups and percentage of the staff receive them; and how large is the bonus that staff are expected to receive?
-4. Is there targeted, significant additional pay for essential workers to serve in hard-to-staff locations such as rural areas?
+4. Is there targeted, significant additional pay for essential personnels to serve in hard-to-staff locations such as rural areas?
 
 ### 3.6.1. Percentage of staff receiving highest performance ratings
 
@@ -198,22 +198,22 @@ wage_bill_change |>
 
 ```{r}
 # 3.6.3. percentage of staff receiving a performance bonus
-performance_bonus_worker <- contract |>
+performance_bonus_personnel <- contract |>
   filter(
     !is.na(allowance_lcu)
   ) |>
   group_by(year) |>
   summarise(
-    total_performance = n_distinct(worker_id)
+    total_performance = n_distinct(personnel_id)
   )
 
 contract |>
   group_by(year) |>
   summarise(
-    total = n_distinct(worker_id)
+    total = n_distinct(personnel_id)
   ) |>
   left_join(
-    performance_bonus_worker,
+    performance_bonus_personnel,
     by = "year"
   ) |>
   mutate(
@@ -328,7 +328,7 @@ contract_annual_growth |>
 
 A key question is whether the public sector workforce is performing well and delivering high quality infrastructure, services, and regulations, which is really a question of public sector labor productivity. Productivity measures the efficiency with which inputs, like labor, are converted into outputs, and is a more precise and economically meaningful concept than “performance,” since presumably performance can be improved by spending more while productivity measures whether more is produced and delivered for a given wage bill.
 
-Measuring labor productivity in government is challenging, mainly because of the difficulty in defining and measuring government outputs. For example, functions such as defense, foreign relations, and environmental protection are difficult to quantify with respect to prices, as well as services for which there are no market transactions. Given these challenges, a diversified approach to measuring outputs must be used. These alternative measures can be distinguished into macro approaches, which provide information at the level of an organization, sector, or service as a whole; and micro approaches, which be applied to the individual employee, task, project, and process.
+Measuring labor productivity in government is challenging, mainly because of the difficulty in defining and measuring government outputs. For example, functions such as defense, foreign relations, and environmental protection are difficult to quantify with respect to prices, as well as services for which there are no market transactions. Given these challenges, a diversified approach to measuring outputs must be used. These alternative measures can be distinguished into macro approaches, which provide information at the level of an establishment, sector, or service as a whole; and micro approaches, which be applied to the individual employee, task, project, and process.
 
 Guidance questions for the assessment.
 
@@ -390,8 +390,8 @@ wwbi |>
     name = case_when(
       name == "edu_sector" ~ "Education",
       name == "hea_sector" ~ "Health",
-      name == "female" ~ "Female worker",
-      name == "male" ~ "Male worker",
+      name == "female" ~ "Female personnel",
+      name == "male" ~ "Male personnel",
       name == "pooled" ~  "Overall"
     )
   ) |>
@@ -432,9 +432,9 @@ contract_annual_growth |>
   )
 ```
 
-### 4.3.4. Trends in educational profiles of public-sector workers relative to private-sector workers (by demographic, occupation, and geographical groups)
+### 4.3.4. Trends in educational profiles of public-sector personnels relative to private-sector personnels (by demographic, occupation, and geographical groups)
 ```{r}
-worker |>
+personnel |>
   mutate(
     year = year(ref_date)
   ) |>

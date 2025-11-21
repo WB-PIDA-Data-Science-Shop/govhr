@@ -508,7 +508,7 @@ compute_share <- function(data,
 #'
 #' \dontrun{
 #'
-#' dt <- contract_harmonized |> mutate(year = year(org_date)) |> as.data.table()
+#' dt <- contract_harmonized |> mutate(year = year(est_date)) |> as.data.table()
 #'
 #'
 #' compute_fastshare(
@@ -756,13 +756,13 @@ compute_fastchange <- function(data, col, date_col) {
 #' Compute Core HRMIS Analytical Tables
 #'
 #' This function generates a suite of standardized analytical tables for HRMIS (Human Resource Management Information System) reports.
-#' It combines contract-level, worker-level, and organizational data to compute wage bill summaries, employment shares, decompositions,
-#' and profiles by occupation, pay grade, organization, education, and seniority.
+#' It combines contract-level, personnel-level, and establishmental data to compute wage bill summaries, employment shares, decompositions,
+#' and profiles by occupation, pay grade, establishment, education, and seniority.
 #'
-#' @param contract_dt A `data.table` containing individual employment contracts with variables such as `worker_id`, `ref_date`,
+#' @param contract_dt A `data.table` containing individual employment contracts with variables such as `personnel_id`, `ref_date`,
 #' wage variables (`gross_salary_lcu`, `net_salary_lcu`, `base_salary_lcu`), and job attributes.
-#' @param worker_dt A `data.table` containing worker-level panel data, including `worker_id`, `ref_date`, demographic and employment information.
-#' @param org_dt A `data.table` containing organizational information (e.g., institution identifiers, types, or sectors).
+#' @param personnel_dt A `data.table` containing personnel-level panel data, including `personnel_id`, `ref_date`, demographic and employment information.
+#' @param est_dt A `data.table` containing establishmental information (e.g., institution identifiers, types, or sectors).
 #' @param macro_indicators A data frame containing macro indicators.
 #'
 #' @return A named list of `data.table` objects containing:
@@ -771,29 +771,29 @@ compute_fastchange <- function(data, col, date_col) {
 #'   \item{publicemployment_share}{Public employment as a share of total employment.}
 #'   \item{wagebill_occupisco}{Wage bill decomposition by ISCO occupation group.}
 #'   \item{wagebill_occupnative}{Wage bill decomposition by native occupational titles.}
-#'   \item{wagebill_orgdecomp}{Wage bill decomposition by organization.}
+#'   \item{wagebill_estdecomp}{Wage bill decomposition by establishment.}
 #'   \item{wagebill_allowshare_paygrade}{Allowance rate by pay grade.}
 #'   \item{wagebill_allowshare_seniority}{Allowance rate by seniority.}
-#'   \item{workerevent}{Worker-level hiring, firing, and retirement events over time.}
+#'   \item{personnelevent}{Personnel-level hiring, firing, and retirement events over time.}
 #'   \item{employment_decomp}{Employment decomposition by occupation and ISCO group.}
-#'   \item{org_decomp}{Employment decomposition by organization.}
-#'   \item{education_profile}{Distribution of public sector workers by education, gender, and occupation.}
-#'   \item{mobilityprofile}{Distribution of public sector workers by pay grade, seniority, gender, and occupation.}
+#'   \item{est_decomp}{Employment decomposition by establishment.}
+#'   \item{education_profile}{Distribution of public sector personnels by education, gender, and occupation.}
+#'   \item{mobilityprofile}{Distribution of public sector personnels by pay grade, seniority, gender, and occupation.}
 #' }
 #'
 #' @details
-#' The function integrates contract, worker, and organizational datasets to compute a standardized HRMIS statistical report.
+#' The function integrates contract, personnel, and establishmental datasets to compute a standardized HRMIS statistical report.
 #' It relies on supporting helper functions such as:
 #' \code{convert_constant_ppp()}, \code{compute_fastshare()}, \code{compute_fastsummary()},
-#' \code{detect_worker_event()}, and \code{detect_retirement()}.
+#' \code{detect_personnel_event()}, and \code{detect_retirement()}.
 #'
 #' Each sub-table in the output list can be used directly in dashboards, reports, or further analytical aggregation.
 #'
 #' @examples
 #' \dontrun{
 #' hrm_stats <- compute_hrmreport_stats(contract_dt = contract_data,
-#'                                      worker_dt = worker_data,
-#'                                      org_dt = org_data)
+#'                                      personnel_dt = personnel_data,
+#'                                      est_dt = est_data)
 #' names(hrm_stats)
 #' }
 #'
@@ -807,14 +807,14 @@ compute_fastchange <- function(data, col, date_col) {
 #' @export
 
 compute_hrmreport_stats <- function(contract_dt,
-                                    worker_dt,
-                                    org_dt,
+                                    personnel_dt,
+                                    est_dt,
                                     macro_indicators){
 
   ## convert to data.table
   contract_dt <-  as.data.table(contract_dt)
-  worker_dt <- as.data.table(worker_dt)
-  org_dt <- as.data.table(org_dt)
+  personnel_dt <- as.data.table(personnel_dt)
+  est_dt <- as.data.table(est_dt)
 
 
   ### 3.1
@@ -845,12 +845,12 @@ compute_hrmreport_stats <- function(contract_dt,
                       output = "long")
 
   ### public sector employment as a share of total employment
-  worker_dt[, year := lubridate::year(ref_date)]
+  personnel_dt[, year := lubridate::year(ref_date)]
 
   pubempshare_dt <-
     compute_fastshare(data = contract_dt,
                       macro_cols = "labor_force_total",
-                      cols = "worker_id",
+                      cols = "personnel_id",
                       groups = c("country_code", "year"),
                       fns = "count_unique",
                       output = "long")
@@ -877,11 +877,11 @@ compute_hrmreport_stats <- function(contract_dt,
                         groups = c("occupation_native", "occupation_english", "year"),
                         output = "long")
 
-  wagebill_orgdecomp_dt <-
+  wagebill_estdecomp_dt <-
     compute_fastsummary(data = contract_dt,
                         cols = c(wage_vars, ppp_vars),
                         fns = c("sum", "mean"),
-                        groups = c("org_id", "year"),
+                        groups = c("est_id", "year"),
                         output = "long")
 
   wagebill_paygrade_dt <-
@@ -915,31 +915,31 @@ compute_hrmreport_stats <- function(contract_dt,
 
   ### compute annual recruitment patterns over time (still need to compute the reallocations, ask Gali!)
 
-  hire_dt <- detect_worker_event(data = worker_dt,
-                                 id_col = "worker_id",
+  hire_dt <- detect_personnel_event(data = personnel_dt,
+                                 id_col = "personnel_id",
                                  event_type = "hire",
-                                 start_date = min(worker_dt$ref_date, na.rm = TRUE),
-                                 end_date = max(worker_dt$ref_date, na.rm = TRUE))
+                                 start_date = min(personnel_dt$ref_date, na.rm = TRUE),
+                                 end_date = max(personnel_dt$ref_date, na.rm = TRUE))
 
 
-  worker_active_dt <- worker_dt[status == "active"]
+  personnel_active_dt <- personnel_dt[status == "active"]
 
-  contract_rename_org_dt <- merge(contract_dt,
-                                  worker_active_dt,
-                                  by = c("worker_id", "ref_date"),
+  contract_rename_est_dt <- merge(contract_dt,
+                                  personnel_active_dt,
+                                  by = c("personnel_id", "ref_date"),
                                   allow.cartesian = TRUE)
 
-  worker_reallocation_dt <- detect_reallocation(data = contract_rename_org_dt,
-                                                worker_hire = hire_dt)
+  personnel_reallocation_dt <- detect_reallocation(data = contract_rename_est_dt,
+                                                personnel_hire = hire_dt)
 
-  workerevent_dt <-
+  personnelevent_dt <-
     bind_rows(hire_dt,
-              detect_worker_event(data = worker_dt,
-                                  id_col = "worker_id",
+              detect_personnel_event(data = personnel_dt,
+                                  id_col = "personnel_id",
                                   event_type = "fire",
-                                  start_date = min(worker_dt$ref_date, na.rm = TRUE),
-                                  end_date = max(worker_dt$ref_date, na.rm = TRUE)),
-              detect_retirement(data = worker_dt))
+                                  start_date = min(personnel_dt$ref_date, na.rm = TRUE),
+                                  end_date = max(personnel_dt$ref_date, na.rm = TRUE)),
+              detect_retirement(data = personnel_dt))
 
 
 
@@ -947,7 +947,7 @@ compute_hrmreport_stats <- function(contract_dt,
 
   empdecomp_dt <-
     compute_fastsummary(data = contract_dt,
-                        cols = "worker_id",
+                        cols = "personnel_id",
                         groups = c("year", "occupation_isconame", "occupation_iscocode"),
                         output = "long",
                         fns = "count_unique") |>
@@ -960,23 +960,23 @@ compute_hrmreport_stats <- function(contract_dt,
 
   orgdecomp_dt <-
     compute_fastsummary(data = contract_dt,
-                        cols = "worker_id",
-                        groups = c("year", "org_id"),
+                        cols = "personnel_id",
+                        groups = c("year", "est_id"),
                         output = "long",
                         fns = "count_unique") |>
     rename(count = "value") %>%
     .[, prop := count / sum(count, na.rm = TRUE), by = "year"]
 
 
-  ## educational profile of public sector workers by gender and perhaps occupation (find out about which
+  ## educational profile of public sector personnels by gender and perhaps occupation (find out about which
   ## rates we need to compute)
 
-  combine_dt <- worker_dt[contract_dt, on = c("worker_id", "ref_date", "year")]
+  combine_dt <- personnel_dt[contract_dt, on = c("personnel_id", "ref_date", "year")]
 
   educprofile_dt <- combine_dt[, .N, by = .(year, gender, educat7,
                                             occupation_iscocode, occupation_native)]
 
-  ## distribution of public sector workers by pay grade
+  ## distribution of public sector personnels by pay grade
   mobilityprofile_dt <- combine_dt[, .N, by = .(year, gender, paygrade, seniority, occupation_native, occupation_iscocode)]
 
 
@@ -987,13 +987,13 @@ compute_hrmreport_stats <- function(contract_dt,
                      wagebill_annual = wagebill_annual_dt,
                      wagebill_occupisco = wagebill_iscodecomp_dt,
                      wagebill_occupnative = wagebill_occupdecomp_dt,
-                     wagebill_orgdecomp = wagebill_orgdecomp_dt,
+                     wagebill_estdecomp = wagebill_estdecomp_dt,
                      wagebill_allowshare_paygrade = wagebill_allowpaygrade_dt,
                      wagebill_allowshare_seniority = wagebill_allowseniority_dt
                    ),
-                   worker_movements = workerevent_dt,
+                   personnel_movements = personnelevent_dt,
                    employment_decomp = empdecomp_dt,
-                   org_decomp = orgdecomp_dt,
+                   est_decomp = orgdecomp_dt,
                    education_profile = educprofile_dt,
                    mobilityprofile = mobilityprofile_dt)
 

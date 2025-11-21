@@ -18,8 +18,8 @@ theme_set(
 devtools::load_all()
 
 # read-in data ------------------------------------------------------------
-worker <- read_rds(
-  here("inst", "extdata", "bra_hrmis_worker.rds")
+personnel <- read_rds(
+  here("inst", "extdata", "bra_hrmis_personnel.rds")
 )
 
 contract <- read_rds(
@@ -144,22 +144,22 @@ wage_bill_change |>
   )
 
 # 3.6.3. percentage of staff receiving a performance bonus
-performance_bonus_worker <- contract |>
+performance_bonus_personnel <- contract |>
   filter(
     !is.na(allowance_lcu)
   ) |>
   group_by(year) |>
   summarise(
-    total_performance = n_distinct(worker_id)
+    total_performance = n_distinct(personnel_id)
   )
 
 contract |>
   group_by(year) |>
   summarise(
-    total = n_distinct(worker_id)
+    total = n_distinct(personnel_id)
   ) |>
   left_join(
-    performance_bonus_worker,
+    performance_bonus_personnel,
     by = "year"
   ) |>
   mutate(
@@ -284,8 +284,8 @@ wwbi |>
     name = case_when(
       name == "edu_sector" ~ "Education",
       name == "hea_sector" ~ "Health",
-      name == "female" ~ "Female worker",
-      name == "male" ~ "Male worker",
+      name == "female" ~ "Female personnel",
+      name == "male" ~ "Male personnel",
       name == "pooled" ~  "Overall"
     )
   ) |>
@@ -324,8 +324,8 @@ contract_annual_growth |>
     y = "Index (2007 = 100)"
   )
 
-# 4.3.4. Trends in educational profiles of public-sector workers relative to private-sector workers (by demographic, occupation, and geographical groups)
-worker |>
+# 4.3.4. Trends in educational profiles of public-sector personnels relative to private-sector personnels (by demographic, occupation, and geographical groups)
+personnel |>
   mutate(
     year = year(ref_date)
   ) |>

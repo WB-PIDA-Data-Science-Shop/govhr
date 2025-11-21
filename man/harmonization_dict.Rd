@@ -14,7 +14,7 @@ A tibble with 48 rows and 9 variables:
 \item{Representation (Code list / Format)}{Expected format, code list, or data representation.}
 \item{Primary Key}{Indicates whether the variable uniquely identifies a record (\code{"Yes"} or \code{"No"}).}
 \item{Relationship}{Describes any relational links to other modules or variables.}
-\item{Module}{The HRMIS module the variable belongs to: \code{"Organization"}, \code{"Worker"}, or \code{"Contract"}.}
+\item{Module}{The HRMIS module the variable belongs to: \code{"Establishment"}, \code{"Personnel"}, or \code{"Contract"}.}
 \item{Example Value}{Illustrative example value for the variable.}
 }
 }
@@ -24,7 +24,7 @@ harmonization_dict
 \description{
 A structured metadata dictionary describing variables harmonized across
 the Human Resource Management Information System (HRMIS) modules:
-Organization, Worker, and Contract. The dictionary follows
+Establishment, Personnel, and Contract. The dictionary follows
 SDMX-style documentation standards and specifies variable names,
 identifiers, data types (in R), relationships, and other metadata fields
 used in HRMIS data harmonization.
@@ -45,7 +45,7 @@ glimpse(harmonization_dict)
 
 # Filter dictionary by module
 harmonization_dict |>
-filter(Module == "Worker")
+filter(Module == "Personnel")
 
 }
 \references{

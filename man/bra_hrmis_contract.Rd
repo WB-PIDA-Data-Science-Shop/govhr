@@ -8,9 +8,11 @@
 A data frame with N rows and 24 variables:
 \describe{
   \item{contract_id}{Unique identifier for the contract}
-  \item{worker_id}{Foreign key linking to Worker module}
-  \item{org_id}{Foreign key linking to Organization module}
+  \item{personnel_id}{Foreign key linking to Personnel module}
+  \item{est_id}{Foreign key linking to Establishment module}
   \item{ref_date}{Timestamp for the contract record}
+  \item{contract_type_code}{Type of contract code}
+  \item{contract_type_native}{Type of contract in local language}
   \item{base_salary_lcu}{Base compensation in local currency units (LCU)}
   \item{gross_salary_lcu}{Total compensation before deductions in local currency units}
   \item{net_salary_lcu}{Compensation after deductions in local currency units}
@@ -28,7 +30,6 @@ A data frame with N rows and 24 variables:
   \item{whours}{Standard or actual hours worked}
   \item{paygrade}{Salary scale or grade level}
   \item{seniority}{Years of service or seniority level}
-  \item{year}{Year of the record}
 }
 }
 \usage{
@@ -36,7 +37,7 @@ bra_hrmis_contract
 }
 \description{
 This dataset contains detailed information about contracts, including salaries,
-allowances, occupation, work hours, and organizational context. Each row represents
+allowances, occupation, work hours, and establishmental context. Each row represents
 a unique contract record.
 }
 \keyword{datasets}

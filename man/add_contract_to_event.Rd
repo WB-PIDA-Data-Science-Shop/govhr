@@ -7,11 +7,11 @@
 add_contract_to_event(event_dt, contract_dt, keep_vars)
 }
 \arguments{
-\item{event_dt}{A data.table containing worker event records. Must include the columns
-`worker_id` and `ref_date`.}
+\item{event_dt}{A data.table containing personnel event records. Must include the columns
+`personnel_id` and `ref_date`.}
 
-\item{contract_dt}{A data.table containing contract information, also including `worker_id`
-and `ref_date`. The contract dataset provides additional attributes describing the worker's
+\item{contract_dt}{A data.table containing contract information, also including `personnel_id`
+and `ref_date`. The contract dataset provides additional attributes describing the personnel's
 contractual context on each reference date.}
 
 \item{keep_vars}{A character vector of variable names in `contract_dt` to be merged into the
@@ -20,16 +20,16 @@ or employment type.}
 }
 \value{
 A data.table identical to `event_dt`, but with the specified variables from `contract_dt`
-joined in by matching on `worker_id` and `ref_date`.
+joined in by matching on `personnel_id` and `ref_date`.
 }
 \description{
 This function merges contract information into an event dataset (such as hires, terminations, or transfers)
-by matching on `worker_id` and `ref_date`. It ensures that selected variables from the contract dataset
+by matching on `personnel_id` and `ref_date`. It ensures that selected variables from the contract dataset
 are attached to corresponding events without duplicating records.
 }
 \details{
 The function performs a *right join* operation of the `contract_dt` onto `event_dt`
-(via `data.table`'s `on` syntax). Only unique combinations of `worker_id`, `ref_date`,
+(via `data.table`'s `on` syntax). Only unique combinations of `personnel_id`, `ref_date`,
 and `keep_vars` are retained from the contract dataset prior to the join, preventing
 duplicate key matches.
 
@@ -41,13 +41,13 @@ about the employee’s contract at the time of each event.
 library(data.table)
 
 event_dt <- data.table(
-  worker_id = c(1, 2, 3),
+  personnel_id = c(1, 2, 3),
   ref_date = as.IDate(c("2020-01-01", "2020-02-01", "2020-03-01")),
   type_event = c("hire", "fire", "hire")
 )
 
 contract_dt <- data.table(
-  worker_id = c(1, 2, 3),
+  personnel_id = c(1, 2, 3),
   ref_date = as.IDate(c("2020-01-01", "2020-02-01", "2020-03-01")),
   department = c("Finance", "HR", "IT"),
   contract_type = c("permanent", "temporary", "consultant")

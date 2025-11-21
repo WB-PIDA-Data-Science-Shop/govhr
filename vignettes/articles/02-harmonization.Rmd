@@ -47,7 +47,7 @@ Across many countries—especially in low- and middle-income settings—governme
 
 This fragmentation makes HRM analytics expensive, slow, and inconsistent. It also limits the ability of governments and development partners—including the World Bank—to compare results across time, sectors, or countries, or to build reusable analytics pipelines.
 
-This article describes the standard approach for harmonizing human resource management information system (HRMIS) data, organized into three main modules: Organization, Worker, and Contract. The contents of each module are described in `vignette("standard_dictionary")`. In this article, we provide a set of helper functions to support the harmonization process across the modules. When users prepare their HRMIS data according to this standard, teams can immediately apply automated tools for data quality control as well as dynamic and reproducible reports on workforce structure dynamics, pay and compensation analytics, establishment control monitoring, staffing distribution analysis. 
+This article describes the standard approach for harmonizing human resource management information system (HRMIS) data, organized into three main modules: Establishment, Personnel, and Contract. The contents of each module are described in `vignette("standard_dictionary")`. In this article, we provide a set of helper functions to support the harmonization process across the modules. When users prepare their HRMIS data according to this standard, teams can immediately apply automated tools for data quality control as well as dynamic and reproducible reports on workforce structure dynamics, pay and compensation analytics, establishment control monitoring, staffing distribution analysis. 
 
 This vignette, harmonization.Rmd, presents the practical workflow for transforming raw HRMIS extracts into these standardized modules. It provides governments with a clear, repeatable procedure for preparing their data so that advanced analytics can be deployed rapidly and consistently—reducing costs, increasing comparability, and strengthening evidence-based HR decision making.
 
@@ -57,7 +57,7 @@ The harmonization workflow demonstrated here shows how to:
 
 * recode local classifications (education, occupation, contract type) into cross-country taxonomies,
 
-* generate unique and persistent identifiers for workers, organizations, and contracts,
+* generate unique and persistent identifiers for personnels, establishments, and contracts,
 
 * attach missing metadata such as country codes, administrative hierarchies, or reference dates,
 
@@ -82,7 +82,7 @@ reactable(
 
 ```
 
-We illustrate the harmonization workflow using this dataset. `bra_hrmis` contains `r nrow(bra_hrmis)` rows and `r ncol(bra_hrmis)` columns, covering covering demographic, employment, organizational, and payroll information for public sector workers.
+We illustrate the harmonization workflow using this dataset. `bra_hrmis` contains `r nrow(bra_hrmis)` rows and `r ncol(bra_hrmis)` columns, covering covering demographic, employment, establishmental, and payroll information for public sector personnels.
 
 A quick glimpse of the dataset: 
 
@@ -110,17 +110,17 @@ The harmonization framework addresses these challenges directly. By defining a c
 The remainder of this section documents the harmonization steps for each of the three core modules derived from the data dictionary:
 
 1. **Contract Module**  
-2. **Worker Module**
-3. **Organization Module**
+2. **Personnel Module**
+3. **Establishment Module**
 Each module represents a specific level of analysis defined by the dictionary and is to be constructed directly from the raw HRMIS data.
 
 ---
 
 ## Harmonizing the Contract Module
 
-The Contract Module is the foundational component of the harmonized payroll dataset. The purpose of this module is to extract and structure all information that is **unique at a contract, reference date level**, as defined in the data dictionary. A “contract record” refers to a worker–contract relationship at a specific reference period (usually month–year), capturing the contractual characteristics governing the worker's employment at that time.
+The Contract Module is the foundational component of the harmonized payroll dataset. The purpose of this module is to extract and structure all information that is **unique at a contract, reference date level**, as defined in the data dictionary. A “contract record” refers to a personnel–contract relationship at a specific reference period (usually month–year), capturing the contractual characteristics governing the personnel's employment at that time.
 
-In practice, the raw HRMIS data typically mixes variables at different conceptual levels—worker attributes, position attributes, contract terms, payroll events, and sometimes even one-off administrative transactions. 
+In practice, the raw HRMIS data typically mixes variables at different conceptual levels—personnel attributes, position attributes, contract terms, payroll events, and sometimes even one-off administrative transactions. 
 
 Working with payroll or HRMIS data in many developing-country contexts often involves very large datasets—sometimes millions of records spanning multiple years. Such data volumes can quickly overwhelm standard analytical workflows if not handled using efficient tools.
 
@@ -165,7 +165,7 @@ kable(mtr_summary)
 
 ```
 
-This clearly shows that `MATRICULA` is the contract ID while `CPF` is possibly the identifier for the worker, the latter will come in handy during the harmonization of the worker module. 
+This clearly shows that `MATRICULA` is the contract ID while `CPF` is possibly the identifier for the personnel, the latter will come in handy during the harmonization of the personnel module. 
 
 Now, we can begin creating the set of variables as defined by the `standard_dictionary` vignette. It is often useful to begin by creating the derived variables. There are four sets of derived variables within the dictionary: 
 
@@ -344,7 +344,7 @@ Now that the derived variables in this contract module have been created, we are
 
 setnames(bra_hrmis,
          old = c("MATRICULA", "CPF", "ORGAO", "CLASSE", "NIVEL"),
-         new = c("contract_id", "worker_id", "org_id", "paygrade", "seniority"))
+         new = c("contract_id", "personnel_id", "est_id", "paygrade", "seniority"))
 
 
 ### now let us select the final set of dictionary variables to complete the module
@@ -352,7 +352,7 @@ setnames(bra_hrmis,
 bra_hrmis_contract <- 
   bra_hrmis |>
   dplyr::select(
-    contract_id, worker_id, org_id,
+    contract_id, personnel_id, est_id,
     ends_with("_date"),
     contains("_salary_"),
     contract_type, 
@@ -373,24 +373,24 @@ glimpse(bra_hrmis_contract)
 ```
 
 
-## Harmonizing the Worker Module
+## Harmonizing the Personnel Module
 
-The Worker Module standardizes individual-level information about employees with the public sector. This section demonstrates the harmonization pipeline using the same contract-level Brazil (Alagoas) HRMIS dataset (bra_hrmis) as an example. We will produce a clean, harmonized dataset named bra_hrmis_worker which conforms to the Worker Module dictionary in `standard_dictionary.Rmd`.
+The Personnel Module standardizes individual-level information about employees with the public sector. This section demonstrates the harmonization pipeline using the same contract-level Brazil (Alagoas) HRMIS dataset (bra_hrmis) as an example. We will produce a clean, harmonized dataset named bra_hrmis_personnel which conforms to the Personnel Module dictionary in `standard_dictionary.Rmd`.
 
-Let's start with a little exploration. We need to understand how many unique worker-organization-refdate combinations are within the data:
+Let's start with a little exploration. We need to understand how many unique personnel-establishment-refdate combinations are within the data:
 
-```{r creating-unique-worker-identifiers}
+```{r creating-unique-personnel-identifiers}
 
 ## how many observations should we expect to have
-worker_count <- 
+personnel_count <- 
 bra_hrmis |>
-  dplyr::select(worker_id, org_id, ref_date) |>
+  dplyr::select(personnel_id, est_id, ref_date) |>
   uniqueN()
 
 
 ```
 
-This tells us that we have `r worker_count` unique worker_id-org_id-refdate combinations in the entire dataset. The goal is to ensure that once all the other variables of the worker module are added. The size of the worker module remains the same. As we did, in the contract module, we now add all the derived variables:
+This tells us that we have `r personnel_count` unique personnel_id-est_id-refdate combinations in the entire dataset. The goal is to ensure that once all the other variables of the personnel module are added. The size of the personnel module remains the same. As we did, in the contract module, we now add all the derived variables:
 
 ```{r add-derivative-variables}
 
@@ -460,51 +460,51 @@ bra_hrmis[, c("tribe", "race") := .(NA, NA)] ## lets quickly create the variable
 ```
 
 
-Finally, we can create the worker module by taking the set of unique values across the set of worker modules we have now created within `bra_hrmis`. See the implementation below:
+Finally, we can create the personnel module by taking the set of unique values across the set of personnel modules we have now created within `bra_hrmis`. See the implementation below:
 
-```{r creating-unique-worker-identifiers2}
+```{r creating-unique-personnel-identifiers2}
 
 
-bra_hrmis_worker <- 
+bra_hrmis_personnel <- 
   bra_hrmis |>
-  dplyr::select(worker_id, org_id, ref_date, birth_date, gender, educat7,
+  dplyr::select(personnel_id, est_id, ref_date, birth_date, gender, educat7,
                 country_name, country_code, adm1_name, adm1_code) |>
   unique()
 
 
 ```
 
-Let's take a look at the `bra_hrmis_worker`
+Let's take a look at the `bra_hrmis_personnel`
 
 ```{r}
 
-glimpse(bra_hrmis_worker)
+glimpse(bra_hrmis_personnel)
 
 ```
 
 
-## Harmonizing the Organization Module
+## Harmonizing the Establishment Module
 
-The Organization Module extracts, standardizes, and structures information on public-sector organizations from the HRMIS records, `bra_hrmis`. The steps below convert the raw organization identifiers into a canonical, well-structured organization register according the harmonization dictionary. See below: 
+The Establishment Module extracts, standardizes, and structures information on public-sector establishments from the HRMIS records, `bra_hrmis`. The steps below convert the raw establishment identifiers into a canonical, well-structured establishment register according the harmonization dictionary. See below: 
 
-```{r organization-module}
+```{r establishment-module}
 
 ### get the set of variables according to the dictionary
-bra_hrmis_org <- 
+bra_hrmis_est <- 
   bra_hrmis |>
-  mutate(org_name_native = org_id,
-         org_type = NA,
-         org_parent = NA,
-         org_child = NA) |>
+  mutate(est_name_native = est_id,
+         est_type = NA,
+         est_parent = NA,
+         est_child = NA) |>
   dplyr::select(
-    org_id, org_name_native, ref_date, org_type, org_parent, org_child,
+    est_id, est_name_native, ref_date, est_type, est_parent, est_child,
     country_code, country_name, adm1_name, adm1_code
   ) |>
   unique() |>
-  mutate(org_name_en = polyglotr::google_translate(org_name_native, target_language = "en"))
+  mutate(est_name_en = polyglotr::google_translate(est_name_native, target_language = "en"))
 
 
-glimpse(bra_hrmis_org)
+glimpse(bra_hrmis_est)
 
 ```
 
@@ -519,9 +519,9 @@ The function `qualitycheck_contractmod()` performs a comprehensive set of checks
 
 Key Checks Performed
 
-* Column existence: Ensures all required fields such as contract_id, worker_id, org_id, salary fields, date fields, and administrative codes are present.
+* Column existence: Ensures all required fields such as contract_id, personnel_id, est_id, salary fields, date fields, and administrative codes are present.
 
-* Uniqueness: Observations must be unique at the contract_id–org_date level.
+* Uniqueness: Observations must be unique at the contract_id–est_date level.
 
 * Type validation: Ensures character, date, and numeric variables are correctly typed.
 
@@ -540,16 +540,16 @@ qualitycheck_contractmod(bra_hrmis_contract |> as_tibble())
 ```
 
 
-## Quality Control for the Worker Module
+## Quality Control for the Personnel Module
 
-Worker-level harmonization requires the presence and validity of demographic, identification, and reference date information.
-The function `qualitycheck_worker()` applies minimal but essential validation steps to ensure basic integrity of the worker table.
+Personnel-level harmonization requires the presence and validity of demographic, identification, and reference date information.
+The function `qualitycheck_personnel()` applies minimal but essential validation steps to ensure basic integrity of the personnel table.
 
 Key Checks Performed
 
-* Required variables exist: Including worker_id, ref_date, birth_date, gender, educat7, tribe, race, and status.
+* Required variables exist: Including personnel_id, ref_date, birth_date, gender, educat7, tribe, race, and status.
 
-* Uniqueness: Worker IDs must be unique within each reference date (ref_date).
+* Uniqueness: Personnel IDs must be unique within each reference date (ref_date).
 
 * Non-missingness: Required fields cannot be NA.
 
@@ -557,26 +557,26 @@ Key Checks Performed
 
 
 Please see the check below: 
-```{r quality-check-worker}
+```{r quality-check-personnel}
 
-qualitycheck_worker(bra_hrmis_worker |> as_tibble())
+qualitycheck_personnel(bra_hrmis_personnel |> as_tibble())
 
 ```
 
 
-## Quality Control for the Organization Module 
+## Quality Control for the Establishment Module 
 
-The organization module captures ministry/department/agency identifiers, names, hierarchical parent-child relationships of public sector organizations, and geographic attributes. The function `qualitycheck_orgmod()` validates structural and coding integrity.
+The establishment module captures ministry/department/agency identifiers, names, hierarchical parent-child relationships of public sector establishments, and geographic attributes. The function `qualitycheck_estmod()` validates structural and coding integrity.
 
 Key Checks Performed
 
-* Required variables exist: org_id, org_name_native, org_parent, org_child, country_code, country_name: adm1_name, adm1_code, English name (org_name_en)
+* Required variables exist: est_id, est_name_native, est_parent, est_child, country_code, country_name: adm1_name, adm1_code, English name (est_name_en)
 
-* Row uniqueness: Each org_id must be unique.
+* Row uniqueness: Each est_id must be unique.
 
 * Non-missingness: All required variables must be populated.
 
-* Type validation: All organization fields must be character.
+* Type validation: All establishment fields must be character.
 
 * ISO3 Validation: Ensures country_code belongs to the official World Bank/ISO list using the `countrycode` package.
 
@@ -584,7 +584,7 @@ Key Checks Performed
 Please see the check below: 
 ```{r quality-check-org}
 
-qualitycheck_orgmod(bra_hrmis_org |> as_tibble())
+qualitycheck_estmod(bra_hrmis_est |> as_tibble())
 
 ```
 

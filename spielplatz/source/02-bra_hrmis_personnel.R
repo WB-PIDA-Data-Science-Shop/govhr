@@ -16,17 +16,12 @@ library(here)
 devtools::load_all()
 set.seed(1789)
 
-dir.create(
-  here("inst", "extdata"),
-  recursive = TRUE
-)
-
 # read-in data ------------------------------------------------------------
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
 
 plan(multisession, workers = 3)
 
-worker_active_list <-
+personnel_active_list <-
   list.files(
     path = file_path,
     pattern = "^Ativos_[0-9]{4}\\.xlsx$",
@@ -39,7 +34,7 @@ worker_active_list <-
       clean_names()
   )
 
-worker_inactive_list <-
+personnel_inactive_list <-
   list.files(
     path = file_path,
     pattern = "^Inativos_[0-9]{4}\\.xlsx$",
@@ -58,31 +53,31 @@ future::plan(sequential)
 # what we want is two things: (1) uniqueness in the cross-section (entities are uniquely identified) and
 # (2) consistency (those unique ids refer to the same entities across the panel)
 
-inactive_inconsistent_cols <- worker_inactive_list |>
+inactive_inconsistent_cols <- personnel_inactive_list |>
   find_inconsistent_colnames() |>
   pull(colnames)
 
 # identify if a dataset contains inconsistent colnames
-worker_inactive_list |>
+personnel_inactive_list |>
   keep(
     ~ detect_inconsistent_cols(.x, inactive_inconsistent_cols)
   )
 
 # harmonize column names
-dictionary_worker <- tibble(
+dictionary_personnel <- tibble(
   from = c(
     "ano_pagamento", "orgao", "mes_referencia", "matricula", "cpf", "data_nascimento", "genero", "escolaridade"
   ),
   to = c(
-    "year", "department", "month", "contract_id", "worker_id", "birth_date", "gender", "education"
+    "year", "department", "month", "contract_id", "personnel_id", "birth_date", "gender", "education"
   )
 )
 
-worker_active <- worker_active_list |>
+personnel_active <- personnel_active_list |>
   map(
     \(data){
       data |>
-        harmonize_columns(dictionary_worker)
+        harmonize_columns(dictionary_personnel)
     }
   ) |>
   bind_rows() |>
@@ -92,11 +87,11 @@ worker_active <- worker_active_list |>
     status = "active"
   )
 
-worker_inactive <- worker_inactive_list |>
+personnel_inactive <- personnel_inactive_list |>
   map(
     \(data){
       data |>
-        harmonize_columns(dictionary_worker)
+        harmonize_columns(dictionary_personnel)
     }
   ) |>
   bind_rows() |>
@@ -106,14 +101,14 @@ worker_inactive <- worker_inactive_list |>
     status = "inactive"
   )
 
-worker_df <- worker_active |>
+personnel_df <- personnel_active |>
   bind_rows(
-    worker_inactive
+    personnel_inactive
   )
 
 # we need to create quality-checks that are specific to each standardized column
 # does it match our expectations
-worker_df <- worker_df |>
+personnel_df <- personnel_df |>
   mutate(
     birth_date = as_date(
       as.numeric(birth_date), origin = "1899-12-30"
@@ -165,7 +160,7 @@ worker_df <- worker_df |>
   )
 
 # check age
-worker_df <- worker_df |>
+personnel_df <- personnel_df |>
   mutate(
     age = if_else(
       age <= 17 & is.na(educat7),
@@ -175,83 +170,83 @@ worker_df <- worker_df |>
   )
 
 # check for uniqueness per year
-worker_quality_check <- create_agent(tbl = worker_df) |>
+personnel_quality_check <- create_agent(tbl = personnel_df) |>
   rows_distinct(
-    columns = worker_id,
+    columns = personnel_id,
     segments = vars(year),
-    step_id = "check_unique_worker_id",
-    label = "Check for uniqueness of worker_df ID per year"
+    step_id = "check_unique_personnel_id",
+    label = "Check for uniqueness of personnel_df ID per year"
   ) |>
   rows_distinct(
-    columns = worker_id,
-    preconditions = . %>% distinct(contract_id, worker_id),
-    step_id = "check_unique_worker_and_worker_id",
-    label = "Check for uniqueness of worker_df ID and national ID combinations"
+    columns = personnel_id,
+    preconditions = . %>% distinct(contract_id, personnel_id),
+    step_id = "check_unique_personnel_and_personnel_id",
+    label = "Check for uniqueness of personnel_df ID and national ID combinations"
   )
 
-worker_quality_check |>
+personnel_quality_check |>
   interrogate()
 
 # deduplicate -------------------------------------------------------------
 # matricula is the contract ID
-worker_id <- worker_df |>
+personnel_id <- personnel_df |>
   distinct(
     contract_id,
-    worker_id
+    personnel_id
   )
 
-worker_id_multiple_contracts <- worker_id |>
-  group_by(worker_id) |>
+personnel_id_multiple_contracts <- personnel_id |>
+  group_by(personnel_id) |>
   summarise(
     n_contract = n_distinct(contract_id),
     .groups = "drop"
   ) |>
   filter(n_contract > 1)
 
-worker_inconsistency_df <- worker_df |>
+personnel_inconsistency_df <- personnel_df |>
   as.data.table() %>%
   .[
     ,
     lapply(.SD, uniqueN),
     .SDcols = c("birth_date", "educat7"),
-    by = c("worker_id", "ref_date")
+    by = c("personnel_id", "ref_date")
   ]
 
 # we identify that there are a few inconsistencies in birth dates
-# such as the same worker having different birth dates
-# and the same worker having two different educational levels
+# such as the same personnel having different birth dates
+# and the same personnel having two different educational levels
 # in the same reference date
-worker_birthdate_inconsistency_df <- worker_df |>
+personnel_birthdate_inconsistency_df <- personnel_df |>
   as.data.table() %>%
   .[
     ,
     lapply(.SD, uniqueN),
     .SDcols = c("birth_date"),
-    by = c("worker_id")
+    by = c("personnel_id")
   ]
 
 # establish protocol that if there are inconsistencies,
 # we use the highest frequency value to override the inconsistencies
 # fix birthdate
-# worker_df <- worker_df |>
+# personnel_df <- personnel_df |>
 #   mutate(
 #     birth_date =
 #   )
 
-# only one worker per reference date per status
-worker_module <- worker_df |>
+# only one personnel per reference date per status
+personnel_module <- personnel_df |>
   distinct(
-    worker_id,
+    personnel_id,
     ref_date,
     status,
     gender,
     educat7
   )
 
-# extract worker_df module ---------------------------------------------------
-# worker_df
+# extract personnel_df module ---------------------------------------------------
+# personnel_df
 #   - Reference date (ref_date)
-#   - worker_df ID (contract_id)
+#   - personnel_df ID (contract_id)
 #   - Date of Birth (birth_date)
 #   - Gender (gender): standardize to english
 #   - Education Attainment (educat7)
@@ -261,20 +256,20 @@ worker_module <- worker_df |>
 
 # create a function that does a conformity assessment
 # and fill out missing columns with NA
-dictionary_worker_cols <- c(
-  "ref_date", "worker_id", "birth_date", "gender", "educat7", "tribe", "race", "status"
+dictionary_personnel_cols <- c(
+  "ref_date", "personnel_id", "birth_date", "gender", "educat7", "tribe", "race", "status"
 )
 
-worker_module_clean <- worker_module |>
+personnel_module_clean <- personnel_module |>
   complete_columns(
-    dictionary_worker_cols
+    dictionary_personnel_cols
   ) |>
   mutate(
     country_code = "BRA"
   )
 
-worker_module_clean |>
+personnel_module_clean |>
   write_rds(
-    here("spielplatz", "data", "bra_hrmis_worker.rds"),
+    here("spielplatz", "data", "bra_hrmis_personnel.rds"),
     compress = "gz"
   )
