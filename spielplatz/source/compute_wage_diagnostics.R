@@ -6,8 +6,8 @@ library(ggplot2)
 
 ### first let us read in the harmonized data
 contract_df <- readRDS("spielplatz/bra_hrmis_contract.rds")
-worker_df <- readRDS("spielplatz/bra_hrmis_worker.rds")
-org_df <- readRDS("spielplatz/bra_hrmis_organization.rds")
+personnel_df <- readRDS("spielplatz/bra_hrmis_personnel.rds")
+est_df <- readRDS("spielplatz/bra_hrmis_establishment.rds")
 
 ### wage bill planning
 

@@ -13,14 +13,14 @@ Data Sources and Coverage
 - Sector coverage (central government, local government, parastatals)
 
 Variable Definitions
-- Talk about the modules (Organization, Worker and Contract modules)
+- Talk about the modules (Establishment, Personnel and Contract modules)
 
-    Organization
-      - Organization ID (org_id)
-      - Organization Name, Native (org_name_native)
-      - Organization Name, English (org_name_english)
-      - Latest date when the organization had that name, (ref_date)
-      - Type of organization: Ministry/Department/Agency. # GK note: I am thinking about the level of hierarchy of an institution. Ideally, we would have parent-child relationships, but I suspect that is rare (org_parent, org_child)
+    Establishment
+      - Establishment ID (est_id)
+      - Establishment Name, Native (est_name_native)
+      - Establishment Name, English (est_name_english)
+      - Latest date when the establishment had that name, (ref_date)
+      - Type of establishment: Ministry/Department/Agency. # GK note: I am thinking about the level of hierarchy of an institution. Ideally, we would have parent-child relationships, but I suspect that is rare (est_parent, est_child)
       - Data corresponding date, (ref_date)
       - Country Code, (country_code) Official World Bank ISO-3 code
       - Country Name, (country_name) Official World Bank country name
@@ -28,9 +28,9 @@ Variable Definitions
       - Administration 1 Code, (adm1_code)
 
 
-    Worker
-      - Worker ID (worker_id)
-      - Organization ID (org_id)
+    Personnel
+      - Personnel ID (personnel_id)
+      - Establishment ID (est_id)
       - Timestamp (ref_date)
       - Date of Birth (birth_day)
       - Gender (gender)
@@ -46,8 +46,8 @@ Variable Definitions
 
     Contract
       - Contract ID (contract_id)
-      - Worker ID (worker_id)
-      - Organization ID (org_id)
+      - Personnel ID (personnel_id)
+      - Establishment ID (est_id)
       - Timestamp (ref_date)
       - Compensation (base_salary, gross_salary, net_salary)
       - Modality of Contract (short-term, open-term, permanent) (contract_type)
@@ -75,7 +75,7 @@ analyzing staff distribution across ministries or regions and identifying over- 
 tracking hires, departures and tenure by unit or manager to highligh retention issues.
 
 - Pay inequality detection
-comparing compensation levels across organizational units to uncover disparities in pay for similar positions
+comparing compensation levels across establishmental units to uncover disparities in pay for similar positions
 
 - Absence and overtime analytics
 

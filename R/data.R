@@ -41,7 +41,7 @@
 #'   \item{ppp}{Purchasing Power Parity (local currency units per international USD). Original WDI code: WB_WDI_PA_NUS_PRVT_PP.}
 #'   \item{fiscal_balance}{Overall Fiscal Balance, USD, percentage of GDP.}
 #'   \item{emp_pop}{The population of employed i.e. `emp_pop_rate` * `tot_pop`.}
-#'   \item{salaried_pop}{The population of salaried workers i.e. `salaried_rate` * `emp_pop`.}
+#'   \item{salaried_pop}{The population of salaried personnels i.e. `salaried_rate` * `emp_pop`.}
 #' }
 #'
 #' @details
@@ -59,7 +59,7 @@
 #'
 #' A dataset containing the structure of the International
 #' Standard Classification of Occupations (ISCO-08), as published by the
-#' International Labour Organization (ILO).
+#' International Labour Establishment (ILO).
 #'
 #' The ISCO provides a system for classifying and aggregating occupational
 #' information to facilitate international comparisons and harmonization of
@@ -92,7 +92,7 @@
 #' Each unit group includes a description outlining the scope of the occupation
 #' according to ILO’s ISCO-08 documentation.
 #'
-#' @source International Labour Organization (ILO),
+#' @source International Labour Establishment (ILO),
 #' \url{https://www.ilo.org/public/english/bureau/stat/isco/}
 #'
 #' @examples
@@ -118,15 +118,15 @@
 #' \describe{
 #'   \item{\code{country_code}}{character World Bank country code.}
 #'   \item{\code{year}}{double Year.}
-#'   \item{\code{share_no_edu}}{double Share of public sector workers with no education.}
-#'   \item{\code{share_primary_edu}}{double Share of public sector workers with primary education completed.}
-#'   \item{\code{share_secondary_edu}}{double Share of public sector workers with secondary education completed.}
-#'   \item{\code{share_tertiary_edu}}{double Share of public sector workers with tertiary education completed.}
-#'   \item{\code{ps_wage_premium_edu_sector}}{double Public sector wage premium in the education sector, compared to formal sector workers in the private sector.}
-#'   \item{\code{ps_wage_premium_hea_sector}}{double Public sector wage premium in the health sector, compared to formal sector workers in the private sector.}
-#'   \item{\code{ps_wage_premium_female}}{double Public sector wage premium for female workers, compared to formal sector workers in the private sector.}
-#'   \item{\code{ps_wage_premium_male}}{double Public sector wage premium for male workers, compared to formal sector workers in the private sector.}
-#'   \item{\code{ps_wage_premium_pooled}}{double Public sector wage premium for all public sector workers, compared to formal sector workers in the private sector.}
+#'   \item{\code{share_no_edu}}{double Share of public sector personnels with no education.}
+#'   \item{\code{share_primary_edu}}{double Share of public sector personnels with primary education completed.}
+#'   \item{\code{share_secondary_edu}}{double Share of public sector personnels with secondary education completed.}
+#'   \item{\code{share_tertiary_edu}}{double Share of public sector personnels with tertiary education completed.}
+#'   \item{\code{ps_wage_premium_edu_sector}}{double Public sector wage premium in the education sector, compared to formal sector personnels in the private sector.}
+#'   \item{\code{ps_wage_premium_hea_sector}}{double Public sector wage premium in the health sector, compared to formal sector personnels in the private sector.}
+#'   \item{\code{ps_wage_premium_female}}{double Public sector wage premium for female personnels, compared to formal sector personnels in the private sector.}
+#'   \item{\code{ps_wage_premium_male}}{double Public sector wage premium for male personnels, compared to formal sector personnels in the private sector.}
+#'   \item{\code{ps_wage_premium_pooled}}{double Public sector wage premium for all public sector personnels, compared to formal sector personnels in the private sector.}
 #'}
 #' @source World Bank
 #' \url{https://data360.worldbank.org/en/int/dataset/WB_WWBI}
@@ -145,57 +145,11 @@
 #' \url{https://data360.worldbank.org/en/int/indicator/WB_ES_T_WK10}
 "enterprise_surveys"
 
-#' Harmonized Contract-Level Dataset (Zambia)
-#'
-#' The contract_harmonized dataset contains 50,000 synthetic contract-level observations
-#' consistent with the harmonization dictionary for the "Contract" module. Each record represents
-#' an employment contract for a worker within an organization, capturing key information on
-#' compensation, contract characteristics, and administrative geography.
-#' All records pertain to Zambia (ISO3: ZMB).
-#'
-#' @format A data frame with 50,000 rows and 21 variables:
-#' \describe{
-#' \item{contract_id}{Character. Unique identifier for each contract (e.g., "C000001").}
-#' \item{worker_id}{Character. Identifier for the worker associated with the contract (e.g., "W03583").}
-#' \item{org_id}{Character. Employer organization associated with the contract (e.g., "ORG0194").}
-#' \item{ref_date}{Date. Date of contract record entry in YYYY-MM-DD format.}
-#' \item{base_salary_lcu}{Numeric. Basic pay before allowances and deductions.}
-#' \item{gross_salary_lcu}{Numeric. Total compensation before taxes and deductions.}
-#' \item{net_salary_lcu}{Numeric. Take-home pay after taxes and deductions.}
-#' \item{contract_type}{Character. Type of employment contract — one of "Short-term", "Open-term", or "Permanent".}
-#' \item{occupation_native}{Character. Worker’s occupation title in the native language (e.g., "Comptable", "Analyste").}
-#' \item{occupation_english}{Character. Worker’s occupation title in English (e.g., "Accountant", "Engineer").}
-#' \item{occupation_isconame}{Character. Occupation name mapped to the ISCO-08 classification (e.g., "Technicians").}
-#' \item{occupation_iscocode}{Character. ISCO-08 occupation code (e.g., "2411", "2141", "8322").}
-#' \item{start_date}{Date. Start date of the employment contract (YYYY-MM-DD).}
-#' \item{end_date}{Date. End date of the employment contract, if applicable (YYYY-MM-DD).}
-#' \item{whours}{Numeric. Total weekly or monthly working hours as per contract.}
-#' \item{paygrade}{Character. Pay grade or salary scale classification (e.g., "G7", "P1").}
-#' \item{seniority}{Numeric. Number of years in service or tenure within the organization.}
-#' \item{country_code}{Character. ISO 3-letter country code ("ZMB").}
-#' \item{country_name}{Character. Country name ("Zambia").}
-#' \item{adm1_name}{Character. Subnational administrative division name (e.g., "Lusaka Province").}
-#' \item{adm1_code}{Character. Code corresponding to the administrative division (e.g., "ZMB02").}
-#' }
-#'
-#' @details
-#' The dataset was synthetically generated to reflect realistic distributions of salary levels,
-#' contract types, and geographic coverage within Zambia. Salaries are internally consistent such
-#' that \code{gross_salary ≥ base_salary ≥ net_salary}.
-#'
-#' @source Synthetic data generated using Python for demonstration purposes.
-#'
-#' @examples
-#' data(contract_harmonized)
-#' dplyr::glimpse(contract_harmonized)
-#' dplyr::count(contract_harmonized, contract_type)
-"contract_harmonized"
-
 #' HRMIS Harmonization Data Dictionary
 #'
 #' A structured metadata dictionary describing variables harmonized across
 #' the Human Resource Management Information System (HRMIS) modules:
-#' Organization, Worker, and Contract. The dictionary follows
+#' Establishment, Personnel, and Contract. The dictionary follows
 #' SDMX-style documentation standards and specifies variable names,
 #' identifiers, data types (in R), relationships, and other metadata fields
 #' used in HRMIS data harmonization.
@@ -209,7 +163,7 @@
 #' \item{Representation (Code list / Format)}{Expected format, code list, or data representation.}
 #' \item{Primary Key}{Indicates whether the variable uniquely identifies a record (\code{"Yes"} or \code{"No"}).}
 #' \item{Relationship}{Describes any relational links to other modules or variables.}
-#' \item{Module}{The HRMIS module the variable belongs to: \code{"Organization"}, \code{"Worker"}, or \code{"Contract"}.}
+#' \item{Module}{The HRMIS module the variable belongs to: \code{"Establishment"}, \code{"Personnel"}, or \code{"Contract"}.}
 #' \item{Example Value}{Illustrative example value for the variable.}
 #' }
 #'
@@ -242,7 +196,7 @@
 #'
 #'# Filter dictionary by module
 #' harmonization_dict |>
-#' filter(Module == "Worker")
+#' filter(Module == "Personnel")
 #'
 "harmonization_dict"
 
@@ -304,15 +258,17 @@
 #' Contract Dataset
 #'
 #' This dataset contains detailed information about contracts, including salaries,
-#' allowances, occupation, work hours, and organizational context. Each row represents
+#' allowances, occupation, work hours, and establishmental context. Each row represents
 #' a unique contract record.
 #'
 #' @format A data frame with N rows and 24 variables:
 #' \describe{
 #'   \item{contract_id}{Unique identifier for the contract}
-#'   \item{worker_id}{Foreign key linking to Worker module}
-#'   \item{org_id}{Foreign key linking to Organization module}
+#'   \item{personnel_id}{Foreign key linking to Personnel module}
+#'   \item{est_id}{Foreign key linking to Establishment module}
 #'   \item{ref_date}{Timestamp for the contract record}
+#'   \item{contract_type_code}{Type of contract code}
+#'   \item{contract_type_native}{Type of contract in local language}
 #'   \item{base_salary_lcu}{Base compensation in local currency units (LCU)}
 #'   \item{gross_salary_lcu}{Total compensation before deductions in local currency units}
 #'   \item{net_salary_lcu}{Compensation after deductions in local currency units}
@@ -330,50 +286,49 @@
 #'   \item{whours}{Standard or actual hours worked}
 #'   \item{paygrade}{Salary scale or grade level}
 #'   \item{seniority}{Years of service or seniority level}
-#'   \item{year}{Year of the record}
 #' }
 #'
 "bra_hrmis_contract"
 
-#' Worker Dataset
+#' Personnel Dataset
 #'
-#' This dataset contains demographic and employment information for workers,
+#' This dataset contains demographic and employment information for personnels,
 #' including identifiers, education, tribal/racial classification, employment status,
-#' and geographic context. Each row represents a unique worker record.
+#' and geographic context. Each row represents a unique personnel record.
 #'
 #' @format A data frame with N rows and 9 variables:
 #' \describe{
-#'   \item{worker_id}{Unique identifier for the worker}
-#'   \item{birth_date}{Worker’s date of birth}
-#'   \item{gender}{Worker’s gender}
+#'   \item{personnel_id}{Unique identifier for the personnel}
+#'   \item{birth_date}{Personnel’s date of birth}
+#'   \item{gender}{Personnel’s gender}
 #'   \item{educat7}{Education level using 7-category classification}
 #'   \item{tribe}{Tribal affiliation (where applicable)}
 #'   \item{race}{Racial/ethnic classification}
 #'   \item{status}{Current employment status (active/retired)}
 #'   \item{country_code}{Official World Bank ISO-3 country code}
-#'   \item{ref_date}{Timestamp for the worker record}
+#'   \item{ref_date}{Timestamp for the personnel record}
 #' }
 #'
-"bra_hrmis_worker"
+"bra_hrmis_personnel"
 
-#' Organization Dataset
+#' Establishment Dataset
 #'
-#' This dataset contains information about public sector organizations, including
+#' This dataset contains information about public sector establishments, including
 #' identifiers, names, hierarchical relationships, and geographic context.
-#' Each row represents a unique organization record.
+#' Each row represents a unique establishment record.
 #'
 #' @format A data frame with N rows and 9 variables:
 #' \describe{
-#'   \item{org_id}{Unique identifier for the organization}
-#'   \item{org_name_native}{Official organization name in local language}
-#'   \item{org_name_en}{Organization name translated to English}
+#'   \item{est_id}{Unique identifier for the establishment}
+#'   \item{est_name_native}{Official establishment name in local language}
+#'   \item{est_name_en}{Establishment name translated to English}
 #'   \item{country_code}{Official World Bank ISO-3 country code}
 #'   \item{country_name}{Official World Bank country name}
 #'   \item{adm1_name}{First-level administrative division name}
 #'   \item{adm1_code}{First-level administrative division code}
-#'   \item{org_parent}{Identifier for parent organization in hierarchy}
-#'   \item{org_child}{Identifier for child organizations in hierarchy}
+#'   \item{est_parent}{Identifier for parent establishment in hierarchy}
+#'   \item{est_child}{Identifier for child establishments in hierarchy}
 #' }
 #'
-"bra_hrmis_org"
+"bra_hrmis_est"
 

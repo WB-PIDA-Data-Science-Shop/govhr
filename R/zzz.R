@@ -7,7 +7,7 @@
 if (getRversion() >= "2.15.1"){
 
   utils::globalVariables(c(
-    "contract_id", "org_date", "worker_id", "org_id", "country_code",
+    "contract_id", "est_date", "personnel_id", "est_id", "country_code",
     "start_date", "end_date", "base_salary_lcu", "gross_salary_lcu",
     "net_salary_lcu", "whours", "cpi", "year", "ppp", "ppp_2017",
     "REF_AREA", "TIME_PERIOD", "OBS_VALUE", "INDICATOR", "n_records",
@@ -19,7 +19,7 @@ if (getRversion() >= "2.15.1"){
     "ts_ratio", "value", "wage_value", "wage_var", ".", "sd",
     "summary_value", "summary_var", ".groups", ":=", "val", "N",
     "allowance_ind", "allowance_lcu", "allowshare", "gender", "educat7",
-    "paygrade", "seniority", "from", "org_to", "paygrade", "seniority"
+    "paygrade", "seniority", "from", "est_to", "paygrade", "seniority"
   ))
 
 }

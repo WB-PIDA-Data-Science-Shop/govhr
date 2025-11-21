@@ -148,7 +148,7 @@ find_duplicate_ids <- function(data, identifier) {
 #' library(tibble)
 #'
 #' df <- tibble(
-#'   worker_id = c(1, 1, 1, 2, 2, 2, 2),
+#'   personnel_id = c(1, 1, 1, 2, 2, 2, 2),
 #'   gender    = c(NA, "M", "F", "F", NA, "M", "F"),
 #'   ref_date  = as.Date(c(
 #'     "2023-01-01", "2023-01-02", "2023-01-02",
@@ -156,7 +156,7 @@ find_duplicate_ids <- function(data, identifier) {
 #'   ))
 #' )
 #'
-#' dedup_value_panel(df, gender, worker_id, ref_date)
+#' dedup_value_panel(df, gender, personnel_id, ref_date)
 #'
 #' @import dplyr
 #' @export

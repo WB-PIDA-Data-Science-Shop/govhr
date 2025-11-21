@@ -56,8 +56,8 @@ library(govhr)
 
 hrm_report_stats <- compute_hrmreport_stats(
   contract_dt = govhr::bra_hrmis_contract,
-  worker_dt = govhr::bra_hrmis_worker,
-  org_dt = govhr::bra_hrmis_org,
+  personnel_dt = govhr::bra_hrmis_personnel,
+  est_dt = govhr::bra_hrmis_est,
   macro_indicators = govhr::macro_indicators
 )
 ```
@@ -161,7 +161,7 @@ Guidance questions for the assessment:
 1. What wage growth is typical for public sector employees in different occupational groups over the course of their career? How of much of this wage growth is dependent on promotions and how much can occur “within grade”?
 2. Does the annual performance management system distinguish between high and low performers? Are promotion decisions largely seniority based and/or automatic?
 3. Are there performance bonus schemes and if so what occupation groups and percentage of the staff receive them; and how large is the bonus that staff are expected to receive?
-4. Is there targeted, significant additional pay for essential workers to serve in hard-to-staff locations such as rural areas?
+4. Is there targeted, significant additional pay for essential personnels to serve in hard-to-staff locations such as rural areas?
 
 ### Allowances as a share of gross pay
 
@@ -192,23 +192,23 @@ hrm_report_stats |>
 <!-- #| fig.alt: > -->
 <!-- #|   Plot of staff receiving a performance bonus -->
 
-<!-- performance_bonus_worker <- govhr::bra_hrmis_contract |> -->
+<!-- performance_bonus_personnel <- govhr::bra_hrmis_contract |> -->
 <!--   filter( -->
 <!--     !is.na(allowance_lcu) & -->
 <!--       lubridate::year(ref_date) <= 2017 -->
 <!--   ) |> -->
 <!--   group_by(year) |> -->
 <!--   summarise( -->
-<!--     total_performance = n_distinct(worker_id) -->
+<!--     total_performance = n_distinct(personnel_id) -->
 <!--   ) -->
 
 <!-- govhr::bra_hrmis_contract |> -->
 <!--   group_by(year) |> -->
 <!--   summarise( -->
-<!--     total = n_distinct(worker_id) -->
+<!--     total = n_distinct(personnel_id) -->
 <!--   ) |> -->
 <!--   left_join( -->
-<!--     performance_bonus_worker, -->
+<!--     performance_bonus_personnel, -->
 <!--     by = "year" -->
 <!--   ) |> -->
 <!--   mutate( -->

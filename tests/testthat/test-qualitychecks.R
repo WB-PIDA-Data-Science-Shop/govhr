@@ -18,12 +18,12 @@ test_that("flag_outlier handles missing values gracefully", {
 })
 
 # ───────────────────────────────────────────────
-# 2. qualitycheck_worker()
+# 2. qualitycheck_personnel()
 # ───────────────────────────────────────────────
-test_that("qualitycheck_worker returns a pointblank_agent", {
-  worker_tbl <- tibble(
+test_that("qualitycheck_personnel returns a pointblank_agent", {
+  personnel_tbl <- tibble(
     ref_date = as_date("2020-01-01") + 0:2,
-    worker_id = 1:3,
+    personnel_id = 1:3,
     birth_date = as_date(c("1980-01-01", "1990-01-01", "1975-01-01")),
     gender = c("M", "F", "M"),
     educat7 = c("Primary", "Secondary", "Tertiary"),
@@ -32,42 +32,42 @@ test_that("qualitycheck_worker returns a pointblank_agent", {
     status = c("Employed", "Unemployed", "Employed")
   )
 
-  agent <- qualitycheck_worker(worker_tbl)
+  agent <- qualitycheck_personnel(personnel_tbl)
   expect_s3_class(agent, "ptblank_agent")
-  expect_true(all(c("ref_date", "worker_id", "birth_date") %in% names(agent$tbl)))
+  expect_true(all(c("ref_date", "personnel_id", "birth_date") %in% names(agent$tbl)))
 })
 
-test_that("qualitycheck_worker detects missing required columns", {
-  bad_tbl <- tibble(worker_id = 1:3)
+test_that("qualitycheck_personnel detects missing required columns", {
+  bad_tbl <- tibble(personnel_id = 1:3)
   expect_error(
-    qualitycheck_worker(bad_tbl),
+    qualitycheck_personnel(bad_tbl),
     NA  # should not hard-stop, pointblank handles inside
   )
 })
 
 # ───────────────────────────────────────────────
-# 3. qualitycheck_orgmod()
+# 3. qualitycheck_estmod()
 # ───────────────────────────────────────────────
-test_that("qualitycheck_orgmod returns agent on valid data", {
-  org_tbl <- tibble(
-    org_name_native = "X",
-    org_id = "ORG1",
+test_that("qualitycheck_estmod returns agent on valid data", {
+  est_tbl <- tibble(
+    est_name_native = "X",
+    est_id = "ORG1",
     country_code = "USA",
     country_name = "United States",
     adm1_name = "California",
     adm1_code = "CA",
-    org_parent = "MIN",
-    org_child = "DEPT",
-    org_name_en = "Ministry of Test"
+    est_parent = "MIN",
+    est_child = "DEPT",
+    est_name_en = "Ministry of Test"
   )
 
-  agent <- qualitycheck_orgmod(org_tbl)
+  agent <- qualitycheck_estmod(est_tbl)
   expect_s3_class(agent, "ptblank_agent")
 })
 
-test_that("qualitycheck_orgmod errors when required variables are missing", {
-  incomplete_org <- tibble(org_id = "ORG1")
-  expect_error(qualitycheck_orgmod(incomplete_org))
+test_that("qualitycheck_estmod errors when required variables are missing", {
+  incomplete_est <- tibble(est_id = "ORG1")
+  expect_error(qualitycheck_estmod(incomplete_est))
 })
 
 # ───────────────────────────────────────────────
@@ -77,9 +77,9 @@ test_that("qualitycheck_contractmod runs and returns agent", {
   # Mock minimal contract_tbl
   contract_tbl <- tibble(
     contract_id = c("C1", "C2"),
-    worker_id = c("W1", "W2"),
-    org_id = c("O1", "O2"),
-    org_date = as.Date(c("2020-01-01", "2021-01-01")),
+    personnel_id = c("W1", "W2"),
+    est_id = c("O1", "O2"),
+    est_date = as.Date(c("2020-01-01", "2021-01-01")),
     base_salary_lcu = c(1000, 2000),
     gross_salary_lcu = c(1500, 2500),
     net_salary_lcu = c(900, 1800),

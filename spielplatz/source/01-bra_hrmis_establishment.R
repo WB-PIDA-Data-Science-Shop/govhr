@@ -12,7 +12,7 @@ library(tidyr)
 library(writexl)
 library(here)
 
-plan(multisession, workers = 6)
+plan(multisession, personnels = 6)
 set.seed(1789)
 
 # read-in data ------------------------------------------------------------
@@ -44,8 +44,8 @@ act_list <-
     ADMINISTRACAO = "Type of administration (e.g., direct, indirect, foundation)",
     TIPO_CONTRATO = "Type of contract (e.g., permanent, temporary, commissioned)",
     GRUPO = "Group (could be a functional or career group)",
-    COD_ORGAO = "Organization code",
-    ORGAO = "Organization name",
+    COD_ORGAO = "Establishment code",
+    ORGAO = "Establishment name",
     CARREIRA = "Career (broad classification of occupation)",
     CARGO = "Position (specific job title)",
     JORNADA = "Work schedule (hours per week)",
@@ -79,7 +79,7 @@ inact_list <- c(
   GRUPO = "Group (career or functional group)",
   VALOR_BRUTO = "Gross pension amount (before deductions)",
   VALOR_LIQUIDO = "Net pension amount (after deductions)",
-  ORGAO = "Organization name prior to retirement",
+  ORGAO = "Establishment name prior to retirement",
   CARGO = "Position held before retirement",
   CLASSE = "Class (pay grade) prior to retirement",
   NIVEL = "Level within the class"
@@ -91,7 +91,7 @@ inact_list <- c(
 active_alagoas_tbl <- bind_rows(active_alagoastbl_list)
 inactive_alagoas_tbl <- bind_rows(inactive_alagoastbl_list)
 
-#### ready to prepare the organization module
+#### ready to prepare the establishment module
 
 #### apparently we ought to keep only September
 active_alagoas_tbl <-
@@ -118,63 +118,63 @@ check_list <-
 
 names(check_list) <- unique(active_alagoas_tbl$ANO_PAGAMENTO)
 
-#### we are going to create a unique identifier for organization by
-#### combining organization name, code and year
+#### we are going to create a unique identifier for establishment by
+#### combining establishment name, code and year
 
-alagoas_org_tbl <-
+alagoas_est_tbl <-
   active_alagoas_tbl |>
   transmute(
-    org_id = ORGAO,
-    org_name_native = ORGAO,
+    est_id = ORGAO,
+    est_name_native = ORGAO,
     country_code = "BRA",
     country_name = "Brazil",
     adm1_name = "Alagoas",
     adm1_code = "AL",
-    org_parent = NA,
-    org_child = NA
+    est_parent = NA,
+    est_child = NA
   ) |>
   unique()
 
-#### include translation for organization name
-alagoas_org_tbl <-
-  alagoas_org_tbl |>
+#### include translation for establishment name
+alagoas_est_tbl <-
+  alagoas_est_tbl |>
   merge(
     tibble(
-      org_name_native = unique(alagoas_org_tbl$org_name_native),
-      org_name_en = polyglotr::google_translate(
-        text = unique(alagoas_org_tbl$org_name_native),
+      est_name_native = unique(alagoas_est_tbl$est_name_native),
+      est_name_en = polyglotr::google_translate(
+        text = unique(alagoas_est_tbl$est_name_native),
         source_language = "pt"
       )
     ),
-    by = "org_name_native",
+    by = "est_name_native",
     all.x = TRUE
   ) |>
   as_tibble() |>
-  mutate(org_name_en = tolower(org_name_en))
+  mutate(est_name_en = tolower(est_name_en))
 
 #### include same data for the inactive works
-alagoas_org_tbl <-
+alagoas_est_tbl <-
   bind_rows(
-    alagoas_org_tbl,
+    alagoas_est_tbl,
     inactive_alagoas_tbl |>
       transmute(
-        org_id = ORGAO,
-        org_name_native = ORGAO,
+        est_id = ORGAO,
+        est_name_native = ORGAO,
         country_code = "BRA",
         country_name = "Brazil",
         adm1_name = "Alagoas",
         adm1_code = "AL",
-        org_parent = NA,
-        org_child = NA
+        est_parent = NA,
+        est_child = NA
       ) |>
       unique() |>
-      mutate(org_name_en = "Alagoas Retirees")
+      mutate(est_name_en = "Alagoas Retirees")
   )
 
 #### write results
-alagoas_org_tbl |>
+alagoas_est_tbl |>
   write_rds(
-    here("spielplatz", "data", "bra_hrmis_organization.rds"),
+    here("spielplatz", "data", "bra_hrmis_establishment.rds"),
     compress = "gz"
   )
 

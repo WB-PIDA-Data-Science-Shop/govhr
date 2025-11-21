@@ -2,21 +2,21 @@
 % Please edit documentation in R/movement.R
 \name{detect_retirement}
 \alias{detect_retirement}
-\title{Detect Worker Retirement Events}
+\title{Detect Personnel Retirement Events}
 \usage{
 detect_retirement(data)
 }
 \arguments{
-\item{data}{A data.frame or data.table with columns `worker_id`, `ref_date`, and `status`.}
+\item{data}{A data.frame or data.table with columns `personnel_id`, `ref_date`, and `status`.}
 }
 \value{
-A data.table with `worker_id`, `ref_date`, and `type_event = "retire"`.
+A data.table with `personnel_id`, `ref_date`, and `type_event = "retire"`.
 }
 \description{
-Identifies workers who retired, i.e., whose status changed from "active" to "inactive".
+Identifies personnels who retired, i.e., whose status changed from "active" to "inactive".
 }
 \examples{
 \dontrun{
-retire_events <- detect_retirement(worker_df)
+retire_events <- detect_retirement(personnel_df)
 }
 }

@@ -9,15 +9,15 @@ A data frame with 993 rows and 11 variables:
 \describe{
   \item{\code{country_code}}{character World Bank country code.}
   \item{\code{year}}{double Year.}
-  \item{\code{share_no_edu}}{double Share of public sector workers with no education.}
-  \item{\code{share_primary_edu}}{double Share of public sector workers with primary education completed.}
-  \item{\code{share_secondary_edu}}{double Share of public sector workers with secondary education completed.}
-  \item{\code{share_tertiary_edu}}{double Share of public sector workers with tertiary education completed.}
-  \item{\code{ps_wage_premium_edu_sector}}{double Public sector wage premium in the education sector, compared to formal sector workers in the private sector.}
-  \item{\code{ps_wage_premium_hea_sector}}{double Public sector wage premium in the health sector, compared to formal sector workers in the private sector.}
-  \item{\code{ps_wage_premium_female}}{double Public sector wage premium for female workers, compared to formal sector workers in the private sector.}
-  \item{\code{ps_wage_premium_male}}{double Public sector wage premium for male workers, compared to formal sector workers in the private sector.}
-  \item{\code{ps_wage_premium_pooled}}{double Public sector wage premium for all public sector workers, compared to formal sector workers in the private sector.}
+  \item{\code{share_no_edu}}{double Share of public sector personnels with no education.}
+  \item{\code{share_primary_edu}}{double Share of public sector personnels with primary education completed.}
+  \item{\code{share_secondary_edu}}{double Share of public sector personnels with secondary education completed.}
+  \item{\code{share_tertiary_edu}}{double Share of public sector personnels with tertiary education completed.}
+  \item{\code{ps_wage_premium_edu_sector}}{double Public sector wage premium in the education sector, compared to formal sector personnels in the private sector.}
+  \item{\code{ps_wage_premium_hea_sector}}{double Public sector wage premium in the health sector, compared to formal sector personnels in the private sector.}
+  \item{\code{ps_wage_premium_female}}{double Public sector wage premium for female personnels, compared to formal sector personnels in the private sector.}
+  \item{\code{ps_wage_premium_male}}{double Public sector wage premium for male personnels, compared to formal sector personnels in the private sector.}
+  \item{\code{ps_wage_premium_pooled}}{double Public sector wage premium for all public sector personnels, compared to formal sector personnels in the private sector.}
 }
 }
 \source{

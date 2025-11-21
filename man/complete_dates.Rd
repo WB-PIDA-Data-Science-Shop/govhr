@@ -9,7 +9,7 @@ complete_dates(data, id_col, start_date, end_date, freq = "year")
 \arguments{
 \item{data}{A data.frame or data.table containing at least an identifier column.}
 
-\item{id_col}{Character. Name of the identifier column (e.g., `"worker_id"`).}
+\item{id_col}{Character. Name of the identifier column (e.g., `"personnel_id"`).}
 
 \item{start_date}{Character or Date. Start of the full date sequence
 (e.g., `"2007-09-01"`).}
@@ -38,8 +38,8 @@ it with the original dataset using a left join (\code{all.x = TRUE}).
 \examples{
 \dontrun{
 complete_dt <- complete_dates(
-  data = worker_df,
-  id_col = "worker_id",
+  data = personnel_df,
+  id_col = "personnel_id",
   start_date = "2007-09-01",
   end_date = "2018-01-01",
   freq = "year"

@@ -20,7 +20,7 @@ qualitycheck_contractmod <- function(contract_tbl,
   # Define default required variables if not passed in
   if (is.null(required_vars)) {
     required_vars <- c(
-      "contract_id", "worker_id", "org_id", "org_date",
+      "contract_id", "personnel_id", "est_id", "est_date",
       "base_salary_lcu", "gross_salary_lcu", "net_salary_lcu",
       "whours", "country_code", "start_date", "end_date",
       "occupation_native", "occupation_english", "year",
@@ -80,15 +80,15 @@ qualitycheck_contractmod <- function(contract_tbl,
                vars(!!!syms(required_vars))) %>%
     # contract data should be unique at the contract id level for each year of data
     rows_distinct(label = "Unique at the contract-year level",
-                  columns = c(contract_id, org_date)) %>%
+                  columns = c(contract_id, est_date)) %>%
     # Type checks
     col_is_character(label = "Character variables are the correct type",
-                     vars(contract_id, worker_id, org_id, country_code,
+                     vars(contract_id, personnel_id, est_id, country_code,
                           occupation_isconame, occupation_iscocode,
                           occupation_native, occupation_english,
                           country_name)) %>%
     col_is_date(label = "Date variables are the appropriate type",
-                vars(org_date, start_date, end_date)) %>%
+                vars(est_date, start_date, end_date)) %>%
     col_is_numeric(label = "Numeric variables are the right class",
                    columns = c(base_salary_lcu,
                                gross_salary_lcu,
@@ -132,9 +132,9 @@ qualitycheck_contractmod <- function(contract_tbl,
 
 }
 
-#' Quality Check for Harmonized Organization Module
+#' Quality Check for Harmonized Establishment Module
 #'
-#' @param org_tbl A data.frame or tibble containing the harmonized organization module
+#' @param est_tbl A data.frame or tibble containing the harmonized establishment module
 #'
 #' @return A pointblank agent object
 #' @export
@@ -142,15 +142,15 @@ qualitycheck_contractmod <- function(contract_tbl,
 #' @import dplyr pointblank countrycode
 #' @importFrom stats na.omit
 #'
-qualitycheck_orgmod <- function(org_tbl) {
+qualitycheck_estmod <- function(est_tbl) {
 
   required_vars <- c(
-    "org_name_native", "org_id", "country_code", "country_name",
-    "adm1_name", "adm1_code", "org_parent", "org_child", "org_name_en"
+    "est_name_native", "est_id", "country_code", "country_name",
+    "adm1_name", "adm1_code", "est_parent", "est_child", "est_name_en"
   )
 
   # Check required columns exist
-  missing_vars <- setdiff(required_vars, names(org_tbl))
+  missing_vars <- setdiff(required_vars, names(est_tbl))
   if (length(missing_vars) > 0) {
     stop("Missing required variables: ", paste(missing_vars, collapse = ", "))
   }
@@ -158,13 +158,13 @@ qualitycheck_orgmod <- function(org_tbl) {
   al <- action_levels(warn_at = 1)
   # Begin pointblank checks
   agent <-
-    org_tbl |>
-    create_agent(label = "QCheck for Organization Module",
+    est_tbl |>
+    create_agent(label = "QCheck for Establishment Module",
                  actions = al) |>
     col_exists(columns = all_of(required_vars),
                label = "All required variables were harmonized") |>
-    rows_distinct(columns = vars(org_id),
-                  label = "Data is unique at the organization level") |>
+    rows_distinct(columns = vars(est_id),
+                  label = "Data is unique at the establishment level") |>
     col_vals_not_null(columns = all_of(required_vars),
                       label = "Column values are not null") |>
     col_is_character(columns = all_of(required_vars),
@@ -178,18 +178,18 @@ qualitycheck_orgmod <- function(org_tbl) {
   return(agent)
 }
 
-#' Quality checks for Worker Module data
+#' Quality checks for Personnel Module data
 #'
-#' This function runs a set of data quality checks on a worker dataset
+#' This function runs a set of data quality checks on a personnel dataset
 #' using the \pkg{pointblank} framework. It verifies that all required
-#' columns are present, worker IDs are unique, and that values are valid
+#' columns are present, personnel IDs are unique, and that values are valid
 #' and within expected ranges.
 #'
-#' @param worker_tbl A data frame or tibble containing worker module data.
+#' @param personnel_tbl A data frame or tibble containing personnel module data.
 #'   Must include the following columns:
 #'   \itemize{
 #'     \item \code{ref_date} – Reference date
-#'     \item \code{worker_id} – Unique worker identifier
+#'     \item \code{personnel_id} – Unique personnel identifier
 #'     \item \code{birth_date} – Date of birth
 #'     \item \code{gender} – Gender
 #'     \item \code{educat7} – Education (7-category classification)
@@ -205,7 +205,7 @@ qualitycheck_orgmod <- function(org_tbl) {
 #' The following checks are performed:
 #' \enumerate{
 #'   \item All required columns exist in the input data.
-#'   \item \code{worker_id} is unique for each \code{ref_date}.
+#'   \item \code{personnel_id} is unique for each \code{ref_date}.
 #'   \item Required columns are not missing.
 #'   \item \code{birth_date} falls between 1900-01-01 and 2000-01-01.
 #' }
@@ -222,7 +222,7 @@ qualitycheck_orgmod <- function(org_tbl) {
 #' library(dplyr)
 #' test_tbl <- tibble::tibble(
 #'   ref_date = as.Date("2020-01-01") + 0:2,
-#'   worker_id = 1:3,
+#'   personnel_id = 1:3,
 #'   birth_date = as.Date(c("1980-01-01", "1990-01-01", "1975-01-01")),
 #'   gender = c("M", "F", "M"),
 #'   educat7 = c("Primary", "Secondary", "Tertiary"),
@@ -231,25 +231,24 @@ qualitycheck_orgmod <- function(org_tbl) {
 #'   status = c("Employed", "Unemployed", "Employed")
 #' )
 #'
-#' qualitycheck_worker(test_tbl)
+#' qualitycheck_personnel(test_tbl)
 #' }
 #'
 #' @export
 
-
-qualitycheck_worker <- function(worker_tbl){
+qualitycheck_personnel <- function(personnel_tbl){
 
   required_vars <- c(
-    "ref_date", "worker_id", "birth_date", "gender", "educat7", "tribe",
+    "ref_date", "personnel_id", "birth_date", "gender", "educat7", "tribe",
     "race", "status"
   )
 
   al <- action_levels(warn_at = 1)
 
   agent <-
-    worker_tbl |>
+    personnel_tbl |>
     create_agent(
-      label = "Quality check for Worker Module",
+      label = "Quality check for Personnel Module",
       actions = al
     ) |>
     col_exists(
@@ -257,8 +256,8 @@ qualitycheck_worker <- function(worker_tbl){
       columns = vars(!!!syms(required_vars))
     ) |>
     rows_distinct(
-      label = "Worker ID is unique.",
-      columns = c(worker_id, ref_date),
+      label = "Personnel ID is unique.",
+      columns = c(personnel_id, ref_date),
     ) |>
     col_vals_not_null(
       label = "Values are not missing.",

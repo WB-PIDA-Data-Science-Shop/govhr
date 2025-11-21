@@ -22,7 +22,7 @@ A data frame with 436 rows and 9 variables:
 }
 }
 \source{
-International Labour Organization (ILO),
+International Labour Establishment (ILO),
 \url{https://www.ilo.org/public/english/bureau/stat/isco/}
 }
 \usage{
@@ -31,7 +31,7 @@ isco
 \description{
 A dataset containing the structure of the International
 Standard Classification of Occupations (ISCO-08), as published by the
-International Labour Organization (ILO).
+International Labour Establishment (ILO).
 }
 \details{
 The ISCO provides a system for classifying and aggregating occupational

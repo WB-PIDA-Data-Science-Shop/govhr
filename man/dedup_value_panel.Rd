@@ -26,7 +26,7 @@ attribute values by inferring from the closest neighbor (lag first, then lead).
 library(tibble)
 
 df <- tibble(
-  worker_id = c(1, 1, 1, 2, 2, 2, 2),
+  personnel_id = c(1, 1, 1, 2, 2, 2, 2),
   gender    = c(NA, "M", "F", "F", NA, "M", "F"),
   ref_date  = as.Date(c(
     "2023-01-01", "2023-01-02", "2023-01-02",
@@ -34,6 +34,6 @@ df <- tibble(
   ))
 )
 
-dedup_value_panel(df, gender, worker_id, ref_date)
+dedup_value_panel(df, gender, personnel_id, ref_date)
 
 }

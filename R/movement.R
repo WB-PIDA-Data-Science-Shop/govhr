@@ -37,17 +37,17 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
   return(data_out)
 }
 
-#' Detect Worker Events
+#' Detect Personnel Events
 #'
-#' Expands a dataset of workers and reference dates to include all possible
-#' worker–date combinations, fills missing periods, and identifies "hire" or
+#' Expands a dataset of personnels and reference dates to include all possible
+#' personnel–date combinations, fills missing periods, and identifies "hire" or
 #' "fire" events based on changes in status over time.
 #'
 #' @param data A data.table or data.frame containing at least the columns:
-#'   - `worker_id`: Unique identifier for workers.
+#'   - `personnel_id`: Unique identifier for personnels.
 #'   - `ref_date`: Reference date (must be coercible to Date).
-#'   - `status`: Worker status (e.g., "active", "inactive").
-#' @param id_col Character. Name of the identifier column (e.g., `"worker_id"`).
+#'   - `status`: Personnel status (e.g., "active", "inactive").
+#' @param id_col Character. Name of the identifier column (e.g., `"personnel_id"`).
 #' @param event_type Character. Either `"hire"` or `"fire"`, controlling which event to detect.
 #' @param start_date Optional start date for the full date sequence
 #'   (default: `"2007-09-01"`).
@@ -63,14 +63,14 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' hires <- detect_worker_event(worker_df, id_col = "worker_id", start_date = "2007-09-01",
+#' hires <- detect_personnel_event(personnel_df, id_col = "personnel_id", start_date = "2007-09-01",
 #'                        end_date = "2018-01-01", event_type = "hire")
 #'
-#' fires <- detect_worker_event(worker_df, id_col = "worker_id", start_date = "2007-09-01",
+#' fires <- detect_personnel_event(personnel_df, id_col = "personnel_id", start_date = "2007-09-01",
 #'                        end_date = "2018-01-01", event_type = "fire")
 #' }
 #' @export
-detect_worker_event <- function(data,
+detect_personnel_event <- function(data,
                                 id_col,
                                 event_type,
                                 start_date,
@@ -79,11 +79,11 @@ detect_worker_event <- function(data,
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
-  # Filter for active workers
-  active_workers_dt <- dt[status == "active"]
+  # Filter for active personnels
+  active_personnels_dt <- dt[status == "active"]
 
-  # Build full date range and unique worker IDs
-  expanded_active_workers_dt <- active_workers_dt |>
+  # Build full date range and unique personnel IDs
+  expanded_active_personnels_dt <- active_personnels_dt |>
     complete_dates(
       id_col,
       start_date,
@@ -92,12 +92,12 @@ detect_worker_event <- function(data,
     ) |>
     data.table::copy()
 
-  # Sort by worker and date
-  data.table::setorderv(expanded_active_workers_dt, cols = c(id_col, "ref_date"))
+  # Sort by personnel and date
+  data.table::setorderv(expanded_active_personnels_dt, cols = c(id_col, "ref_date"))
 
   # Add lag/lead and event detection
   if (event_type == "hire") {
-    expanded_active_workers_dt[
+    expanded_active_personnels_dt[
       ,
       type_event := fifelse(
         status == "active" & is.na(data.table::shift(status, type = "lag")),
@@ -105,11 +105,11 @@ detect_worker_event <- function(data,
         "no hire"
     ), by = id_col]
 
-    expanded_active_workers_dt <- expanded_active_workers_dt[
+    expanded_active_personnels_dt <- expanded_active_personnels_dt[
       ref_date > lubridate::ymd(start_date),
     ]
   } else {
-    expanded_active_workers_dt[
+    expanded_active_personnels_dt[
       ,
       type_event := ifelse(
         status == "active" & is.na(data.table::shift(status, type = "lead")),
@@ -117,50 +117,50 @@ detect_worker_event <- function(data,
         "no fire"
     ), by = id_col]
 
-    expanded_active_workers_dt <- expanded_active_workers_dt[
+    expanded_active_personnels_dt <- expanded_active_personnels_dt[
       ref_date < lubridate::ymd(end_date),
     ]
   }
 
-  expanded_active_workers_dt <- expanded_active_workers_dt[
+  expanded_active_personnels_dt <- expanded_active_personnels_dt[
     type_event %in% c("hire", "fire"),
     c(id_col, "ref_date", "type_event"),
     with = FALSE
   ]
 
-  data_out <- convert_data(expanded_active_workers_dt, data)
+  data_out <- convert_data(expanded_active_personnels_dt, data)
 
   return(data_out)
 }
 
-#' Detect Worker Retirement Events
+#' Detect Personnel Retirement Events
 #'
-#' Identifies workers who retired, i.e., whose status changed from "active" to "inactive".
+#' Identifies personnels who retired, i.e., whose status changed from "active" to "inactive".
 #'
-#' @param data A data.frame or data.table with columns `worker_id`, `ref_date`, and `status`.
+#' @param data A data.frame or data.table with columns `personnel_id`, `ref_date`, and `status`.
 #'
-#' @return A data.table with `worker_id`, `ref_date`, and `type_event = "retire"`.
+#' @return A data.table with `personnel_id`, `ref_date`, and `type_event = "retire"`.
 #'
 #' @importFrom data.table as.data.table shift
 #'
 #' @examples
 #' \dontrun{
-#' retire_events <- detect_retirement(worker_df)
+#' retire_events <- detect_retirement(personnel_df)
 #' }
 #' @export
 detect_retirement <- function(data) {
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
-  # Ensure ordering by worker and date
-  data.table::setorderv(dt, cols = c("worker_id", "ref_date"))
+  # Ensure ordering by personnel and date
+  data.table::setorderv(dt, cols = c("personnel_id", "ref_date"))
 
-  # Create lag_status within each worker
-  dt[, lead_status := data.table::shift(status, type = "lead"), by = worker_id]
+  # Create lag_status within each personnel
+  dt[, lead_status := data.table::shift(status, type = "lead"), by = personnel_id]
 
   # Filter for retire events
   retire_dt <- dt[lead_status == "inactive" & status == "active",
-                  .(worker_id, ref_date)]
+                  .(personnel_id, ref_date)]
 
   # Add event type
   retire_dt[, type_event := "retire"]
@@ -171,23 +171,23 @@ detect_retirement <- function(data) {
   return(retire_dt)
 }
 
-#' Detect Worker Reallocation Events
+#' Detect Personnel Reallocation Events
 #'
-#' Identifies reallocation events when a worker's set of organizations changes
+#' Identifies reallocation events when a personnel's set of establishments changes
 #' between consecutive reference dates. Removes hire events and only keeps
-#' reallocation events after the earliest reference date for each worker.
+#' reallocation events after the earliest reference date for each personnel.
 #'
 #' @param data A data.frame or tibble containing at least the columns:
-#'   - `worker_id`: Unique worker identifier.
+#'   - `personnel_id`: Unique personnel identifier.
 #'   - `ref_date`: Reference date (Date or convertible to Date).
-#'   - `org_id`: Organization ID.
-#' @param worker_hire A data.frame or tibble containing hire events with columns
-#'   `worker_id` and `ref_date`.
+#'   - `est_id`: Establishment ID.
+#' @param personnel_hire A data.frame or tibble containing hire events with columns
+#'   `personnel_id` and `ref_date`.
 #'
 #' @return A tibble with columns:
-#'   - `worker_id`
+#'   - `personnel_id`
 #'   - `ref_date`
-#'   - `org_id_nested`: List-column of organization IDs for that worker and date.
+#'   - `est_id_nested`: List-column of establishment IDs for that personnel and date.
 #'   - `type_event`: `"reallocation"` or `"no reallocation"`.
 #'
 #' @importFrom dplyr arrange select group_by mutate ungroup distinct filter anti_join lag
@@ -196,43 +196,43 @@ detect_retirement <- function(data) {
 #'
 #' @examples
 #' \dontrun{
-#' worker_reallocation_df <- detect_reallocation(contract_rename_org_df, worker_hire_df)
+#' personnel_reallocation_df <- detect_reallocation(contract_rename_est_df, personnel_hire_df)
 #' }
 #' @export
-detect_reallocation <- function(data, worker_hire) {
+detect_reallocation <- function(data, personnel_hire) {
   data_nested <- data %>%
-    # Arrange by worker, date, and org
-    arrange(worker_id, ref_date, org_id) %>%
+    # Arrange by personnel, date, and org
+    arrange(personnel_id, ref_date, est_id) %>%
 
     # Keep only relevant columns
-    select(worker_id, ref_date, org_id) %>%
+    select(personnel_id, ref_date, est_id) %>%
 
-    # Nest org_id by worker_id and ref_date
-    group_by(worker_id, ref_date) %>%
-    nest(.key = "org_id_nested")
+    # Nest est_id by personnel_id and ref_date
+    group_by(personnel_id, ref_date) %>%
+    nest(.key = "est_id_nested")
 
   data_reallocation <- data_nested %>%
 
     # Detect reallocation events by comparing to previous ref_date
-    group_by(worker_id) %>%
+    group_by(personnel_id) %>%
     mutate(
       type_event = map2_chr(
-        org_id_nested,
-        lag(org_id_nested),
+        est_id_nested,
+        lag(est_id_nested),
         ~ ifelse(!identical(.x, .y), "reallocation", "no reallocation")
       )
     ) %>%
-    select(-org_id_nested) |>
+    select(-est_id_nested) |>
     ungroup() %>%
 
     # Remove hire events
     anti_join(
-      worker_hire %>% distinct(worker_id, ref_date),
-      by = c("worker_id", "ref_date")
+      personnel_hire %>% distinct(personnel_id, ref_date),
+      by = c("personnel_id", "ref_date")
     ) %>%
 
     # Keep only reallocation events after earliest ref_date
-    group_by(worker_id) %>%
+    group_by(personnel_id) %>%
     filter(ref_date > min(ref_date) & type_event == "reallocation") %>%
     ungroup()
 
@@ -244,13 +244,13 @@ detect_reallocation <- function(data, worker_hire) {
 #'
 #' @description
 #' This function merges contract information into an event dataset (such as hires, terminations, or transfers)
-#' by matching on `worker_id` and `ref_date`. It ensures that selected variables from the contract dataset
+#' by matching on `personnel_id` and `ref_date`. It ensures that selected variables from the contract dataset
 #' are attached to corresponding events without duplicating records.
 #'
-#' @param event_dt A data.table containing worker event records. Must include the columns
-#'   `worker_id` and `ref_date`.
-#' @param contract_dt A data.table containing contract information, also including `worker_id`
-#'   and `ref_date`. The contract dataset provides additional attributes describing the worker's
+#' @param event_dt A data.table containing personnel event records. Must include the columns
+#'   `personnel_id` and `ref_date`.
+#' @param contract_dt A data.table containing contract information, also including `personnel_id`
+#'   and `ref_date`. The contract dataset provides additional attributes describing the personnel's
 #'   contractual context on each reference date.
 #' @param keep_vars A character vector of variable names in `contract_dt` to be merged into the
 #'   event dataset. These typically describe contract-level attributes such as position, department,
@@ -258,11 +258,11 @@ detect_reallocation <- function(data, worker_hire) {
 #'
 #' @return
 #' A data.table identical to `event_dt`, but with the specified variables from `contract_dt`
-#' joined in by matching on `worker_id` and `ref_date`.
+#' joined in by matching on `personnel_id` and `ref_date`.
 #'
 #' @details
 #' The function performs a *right join* operation of the `contract_dt` onto `event_dt`
-#' (via `data.table`'s `on` syntax). Only unique combinations of `worker_id`, `ref_date`,
+#' (via `data.table`'s `on` syntax). Only unique combinations of `personnel_id`, `ref_date`,
 #' and `keep_vars` are retained from the contract dataset prior to the join, preventing
 #' duplicate key matches.
 #'
@@ -274,13 +274,13 @@ detect_reallocation <- function(data, worker_hire) {
 #' library(data.table)
 #'
 #' event_dt <- data.table(
-#'   worker_id = c(1, 2, 3),
+#'   personnel_id = c(1, 2, 3),
 #'   ref_date = as.IDate(c("2020-01-01", "2020-02-01", "2020-03-01")),
 #'   type_event = c("hire", "fire", "hire")
 #' )
 #'
 #' contract_dt <- data.table(
-#'   worker_id = c(1, 2, 3),
+#'   personnel_id = c(1, 2, 3),
 #'   ref_date = as.IDate(c("2020-01-01", "2020-02-01", "2020-03-01")),
 #'   department = c("Finance", "HR", "IT"),
 #'   contract_type = c("permanent", "temporary", "consultant")
@@ -300,9 +300,9 @@ add_contract_to_event <- function(event_dt,
                                   contract_dt,
                                   keep_vars){
 
-  contract_dt <- unique(contract_dt[, c("worker_id", "ref_date", keep_vars), with = FALSE])
+  contract_dt <- unique(contract_dt[, c("personnel_id", "ref_date", keep_vars), with = FALSE])
 
-  event_dt <- contract_dt[event_dt, on = c("worker_id", "ref_date")]
+  event_dt <- contract_dt[event_dt, on = c("personnel_id", "ref_date")]
 
   return(event_dt)
 
@@ -312,28 +312,28 @@ add_contract_to_event <- function(event_dt,
 #'
 #' @description
 #' Identifies transitions in specified job-related attributes (e.g., pay grade, seniority)
-#' for each worker over time. The function first determines the "dominant" contract
-#' per worker and reference date based on a decision variable (e.g., highest base salary),
+#' for each personnel over time. The function first determines the "dominant" contract
+#' per personnel and reference date based on a decision variable (e.g., highest base salary),
 #' and then detects when the selected attributes change across time.
 #'
 #' @param contract_dt A `data.table`, `data.frame` object containing contract level records.
-#' Must include columns for `worker_id`, `ref_date`, the variables listed in `vars`,
+#' Must include columns for `personnel_id`, `ref_date`, the variables listed in `vars`,
 #' and the `decision_var`.
 #' @param vars A character vector of attribute names (column names) to monitor for changes
 #' (e.g., `c("paygrade", "seniority")`).
 #' @param decision_var A string specifying the column name used to identify the dominant
-#' contract per worker and date (e.g., `"base_salary_lcu"`).
+#' contract per personnel and date (e.g., `"base_salary_lcu"`).
 #' @param decision_fn A function defining the decision rule for selecting the dominant
-#' contract within each worker-date group (default: `max`). Typically `max`, `min`, or
+#' contract within each personnel-date group (default: `max`). Typically `max`, `min`, or
 #' a custom summary function.
 #'
 #' @details
 #' The function:
 #' \enumerate{
-#'   \item Sorts contracts by `worker_id`, `ref_date`, and the decision variable.
-#'   \item Selects the dominant contract per worker-date combination using `decision_fn`.
+#'   \item Sorts contracts by `personnel_id`, `ref_date`, and the decision variable.
+#'   \item Selects the dominant contract per personnel-date combination using `decision_fn`.
 #'   \item For each attribute in `vars`, compares its value to the previous record
-#'   (by worker) and detects any changes.
+#'   (by personnel) and detects any changes.
 #'   \item Returns all transitions, including the attribute name, previous and new values,
 #'   and the start and end dates for the transition.
 #' }
@@ -343,7 +343,7 @@ add_contract_to_event <- function(event_dt,
 #'
 #' @return A `data.table` with the following columns:
 #' \describe{
-#'   \item{worker_id}{Unique worker identifier.}
+#'   \item{personnel_id}{Unique personnel identifier.}
 #'   \item{start_date}{Date of the previous contract before the change.}
 #'   \item{ref_date}{Date when the new attribute value takes effect.}
 #'   \item{attribute}{Name of the attribute that changed.}
@@ -354,7 +354,7 @@ add_contract_to_event <- function(event_dt,
 #' @examples
 #' library(data.table)
 #' dt <- data.table(
-#'   worker_id = c(1, 1, 1, 2, 2),
+#'   personnel_id = c(1, 1, 1, 2, 2),
 #'   ref_date = as.Date(c("2020-01-01", "2021-01-01", "2022-01-01",
 #'                        "2020-06-01", "2021-06-01")),
 #'   paygrade = c("A", "A", "B", "C", "D"),
@@ -377,32 +377,32 @@ detect_career_transitions <- function(contract_dt,
                                       decision_fn = max) {
 
   # Keep only needed columns
-  contract_dt <- contract_dt[, c("worker_id", "ref_date", vars, decision_var), with = FALSE]
+  contract_dt <- contract_dt[, c("personnel_id", "ref_date", vars, decision_var), with = FALSE]
 
-  # Sort by worker, date, and decision variable
-  setorderv(contract_dt, c("worker_id", "ref_date", decision_var), order = c(1, 1, -1))
+  # Sort by personnel, date, and decision variable
+  setorderv(contract_dt, c("personnel_id", "ref_date", decision_var), order = c(1, 1, -1))
 
-  # Apply decision rule: pick the dominant job for each worker-date
+  # Apply decision rule: pick the dominant job for each personnel-date
   # We assume decision_fn = max by default (i.e. highest of whatever decision_var)
   contract_main <- contract_dt[
     , .SD[get(decision_var) == decision_fn(get(decision_var))][1],
-    by = .(worker_id, ref_date)
+    by = .(personnel_id, ref_date)
   ]
 
   # Now detect transitions for each variable
   detect_transitions <- function(attr) {
-    # Add previous value by worker
-    contract_main[, paste0(attr, "_prev") := shift(get(attr)), by = worker_id]
+    # Add previous value by personnel
+    contract_main[, paste0(attr, "_prev") := shift(get(attr)), by = personnel_id]
 
     # Keep rows where the attribute changed
     transitions <- contract_main[get(attr) != get(paste0(attr, "_prev")),
-                                 .(worker_id,
+                                 .(personnel_id,
                                    start_date = shift(ref_date, 1L, type = "lag"),
                                    ref_date,
                                    attribute = attr,
                                    from = get(paste0(attr, "_prev")),
                                    to = get(attr)),
-                                 by = worker_id]
+                                 by = personnel_id]
 
     return(transitions[])
   }
@@ -424,7 +424,7 @@ detect_career_transitions <- function(contract_dt,
 #' each identifier has a record for every time point, even if data are missing.
 #'
 #' @param data A data.frame or data.table containing at least an identifier column.
-#' @param id_col Character. Name of the identifier column (e.g., `"worker_id"`).
+#' @param id_col Character. Name of the identifier column (e.g., `"personnel_id"`).
 #' @param start_date Character or Date. Start of the full date sequence
 #'   (e.g., `"2007-09-01"`).
 #' @param end_date Character or Date. End of the full date sequence
@@ -448,8 +448,8 @@ detect_career_transitions <- function(contract_dt,
 #' @examples
 #' \dontrun{
 #' complete_dt <- complete_dates(
-#'   data = worker_df,
-#'   id_col = "worker_id",
+#'   data = personnel_df,
+#'   id_col = "personnel_id",
 #'   start_date = "2007-09-01",
 #'   end_date = "2018-01-01",
 #'   freq = "year"

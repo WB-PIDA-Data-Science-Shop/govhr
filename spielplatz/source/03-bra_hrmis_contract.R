@@ -26,7 +26,7 @@ dir.create(
 # read-in data ------------------------------------------------------------
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
 
-plan(multisession, workers = 6)
+plan(multisession, personnels = 6)
 
 contract_active_list <-
   list.files(path = file_path,
@@ -52,7 +52,7 @@ active_alagoas_tbl <-
 ##### now we are ready to harmonize!
 
 ###### first let us confirm our data is unique at the matricula level
-###### lets check how contracts there are to unique workers
+###### lets check how contracts there are to unique personnels
 active_alagoas_tbl |>
   group_by(ANO_PAGAMENTO) |>
   summarize(unique_cpf = length(unique(CPF)), nobs = length(CPF))
@@ -61,7 +61,7 @@ active_alagoas_tbl |>
   group_by(ANO_PAGAMENTO) |>
   summarize(unique_mtr = length(unique(MATRICULA)), nobs = length(MATRICULA))
 
-### reclassify isco occupations for the contracted or retired workers
+### reclassify isco occupations for the contracted or retired personnels
 inactive_alagoas_tbl <-
   inactive_alagoas_tbl |>
   mutate(CARREIRA = CARGO)
@@ -138,15 +138,14 @@ inactive_alagoas_tbl <-
   ) |>
   as_tibble()
 
-
 ### first let us figure out how many contracts each person has per year
 contract_alagoas_tbl <-
   bind_rows(
     active_alagoas_tbl |>
       transmute(
         contract_id = MATRICULA,
-        worker_id = CPF,
-        org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
+        personnel_id = CPF,
+        est_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
         ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
         base_salary_lcu = SALARIO_BASE,
         allowance_lcu = ABONO_PERMANENCIA,
@@ -175,8 +174,8 @@ contract_alagoas_tbl <-
     inactive_alagoas_tbl |>
       transmute(
         contract_id = MATRICULA,
-        worker_id = CPF,
-        org_id = paste(ORGAO, "000000", sep = "-"),
+        personnel_id = CPF,
+        est_id = paste(ORGAO, "000000", sep = "-"),
         ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
         base_salary_lcu = NA,
         allowance_lcu = NA,
@@ -213,5 +212,5 @@ contract_alagoas_tbl <-
 qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
 
 saveRDS(
-  contract_alagoas_tbl, "spielplatz/bra_hrmis_contract.rds"
+  contract_alagoas_tbl, "spielplatz/data/bra_hrmis_contract.rds"
 )

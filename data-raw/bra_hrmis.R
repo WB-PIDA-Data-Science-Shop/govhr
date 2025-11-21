@@ -4,14 +4,10 @@ library(furrr)
 library(writexl)
 library(digest)
 library(labourR)
+library(readr)
 library(here)
 
 devtools::load_all()
-
-dir.create(
-  here("inst", "extdata"),
-  recursive = TRUE
-)
 
 # read-in data ------------------------------------------------------------
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
@@ -60,17 +56,19 @@ bra_hrmis <- bra_hrmis |>
 bra_hrmis_contract <- read_rds(
   here("spielplatz", "data", "bra_hrmis_contract.rds")
 ) |>
-  filter(year >= 2014)
+  filter(
+    lubridate::year(ref_date) >= 2014
+  )
 
-bra_hrmis_worker <- read_rds(
-  here("spielplatz", "data", "bra_hrmis_worker.rds")
+bra_hrmis_personnel <- read_rds(
+  here("spielplatz", "data", "bra_hrmis_personnel.rds")
 ) |>
   filter(
     lubridate::year(ref_date) >= 2014
   )
 
-bra_hrmis_org <- read_rds(
-  here("spielplatz", "data", "bra_hrmis_organization.rds")
+bra_hrmis_est <- read_rds(
+  here("spielplatz", "data", "bra_hrmis_establishment.rds")
 )
 
 # write-out ---------------------------------------------------------------
@@ -78,5 +76,5 @@ usethis::use_data(bra_hrmis, overwrite = TRUE)
 
 # modules
 usethis::use_data(bra_hrmis_contract, overwrite = TRUE)
-usethis::use_data(bra_hrmis_worker, overwrite = TRUE)
-usethis::use_data(bra_hrmis_org, overwrite = TRUE)
+usethis::use_data(bra_hrmis_personnel, overwrite = TRUE)
+usethis::use_data(bra_hrmis_est, overwrite = TRUE)

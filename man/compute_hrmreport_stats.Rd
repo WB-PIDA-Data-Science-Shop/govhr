@@ -4,15 +4,15 @@
 \alias{compute_hrmreport_stats}
 \title{Compute Core HRMIS Analytical Tables}
 \usage{
-compute_hrmreport_stats(contract_dt, worker_dt, org_dt, macro_indicators)
+compute_hrmreport_stats(contract_dt, personnel_dt, est_dt, macro_indicators)
 }
 \arguments{
-\item{contract_dt}{A `data.table` containing individual employment contracts with variables such as `worker_id`, `ref_date`,
+\item{contract_dt}{A `data.table` containing individual employment contracts with variables such as `personnel_id`, `ref_date`,
 wage variables (`gross_salary_lcu`, `net_salary_lcu`, `base_salary_lcu`), and job attributes.}
 
-\item{worker_dt}{A `data.table` containing worker-level panel data, including `worker_id`, `ref_date`, demographic and employment information.}
+\item{personnel_dt}{A `data.table` containing personnel-level panel data, including `personnel_id`, `ref_date`, demographic and employment information.}
 
-\item{org_dt}{A `data.table` containing organizational information (e.g., institution identifiers, types, or sectors).}
+\item{est_dt}{A `data.table` containing establishmental information (e.g., institution identifiers, types, or sectors).}
 
 \item{macro_indicators}{A data frame containing macro indicators.}
 }
@@ -23,34 +23,34 @@ A named list of `data.table` objects containing:
   \item{publicemployment_share}{Public employment as a share of total employment.}
   \item{wagebill_occupisco}{Wage bill decomposition by ISCO occupation group.}
   \item{wagebill_occupnative}{Wage bill decomposition by native occupational titles.}
-  \item{wagebill_orgdecomp}{Wage bill decomposition by organization.}
+  \item{wagebill_estdecomp}{Wage bill decomposition by establishment.}
   \item{wagebill_allowshare_paygrade}{Allowance rate by pay grade.}
   \item{wagebill_allowshare_seniority}{Allowance rate by seniority.}
-  \item{workerevent}{Worker-level hiring, firing, and retirement events over time.}
+  \item{personnelevent}{Personnel-level hiring, firing, and retirement events over time.}
   \item{employment_decomp}{Employment decomposition by occupation and ISCO group.}
-  \item{org_decomp}{Employment decomposition by organization.}
-  \item{education_profile}{Distribution of public sector workers by education, gender, and occupation.}
-  \item{mobilityprofile}{Distribution of public sector workers by pay grade, seniority, gender, and occupation.}
+  \item{est_decomp}{Employment decomposition by establishment.}
+  \item{education_profile}{Distribution of public sector personnels by education, gender, and occupation.}
+  \item{mobilityprofile}{Distribution of public sector personnels by pay grade, seniority, gender, and occupation.}
 }
 }
 \description{
 This function generates a suite of standardized analytical tables for HRMIS (Human Resource Management Information System) reports.
-It combines contract-level, worker-level, and organizational data to compute wage bill summaries, employment shares, decompositions,
-and profiles by occupation, pay grade, organization, education, and seniority.
+It combines contract-level, personnel-level, and establishmental data to compute wage bill summaries, employment shares, decompositions,
+and profiles by occupation, pay grade, establishment, education, and seniority.
 }
 \details{
-The function integrates contract, worker, and organizational datasets to compute a standardized HRMIS statistical report.
+The function integrates contract, personnel, and establishmental datasets to compute a standardized HRMIS statistical report.
 It relies on supporting helper functions such as:
 \code{convert_constant_ppp()}, \code{compute_fastshare()}, \code{compute_fastsummary()},
-\code{detect_worker_event()}, and \code{detect_retirement()}.
+\code{detect_personnel_event()}, and \code{detect_retirement()}.
 
 Each sub-table in the output list can be used directly in dashboards, reports, or further analytical aggregation.
 }
 \examples{
 \dontrun{
 hrm_stats <- compute_hrmreport_stats(contract_dt = contract_data,
-                                     worker_dt = worker_data,
-                                     org_dt = org_data)
+                                     personnel_dt = personnel_data,
+                                     est_dt = est_data)
 names(hrm_stats)
 }
 

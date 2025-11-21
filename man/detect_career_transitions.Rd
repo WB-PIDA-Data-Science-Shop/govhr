@@ -8,23 +8,23 @@ detect_career_transitions(contract_dt, vars, decision_var, decision_fn = max)
 }
 \arguments{
 \item{contract_dt}{A `data.table`, `data.frame` object containing contract level records.
-Must include columns for `worker_id`, `ref_date`, the variables listed in `vars`,
+Must include columns for `personnel_id`, `ref_date`, the variables listed in `vars`,
 and the `decision_var`.}
 
 \item{vars}{A character vector of attribute names (column names) to monitor for changes
 (e.g., `c("paygrade", "seniority")`).}
 
 \item{decision_var}{A string specifying the column name used to identify the dominant
-contract per worker and date (e.g., `"base_salary_lcu"`).}
+contract per personnel and date (e.g., `"base_salary_lcu"`).}
 
 \item{decision_fn}{A function defining the decision rule for selecting the dominant
-contract within each worker-date group (default: `max`). Typically `max`, `min`, or
+contract within each personnel-date group (default: `max`). Typically `max`, `min`, or
 a custom summary function.}
 }
 \value{
 A `data.table` with the following columns:
 \describe{
-  \item{worker_id}{Unique worker identifier.}
+  \item{personnel_id}{Unique personnel identifier.}
   \item{start_date}{Date of the previous contract before the change.}
   \item{ref_date}{Date when the new attribute value takes effect.}
   \item{attribute}{Name of the attribute that changed.}
@@ -34,17 +34,17 @@ A `data.table` with the following columns:
 }
 \description{
 Identifies transitions in specified job-related attributes (e.g., pay grade, seniority)
-for each worker over time. The function first determines the "dominant" contract
-per worker and reference date based on a decision variable (e.g., highest base salary),
+for each personnel over time. The function first determines the "dominant" contract
+per personnel and reference date based on a decision variable (e.g., highest base salary),
 and then detects when the selected attributes change across time.
 }
 \details{
 The function:
 \enumerate{
-  \item Sorts contracts by `worker_id`, `ref_date`, and the decision variable.
-  \item Selects the dominant contract per worker-date combination using `decision_fn`.
+  \item Sorts contracts by `personnel_id`, `ref_date`, and the decision variable.
+  \item Selects the dominant contract per personnel-date combination using `decision_fn`.
   \item For each attribute in `vars`, compares its value to the previous record
-  (by worker) and detects any changes.
+  (by personnel) and detects any changes.
   \item Returns all transitions, including the attribute name, previous and new values,
   and the start and end dates for the transition.
 }
@@ -55,7 +55,7 @@ contracts when `decision_fn = max`. If ties occur, the first instance is selecte
 \examples{
 library(data.table)
 dt <- data.table(
-  worker_id = c(1, 1, 1, 2, 2),
+  personnel_id = c(1, 1, 1, 2, 2),
   ref_date = as.Date(c("2020-01-01", "2021-01-01", "2022-01-01",
                        "2020-06-01", "2021-06-01")),
   paygrade = c("A", "A", "B", "C", "D"),

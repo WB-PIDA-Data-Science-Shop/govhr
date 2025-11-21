@@ -38,9 +38,9 @@ generate_hrmis_data <- function(n) {
   # Calculate records per reference date
   records_per_date <- round(n / length(ref_dates))
 
-  # Generate base worker pool (people who could appear in multiple periods)
-  n_workers <- round(n * 0.6)  # 60% of records are from a stable worker pool
-  worker_pool <- paste0("W", sprintf("%06d", 1:n_workers))
+  # Generate base personnel pool (people who could appear in multiple periods)
+  n_personnels <- round(n * 0.6)  # 60% of records are from a stable personnel pool
+  personnel_pool <- paste0("W", sprintf("%06d", 1:n_personnels))
 
   # Initialize empty dataframe
   all_data <- tibble()
@@ -50,43 +50,43 @@ generate_hrmis_data <- function(n) {
     current_ref_date <- ref_dates[i]
     n_records <- records_per_date
 
-    # Determine worker composition for this period
+    # Determine personnel composition for this period
     if (i == 1) {
       # First period: all new hires
-      workers <- sample(worker_pool, n_records, replace = FALSE)
+      personnels <- sample(personnel_pool, n_records, replace = FALSE)
       start_dates <- current_ref_date - days(sample(0:365, n_records, replace = TRUE))
     } else {
       # Subsequent periods: mix of retained, new hires, and churned
       prev_data <- all_data %>%
         filter(ref_date == ref_dates[i-1])
 
-      # Retention rate: 70-80% of previous period workers are retained
+      # Retention rate: 70-80% of previous period personnels are retained
       retention_rate <- runif(1, 0.70, 0.80)
       n_retained <- round(nrow(prev_data) * retention_rate)
 
-      # Get workers from previous period who are still active
-      prev_active_workers <- prev_data %>%
+      # Get personnels from previous period who are still active
+      prev_active_personnels <- prev_data %>%
         filter(is.na(end_date) | end_date >= current_ref_date) %>%
-        pull(worker_id)
+        pull(personnel_id)
 
-      # Retained workers (from previous active workers)
-      retained_workers <- sample(prev_active_workers,
-                                 min(n_retained, length(prev_active_workers)),
+      # Retained personnels (from previous active personnels)
+      retained_personnels <- sample(prev_active_personnels,
+                                 min(n_retained, length(prev_active_personnels)),
                                  replace = FALSE)
 
       # New hires to fill remaining slots
-      n_new_hires <- n_records - length(retained_workers)
-      available_workers <- setdiff(worker_pool, retained_workers)
-      new_hire_workers <- sample(available_workers, n_new_hires, replace = FALSE)
+      n_new_hires <- n_records - length(retained_personnels)
+      available_personnels <- setdiff(personnel_pool, retained_personnels)
+      new_hire_personnels <- sample(available_personnels, n_new_hires, replace = FALSE)
 
-      workers <- c(retained_workers, new_hire_workers)
+      personnels <- c(retained_personnels, new_hire_personnels)
 
-      # Start dates: retained workers keep their original start date, new hires get recent dates
+      # Start dates: retained personnels keep their original start date, new hires get recent dates
       start_dates <- c(
-        # Retained workers: get their original start date from previous period
-        sapply(retained_workers, function(w) {
+        # Retained personnels: get their original start date from previous period
+        sapply(retained_personnels, function(w) {
           prev_start <- prev_data %>%
-            filter(worker_id == w) %>%
+            filter(personnel_id == w) %>%
             pull(start_date) %>%
             first()
           if(length(prev_start) == 0 || is.na(prev_start)) {
@@ -104,8 +104,8 @@ generate_hrmis_data <- function(n) {
     period_data <- tibble(
       # IDs
       contract_id = paste0("C", sprintf("%06d", (i-1)*records_per_date + 1:n_records)),
-      worker_id = workers,
-      org_id = paste0("ORG", sprintf("%03d", sample(1:50, n_records, replace = TRUE))),
+      personnel_id = personnels,
+      est_id = paste0("ORG", sprintf("%03d", sample(1:50, n_records, replace = TRUE))),
 
       # Reference date (same for all records in this period)
       ref_date = current_ref_date,
@@ -114,13 +114,13 @@ generate_hrmis_data <- function(n) {
     ) %>%
       mutate(
         # Determine who gets terminated/leaves before next period
-        # 20-30% of workers will have left by the next period
+        # 20-30% of personnels will have left by the next period
         churn_rate = if_else(i < length(ref_dates),
                              runif(1, 0.20, 0.30),
                              0.15),  # Lower churn in last period
         churn_this_period = runif(n()) < churn_rate,
 
-        # For churned workers, set end date between this ref_date and next ref_date
+        # For churned personnels, set end date between this ref_date and next ref_date
         end_date = if_else(
           churn_this_period & i < length(ref_dates),
           start_date + days(sample(30:365, n(), replace = TRUE)),
@@ -135,9 +135,9 @@ generate_hrmis_data <- function(n) {
         ),
 
         # Salary information (base in local currency)
-        # Retained workers might get raises
+        # Retained personnels might get raises
         base_salary = if_else(
-          worker_id %in% retained_workers & i > 1,
+          personnel_id %in% retained_personnels & i > 1,
           round(rnorm(n(), mean = 55000, sd = 22000), 2),  # Slightly higher for retained
           round(rnorm(n(), mean = 50000, sd = 20000), 2)
         ),
@@ -171,7 +171,7 @@ generate_hrmis_data <- function(n) {
       select(-churn_this_period, -churn_rate) %>%
       # Reorder columns to match the header
       select(
-        contract_id, worker_id, org_id, ref_date,
+        contract_id, personnel_id, est_id, ref_date,
         base_salary, gross_salary, net_salary,
         contract_type, occupation_title, occupation_code,
         occupation_category, occupation_level,
@@ -201,8 +201,8 @@ introduce_errors <- function(df, error_rate = 0.15) {
   df <- df %>%
     mutate(
       # Critical fields: low missingness (2-5%)
-      worker_id = if_else(runif(n) < 0.02, NA_character_, worker_id),
-      org_id = if_else(runif(n) < 0.03, NA_character_, org_id),
+      personnel_id = if_else(runif(n) < 0.02, NA_character_, personnel_id),
+      est_id = if_else(runif(n) < 0.03, NA_character_, est_id),
 
       # Salary fields: moderate missingness (5-10%)
       base_salary = if_else(runif(n) < 0.08, NA_real_, base_salary),
@@ -453,8 +453,8 @@ diagnose_errors(hrmis_data_with_errors)
 # Summary statistics
 cat("\n=== DATA SUMMARY ===\n")
 cat("Total records:", nrow(hrmis_data_with_errors), "\n")
-cat("Unique workers:", n_distinct(hrmis_data_with_errors$worker_id, na.rm = TRUE), "\n")
-cat("Unique organizations:", n_distinct(hrmis_data_with_errors$org_id, na.rm = TRUE), "\n")
+cat("Unique personnels:", n_distinct(hrmis_data_with_errors$personnel_id, na.rm = TRUE), "\n")
+cat("Unique establishments:", n_distinct(hrmis_data_with_errors$est_id, na.rm = TRUE), "\n")
 cat("Complete cases (no missing values):", sum(complete.cases(hrmis_data_with_errors)), "\n")
 cat("Records with at least one error/missing:",
     sum(!complete.cases(hrmis_data_with_errors)), "\n")
@@ -463,8 +463,8 @@ cat("\n=== COHORT ANALYSIS BY REF_DATE ===\n")
 cohort_summary <- hrmis_data_with_errors %>%
   group_by(ref_date) %>%
   summarise(
-    total_workers = n(),
-    unique_workers = n_distinct(worker_id, na.rm = TRUE),
+    total_personnels = n(),
+    unique_personnels = n_distinct(personnel_id, na.rm = TRUE),
     new_hires = sum(start_date >= ref_date - days(365) & start_date <= ref_date, na.rm = TRUE),
     terminated = sum(!is.na(end_date) & end_date >= ref_date - days(365) & end_date <= ref_date, na.rm = TRUE),
     active = sum(is.na(end_date) | end_date > ref_date, na.rm = TRUE),
@@ -478,21 +478,21 @@ print(cohort_summary)
 cat("\n=== RETENTION RATES ===\n")
 ref_dates <- sort(unique(hrmis_data_with_errors$ref_date))
 for (i in 2:length(ref_dates)) {
-  prev_workers <- hrmis_data_with_errors %>%
+  prev_personnels <- hrmis_data_with_errors %>%
     filter(ref_date == ref_dates[i-1]) %>%
-    pull(worker_id) %>%
+    pull(personnel_id) %>%
     unique()
 
-  current_workers <- hrmis_data_with_errors %>%
+  current_personnels <- hrmis_data_with_errors %>%
     filter(ref_date == ref_dates[i]) %>%
-    pull(worker_id) %>%
+    pull(personnel_id) %>%
     unique()
 
-  retained <- length(intersect(prev_workers, current_workers))
-  retention_rate <- round(retained / length(prev_workers) * 100, 1)
+  retained <- length(intersect(prev_personnels, current_personnels))
+  retention_rate <- round(retained / length(prev_personnels) * 100, 1)
 
   cat(format(ref_dates[i-1]), "to", format(ref_dates[i]), ": ",
-      retention_rate, "% (", retained, "/", length(prev_workers), ")\n")
+      retention_rate, "% (", retained, "/", length(prev_personnels), ")\n")
 }
 
 # Export both clean and dirty data

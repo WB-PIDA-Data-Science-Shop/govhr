@@ -57,7 +57,17 @@ names(fns)
 
 # Example usage with compute_summary()
 compute_summary(
-  data = contract_harmonized,
+  data = tibble::tibble(
+     country_code = c(rep("A", 100), rep("B", 100)),
+     gross_salary_lcu = c(
+      rnorm(100, mean = 1000, sd = 100),
+      rnorm(100,  mean = 2000, sd = 100)
+      ),
+     net_salary_lcu = c(
+      rnorm(100, mean = 0.7 * 1000, sd = 100),
+      rnorm(100,  mean = 0.7 * 2000, sd = 100)
+     )
+  ),
   cols = c("gross_salary_lcu", "net_salary_lcu"),
   groups = c("country_code"),
   fns = c("mean", "sd", "cv")

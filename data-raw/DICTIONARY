@@ -169,9 +169,9 @@ Table 04 - Types of Dependency
 | `mes`             | Month (e.g., 202201 for January 2022)                                              |
 | `id_funcionario`  | Another unique identifier for the employee (possibly different from `id_servidor`) |
 | `nome`            | Name of the employee                                                               |
-| `cod_orgao`       | Code of the agency / department                                                    |
+| `cod_estao`       | Code of the agency / department                                                    |
 | `orgao`           | Name of the agency                                                                 |
-| `tipo_empresa`    | Type of organization (e.g., direct administration, autarchy)                       |
+| `tipo_empresa`    | Type of establishment (e.g., direct administration, autarchy)                       |
 | `sexo`            | Gender (M/F)                                                                       |
 | `dt_nascimento`   | Date of birth                                                                      |
 | `idade`           | Age                                                                                |
@@ -226,7 +226,7 @@ Table 04 - Types of Dependency
 | `ret_t_f_co_a`    | Reimbursement / retention type A                                                   |
 | `ret_t_f_co_b`    | Reimbursement / retention type B                                                   |
 | `gr_com_j_op`     | Commissioned gratification (uncertain)                                             |
-| `no_orgao`        | Full name of the agency                                                            |
+| `no_estao`        | Full name of the agency                                                            |
 | `no_cargo`        | Full name of the position                                                          |
 
 
@@ -245,8 +245,8 @@ Table 04 - Types of Dependency
 | `ADMINISTRACAO`                     | Type of administration (e.g., direct, indirect, foundation)        |
 | `TIPO_CONTRATO`                     | Type of contract (e.g., permanent, temporary, commissioned)        |
 | `GRUPO`                             | Group (could be a functional or career group)                      |
-| `COD_ORGAO`                         | Organization code                                                  |
-| `ORGAO`                             | Organization name                                                  |
+| `COD_ESTAO`                         | Establishment code                                                  |
+| `ORGAO`                             | Establishment name                                                  |
 | `CARREIRA`                          | Career (broad classification of occupation)                        |
 | `CARGO`                             | Position (specific job title)                                      |
 | `JORNADA`                           | Work schedule (hours per week)                                     |
