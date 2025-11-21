@@ -39,7 +39,7 @@ missing or conflicting.
 library(tibble)
 
 df <- tibble(
-  worker_id = c(1, 1, 1, 2, 2, 2, 2),
+  personnel_id = c(1, 1, 1, 2, 2, 2, 2),
   gender    = c(NA, "M", "F", "F", NA, "M", "F"),
   ref_date  = as.Date(c(
     "2023-01-01", "2023-01-02", "2023-01-02",
@@ -47,13 +47,13 @@ df <- tibble(
   ))
 )
 
-dedup_value_panel(df, gender, worker_id, ref_date)
+dedup_value_panel(df, gender, personnel_id, ref_date)
 #> # A tibble: 5 × 3
-#>   worker_id ref_date   gender
-#>       <dbl> <date>     <chr> 
-#> 1         1 2023-01-01 NA    
-#> 2         1 2023-01-02 F     
-#> 3         2 2023-01-01 F     
-#> 4         2 2023-01-02 NA    
-#> 5         2 2023-01-03 F     
+#>   personnel_id ref_date   gender
+#>          <dbl> <date>     <chr> 
+#> 1            1 2023-01-01 NA    
+#> 2            1 2023-01-02 F     
+#> 3            2 2023-01-01 F     
+#> 4            2 2023-01-02 NA    
+#> 5            2 2023-01-03 F     
 ```

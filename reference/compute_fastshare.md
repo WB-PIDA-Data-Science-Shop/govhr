@@ -81,7 +81,7 @@ format with one column per indicator.
 ``` r
 if (FALSE) { # \dontrun{
 
-dt <- contract_harmonized |> mutate(year = year(org_date)) |> as.data.table()
+dt <- contract_harmonized |> mutate(year = year(est_date)) |> as.data.table()
 
 
 compute_fastshare(

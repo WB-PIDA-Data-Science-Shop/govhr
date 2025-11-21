@@ -4,8 +4,8 @@
 
 This article shows examples for how to analyze harmonized human resource
 management information system (HRMIS) data, organized into three main
-modules: Organization, Worker, and Contract. The contents of each module
-are described in `vignette("standard_dictionary")`
+modules: Establishment, Personnel, and Contract. The contents of each
+module are described in `vignette("standard_dictionary")`
 
 ## Building analytics on harmonized data
 
@@ -70,46 +70,46 @@ in a decomposition by establishment. You can quickly do that with our
 function, like this:
 
 ``` r
-wagebill_annual_org <-
+wagebill_annual_est <-
   bra_hrmis_contract |> 
     compute_fastsummary(
       cols = c("net_salary_ppp"), 
       fns = c("sum"), 
-      groups = c("org_id", "year"), 
+      groups = c("est_id", "year"), 
       output = "long"
     )
 
 reactable(
-  wagebill_annual_org
+  wagebill_annual_est
 )
 ```
 
-We just have to add `"org_id"` to the groups argument. We can quickly
+We just have to add `"est_id"` to the groups argument. We can quickly
 plot this new object:
 
 ``` r
-wagebill_annual_org |> 
+wagebill_annual_est |> 
   filter(
     year != 2018 &
-      org_id %in% (unique(wagebill_annual_org$org_id) |> sample(4))
+      est_id %in% (unique(wagebill_annual_est$est_id) |> sample(4))
   ) |>
   ggplot_point_line(
     year,
     value,
-    group = org_id
+    group = est_id
   ) +
   scale_y_continuous(
     labels = scales::label_number()
   ) +
   facet_wrap(
-    vars(org_id)
+    vars(est_id)
   ) +
   labs(
     x = "Year",
     y = "Wage Bill \n(Constant International Dollars)",
-    title = "Wage Bill: Annual, by Organization"
+    title = "Wage Bill: Annual, by Establishment"
   )
 ```
 
-![Plot of wage bill at the annual level and organizational
+![Plot of wage bill at the annual level and establishmental
 level.](03-analytics_files/figure-html/unnamed-chunk-5-1.png)

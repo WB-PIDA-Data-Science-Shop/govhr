@@ -118,18 +118,34 @@ names(fns)
 
 # Example usage with compute_summary()
 compute_summary(
-  data = contract_harmonized,
+  data = tibble::tibble(
+     country_code = c(rep("A", 100), rep("B", 100)),
+     gross_salary_lcu = c(
+      rnorm(100, mean = 1000, sd = 100),
+      rnorm(100,  mean = 2000, sd = 100)
+      ),
+     net_salary_lcu = c(
+      rnorm(100, mean = 0.7 * 1000, sd = 100),
+      rnorm(100,  mean = 0.7 * 2000, sd = 100)
+     )
+  ),
   cols = c("gross_salary_lcu", "net_salary_lcu"),
   groups = c("country_code"),
   fns = c("mean", "sd", "cv")
 )
-#> # A tibble: 6 × 3
-#>   country_code indicator                value
-#>   <chr>        <chr>                    <dbl>
-#> 1 ZMB          gross_salary_lcu_mean 5321.   
-#> 2 ZMB          gross_salary_lcu_sd    880.   
-#> 3 ZMB          gross_salary_lcu_cv      0.165
-#> 4 ZMB          net_salary_lcu_mean   4312.   
-#> 5 ZMB          net_salary_lcu_sd      764.   
-#> 6 ZMB          net_salary_lcu_cv        0.177
+#> # A tibble: 12 × 3
+#>    country_code indicator                 value
+#>    <chr>        <chr>                     <dbl>
+#>  1 A            gross_salary_lcu_mean 1015.    
+#>  2 A            gross_salary_lcu_sd     99.5   
+#>  3 A            gross_salary_lcu_cv      0.0981
+#>  4 A            net_salary_lcu_mean    709.    
+#>  5 A            net_salary_lcu_sd      105.    
+#>  6 A            net_salary_lcu_cv        0.148 
+#>  7 B            gross_salary_lcu_mean 2007.    
+#>  8 B            gross_salary_lcu_sd    106.    
+#>  9 B            gross_salary_lcu_cv      0.0527
+#> 10 B            net_salary_lcu_mean   1407.    
+#> 11 B            net_salary_lcu_sd      104.    
+#> 12 B            net_salary_lcu_cv        0.0737
 ```

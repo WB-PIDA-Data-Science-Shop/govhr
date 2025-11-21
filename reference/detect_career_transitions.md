@@ -1,10 +1,10 @@
 # Detect Career Transitions Based on Contract Attributes
 
 Identifies transitions in specified job-related attributes (e.g., pay
-grade, seniority) for each worker over time. The function first
-determines the "dominant" contract per worker and reference date based
-on a decision variable (e.g., highest base salary), and then detects
-when the selected attributes change across time.
+grade, seniority) for each personnel over time. The function first
+determines the "dominant" contract per personnel and reference date
+based on a decision variable (e.g., highest base salary), and then
+detects when the selected attributes change across time.
 
 ## Usage
 
@@ -17,7 +17,7 @@ detect_career_transitions(contract_dt, vars, decision_var, decision_fn = max)
 - contract_dt:
 
   A \`data.table\`, \`data.frame\` object containing contract level
-  records. Must include columns for \`worker_id\`, \`ref_date\`, the
+  records. Must include columns for \`personnel_id\`, \`ref_date\`, the
   variables listed in \`vars\`, and the \`decision_var\`.
 
 - vars:
@@ -28,21 +28,21 @@ detect_career_transitions(contract_dt, vars, decision_var, decision_fn = max)
 - decision_var:
 
   A string specifying the column name used to identify the dominant
-  contract per worker and date (e.g., \`"base_salary_lcu"\`).
+  contract per personnel and date (e.g., \`"base_salary_lcu"\`).
 
 - decision_fn:
 
   A function defining the decision rule for selecting the dominant
-  contract within each worker-date group (default: \`max\`). Typically
-  \`max\`, \`min\`, or a custom summary function.
+  contract within each personnel-date group (default: \`max\`).
+  Typically \`max\`, \`min\`, or a custom summary function.
 
 ## Value
 
 A \`data.table\` with the following columns:
 
-- worker_id:
+- personnel_id:
 
-  Unique worker identifier.
+  Unique personnel identifier.
 
 - start_date:
 
@@ -68,14 +68,14 @@ A \`data.table\` with the following columns:
 
 The function:
 
-1.  Sorts contracts by \`worker_id\`, \`ref_date\`, and the decision
+1.  Sorts contracts by \`personnel_id\`, \`ref_date\`, and the decision
     variable.
 
-2.  Selects the dominant contract per worker-date combination using
+2.  Selects the dominant contract per personnel-date combination using
     \`decision_fn\`.
 
 3.  For each attribute in \`vars\`, compares its value to the previous
-    record (by worker) and detects any changes.
+    record (by personnel) and detects any changes.
 
 4.  Returns all transitions, including the attribute name, previous and
     new values, and the start and end dates for the transition.
@@ -89,7 +89,7 @@ first instance is selected.
 ``` r
 library(data.table)
 dt <- data.table(
-  worker_id = c(1, 1, 1, 2, 2),
+  personnel_id = c(1, 1, 1, 2, 2),
   ref_date = as.Date(c("2020-01-01", "2021-01-01", "2022-01-01",
                        "2020-06-01", "2021-06-01")),
   paygrade = c("A", "A", "B", "C", "D"),
@@ -102,11 +102,11 @@ detect_career_transitions(
   vars = c("paygrade", "seniority"),
   decision_var = "base_salary_lcu"
 )
-#>    worker_id worker_id start_date   ref_date attribute   from     to
-#>        <num>     <num>     <Date>     <Date>    <char> <char> <char>
-#> 1:         1         1       <NA> 2022-01-01  paygrade      A      B
-#> 2:         2         2       <NA> 2021-06-01  paygrade      C      D
-#> 3:         1         1       <NA> 2021-01-01 seniority      1      2
-#> 4:         1         1 2021-01-01 2022-01-01 seniority      2      3
-#> 5:         2         2       <NA> 2021-06-01 seniority      1      2
+#>    personnel_id personnel_id start_date   ref_date attribute   from     to
+#>           <num>        <num>     <Date>     <Date>    <char> <char> <char>
+#> 1:            1            1       <NA> 2022-01-01  paygrade      A      B
+#> 2:            2            2       <NA> 2021-06-01  paygrade      C      D
+#> 3:            1            1       <NA> 2021-01-01 seniority      1      2
+#> 4:            1            1 2021-01-01 2022-01-01 seniority      2      3
+#> 5:            2            2       <NA> 2021-06-01 seniority      1      2
 ```

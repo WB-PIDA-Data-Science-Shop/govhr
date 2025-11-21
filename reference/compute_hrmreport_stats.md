@@ -2,15 +2,15 @@
 
 This function generates a suite of standardized analytical tables for
 HRMIS (Human Resource Management Information System) reports. It
-combines contract-level, worker-level, and organizational data to
+combines contract-level, personnel-level, and establishmental data to
 compute wage bill summaries, employment shares, decompositions, and
-profiles by occupation, pay grade, organization, education, and
+profiles by occupation, pay grade, establishment, education, and
 seniority.
 
 ## Usage
 
 ``` r
-compute_hrmreport_stats(contract_dt, worker_dt, org_dt, macro_indicators)
+compute_hrmreport_stats(contract_dt, personnel_dt, est_dt, macro_indicators)
 ```
 
 ## Arguments
@@ -18,18 +18,19 @@ compute_hrmreport_stats(contract_dt, worker_dt, org_dt, macro_indicators)
 - contract_dt:
 
   A \`data.table\` containing individual employment contracts with
-  variables such as \`worker_id\`, \`ref_date\`, wage variables
+  variables such as \`personnel_id\`, \`ref_date\`, wage variables
   (\`gross_salary_lcu\`, \`net_salary_lcu\`, \`base_salary_lcu\`), and
   job attributes.
 
-- worker_dt:
+- personnel_dt:
 
-  A \`data.table\` containing worker-level panel data, including
-  \`worker_id\`, \`ref_date\`, demographic and employment information.
+  A \`data.table\` containing personnel-level panel data, including
+  \`personnel_id\`, \`ref_date\`, demographic and employment
+  information.
 
-- org_dt:
+- est_dt:
 
-  A \`data.table\` containing organizational information (e.g.,
+  A \`data.table\` containing establishmental information (e.g.,
   institution identifiers, types, or sectors).
 
 - macro_indicators:
@@ -56,9 +57,9 @@ A named list of \`data.table\` objects containing:
 
   Wage bill decomposition by native occupational titles.
 
-- wagebill_orgdecomp:
+- wagebill_estdecomp:
 
-  Wage bill decomposition by organization.
+  Wage bill decomposition by establishment.
 
 - wagebill_allowshare_paygrade:
 
@@ -68,37 +69,37 @@ A named list of \`data.table\` objects containing:
 
   Allowance rate by seniority.
 
-- workerevent:
+- personnelevent:
 
-  Worker-level hiring, firing, and retirement events over time.
+  Personnel-level hiring, firing, and retirement events over time.
 
 - employment_decomp:
 
   Employment decomposition by occupation and ISCO group.
 
-- org_decomp:
+- est_decomp:
 
-  Employment decomposition by organization.
+  Employment decomposition by establishment.
 
 - education_profile:
 
-  Distribution of public sector workers by education, gender, and
+  Distribution of public sector personnels by education, gender, and
   occupation.
 
 - mobilityprofile:
 
-  Distribution of public sector workers by pay grade, seniority, gender,
-  and occupation.
+  Distribution of public sector personnels by pay grade, seniority,
+  gender, and occupation.
 
 ## Details
 
-The function integrates contract, worker, and organizational datasets to
-compute a standardized HRMIS statistical report. It relies on supporting
-helper functions such as:
+The function integrates contract, personnel, and establishmental
+datasets to compute a standardized HRMIS statistical report. It relies
+on supporting helper functions such as:
 [`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.md),
 [`compute_fastshare()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastshare.md),
 [`compute_fastsummary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastsummary.md),
-[`detect_worker_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_worker_event.md),
+[`detect_personnel_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_personnel_event.md),
 and
 [`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md).
 
@@ -110,8 +111,8 @@ reports, or further analytical aggregation.
 ``` r
 if (FALSE) { # \dontrun{
 hrm_stats <- compute_hrmreport_stats(contract_dt = contract_data,
-                                     worker_dt = worker_data,
-                                     org_dt = org_data)
+                                     personnel_dt = personnel_data,
+                                     est_dt = est_data)
 names(hrm_stats)
 } # }
 ```

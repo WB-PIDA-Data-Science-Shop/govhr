@@ -92,7 +92,7 @@ A tibble with 11652 rows and 14 variables:
 
 - salaried_pop:
 
-  The population of salaried workers i.e. \`salaried_rate\` \*
+  The population of salaried personnels i.e. \`salaried_rate\` \*
   \`emp_pop\`.
 
 ## Source

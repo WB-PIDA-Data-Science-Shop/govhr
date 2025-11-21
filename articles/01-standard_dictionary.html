@@ -75,14 +75,14 @@
 </h2>
 <p>This article describes a standard dictionary for human resource
 management information system (HRMIS) data, organized into three main
-modules: Organization, Worker, and Contract. These modules are designed
-to organize and standardize information about public sector personnel
-across different countries and administrative levels.</p>
+modules: Establishment, Personnel, and Contract. These modules are
+designed to organize and standardize information about public sector
+personnel across different countries and administrative levels.</p>
 </div>
 <div class="section level2">
-<h2 id="module-1-organization">Module 1: Organization<a class="anchor" aria-label="anchor" href="#module-1-organization"></a>
+<h2 id="module-1-establishment">Module 1: Establishment<a class="anchor" aria-label="anchor" href="#module-1-establishment"></a>
 </h2>
-<p>The Organization module captures information about public sector
+<p>The Establishment module captures information about public sector
 institutions, including ministries, departments, and agencies.</p>
 <div class="section level3">
 <h3 id="fields">Fields<a class="anchor" aria-label="anchor" href="#fields"></a>
@@ -100,39 +100,39 @@ institutions, including ministries, departments, and agencies.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Organization ID</td>
-<td><code>org_id</code></td>
-<td>Unique identifier for the organization</td>
+<td>Establishment ID</td>
+<td><code>est_id</code></td>
+<td>Unique identifier for the establishment</td>
 </tr>
 <tr class="even">
-<td>Organization Name (Native)</td>
-<td><code>org_name_native</code></td>
-<td>Official organization name in local language</td>
+<td>Establishment Name (Native)</td>
+<td><code>est_name_native</code></td>
+<td>Official establishment name in local language</td>
 </tr>
 <tr class="odd">
-<td>Organization Name (English)</td>
-<td><code>org_name_en</code></td>
-<td>Organization name translated to English</td>
+<td>Establishment Name (English)</td>
+<td><code>est_name_en</code></td>
+<td>Establishment name translated to English</td>
 </tr>
 <tr class="even">
 <td>Reference Date</td>
 <td><code>ref_date</code></td>
-<td>Latest date when the organization had that name</td>
+<td>Latest date when the establishment had that name</td>
 </tr>
 <tr class="odd">
-<td>Organization Type</td>
-<td><code>org_type</code></td>
-<td>Type of organization (Ministry/Department/Agency)</td>
+<td>Establishment Type</td>
+<td><code>est_type</code></td>
+<td>Type of establishment (Ministry/Department/Agency)</td>
 </tr>
 <tr class="even">
-<td>Parent Organization</td>
-<td><code>org_parent</code></td>
-<td>Identifier for parent organization in hierarchy</td>
+<td>Parent Establishment</td>
+<td><code>est_parent</code></td>
+<td>Identifier for parent establishment in hierarchy</td>
 </tr>
 <tr class="odd">
-<td>Child Organization</td>
-<td><code>org_child</code></td>
-<td>Identifier for child organizations in hierarchy</td>
+<td>Child Establishment</td>
+<td><code>est_child</code></td>
+<td>Identifier for child establishments in hierarchy</td>
 </tr>
 <tr class="even">
 <td>Country Code</td>
@@ -162,24 +162,24 @@ institutions, including ministries, departments, and agencies.</p>
 </h3>
 <ul>
 <li>
-<strong>Organization Type</strong>: Indicates the hierarchical level
-of the institution within the government structure. Ideally, this would
-support parent-child relationships, though such data may be rare in
-practice.</li>
+<strong>Establishment Type</strong>: Indicates the hierarchical
+level of the institution within the government structure. Ideally, this
+would support parent-child relationships, though such data may be rare
+in practice.</li>
 <li>
 <strong>Administration Level</strong>: Refers to the
 geographic/administrative level of government (e.g., national,
 state/provincial, local).</li>
 <li>
 <strong>Reference Date</strong>: Critical for tracking
-organizational changes, mergers, or renaming over time.</li>
+establishmental changes, mergers, or renaming over time.</li>
 </ul>
 </div>
 </div>
 <div class="section level2">
-<h2 id="module-2-worker">Module 2: Worker<a class="anchor" aria-label="anchor" href="#module-2-worker"></a>
+<h2 id="module-2-personnel">Module 2: Personnel<a class="anchor" aria-label="anchor" href="#module-2-personnel"></a>
 </h2>
-<p>The Worker module contains demographic and employment information
+<p>The Personnel module contains demographic and employment information
 about individual public sector employees.</p>
 <div class="section level3">
 <h3 id="fields-1">Fields<a class="anchor" aria-label="anchor" href="#fields-1"></a>
@@ -197,34 +197,34 @@ about individual public sector employees.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Worker ID</td>
-<td><code>worker_id</code></td>
-<td>Unique identifier for the worker</td>
+<td>Personnel ID</td>
+<td><code>personnel_id</code></td>
+<td>Unique identifier for the personnel</td>
 </tr>
 <tr class="even">
-<td>Organization ID</td>
-<td><code>org_id</code></td>
-<td>Foreign key linking to Organization module</td>
+<td>Establishment ID</td>
+<td><code>est_id</code></td>
+<td>Foreign key linking to Establishment module</td>
 </tr>
 <tr class="odd">
-<td>Organization Name</td>
-<td><code>org_name_native</code></td>
-<td>Foreign key linking to the Organization module</td>
+<td>Establishment Name</td>
+<td><code>est_name_native</code></td>
+<td>Foreign key linking to the Establishment module</td>
 </tr>
 <tr class="even">
 <td>Reference Date</td>
 <td><code>ref_date</code></td>
-<td>Timestamp for the worker record</td>
+<td>Timestamp for the personnel record</td>
 </tr>
 <tr class="odd">
 <td>Date of Birth</td>
 <td><code>birth_date</code></td>
-<td>Worker’s date of birth</td>
+<td>Personnel’s date of birth</td>
 </tr>
 <tr class="even">
 <td>Gender</td>
 <td><code>gender</code></td>
-<td>Worker’s gender</td>
+<td>Personnel’s gender</td>
 </tr>
 <tr class="odd">
 <td>Education Attainment (7 categories)</td>
@@ -273,9 +273,9 @@ about individual public sector employees.</p>
 systems are provided to allow for cross-country comparisons and mapping
 to international standards.</li>
 <li>
-<strong>Geographic Information</strong>: While workers are linked to
-organizations, separate geographic fields allow for tracking mobility
-and remote work arrangements.</li>
+<strong>Geographic Information</strong>: While personnels are linked
+to establishments, separate geographic fields allow for tracking
+mobility and remote work arrangements.</li>
 <li>
 <strong>Privacy Considerations</strong>: This module contains
 sensitive personal information and should be handled according to
@@ -309,19 +309,19 @@ compensation, and job characteristics.</p>
 <td>Unique identifier for the contract</td>
 </tr>
 <tr class="even">
-<td>Worker ID</td>
-<td><code>worker_id</code></td>
-<td>Foreign key linking to Worker module</td>
+<td>Personnel ID</td>
+<td><code>personnel_id</code></td>
+<td>Foreign key linking to Personnel module</td>
 </tr>
 <tr class="odd">
-<td>Organization ID</td>
-<td><code>org_id</code></td>
-<td>Foreign key linking to Organization module</td>
+<td>Establishment ID</td>
+<td><code>est_id</code></td>
+<td>Foreign key linking to Establishment module</td>
 </tr>
 <tr class="even">
-<td>Organization Name</td>
-<td><code>org_name_native</code></td>
-<td>Foreign key linking to Organization module</td>
+<td>Establishment Name</td>
+<td><code>est_name_native</code></td>
+<td>Foreign key linking to Establishment module</td>
 </tr>
 <tr class="odd">
 <td>Reference Date</td>
@@ -470,13 +470,13 @@ employment stability and temporary arrangements.</li>
 <h2 id="relationship-between-modules">Relationship between modules<a class="anchor" aria-label="anchor" href="#relationship-between-modules"></a>
 </h2>
 <p>The three modules are related as follows:</p>
-<pre><code>Organization (1) ←→ (N) Worker
-Organization (1) ←→ (N) Contract
-Worker (1) ←→ (N) Contract</code></pre>
+<pre><code>Establishment (1) ←→ (N) Personnel
+Establishment (1) ←→ (N) Contract
+Personnel (1) ←→ (N) Contract</code></pre>
 <ul>
-<li>One organization can have many workers</li>
-<li>One organization can have many contracts</li>
-<li>One worker can have multiple contracts (over time or
+<li>One establishment can have many personnels</li>
+<li>One establishment can have many contracts</li>
+<li>One personnel can have multiple contracts (over time or
 concurrent)</li>
 </ul>
 </div>

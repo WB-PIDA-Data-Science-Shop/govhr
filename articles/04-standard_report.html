@@ -110,8 +110,8 @@ function.</p>
 <span></span>
 <span><span class="va">hrm_report_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_hrmreport_stats.html">compute_hrmreport_stats</a></span><span class="op">(</span></span>
 <span>  contract_dt <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_contract.html">bra_hrmis_contract</a></span>,</span>
-<span>  worker_dt <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_worker.html">bra_hrmis_worker</a></span>,</span>
-<span>  org_dt <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_org.html">bra_hrmis_org</a></span>,</span>
+<span>  personnel_dt <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
+<span>  est_dt <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_est.html">bra_hrmis_est</a></span>,</span>
 <span>  macro_indicators <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/macro_indicators.html">macro_indicators</a></span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -235,8 +235,8 @@ and/or automatic?</li>
 <li>Are there performance bonus schemes and if so what occupation groups
 and percentage of the staff receive them; and how large is the bonus
 that staff are expected to receive?</li>
-<li>Is there targeted, significant additional pay for essential workers
-to serve in hard-to-staff locations such as rural areas?</li>
+<li>Is there targeted, significant additional pay for essential
+personnels to serve in hard-to-staff locations such as rural areas?</li>
 </ol>
 <div class="section level4">
 <h4 id="allowances-as-a-share-of-gross-pay">Allowances as a share of gross pay<a class="anchor" aria-label="anchor" href="#allowances-as-a-share-of-gross-pay"></a>
@@ -262,22 +262,22 @@ to serve in hard-to-staff locations such as rural areas?</li>
 <!-- ```{r} -->
 <!-- #| fig.alt: > -->
 <!-- #|   Plot of staff receiving a performance bonus -->
-<!-- performance_bonus_worker <- govhr::bra_hrmis_contract |> -->
+<!-- performance_bonus_personnel <- govhr::bra_hrmis_contract |> -->
 <!--   filter( -->
 <!--     !is.na(allowance_lcu) & -->
 <!--       lubridate::year(ref_date) <= 2017 -->
 <!--   ) |> -->
 <!--   group_by(year) |> -->
 <!--   summarise( -->
-<!--     total_performance = n_distinct(worker_id) -->
+<!--     total_performance = n_distinct(personnel_id) -->
 <!--   ) -->
 <!-- govhr::bra_hrmis_contract |> -->
 <!--   group_by(year) |> -->
 <!--   summarise( -->
-<!--     total = n_distinct(worker_id) -->
+<!--     total = n_distinct(personnel_id) -->
 <!--   ) |> -->
 <!--   left_join( -->
-<!--     performance_bonus_worker, -->
+<!--     performance_bonus_personnel, -->
 <!--     by = "year" -->
 <!--   ) |> -->
 <!--   mutate( -->

@@ -41,10 +41,10 @@ library(govhr)
   : Brazilian Public Employee Payroll Data
 - [`bra_hrmis_contract`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_contract.md)
   : Contract Dataset
-- [`bra_hrmis_org`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_org.md)
-  : Organization Dataset
-- [`bra_hrmis_worker`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_worker.md)
-  : Worker Dataset
+- [`bra_hrmis_est`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_est.md)
+  : Establishment Dataset
+- [`bra_hrmis_personnel`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_personnel.md)
+  : Personnel Dataset
 - [`calculate_date_intervals()`](https://wb-pida-data-science-shop.github.io/govhr/reference/calculate_date_intervals.md)
   : Calculate time intervals between reference dates
 - [`complete_columns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/complete_columns.md)
@@ -67,8 +67,6 @@ library(govhr)
   : Compute Shares of Summary Indicators Relative to Macro Indicators
 - [`compute_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_summary.md)
   : Compute grouped summary statistics for multiple variables
-- [`contract_harmonized`](https://wb-pida-data-science-shop.github.io/govhr/reference/contract_harmonized.md)
-  : Harmonized Contract-Level Dataset (Zambia)
 - [`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.md)
   : Convert nominal wages to real PPP-adjusted wages (2021 base year)
 - [`convert_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_data.md)
@@ -90,12 +88,12 @@ library(govhr)
   : Detect Career Transitions Based on Contract Attributes
 - [`detect_inconsistent_cols()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_inconsistent_cols.md)
   : Detect Inconsistent Columns in a Data Frame
+- [`detect_personnel_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_personnel_event.md)
+  : Detect Personnel Events
 - [`detect_reallocation()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_reallocation.md)
-  : Detect Worker Reallocation Events
+  : Detect Personnel Reallocation Events
 - [`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md)
-  : Detect Worker Retirement Events
-- [`detect_worker_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_worker_event.md)
-  : Detect Worker Events
+  : Detect Personnel Retirement Events
 - [`enterprise_surveys`](https://wb-pida-data-science-shop.github.io/govhr/reference/enterprise_surveys.md)
   : World Bank Enterprise Surveys
 - [`find_duplicate_ids()`](https://wb-pida-data-science-shop.github.io/govhr/reference/find_duplicate_ids.md)
@@ -125,10 +123,10 @@ library(govhr)
   : Pivot Data360 dataset to wide format
 - [`qualitycheck_contractmod()`](https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_contractmod.md)
   : Quality Checks for Harmonized HRMIS Contract Data
-- [`qualitycheck_orgmod()`](https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_orgmod.md)
-  : Quality Check for Harmonized Organization Module
-- [`qualitycheck_worker()`](https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_worker.md)
-  : Quality checks for Worker Module data
+- [`qualitycheck_estmod()`](https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_estmod.md)
+  : Quality Check for Harmonized Establishment Module
+- [`qualitycheck_personnel()`](https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_personnel.md)
+  : Quality checks for Personnel Module data
 - [`social_sustainability`](https://wb-pida-data-science-shop.github.io/govhr/reference/social_sustainability.md)
   : Social Sustainability Global Database
 - [`wwbi`](https://wb-pida-data-science-shop.github.io/govhr/reference/wwbi.md)

@@ -30,47 +30,47 @@ A data frame with 993 rows and 11 variables:
 
 - `share_no_edu`:
 
-  double Share of public sector workers with no education.
+  double Share of public sector personnels with no education.
 
 - `share_primary_edu`:
 
-  double Share of public sector workers with primary education
+  double Share of public sector personnels with primary education
   completed.
 
 - `share_secondary_edu`:
 
-  double Share of public sector workers with secondary education
+  double Share of public sector personnels with secondary education
   completed.
 
 - `share_tertiary_edu`:
 
-  double Share of public sector workers with tertiary education
+  double Share of public sector personnels with tertiary education
   completed.
 
 - `ps_wage_premium_edu_sector`:
 
   double Public sector wage premium in the education sector, compared to
-  formal sector workers in the private sector.
+  formal sector personnels in the private sector.
 
 - `ps_wage_premium_hea_sector`:
 
   double Public sector wage premium in the health sector, compared to
-  formal sector workers in the private sector.
+  formal sector personnels in the private sector.
 
 - `ps_wage_premium_female`:
 
-  double Public sector wage premium for female workers, compared to
-  formal sector workers in the private sector.
+  double Public sector wage premium for female personnels, compared to
+  formal sector personnels in the private sector.
 
 - `ps_wage_premium_male`:
 
-  double Public sector wage premium for male workers, compared to formal
-  sector workers in the private sector.
+  double Public sector wage premium for male personnels, compared to
+  formal sector personnels in the private sector.
 
 - `ps_wage_premium_pooled`:
 
-  double Public sector wage premium for all public sector workers,
-  compared to formal sector workers in the private sector.
+  double Public sector wage premium for all public sector personnels,
+  compared to formal sector personnels in the private sector.
 
 ## Source
 

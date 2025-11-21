@@ -41,8 +41,8 @@ library(govhr)
 
 hrm_report_stats <- compute_hrmreport_stats(
   contract_dt = govhr::bra_hrmis_contract,
-  worker_dt = govhr::bra_hrmis_worker,
-  org_dt = govhr::bra_hrmis_org,
+  personnel_dt = govhr::bra_hrmis_personnel,
+  est_dt = govhr::bra_hrmis_est,
   macro_indicators = govhr::macro_indicators
 )
 ```
@@ -170,8 +170,8 @@ Guidance questions for the assessment:
 3.  Are there performance bonus schemes and if so what occupation groups
     and percentage of the staff receive them; and how large is the bonus
     that staff are expected to receive?
-4.  Is there targeted, significant additional pay for essential workers
-    to serve in hard-to-staff locations such as rural areas?
+4.  Is there targeted, significant additional pay for essential
+    personnels to serve in hard-to-staff locations such as rural areas?
 
 #### Allowances as a share of gross pay
 

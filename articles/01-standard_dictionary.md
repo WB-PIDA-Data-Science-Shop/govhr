@@ -4,57 +4,57 @@
 
 This article describes a standard dictionary for human resource
 management information system (HRMIS) data, organized into three main
-modules: Organization, Worker, and Contract. These modules are designed
-to organize and standardize information about public sector personnel
-across different countries and administrative levels.
+modules: Establishment, Personnel, and Contract. These modules are
+designed to organize and standardize information about public sector
+personnel across different countries and administrative levels.
 
-## Module 1: Organization
+## Module 1: Establishment
 
-The Organization module captures information about public sector
+The Establishment module captures information about public sector
 institutions, including ministries, departments, and agencies.
 
 ### Fields
 
-| Field Name                  | Variable Name     | Description                                       |
-|-----------------------------|-------------------|---------------------------------------------------|
-| Organization ID             | `org_id`          | Unique identifier for the organization            |
-| Organization Name (Native)  | `org_name_native` | Official organization name in local language      |
-| Organization Name (English) | `org_name_en`     | Organization name translated to English           |
-| Reference Date              | `ref_date`        | Latest date when the organization had that name   |
-| Organization Type           | `org_type`        | Type of organization (Ministry/Department/Agency) |
-| Parent Organization         | `org_parent`      | Identifier for parent organization in hierarchy   |
-| Child Organization          | `org_child`       | Identifier for child organizations in hierarchy   |
-| Country Code                | `country_code`    | Official World Bank ISO-3 country code            |
-| Country Name                | `country_name`    | Official World Bank country name                  |
-| Administration 1 Name       | `adm1_name`       | First-level administrative division name          |
-| Administration 1 Code       | `adm1_code`       | First-level administrative division code          |
+| Field Name                   | Variable Name     | Description                                        |
+|------------------------------|-------------------|----------------------------------------------------|
+| Establishment ID             | `est_id`          | Unique identifier for the establishment            |
+| Establishment Name (Native)  | `est_name_native` | Official establishment name in local language      |
+| Establishment Name (English) | `est_name_en`     | Establishment name translated to English           |
+| Reference Date               | `ref_date`        | Latest date when the establishment had that name   |
+| Establishment Type           | `est_type`        | Type of establishment (Ministry/Department/Agency) |
+| Parent Establishment         | `est_parent`      | Identifier for parent establishment in hierarchy   |
+| Child Establishment          | `est_child`       | Identifier for child establishments in hierarchy   |
+| Country Code                 | `country_code`    | Official World Bank ISO-3 country code             |
+| Country Name                 | `country_name`    | Official World Bank country name                   |
+| Administration 1 Name        | `adm1_name`       | First-level administrative division name           |
+| Administration 1 Code        | `adm1_code`       | First-level administrative division code           |
 
 ### Notes
 
-- **Organization Type**: Indicates the hierarchical level of the
+- **Establishment Type**: Indicates the hierarchical level of the
   institution within the government structure. Ideally, this would
   support parent-child relationships, though such data may be rare in
   practice.
 - **Administration Level**: Refers to the geographic/administrative
   level of government (e.g., national, state/provincial, local).
-- **Reference Date**: Critical for tracking organizational changes,
+- **Reference Date**: Critical for tracking establishmental changes,
   mergers, or renaming over time.
 
-## Module 2: Worker
+## Module 2: Personnel
 
-The Worker module contains demographic and employment information about
-individual public sector employees.
+The Personnel module contains demographic and employment information
+about individual public sector employees.
 
 ### Fields
 
 | Field Name                          | Variable Name     | Description                                      |
 |-------------------------------------|-------------------|--------------------------------------------------|
-| Worker ID                           | `worker_id`       | Unique identifier for the worker                 |
-| Organization ID                     | `org_id`          | Foreign key linking to Organization module       |
-| Organization Name                   | `org_name_native` | Foreign key linking to the Organization module   |
-| Reference Date                      | `ref_date`        | Timestamp for the worker record                  |
-| Date of Birth                       | `birth_date`      | Worker’s date of birth                           |
-| Gender                              | `gender`          | Worker’s gender                                  |
+| Personnel ID                        | `personnel_id`    | Unique identifier for the personnel              |
+| Establishment ID                    | `est_id`          | Foreign key linking to Establishment module      |
+| Establishment Name                  | `est_name_native` | Foreign key linking to the Establishment module  |
+| Reference Date                      | `ref_date`        | Timestamp for the personnel record               |
+| Date of Birth                       | `birth_date`      | Personnel’s date of birth                        |
+| Gender                              | `gender`          | Personnel’s gender                               |
 | Education Attainment (7 categories) | `educat7`         | Education level using 10-category classification |
 | Tribe                               | `tribe`           | Tribal affiliation                               |
 | Race                                | `race`            | Racial/ethnic classification                     |
@@ -68,9 +68,9 @@ individual public sector employees.
 - **Education Categories**: Multiple classification systems are provided
   to allow for cross-country comparisons and mapping to international
   standards.
-- **Geographic Information**: While workers are linked to organizations,
-  separate geographic fields allow for tracking mobility and remote work
-  arrangements.
+- **Geographic Information**: While personnels are linked to
+  establishments, separate geographic fields allow for tracking mobility
+  and remote work arrangements.
 - **Privacy Considerations**: This module contains sensitive personal
   information and should be handled according to applicable data
   protection regulations.
@@ -85,9 +85,9 @@ compensation, and job characteristics.
 | Field Name             | Variable Name                                                     | Description                                                                 |
 |------------------------|-------------------------------------------------------------------|-----------------------------------------------------------------------------|
 | Contract ID            | `contract_id`                                                     | Unique identifier for the contract                                          |
-| Worker ID              | `worker_id`                                                       | Foreign key linking to Worker module                                        |
-| Organization ID        | `org_id`                                                          | Foreign key linking to Organization module                                  |
-| Organization Name      | `org_name_native`                                                 | Foreign key linking to Organization module                                  |
+| Personnel ID           | `personnel_id`                                                    | Foreign key linking to Personnel module                                     |
+| Establishment ID       | `est_id`                                                          | Foreign key linking to Establishment module                                 |
+| Establishment Name     | `est_name_native`                                                 | Foreign key linking to Establishment module                                 |
 | Reference Date         | `ref_date`                                                        | Timestamp for the contract record                                           |
 | Base Salary (LCU)      | `base_salary_lcu`                                                 | Base compensation in local currency units                                   |
 | Base Salary (PPP)      | `base_salary_ppp`                                                 | Base compensation in constant 2021 international dollars                    |
@@ -127,13 +127,13 @@ compensation, and job characteristics.
 
 The three modules are related as follows:
 
-    Organization (1) ←→ (N) Worker
-    Organization (1) ←→ (N) Contract
-    Worker (1) ←→ (N) Contract
+    Establishment (1) ←→ (N) Personnel
+    Establishment (1) ←→ (N) Contract
+    Personnel (1) ←→ (N) Contract
 
-- One organization can have many workers
-- One organization can have many contracts
-- One worker can have multiple contracts (over time or concurrent)
+- One establishment can have many personnels
+- One establishment can have many contracts
+- One personnel can have multiple contracts (over time or concurrent)
 
 ## Data Quality Considerations
 

@@ -19,7 +19,7 @@ complete_dates(data, id_col, start_date, end_date, freq = "year")
 
 - id_col:
 
-  Character. Name of the identifier column (e.g., \`"worker_id"\`).
+  Character. Name of the identifier column (e.g., \`"personnel_id"\`).
 
 - start_date:
 
@@ -54,8 +54,8 @@ using a left join (`all.x = TRUE`).
 ``` r
 if (FALSE) { # \dontrun{
 complete_dt <- complete_dates(
-  data = worker_df,
-  id_col = "worker_id",
+  data = personnel_df,
+  id_col = "personnel_id",
   start_date = "2007-09-01",
   end_date = "2018-01-01",
   freq = "year"

@@ -1,7 +1,7 @@
 # Contract Dataset
 
 This dataset contains detailed information about contracts, including
-salaries, allowances, occupation, work hours, and organizational
+salaries, allowances, occupation, work hours, and establishmental
 context. Each row represents a unique contract record.
 
 ## Usage
@@ -18,17 +18,25 @@ A data frame with N rows and 24 variables:
 
   Unique identifier for the contract
 
-- worker_id:
+- personnel_id:
 
-  Foreign key linking to Worker module
+  Foreign key linking to Personnel module
 
-- org_id:
+- est_id:
 
-  Foreign key linking to Organization module
+  Foreign key linking to Establishment module
 
 - ref_date:
 
   Timestamp for the contract record
+
+- contract_type_code:
+
+  Type of contract code
+
+- contract_type_native:
+
+  Type of contract in local language
 
 - base_salary_lcu:
 
@@ -97,7 +105,3 @@ A data frame with N rows and 24 variables:
 - seniority:
 
   Years of service or seniority level
-
-- year:
-
-  Year of the record

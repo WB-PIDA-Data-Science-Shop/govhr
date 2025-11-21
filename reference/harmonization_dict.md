@@ -2,10 +2,10 @@
 
 A structured metadata dictionary describing variables harmonized across
 the Human Resource Management Information System (HRMIS) modules:
-Organization, Worker, and Contract. The dictionary follows SDMX-style
-documentation standards and specifies variable names, identifiers, data
-types (in R), relationships, and other metadata fields used in HRMIS
-data harmonization.
+Establishment, Personnel, and Contract. The dictionary follows
+SDMX-style documentation standards and specifies variable names,
+identifiers, data types (in R), relationships, and other metadata fields
+used in HRMIS data harmonization.
 
 ## Usage
 
@@ -49,8 +49,8 @@ A tibble with 48 rows and 9 variables:
 
 - Module:
 
-  The HRMIS module the variable belongs to: `"Organization"`,
-  `"Worker"`, or `"Contract"`.
+  The HRMIS module the variable belongs to: `"Establishment"`,
+  `"Personnel"`, or `"Contract"`.
 
 - Example Value:
 
@@ -95,27 +95,9 @@ glimpse(harmonization_dict)
 
 # Filter dictionary by module
 harmonization_dict |>
-filter(Module == "Worker")
-#> # A tibble: 16 × 9
-#>    `Concept Name`    `Concept ID` Description `Data Type` Representation (Code…¹
-#>    <chr>             <chr>        <chr>       <chr>       <chr>                 
-#>  1 Worker ID         worker_id    Unique ide… character   Alphanumeric          
-#>  2 Organization ID   org_id       Identifier… character   Alphanumeric          
-#>  3 Reference Date    ref_date     Date of th… Date        YYYY-MM-DD            
-#>  4 Date of Birth     birth_day    Worker’s d… Date        YYYY-MM-DD            
-#>  5 Gender            gender       Sex of the… character   Codelist: SEX (M, F, …
-#>  6 Educational Atta… educat4      Educationa… character   Codelist: EDUC4       
-#>  7 Educational Atta… educat5      Educationa… character   Codelist: EDUC5       
-#>  8 Educational Atta… educat7      Educationa… character   Codelist: EDUC7       
-#>  9 Educational Atta… educat10     Educationa… character   Codelist: EDUC10      
-#> 10 Tribe             tribe        Worker’s e… character   Text                  
-#> 11 Race              race         Worker’s r… character   Text                  
-#> 12 Employment Status status       Employment… character   Codelist: STATUS      
-#> 13 Country Code      country_code ISO 3-lett… character   ISO3                  
-#> 14 Country Name      country_name Official c… character   Text                  
-#> 15 Administration 1… adm1_name    Subnationa… character   Text                  
-#> 16 Administration 1… adm1_code    Administra… character   Alphanumeric          
-#> # ℹ abbreviated name: ¹​`Representation (Code list / Format)`
-#> # ℹ 4 more variables: `Primary Key` <chr>, Relationship <chr>, Module <chr>,
-#> #   `Example Value` <chr>
+filter(Module == "Personnel")
+#> # A tibble: 0 × 9
+#> # ℹ 9 variables: Concept Name <chr>, Concept ID <chr>, Description <chr>,
+#> #   Data Type <chr>, Representation (Code list / Format) <chr>,
+#> #   Primary Key <chr>, Relationship <chr>, Module <chr>, Example Value <chr>
 ```

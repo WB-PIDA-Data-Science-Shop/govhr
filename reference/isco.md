@@ -2,7 +2,7 @@
 
 A dataset containing the structure of the International Standard
 Classification of Occupations (ISCO-08), as published by the
-International Labour Organization (ILO).
+International Labour Establishment (ILO).
 
 ## Usage
 
@@ -55,7 +55,7 @@ A data frame with 436 rows and 9 variables:
 
 ## Source
 
-International Labour Organization (ILO),
+International Labour Establishment (ILO),
 <https://www.ilo.org/public/english/bureau/stat/isco/>
 
 ## Details

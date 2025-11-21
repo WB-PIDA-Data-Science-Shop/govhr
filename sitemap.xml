@@ -12,8 +12,8 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/add_contract_to_event.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_contract.html</loc></url>
-<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_org.html</loc></url>
-<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_worker.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_est.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_personnel.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/calculate_date_intervals.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/complete_columns.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/complete_dates.html</loc></url>
@@ -24,7 +24,6 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_hrmreport_stats.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_share.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_summary.html</loc></url>
-<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/contract_harmonized.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/convert_data.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/count_unique.html</loc></url>
@@ -36,9 +35,9 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/define_fns.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_career_transitions.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_inconsistent_cols.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_personnel_event.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_reallocation.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.html</loc></url>
-<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_worker_event.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/enterprise_surveys.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/find_duplicate_ids.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/find_inconsistent_colnames.html</loc></url>
@@ -55,8 +54,8 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/macro_indicators.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/pivot_data360.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_contractmod.html</loc></url>
-<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_orgmod.html</loc></url>
-<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_worker.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_estmod.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_personnel.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/social_sustainability.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/wwbi.html</loc></url>
 </urlset>

@@ -1,14 +1,14 @@
-# Detect Worker Reallocation Events
+# Detect Personnel Reallocation Events
 
-Identifies reallocation events when a worker's set of organizations
+Identifies reallocation events when a personnel's set of establishments
 changes between consecutive reference dates. Removes hire events and
 only keeps reallocation events after the earliest reference date for
-each worker.
+each personnel.
 
 ## Usage
 
 ``` r
-detect_reallocation(data, worker_hire)
+detect_reallocation(data, personnel_hire)
 ```
 
 ## Arguments
@@ -16,24 +16,25 @@ detect_reallocation(data, worker_hire)
 - data:
 
   A data.frame or tibble containing at least the columns: -
-  \`worker_id\`: Unique worker identifier. - \`ref_date\`: Reference
-  date (Date or convertible to Date). - \`org_id\`: Organization ID.
+  \`personnel_id\`: Unique personnel identifier. - \`ref_date\`:
+  Reference date (Date or convertible to Date). - \`est_id\`:
+  Establishment ID.
 
-- worker_hire:
+- personnel_hire:
 
   A data.frame or tibble containing hire events with columns
-  \`worker_id\` and \`ref_date\`.
+  \`personnel_id\` and \`ref_date\`.
 
 ## Value
 
-A tibble with columns: - \`worker_id\` - \`ref_date\` -
-\`org_id_nested\`: List-column of organization IDs for that worker and
-date. - \`type_event\`: \`"reallocation"\` or \`"no reallocation"\`.
+A tibble with columns: - \`personnel_id\` - \`ref_date\` -
+\`est_id_nested\`: List-column of establishment IDs for that personnel
+and date. - \`type_event\`: \`"reallocation"\` or \`"no reallocation"\`.
 
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
-worker_reallocation_df <- detect_reallocation(contract_rename_org_df, worker_hire_df)
+personnel_reallocation_df <- detect_reallocation(contract_rename_est_df, personnel_hire_df)
 } # }
 ```
