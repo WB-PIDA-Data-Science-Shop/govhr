@@ -8,7 +8,6 @@ output:
     toc_float: true
 ---
 
-
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 # reference:
 # https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf
@@ -30,13 +29,15 @@ theme_set(
 devtools::load_all()
 
 # read-in data ------------------------------------------------------------
-personnel <- read_rds(
-  here("inst", "extdata", "bra_hrmis_personnel.rds")
-)
+personnel <- govhr::bra_hrmis_personnel |> 
+  mutate(
+    year = lubridate::year(ref_date)
+  )
 
-contract <- read_rds(
-  here("spielplatz", "bra_hrmis_contract.rds")
-)
+contract <- govhr::bra_hrmis_contract |> 
+  mutate(
+    year = lubridate::year(ref_date)
+  )
 
 # process data ------------------------------------------------------------
 contract_ppp <- contract |>
@@ -46,9 +47,11 @@ contract_ppp <- contract |>
   )
 
 contract_summary_ppp <- contract_ppp |>
-  compute_grouped_summary(
-    group_vars = c(year, paygrade),
-    cols = c(base_salary_ppp, allowance_ppp)
+  compute_summary(
+    cols = c("base_salary_ppp", "allowance_ppp"),
+    groups = c("year", "paygrade"),
+    fns = "sum",
+    output = "wide"
   )
 
 contract_annual_growth <- contract_ppp |>
@@ -112,6 +115,32 @@ The second part assesses the impact of these employment and compensation practic
 2. Public sector productivity.
 3. Labor allocation between the public and private sectors.
 
+## 3.1. Wage bill planning {.tabset-dropdown}
+
+The wage bill represents a large and less flexible component of government expenditures with significant future liabilities. Globally, and noting the difficulties with cross-country comparisons, the wage bill represents approximately 30 percent of government expenditures,
+with significant variation around this average. This section presents some indicators that can help governments better understand and manage their wage bill.
+
+Guidance questions for the assessment:
+
+1. What are the main stylized facts about the wage bill: its actual size, evolution, and decomposition into employment
+and wages?
+2. Is wage bill management anchored in comprehensive, accurate, and timely data?
+    a. Does the data cover all government employees paid from the budget and from extra-budgetary funds?
+    b. Is the data derived from integrated payroll and human resource systems that are updated every pay cycle?
+    c. Are budget classifications transparent so that all payroll expenditures are accurately recorded?
+3. Is wage bill planning integrated in a broader medium-term fiscal framework? Are forward budget estimates derived
+from models of future wage bill commitments?
+4. How does the institutional regime for salary setting impact wage bill planning? Are there particular challenges
+for subnational wage bill planning due to mismatches in staffing decisions and funding between central and
+subnational governments?
+5. Are staffing increases informed by needs and medium-term strategic planning, or primarily by short-term
+political considerations?
+6. Is there any public debate or public disclosure around wage bill policies?
+
+### 3.1.1. Wage bill as share of GDP, expenditures, and revenues
+
+
+
 ## 3.6. Wage incentives {.tabset-dropdown}
 
 The extent to which wage increases are explicitly linked to performance is important for both employee motivation and public sector productivity. This section provide some key stylized facts that provide evidence of the productivity and fiscal implications of pay incentives. These include: the magnitude of promotion-based and seniority-based annual wage increases, expected wage increases over an employee's career and the coverage and key design features of performance bonuses.
@@ -124,6 +153,10 @@ Guidance questions for the assessment:
 4. Is there targeted, significant additional pay for essential personnels to serve in hard-to-staff locations such as rural areas?
 
 ### 3.6.1. Percentage of staff receiving highest performance ratings
+
+```{r}
+
+```
 
 ### 3.6.2. The size of annual, within-grade pay increases
 
