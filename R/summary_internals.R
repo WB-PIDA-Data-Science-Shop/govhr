@@ -282,7 +282,7 @@ lapply_at <- function(var, funs, ...) {
     FUN.VALUE = character(length(funs)),
     USE.NAMES = FALSE
   )
-  results
+  return(results)
 }
 
 
