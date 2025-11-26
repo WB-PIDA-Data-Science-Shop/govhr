@@ -311,7 +311,7 @@ complete_columns <- function(data, cols) {
 #' - `ppp` has columns: country_code, ppp  (ppp = LCU per 2021 Intl$)
 #'
 #' @param data Data frame with columns (country_code, year, wage).
-#' @param cols Column name to convert to constant PPP in international 2021 dollars.
+#' @param cols A character vector with column name to convert to constant PPP in international 2021 dollars.
 #' @param macro_indicators Macroeconomic indicators, can be lazy loaded.
 #' @return `data_out` augmented with columns converted to international 2021 dollars.
 #' @examples
@@ -327,7 +327,7 @@ complete_columns <- function(data, cols) {
 #'   cpi = c(85, 100), ppp = c(1.5, 3.5)
 #' )
 #'
-#' convert_constant_ppp(hh, wage, macro_indicators)
+#' convert_constant_ppp(hh, "wage", macro_indicators)
 #'
 #' @importFrom dplyr filter select rename left_join mutate
 #' @import glue

@@ -34,13 +34,13 @@ personnel <- govhr::bra_hrmis_personnel |>
     year = lubridate::year(ref_date)
   )
 
-contract <- govhr::bra_hrmis_contract |>
+contract_df <- govhr::bra_hrmis_contract |>
   mutate(
     year = lubridate::year(ref_date)
   )
 
 # process data ------------------------------------------------------------
-contract_ppp <- contract |>
+contract_ppp <- contract_df |>
   convert_constant_ppp(
     ends_with("lcu"),
     macro_indicators |> mutate(year = as.numeric(year))
@@ -144,8 +144,6 @@ political considerations?
 ### 3.1.1. Wage bill as share of GDP, expenditures, and revenues
 
 ```{r}
-
-### 3.1
 wage_vars <- c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")
 
 lcu_vars <- colnames(govhr::macro_indicators)[grepl(
@@ -154,23 +152,24 @@ lcu_vars <- colnames(govhr::macro_indicators)[grepl(
 )]
 
 ### compute ppp variables
-bra_wagebill <- contract |> 
+bra_wagebill <- contract_df |> 
   convert_constant_ppp(
-    cols = wage_vars,
+    cols = c(gross_salary_lcu, net_salary_lcu, base_salary_lcu),
     macro_indicators = govhr::macro_indicators
   )
 
-ppp_vars <- colnames(contract)[grepl("_ppp", colnames(contract_dt))]
+ppp_vars <- colnames(contract_df)[grepl("_ppp", colnames(contract_df))]
 
 wagebill_shares_dt <-
-  compute_fastshare(
-    data = contract,
+  compute_share(
+    data = contract_df,
     cols = wage_vars,
     macro_cols = lcu_vars,
     groups = c("country_code", "year"),
     fns = "sum",
     output = "long"
   )
+
 ```
 
 ## 3.6. Wage incentives {.tabset-dropdown}
@@ -264,7 +263,7 @@ wage_bill_change |>
 
 ```{r}
 # 3.6.3. percentage of staff receiving a performance bonus
-performance_bonus_personnel <- contract |>
+performance_bonus_personnel <- contract_df |>
   filter(
     !is.na(allowance_lcu)
   ) |>
@@ -273,7 +272,7 @@ performance_bonus_personnel <- contract |>
     total_performance = n_distinct(personnel_id)
   )
 
-contract |>
+contract_df |>
   group_by(year) |>
   summarise(
     total = n_distinct(personnel_id)
