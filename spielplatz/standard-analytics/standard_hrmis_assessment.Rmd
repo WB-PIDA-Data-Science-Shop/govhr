@@ -29,12 +29,12 @@ theme_set(
 devtools::load_all()
 
 # read-in data ------------------------------------------------------------
-personnel <- govhr::bra_hrmis_personnel |> 
+personnel <- govhr::bra_hrmis_personnel |>
   mutate(
     year = lubridate::year(ref_date)
   )
 
-contract <- govhr::bra_hrmis_contract |> 
+contract <- govhr::bra_hrmis_contract |>
   mutate(
     year = lubridate::year(ref_date)
   )
@@ -62,7 +62,9 @@ contract_annual_growth <- contract_ppp |>
     .groups = "drop"
   ) |>
   mutate(
-    growth_median_wage_ppp = (median_wage_ppp - lag(median_wage_ppp))/lag(median_wage_ppp) * 100
+    growth_median_wage_ppp = (median_wage_ppp - lag(median_wage_ppp)) /
+      lag(median_wage_ppp) *
+      100
   ) |>
   left_join(
     macro_indicators,
@@ -84,7 +86,9 @@ wage_bill_change <- contract_ppp |>
   arrange(paygrade, year) |>
   group_by(paygrade) |>
   mutate(
-    pct_change = 100 * (median_base_salary_ppp - lag(median_base_salary_ppp))/ lag(median_base_salary_ppp),
+    pct_change = 100 *
+      (median_base_salary_ppp - lag(median_base_salary_ppp)) /
+      lag(median_base_salary_ppp),
     .groups = "drop"
   )
 
@@ -139,7 +143,35 @@ political considerations?
 
 ### 3.1.1. Wage bill as share of GDP, expenditures, and revenues
 
+```{r}
 
+### 3.1
+wage_vars <- c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")
+
+lcu_vars <- colnames(govhr::macro_indicators)[grepl(
+  "_lcu",
+  colnames(govhr::macro_indicators)
+)]
+
+### compute ppp variables
+bra_wagebill <- contract |> 
+  convert_constant_ppp(
+    cols = wage_vars,
+    macro_indicators = govhr::macro_indicators
+  )
+
+ppp_vars <- colnames(contract)[grepl("_ppp", colnames(contract_dt))]
+
+wagebill_shares_dt <-
+  compute_fastshare(
+    data = contract,
+    cols = wage_vars,
+    macro_cols = lcu_vars,
+    groups = c("country_code", "year"),
+    fns = "sum",
+    output = "long"
+  )
+```
 
 ## 3.6. Wage incentives {.tabset-dropdown}
 
@@ -206,7 +238,8 @@ wage_bill_change |>
     linetype = "dashed"
   ) +
   scale_color_brewer(
-    name = "Paygrade", palette = "Paired"
+    name = "Paygrade",
+    palette = "Paired"
   ) +
   scale_x_continuous(
     breaks = scales::pretty_breaks()
@@ -251,7 +284,7 @@ contract |>
   ) |>
   mutate(
     year = as.numeric(year),
-    share_performance = total_performance/total
+    share_performance = total_performance / total
   ) |>
   ggplot_point_line(
     year,
@@ -274,7 +307,7 @@ contract |>
 ```{r}
 contract_summary_ppp |>
   mutate(
-    share_allowance = allowance_ppp_mean/base_salary_ppp_mean
+    share_allowance = allowance_ppp_mean / base_salary_ppp_mean
   ) |>
   filter(
     paygrade %in% seq(1, 4, 1)
@@ -288,7 +321,8 @@ contract_summary_ppp |>
     vars(paygrade)
   ) +
   scale_color_brewer(
-    name = "Paygrade", palette = "Paired"
+    name = "Paygrade",
+    palette = "Paired"
   ) +
   scale_y_continuous(
     labels = scales::percent_format()
@@ -343,8 +377,12 @@ contract_annual_growth |>
   filter(year <= 2017) |>
   transmute(
     year,
-    `Median Wage (PPP)` = median_wage_ppp/median_wage_ppp[year == min(year)] * 100,
-    `Total Headcount` = total_headcount/total_headcount[year == min(year)] * 100
+    `Median Wage (PPP)` = median_wage_ppp /
+      median_wage_ppp[year == min(year)] *
+      100,
+    `Total Headcount` = total_headcount /
+      total_headcount[year == min(year)] *
+      100
   ) |>
   pivot_longer(
     -c(year),
@@ -425,7 +463,7 @@ wwbi |>
       name == "hea_sector" ~ "Health",
       name == "female" ~ "Female personnel",
       name == "male" ~ "Male personnel",
-      name == "pooled" ~  "Overall"
+      name == "pooled" ~ "Overall"
     )
   ) |>
   filter(
@@ -447,8 +485,10 @@ N/A
 contract_annual_growth |>
   transmute(
     year,
-    `Total Headcount` = total_headcount/total_headcount[year == 2007] * 100,
-    `Total labor force` = labor_force_total/labor_force_total[year == 2007] * 100
+    `Total Headcount` = total_headcount / total_headcount[year == 2007] * 100,
+    `Total labor force` = labor_force_total /
+      labor_force_total[year == 2007] *
+      100
   ) |>
   pivot_longer(
     -c(year),
@@ -473,7 +513,15 @@ personnel |>
   ) |>
   group_by(country_code, year) |>
   summarise(
-    ps_share_tertiary = mean(educat7 %in% c("Higher than secondary but not university", "University incomplete or complete"), na.rm = TRUE) * 100,
+    ps_share_tertiary = mean(
+      educat7 %in%
+        c(
+          "Higher than secondary but not university",
+          "University incomplete or complete"
+        ),
+      na.rm = TRUE
+    ) *
+      100,
     .groups = "drop"
   ) |>
   left_join(

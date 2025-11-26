@@ -360,7 +360,7 @@ convert_constant_ppp <- function(data, cols, macro_indicators) {
     ) |>
     mutate(
       across(
-        {{cols}},
+        all_of({{cols}}),
         ~ (cpi / base_cpi) * (.x / ppp_2021),
         .names = "{sub('_lcu$', '_ppp', .col)}"
       )
