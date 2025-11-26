@@ -1,122 +1,117 @@
 
-#' Fast Summary Statistics by Group
+#' Compute Fast Summary Statistics by Group
 #'
-#' Computes summary statistics for specified numeric columns in a data frame or data.table,
-#' optionally grouped by one or more categorical variables. This function supports both
-#' predefined summary functions (e.g., mean, sum) and user-specified formulas. It returns
-#' results in either long or wide format, and can optionally convert the output to a tibble.
+#' `compute_fastsummary()` computes summary statistics for selected columns
+#' of a `data.table`, optionally grouped by one or more variables. It allows
+#' the user to specify a set of functions to apply, either from a predefined
+#' set or custom formulas/functions.
 #'
-#' @param data A data.table or data.frame containing the data to summarize.
-#' @param cols A character vector specifying the names of numeric columns to summarize.
-#' @param fns Optional. A character vector or list of formulas specifying the summary functions
-#' to apply. If NULL, default functions defined by define_fns() are used.
-#' - If a character vector, function names must match those in the defaults (e.g., "mean", "sum").
-#' - If a list, can contain formulas or a mix of character names and formulas.
-#' @param groups A character vector specifying one or more grouping variables.
-#' @param output A character string specifying the output format. Must be one of:
-#' - "long": produces a tall table with an indicator column and a value column.
-#' - "wide": produces a wide table with one column per statistic.
-#' @param tbl Logical. If TRUE, converts the resulting data.table into a tibble.
+#' @param data A `data.table`. The dataset on which to compute the summaries.
+#'   Must be of class `data.table`.
+#' @param cols A character vector. Names of the columns to summarize.
+#' @param fns Optional. Either:
+#'   \itemize{
+#'     \item `NULL` (default): use all default functions defined by
+#'       `define_fns()`.
+#'     \item A character vector of function names matching `define_fns()`.
+#'     \item A list of functions or formulas, possibly mixed with character
+#'       names referring to `define_fns()`.
+#'   }
+#' @param groups A character vector. Column(s) by which to group the data
+#'   before computing the summary statistics.
+#' @param output Character. Either `"long"` (default) or `"wide"` to specify
+#'   the output format. `"long"` returns one row per group per summary
+#'   statistic, `"wide"` returns one row per group with multiple columns for
+#'   each summary statistic.
+#' @param tbl Logical. If `TRUE`, converts the result to a tibble (`tibble::as_tibble()`).
+#'
+#' @return A `data.table` (or tibble if `tbl = TRUE`) containing the summary
+#'   statistics for the selected columns. The output will be either long or
+#'   wide depending on the `output` argument.
 #'
 #' @details
-#' The function first matches the output argument, loads default summary functions from
-#' define_fns(), and determines which functions to apply based on user input. It uses
-#' efficient data.table operations for grouped computation, and optionally reshapes the
-#' output to long format with data.table::melt().
-#'
-#' @return A data.table (or tibble if tbl = TRUE) containing summary statistics by group,
-#' either in long or wide format.
+#' The function constructs the summary calls efficiently using `bquote()`
+#' and evaluates them within the `data.table` environment. This allows for
+#' fast computation even with large datasets. Custom functions can be
+#' supplied as formulas (e.g., `~ mean(.x, na.rm = TRUE)`) or as
+#' pre-defined function names from `define_fns()`.
 #'
 #' @examples
 #' \dontrun{
-#' # Example usage:
+#' library(data.table)
+#' dt <- data.table(x = rnorm(100), y = rnorm(100), group = sample(1:2, 100, TRUE))
+#' # Compute mean and sd by group
+#' compute_fastsummary(dt, cols = c("x", "y"), fns = c("mean", "sd"), groups = "group")
+#'
+#' # Use a custom function
 #' compute_fastsummary(
-#' data = contract_harmonized |> as.data.table(),
-#' cols = c("base_salary_lcu", "gross_salary_lcu"),
-#' fns = c("mean", "sum"),
-#' groups = c("occupation_isconame", "year"),
-#' output = "long"
+#'   dt,
+#'   cols = "x",
+#'   fns = list(mean = ~mean(.x, na.rm = TRUE)),
+#'   groups = "group",
+#'   output = "long",
+#'   tbl = TRUE
 #' )
 #' }
 #'
-#' @seealso [define_fns()], [data.table::melt()], [tibble::as_tibble()]
-#'
-#' @importFrom data.table as.data.table melt :=
+#' @importFrom data.table is.data.table melt
 #' @importFrom tibble as_tibble
+#' @importFrom rlang is_formula as_function
 #' @importFrom glue glue
-#' @importFrom rlang is_formula
-#' @importFrom stats setNames
-#'
+#' 
 #' @export
-
-
 compute_fastsummary <- function(data,
                                 cols,
                                 fns = NULL,
                                 groups,
                                 output = c("long", "wide"),
-                                tbl = FALSE){
+                                tbl = FALSE) {
 
-  # --- 0. Match output argument ---
   output <- match.arg(output)
+  stopifnot(data.table::is.data.table(data))
 
-  # --- 1. Define default summary functions ---
   default_fns <- define_fns()
 
-  # --- 2. Resolve which functions to use ---
+  # resolve fns -> selected_fns : named list of functions/formulas
   if (is.null(fns)) {
-    # No functions specified → use all defaults
     selected_fns <- default_fns
-
   } else if (is.character(fns)) {
-    # Character vector → use named defaults
     unknown <- setdiff(fns, names(default_fns))
-    if (length(unknown) > 0) {
-      stop(glue::glue("Unknown function name(s): {toString(unknown)}"))
-    }
+    if (length(unknown) > 0) stop(glue::glue("Unknown function name(s): {toString(unknown)}"))
     selected_fns <- default_fns[fns]
-
   } else if (is.list(fns)) {
-    # List of formulas or a mix (character names + formulas)
+    # mix of names and formulas
     char_fns <- fns[sapply(fns, is.character)]
     formula_fns <- fns[sapply(fns, rlang::is_formula)]
+    selected_fns <- c(default_fns[intersect(unlist(char_fns), names(default_fns))], formula_fns)
+  } else stop("`fns` must be NULL, character vector, or a list")
 
-    # Add default functions where names are characters
-    selected_fns <- c(
-      default_fns[intersect(unlist(char_fns), names(default_fns))],
-      formula_fns
-    )
-  } else {
-    stop("`fns` must be NULL, a character vector, or a list of formulas.")
+  # Build call list (fast)
+  calls <- list()
+  for (v in cols) {
+    for (fname in names(selected_fns)) {
+      fn <- selected_fns[[fname]]
+      if (rlang::is_formula(fn)) fn <- rlang::as_function(fn)
+      # create expression like mean(col) but using the actual function object
+      calls[[paste(v, fname, sep = "_")]] <- bquote(.(fn)(.(as.name(v))))
+    }
   }
 
-  stats_dt <- data[, lapply_at(.SD, fns), .SDcols = cols, by = groups]
+  j_call <- as.call(c(as.name("list"), calls))
 
-  # # --- compute summaries ---
-  # stats_dt <- data[, lapply(.SD, function(col)
-  #   sapply(selected_fns, function(fn) fn(col))),
-  #   .SDcols = cols,
-  #   by = groups]
+  # Evaluate inside data.table
+  stats_dt <- data[, eval(j_call), by = groups]
 
 
-  # --- 3. Optionally pivot to long format ---
+  # reshape data to long or wide depending on user preferences
   if (output == "long") {
     stats_dt <- data.table::melt(stats_dt,
                                  id.vars = groups,
                                  variable.name = "indicator",
                                  value.name = "value")
   }
-
-  # --- 4. Quick transformation into tbl if needed
-
-  if (tbl == TRUE){
-
-    stats_dt <- stats_dt |> as_tibble()
-
-  }
-
-  return(stats_dt)
-
+  if (tbl) stats_dt <- tibble::as_tibble(stats_dt)
+  stats_dt
 }
 
 
@@ -176,8 +171,8 @@ compute_fastsummary <- function(data,
 #'   cols = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
 #'   fns = c("sum", "mean"),
 #'   output = "wide",
-#'   groups = c("country_code", "year")
-#' )
+#'   groups = c("country_code", "year"))
+#' 
 #' }
 #'
 #' @importFrom data.table as.data.table melt dcast merge.data.table := setkeyv
@@ -189,7 +184,7 @@ compute_fastshare <- function(data,
                               macro_data = macro_indicators |> as.data.table(),
                               macro_cols,
                               cols,
-                              groups = c("country_code", "year"),
+                              groups,
                               fns,
                               output = c("long", "wide")) {
   output <- match.arg(output)
