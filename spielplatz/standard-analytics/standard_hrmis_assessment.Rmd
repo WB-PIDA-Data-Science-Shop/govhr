@@ -20,6 +20,7 @@ library(ggplot2)
 library(purrr)
 library(lubridate)
 library(ggthemes)
+library(forcats)
 
 # set default color palette with scale_color_brewer
 theme_set(
@@ -29,7 +30,7 @@ theme_set(
 devtools::load_all()
 
 # read-in data ------------------------------------------------------------
-personnel <- govhr::bra_hrmis_personnel |>
+personnel_df <- govhr::bra_hrmis_personnel |>
   mutate(
     year = lubridate::year(ref_date)
   )
@@ -37,60 +38,6 @@ personnel <- govhr::bra_hrmis_personnel |>
 contract_df <- govhr::bra_hrmis_contract |>
   mutate(
     year = lubridate::year(ref_date)
-  )
-
-# process data ------------------------------------------------------------
-contract_ppp <- contract_df |>
-  as.data.table() |> 
-  convert_constant_ppp(
-    ends_with("lcu"),
-    macro_indicators |> mutate(year = as.numeric(year))
-  )
-
-contract_summary_ppp <- contract_ppp |>
-  compute_fastsummary(
-    cols = c("base_salary_ppp", "allowance_ppp"),
-    groups = c("year", "paygrade"),
-    fns = "sum",
-    output = "wide"
-  )
-
-contract_annual_growth <- contract_ppp |>
-  group_by(country_code, year) |>
-  summarise(
-    median_wage_ppp = median(gross_salary_ppp, na.rm = TRUE),
-    total_headcount = n(),
-    .groups = "drop"
-  ) |>
-  mutate(
-    growth_median_wage_ppp = (median_wage_ppp - lag(median_wage_ppp)) /
-      lag(median_wage_ppp) *
-      100
-  ) |>
-  left_join(
-    macro_indicators,
-    by = c("country_code", "year")
-  )
-
-wage_bill_change <- contract_ppp |>
-  filter(
-    paygrade %in% seq(1, 4, 1)
-  ) |>
-  mutate(
-    year = as.integer(year)
-  ) |>
-  group_by(paygrade, year) |>
-  summarise(
-    median_base_salary_ppp = median(base_salary_ppp, na.rm = TRUE),
-    .groups = "drop"
-  ) |>
-  arrange(paygrade, year) |>
-  group_by(paygrade) |>
-  mutate(
-    pct_change = 100 *
-      (median_base_salary_ppp - lag(median_base_salary_ppp)) /
-      lag(median_base_salary_ppp),
-    .groups = "drop"
   )
 
 knitr::opts_chunk$set(
@@ -153,7 +100,7 @@ lcu_vars <- colnames(govhr::macro_indicators)[grepl(
 )]
 
 ### compute ppp variables
-bra_wagebill <- contract_df |> 
+bra_wagebill <- contract_df |>
   convert_constant_ppp(
     cols = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
     macro_indicators = govhr::macro_indicators
@@ -161,8 +108,8 @@ bra_wagebill <- contract_df |>
 
 ppp_vars <- colnames(contract_df)[grepl("_ppp", colnames(contract_df))]
 
-wagebill_shares_dt <- bra_wagebill |> 
-  as.data.table() |> 
+wagebill_shares_dt <- bra_wagebill |>
+  as.data.table() |>
   compute_fastshare(
     cols = wage_vars,
     macro_cols = lcu_vars,
@@ -171,15 +118,16 @@ wagebill_shares_dt <- bra_wagebill |>
     output = "long"
   )
 
-wagebill_shares_dt |> 
+wagebill_shares_dt |>
   filter(
-    indicator %in% c(
-      "gross_salary_lcu_sum_per_gdp_lcu", 
-      "gross_salary_lcu_sum_per_pexpenditure_lcu",
-      "gross_salary_lcu_sum_per_prevenue_lcu"
-    ) & 
+    indicator %in%
+      c(
+        "gross_salary_lcu_sum_per_gdp_lcu",
+        "gross_salary_lcu_sum_per_pexpenditure_lcu",
+        "gross_salary_lcu_sum_per_prevenue_lcu"
+      ) &
       year < 2018
-  ) |> 
+  ) |>
   ggplot(
     aes(year, value, color = indicator)
   ) +
@@ -189,13 +137,138 @@ wagebill_shares_dt |>
     labels = scales::percent_format()
   ) +
   labs(
-    x = "Year", 
+    x = "Year",
     y = "Share (percentage)",
     title = "Wage Bill as Share of GDP, expenditures and revenues"
   ) +
   theme(
     legend.position = "bottom"
   )
+```
+
+### 3.1.2. Wage bill decomposed by administrative and industry classification
+
+```{r}
+bra_wagebill |>
+  as.data.table() |>
+  compute_fastsummary(
+    cols = wage_vars,
+    groups = c("occupation_isconame", "year"),
+    fns = "sum",
+    output = "long"
+  ) |>
+  filter(
+    year == 2017 &
+      !is.na(occupation_isconame)
+  ) |>
+  # extract top tenth percentile
+  slice_max(
+    prop = 0.1,
+    order_by = value
+  ) |> 
+  ggplot() +
+  geom_col(
+    aes(value, fct_reorder(occupation_isconame, value, .fun = mean))
+  ) +
+  scale_x_continuous(
+    labels = scales::label_comma()
+  ) +
+  labs(
+    x = "Total",
+    y = "Occupation (ISCO)"
+  )
+```
+
+### Annual recruitment patterns over time
+
+```{r}
+personnel_hire_df <- personnel_df |> 
+  detect_personnel_event(
+    id_col = "personnel_id",
+    event_type = "hire",
+    start_date = "2014-09-01",
+    end_date = "2018-09-01"
+  )
+
+personnel_hire_df |> 
+  count(ref_date) |> 
+  ggplot(
+    aes(ref_date, n)
+  ) +
+  geom_point() +
+  geom_line()
+```
+
+## 3.2. Wage Bill Controls {.tabset-dropdown}
+
+Wage bill ceilings are effective only when ministries must adhere to them, which depends on how ceilings are defined, how much reallocation flexibility agencies have, and the strength of oversight. Large gaps between budgeted and actual wage spending, or between authorized and filled positions, indicate weak control. Robust payroll–HR systems are essential to prevent ghost workers and illegal payments. Where such control systems are absent, payroll audits, employee censuses, and electronic payment systems help strengthen control and reduce salary arrears.
+
+Guidance questions for the assessment:
+
+1. Are wage bill ceilings set by the Ministry of Finance adhered to by line ministries?
+    a. Are ceilings set based on positions or actual personnel?
+    b. Do ministries agencies have discretion in spending the savings from vacant positions?
+    c. If agencies have flexibility in reappropriations from payroll to other expenditures, are these being done
+    transparently?
+2. How effective are payroll controls as measured by PEFA indicator PI-23?
+    a. Integration of personnel and payroll records
+    b. Management of payroll changes
+    c. Internal control of payroll
+    d. Use of payroll audits
+3. Is there a high incidence of ghost workers? What are the reasons for these workers being on the payroll (fake
+workers, retirees still on the payroll, or legitimate employees getting illegal pay)? Has a payroll audit been conducted
+to identify issues?
+4. Is there are problem of salary arrears and delays in the payment of salaries for public servants
+
+### 3.2.1. Deviations between budgeted and actual general government wage bill expenditures
+
+```{r}
+macro_indicators |> 
+    filter(
+      country_code == "BRA" &
+        between(year, 2014, 2018)
+    ) |> 
+    mutate(
+      budget_execution_rate = pexpenditure_lcu/prevenue_lcu
+    ) |> 
+    ggplot(
+      aes(year, budget_execution_rate)
+    ) +
+    geom_point() +
+    geom_line() +
+    geom_hline(
+      yintercept = 1,
+      linetype = "dashed"
+    )
+```
+
+### 3.2.2. Filled positions as a proportion of budgeted positions
+
+### 3.2.3. Ghost workers as a percentage of total workers
+
+### 3.2.3. Wage bill arrears as a  percentage of total wage bill expenditures
+
+## 3.3. Employment Level and Distribution {.tabset-dropdown}
+
+This section assesses whether a public sector is over- or under-staffed by comparing public employment to total, paid, and formal-sector employment.  Globally, the public sector accounts on average for about 16% of total employment, 30% of wage employment and 37% of formal-sector wage employment — though there is wide cross-country variation, with public-sector shares ranging from under 2% to over 40%.  The share of public sector employment tends to rise with a country’s income level, reflecting greater government roles as economies develop, but there is no clear relationship between income and the share of salaried employment that is public — implying that public and private formal wage employment often expand together.  The analysis of employment distribution should also examine whether the right number of staff are employed in the right functions, locations, and sectors — to ensure efficiency and avoid distortions.
+
+Guidance questions for the assessment:
+
+1. Is the public sector over- or understaffed in aggregate and what have been the employment trends over time?
+2. Is the public sector over- or understaffed for particular skills and occupations, both in aggregate and in specific
+organizational and territorial jurisdictions?
+3. Are there a large proportion of public sector workers with low educational qualifications or in low-skilled jobs?
+4. Is the public sector a gender-equal employer?
+a. What are the proportion of women in aggregate?
+b. Is there horizontal and vertical segregation in employment?
+5. Is there a dual labor regime with a large segment of contract workers, and what are its implications for public
+sector employment?
+
+### 3.3.1. Public sector employment as a share of total employment
+
+```{r}
+wwbi |> 
+  filter(country_code == "BRA")
 ```
 
 ## 3.6. Wage incentives {.tabset-dropdown}
