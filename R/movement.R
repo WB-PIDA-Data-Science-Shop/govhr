@@ -71,11 +71,11 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
 #' }
 #' @export
 detect_personnel_event <- function(data,
-                                id_col,
-                                event_type,
-                                start_date,
-                                end_date,
-                                freq = "year") {
+                                   id_col,
+                                   event_type,
+                                   start_date,
+                                   end_date,
+                                   freq = "year") {
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 

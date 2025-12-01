@@ -138,7 +138,7 @@ count_unique <- function(x){
 #'
 #' @description
 #' Creates and returns a named list of default summary functions used
-#' throughout the analytics framework (e.g., by [compute_summary()]).
+#' throughout the analytics framework (e.g., by [compute_fastsummary()]).
 #' Each function is defined as a purrr-style formula (`~`) that operates
 #' on a vector `.x` and returns a scalar summary statistic. The returned
 #' list can be supplied directly to a summarization pipeline or extended
@@ -149,7 +149,7 @@ count_unique <- function(x){
 #' numeric vectors, including measures of central tendency, dispersion,
 #' distribution, and data quality (e.g., share of missing or zero values).
 #' Users can extend or override the defaults by appending their own
-#' named formulas before passing to [compute_summary()].
+#' named formulas before passing to [compute_fastsummary()].
 #'
 #' @return
 #' A named list of formula functions suitable for use with
@@ -185,8 +185,8 @@ count_unique <- function(x){
 #' # Inspect available summaries
 #' names(fns)
 #'
-#' # Example usage with compute_summary()
-#' compute_summary(
+#' # Example usage with compute_fastsummary()
+#' compute_fastsummary(
 #'   data = tibble::tibble(
 #'      country_code = c(rep("A", 100), rep("B", 100)),
 #'      gross_salary_lcu = c(
@@ -197,13 +197,13 @@ count_unique <- function(x){
 #'       rnorm(100, mean = 0.7 * 1000, sd = 100),
 #'       rnorm(100,  mean = 0.7 * 2000, sd = 100)
 #'      )
-#'   ),
+#'   ) |> data.table::as.data.table(),
 #'   cols = c("gross_salary_lcu", "net_salary_lcu"),
 #'   groups = c("country_code"),
 #'   fns = c("mean", "sd", "cv")
 #' )
 #'
-#' @seealso [compute_summary()], [compute_share()]
+#' @seealso [compute_fastsummary()], [compute_fastshare()]
 #' @keywords internal utilities summarization
 #' @export
 
@@ -235,57 +235,4 @@ define_fns <- function(){
   return(default_fns)
 
 }
-
-
-
-#' Apply multiple functions to multiple variables (data.table compatible)
-#'
-#' @description
-#' A lightweight helper function that applies a list of functions to a set of variables,
-#' mimicking the behavior of `dplyr::summarise_at()`, but designed for use within
-#' `data.table` syntax. This is useful when you want to compute several summary
-#' statistics (e.g., mean, sd) over a subset of columns defined by `.SD` and
-#' `.SDcols`.
-#'
-#' @param var A vector, list, or data frame-like object (e.g., `.SD` inside a
-#'   `data.table` call) containing the variables to which the functions should
-#'   be applied.
-#' @param funs A character vector of function names (e.g., `"mean"`, `"sd"`, `"sum"`)
-#'   or a list of function objects to be applied to each element of `var`.
-#' @param ... Additional arguments passed to each function call (e.g., `na.rm = TRUE`).
-#'
-#' @return A named list where each element corresponds to a combination of variable
-#'   and function (e.g., `Sepal.Length_mean`, `Sepal.Length_sd`), suitable for
-#'   use inside `data.table::lapply()`.
-#'
-#' @examples
-#' library(data.table)
-#' iris_dt <- as.data.table(iris)
-#'
-#' # Compute mean and sd for Sepal variables by Species
-#' iris_dt[, lapply_at(.SD, c("mean", "sd"), na.rm = TRUE),
-#'         .SDcols = patterns("^Sepal"),
-#'         by = Species]
-#'
-#' @seealso [dplyr::summarise_at()], [data.table::lapply()]
-#'
-#' @export
-lapply_at <- function(var, funs, ...) {
-  results <- sapply(var, function(var) {
-    lapply(funs, do.call, list(var, ...))
-  })
-  names(results) <- vapply(
-    names(var),
-    paste,
-    funs,
-    sep = "_",
-    FUN.VALUE = character(length(funs)),
-    USE.NAMES = FALSE
-  )
-  results
-}
-
-
-
-
 
