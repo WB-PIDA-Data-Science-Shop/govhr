@@ -35,7 +35,7 @@ and the value is a one-sided formula that computes the summary.
 }
 \description{
 Creates and returns a named list of default summary functions used
-throughout the analytics framework (e.g., by [compute_summary()]).
+throughout the analytics framework (e.g., by [compute_fastsummary()]).
 Each function is defined as a purrr-style formula (`~`) that operates
 on a vector `.x` and returns a scalar summary statistic. The returned
 list can be supplied directly to a summarization pipeline or extended
@@ -46,7 +46,7 @@ The returned list contains commonly used descriptive statistics for
 numeric vectors, including measures of central tendency, dispersion,
 distribution, and data quality (e.g., share of missing or zero values).
 Users can extend or override the defaults by appending their own
-named formulas before passing to [compute_summary()].
+named formulas before passing to [compute_fastsummary()].
 }
 \examples{
 # Load the default function set
@@ -55,8 +55,8 @@ fns <- define_fns()
 # Inspect available summaries
 names(fns)
 
-# Example usage with compute_summary()
-compute_summary(
+# Example usage with compute_fastsummary()
+compute_fastsummary(
   data = tibble::tibble(
      country_code = c(rep("A", 100), rep("B", 100)),
      gross_salary_lcu = c(
@@ -67,7 +67,7 @@ compute_summary(
       rnorm(100, mean = 0.7 * 1000, sd = 100),
       rnorm(100,  mean = 0.7 * 2000, sd = 100)
      )
-  ),
+  ) |> data.table::as.data.table(),
   cols = c("gross_salary_lcu", "net_salary_lcu"),
   groups = c("country_code"),
   fns = c("mean", "sd", "cv")
@@ -75,7 +75,7 @@ compute_summary(
 
 }
 \seealso{
-[compute_summary()], [compute_share()]
+[compute_fastsummary()], [compute_fastshare()]
 }
 \keyword{internal}
 \keyword{summarization}

@@ -10,7 +10,8 @@ output:
 knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
-  dpi = 300
+  dpi = 300,
+  eval = FALSE
 )
 
 library(dplyr)
@@ -96,9 +97,9 @@ wagebill_annual <- hrm_report_stats |>
   )
 
 wagebill_annual |> 
-  compute_change(
-    value,
-    date_col = year
+  compute_fastchange(
+    "value",
+    date_col = "year"
   ) |>
   ggplot() +
   geom_point(
