@@ -1,7 +1,7 @@
 # Define Default Summary Functions
 
 Creates and returns a named list of default summary functions used
-throughout the analytics framework (e.g., by \[compute_summary()\]).
+throughout the analytics framework (e.g., by \[compute_fastsummary()\]).
 Each function is defined as a purrr-style formula (\`~\`) that operates
 on a vector \`.x\` and returns a scalar summary statistic. The returned
 list can be supplied directly to a summarization pipeline or extended by
@@ -97,11 +97,11 @@ The returned list contains commonly used descriptive statistics for
 numeric vectors, including measures of central tendency, dispersion,
 distribution, and data quality (e.g., share of missing or zero values).
 Users can extend or override the defaults by appending their own named
-formulas before passing to \[compute_summary()\].
+formulas before passing to \[compute_fastsummary()\].
 
 ## See also
 
-\[compute_summary()\], \[compute_share()\]
+\[compute_fastsummary()\], \[compute_fastshare()\]
 
 ## Examples
 
@@ -116,8 +116,8 @@ names(fns)
 #> [11] "prop"         "dtprop"       "count_unique" "prop_na"      "prop_zero"   
 #> [16] "p25"          "p75"          "p90"          "sd"          
 
-# Example usage with compute_summary()
-compute_summary(
+# Example usage with compute_fastsummary()
+compute_fastsummary(
   data = tibble::tibble(
      country_code = c(rep("A", 100), rep("B", 100)),
      gross_salary_lcu = c(
@@ -128,24 +128,23 @@ compute_summary(
       rnorm(100, mean = 0.7 * 1000, sd = 100),
       rnorm(100,  mean = 0.7 * 2000, sd = 100)
      )
-  ),
+  ) |> data.table::as.data.table(),
   cols = c("gross_salary_lcu", "net_salary_lcu"),
   groups = c("country_code"),
   fns = c("mean", "sd", "cv")
 )
-#> # A tibble: 12 × 3
-#>    country_code indicator                 value
-#>    <chr>        <chr>                     <dbl>
-#>  1 A            gross_salary_lcu_mean 1015.    
-#>  2 A            gross_salary_lcu_sd     99.5   
-#>  3 A            gross_salary_lcu_cv      0.0981
-#>  4 A            net_salary_lcu_mean    709.    
-#>  5 A            net_salary_lcu_sd      105.    
-#>  6 A            net_salary_lcu_cv        0.148 
-#>  7 B            gross_salary_lcu_mean 2007.    
-#>  8 B            gross_salary_lcu_sd    106.    
-#>  9 B            gross_salary_lcu_cv      0.0527
-#> 10 B            net_salary_lcu_mean   1407.    
-#> 11 B            net_salary_lcu_sd      104.    
-#> 12 B            net_salary_lcu_cv        0.0737
+#>     country_code             indicator        value
+#>           <char>                <fctr>        <num>
+#>  1:            A gross_salary_lcu_mean 1.008823e+03
+#>  2:            B gross_salary_lcu_mean 2.011776e+03
+#>  3:            A   gross_salary_lcu_sd 1.001077e+02
+#>  4:            B   gross_salary_lcu_sd 1.064013e+02
+#>  5:            A   gross_salary_lcu_cv 9.923214e-02
+#>  6:            B   gross_salary_lcu_cv 5.288922e-02
+#>  7:            A   net_salary_lcu_mean 7.029052e+02
+#>  8:            B   net_salary_lcu_mean 1.416096e+03
+#>  9:            A     net_salary_lcu_sd 1.031342e+02
+#> 10:            B     net_salary_lcu_sd 9.945359e+01
+#> 11:            A     net_salary_lcu_cv 1.467257e-01
+#> 12:            B     net_salary_lcu_cv 7.023082e-02
 ```

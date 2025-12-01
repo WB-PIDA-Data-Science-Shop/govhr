@@ -89,9 +89,9 @@ wagebill_annual <- hrm_report_stats |>
   )
 
 wagebill_annual |> 
-  compute_change(
-    value,
-    date_col = year
+  compute_fastchange(
+    "value",
+    date_col = "year"
   ) |>
   ggplot() +
   geom_point(
@@ -105,9 +105,6 @@ wagebill_annual |>
     y = "Wage bill (annual growth)"
   )
 ```
-
-![Plot of correlation between wage bill growth and fiscal
-balances.](04-standard_report_files/figure-html/unnamed-chunk-2-1.png)
 
 #### Decomposition of wage growth: employment and wages
 
@@ -144,9 +141,6 @@ wagebill_annual |>
     y = "Indicator"
   )
 ```
-
-![Plot of decomposition of wage
-growth](04-standard_report_files/figure-html/unnamed-chunk-3-1.png)
 
 ### Wage incentives
 
@@ -193,6 +187,3 @@ hrm_report_stats |>
     title = "Allowance as Share of Gross Salary, by Paygrade"
   )
 ```
-
-![Plot of allowance as a share of gross
-pay.](04-standard_report_files/figure-html/unnamed-chunk-4-1.png)

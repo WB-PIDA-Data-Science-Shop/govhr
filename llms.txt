@@ -51,8 +51,6 @@ library(govhr)
   : Complete columns in a dataframe
 - [`complete_dates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/complete_dates.md)
   : Complete Panel Data by Identifier and Reference Dates
-- [`compute_change()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_change.md)
-  : Compute Year-over-Year Growth for a Numeric Column
 - [`compute_fastchange()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastchange.md)
   : Calculate year-over-year growth for a numeric column (data.table
   version)
@@ -60,13 +58,9 @@ library(govhr)
   : Compute ratio indicators of summarized variables over macro
   indicators
 - [`compute_fastsummary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastsummary.md)
-  : Fast Summary Statistics by Group
+  : Compute Fast Summary Statistics by Group
 - [`compute_hrmreport_stats()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_hrmreport_stats.md)
   : Compute Core HRMIS Analytical Tables
-- [`compute_share()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_share.md)
-  : Compute Shares of Summary Indicators Relative to Macro Indicators
-- [`compute_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_summary.md)
-  : Compute grouped summary statistics for multiple variables
 - [`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.md)
   : Convert nominal wages to real PPP-adjusted wages (2021 base year)
 - [`convert_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_data.md)
@@ -114,9 +108,6 @@ library(govhr)
   : Harmonize column names based on a dictionary
 - [`isco`](https://wb-pida-data-science-shop.github.io/govhr/reference/isco.md)
   : International Standard Classification of Occupations (ISCO-08)
-- [`lapply_at()`](https://wb-pida-data-science-shop.github.io/govhr/reference/lapply_at.md)
-  : Apply multiple functions to multiple variables (data.table
-  compatible)
 - [`macro_indicators`](https://wb-pida-data-science-shop.github.io/govhr/reference/macro_indicators.md)
   : Macro-level World Bank WDI indicators
 - [`pivot_data360()`](https://wb-pida-data-science-shop.github.io/govhr/reference/pivot_data360.md)

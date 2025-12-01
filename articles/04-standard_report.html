@@ -158,9 +158,9 @@ option scenarios based on wage bill modeling?</li>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="va">wagebill_annual</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/compute_change.html">compute_change</a></span><span class="op">(</span></span>
-<span>    <span class="va">value</span>,</span>
-<span>    date_col <span class="op">=</span> <span class="va">year</span></span>
+<span>  <span class="fu"><a href="../reference/compute_fastchange.html">compute_fastchange</a></span><span class="op">(</span></span>
+<span>    <span class="st">"value"</span>,</span>
+<span>    date_col <span class="op">=</span> <span class="st">"year"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span></span>
@@ -173,7 +173,6 @@ option scenarios based on wage bill modeling?</li>
 <span>    x <span class="op">=</span> <span class="st">"Fiscal balance"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Wage bill (annual growth)"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="04-standard_report_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="Plot of correlation between wage bill growth and fiscal balances." width="2187.5"></p>
 </div>
 <div class="section level4">
 <h4 id="decomposition-of-wage-growth-employment-and-wages">Decomposition of wage growth: employment and wages<a class="anchor" aria-label="anchor" href="#decomposition-of-wage-growth-employment-and-wages"></a>
@@ -210,7 +209,6 @@ option scenarios based on wage bill modeling?</li>
 <span>    x <span class="op">=</span> <span class="st">"Year"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Indicator"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="04-standard_report_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="Plot of decomposition of wage growth" width="2187.5"></p>
 </div>
 </div>
 <div class="section level3">
@@ -258,7 +256,7 @@ personnels to serve in hard-to-staff locations such as rural areas?</li>
 <span>    y <span class="op">=</span> <span class="st">"Allowance as Share of Gross Salary"</span>,</span>
 <span>    title <span class="op">=</span> <span class="st">"Allowance as Share of Gross Salary, by Paygrade"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="04-standard_report_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="Plot of allowance as a share of gross pay." width="2187.5"><!-- ### Percentage of staff receiving a performance bonus --></p>
+<!-- ### Percentage of staff receiving a performance bonus -->
 <!-- ```{r} -->
 <!-- #| fig.alt: > -->
 <!-- #|   Plot of staff receiving a performance bonus -->

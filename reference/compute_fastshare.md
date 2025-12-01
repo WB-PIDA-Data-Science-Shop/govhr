@@ -13,7 +13,7 @@ compute_fastshare(
   macro_data = as.data.table(macro_indicators),
   macro_cols,
   cols,
-  groups = c("country_code", "year"),
+  groups,
   fns,
   output = c("long", "wide")
 )
@@ -100,7 +100,7 @@ compute_fastshare(
   cols = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
   fns = c("sum", "mean"),
   output = "wide",
-  groups = c("country_code", "year")
-)
+  groups = c("country_code", "year"))
+
 } # }
 ```

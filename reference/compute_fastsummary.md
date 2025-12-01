@@ -1,11 +1,9 @@
-# Fast Summary Statistics by Group
+# Compute Fast Summary Statistics by Group
 
-Computes summary statistics for specified numeric columns in a data
-frame or data.table, optionally grouped by one or more categorical
-variables. This function supports both predefined summary functions
-(e.g., mean, sum) and user-specified formulas. It returns results in
-either long or wide format, and can optionally convert the output to a
-tibble.
+\`compute_fastsummary()\` computes summary statistics for selected
+columns of a \`data.table\`, optionally grouped by one or more
+variables. It allows the user to specify a set of functions to apply,
+either from a predefined set or custom formulas/functions.
 
 ## Usage
 
@@ -24,63 +22,73 @@ compute_fastsummary(
 
 - data:
 
-  A data.table or data.frame containing the data to summarize.
+  A \`data.table\`. The dataset on which to compute the summaries. Must
+  be of class \`data.table\`.
 
 - cols:
 
-  A character vector specifying the names of numeric columns to
-  summarize.
+  A character vector. Names of the columns to summarize.
 
 - fns:
 
-  Optional. A character vector or list of formulas specifying the
-  summary functions to apply. If NULL, default functions defined by
-  define_fns() are used. - If a character vector, function names must
-  match those in the defaults (e.g., "mean", "sum"). - If a list, can
-  contain formulas or a mix of character names and formulas.
+  Optional. Either:
+
+  - \`NULL\` (default): use all default functions defined by
+    \`define_fns()\`.
+
+  - A character vector of function names matching \`define_fns()\`.
+
+  - A list of functions or formulas, possibly mixed with character names
+    referring to \`define_fns()\`.
 
 - groups:
 
-  A character vector specifying one or more grouping variables.
+  A character vector. Column(s) by which to group the data before
+  computing the summary statistics.
 
 - output:
 
-  A character string specifying the output format. Must be one of: -
-  "long": produces a tall table with an indicator column and a value
-  column. - "wide": produces a wide table with one column per statistic.
+  Character. Either \`"long"\` (default) or \`"wide"\` to specify the
+  output format. \`"long"\` returns one row per group per summary
+  statistic, \`"wide"\` returns one row per group with multiple columns
+  for each summary statistic.
 
 - tbl:
 
-  Logical. If TRUE, converts the resulting data.table into a tibble.
+  Logical. If \`TRUE\`, converts the result to a tibble
+  (\`tibble::as_tibble()\`).
 
 ## Value
 
-A data.table (or tibble if tbl = TRUE) containing summary statistics by
-group, either in long or wide format.
+A \`data.table\` (or tibble if \`tbl = TRUE\`) containing the summary
+statistics for the selected columns. The output will be either long or
+wide depending on the \`output\` argument.
 
 ## Details
 
-The function first matches the output argument, loads default summary
-functions from define_fns(), and determines which functions to apply
-based on user input. It uses efficient data.table operations for grouped
-computation, and optionally reshapes the output to long format with
-data.table::melt().
-
-## See also
-
-\[define_fns()\], \[data.table::melt()\], \[tibble::as_tibble()\]
+The function constructs the summary calls efficiently using \`bquote()\`
+and evaluates them within the \`data.table\` environment. This allows
+for fast computation even with large datasets. Custom functions can be
+supplied as formulas (e.g., \`~ mean(.x, na.rm = TRUE)\`) or as
+pre-defined function names from \`define_fns()\`.
 
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
-# Example usage:
+library(data.table)
+dt <- data.table(x = rnorm(100), y = rnorm(100), group = sample(1:2, 100, TRUE))
+# Compute mean and sd by group
+compute_fastsummary(dt, cols = c("x", "y"), fns = c("mean", "sd"), groups = "group")
+
+# Use a custom function
 compute_fastsummary(
-data = contract_harmonized |> as.data.table(),
-cols = c("base_salary_lcu", "gross_salary_lcu"),
-fns = c("mean", "sum"),
-groups = c("occupation_isconame", "year"),
-output = "long"
+  dt,
+  cols = "x",
+  fns = list(mean = ~mean(.x, na.rm = TRUE)),
+  groups = "group",
+  output = "long",
+  tbl = TRUE
 )
 } # }
 ```

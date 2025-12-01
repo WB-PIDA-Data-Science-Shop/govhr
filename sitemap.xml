@@ -17,13 +17,10 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/calculate_date_intervals.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/complete_columns.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/complete_dates.html</loc></url>
-<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_change.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastchange.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastshare.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastsummary.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_hrmreport_stats.html</loc></url>
-<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_share.html</loc></url>
-<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_summary.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/convert_data.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/count_unique.html</loc></url>
@@ -50,7 +47,6 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/harmonize_columns.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/index.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/isco.html</loc></url>
-<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/lapply_at.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/macro_indicators.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/pivot_data360.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_contractmod.html</loc></url>
