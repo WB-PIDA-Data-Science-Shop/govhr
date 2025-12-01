@@ -154,14 +154,14 @@ lcu_vars <- colnames(govhr::macro_indicators)[grepl(
 ### compute ppp variables
 bra_wagebill <- contract_df |> 
   convert_constant_ppp(
-    cols = c(gross_salary_lcu, net_salary_lcu, base_salary_lcu),
+    cols = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
     macro_indicators = govhr::macro_indicators
   )
 
 ppp_vars <- colnames(contract_df)[grepl("_ppp", colnames(contract_df))]
 
 wagebill_shares_dt <-
-  compute_share(
+  compute_fastshare(
     data = contract_df,
     cols = wage_vars,
     macro_cols = lcu_vars,
@@ -169,7 +169,6 @@ wagebill_shares_dt <-
     fns = "sum",
     output = "long"
   )
-
 ```
 
 ## 3.6. Wage incentives {.tabset-dropdown}
