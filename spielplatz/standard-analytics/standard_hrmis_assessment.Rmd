@@ -41,13 +41,14 @@ contract_df <- govhr::bra_hrmis_contract |>
 
 # process data ------------------------------------------------------------
 contract_ppp <- contract_df |>
+  as.data.table() |> 
   convert_constant_ppp(
     ends_with("lcu"),
     macro_indicators |> mutate(year = as.numeric(year))
   )
 
 contract_summary_ppp <- contract_ppp |>
-  compute_summary(
+  compute_fastsummary(
     cols = c("base_salary_ppp", "allowance_ppp"),
     groups = c("year", "paygrade"),
     fns = "sum",
@@ -160,14 +161,40 @@ bra_wagebill <- contract_df |>
 
 ppp_vars <- colnames(contract_df)[grepl("_ppp", colnames(contract_df))]
 
-wagebill_shares_dt <-
+wagebill_shares_dt <- bra_wagebill |> 
+  as.data.table() |> 
   compute_fastshare(
-    data = contract_df,
     cols = wage_vars,
     macro_cols = lcu_vars,
     groups = c("country_code", "year"),
     fns = "sum",
     output = "long"
+  )
+
+wagebill_shares_dt |> 
+  filter(
+    indicator %in% c(
+      "gross_salary_lcu_sum_per_gdp_lcu", 
+      "gross_salary_lcu_sum_per_pexpenditure_lcu",
+      "gross_salary_lcu_sum_per_prevenue_lcu"
+    ) & 
+      year < 2018
+  ) |> 
+  ggplot(
+    aes(year, value, color = indicator)
+  ) +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year", 
+    y = "Share (percentage)",
+    title = "Wage Bill as Share of GDP, expenditures and revenues"
+  ) +
+  theme(
+    legend.position = "bottom"
   )
 ```
 
