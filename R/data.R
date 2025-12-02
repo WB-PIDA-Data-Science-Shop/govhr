@@ -127,6 +127,9 @@
 #'   \item{\code{ps_wage_premium_female}}{double Public sector wage premium for female personnels, compared to formal sector personnels in the private sector.}
 #'   \item{\code{ps_wage_premium_male}}{double Public sector wage premium for male personnels, compared to formal sector personnels in the private sector.}
 #'   \item{\code{ps_wage_premium_pooled}}{double Public sector wage premium for all public sector personnels, compared to formal sector personnels in the private sector.}
+#'   \item{\code{ps_share_total_emp}}{double Public sector employment, as a share of total employment}
+#'   \item{\code{ps_share_paid_emp}}{double Public sector employment, as a share of paid employment}
+#'   \item{\code{ps_share_formal_emp}}{double Public sector employment, as a share of formal employment}
 #'}
 #' @source World Bank
 #' \url{https://data360.worldbank.org/en/int/dataset/WB_WWBI}

@@ -1,15 +1,19 @@
 ## code to prepare `wwbi` dataset goes here
-## code to prepare `wwbi` dataset goes here
 library(dplyr)
 library(readxl)
 library(janitor)
 library(tidyr)
 library(stringr)
 
+devtools::load_all()
+
 # accessed 2025.10.10
 wwbi_indicators <- c(
   "WB_WWBI_BI_WAG_PREM_PE",
-  "WB_WWBI_BI_PWK_PUBS_ED"
+  "WB_WWBI_BI_PWK_PUBS_ED",
+  "WB_WWBI_BI_EMP_TOTL_PB",
+  "WB_WWBI_BI_EMP_PWRK_PB",
+  "WB_WWBI_BI_EMP_FRML_PB"
 )
 
 wwbi_raw <- get_data360_api(
@@ -58,11 +62,34 @@ wwbi_wage_premium <- wwbi_raw |>
     ps_wage_premium_hea_sector = WB_WWBI_BI_WAG_PREM_PE_WB_WWBI_INHE__T
   )
 
+wwbi_employment <- wwbi_raw |> 
+  filter(
+    INDICATOR %in% c(
+      "WB_WWBI_BI_EMP_TOTL_PB",
+      "WB_WWBI_BI_EMP_PWRK_PB",
+      "WB_WWBI_BI_EMP_FRML_PB"
+    ) &
+      # _Z denotes pooled
+      COMP_BREAKDOWN_1 == "_Z" &
+      # _T denotes total 
+      SEX == "_T" & AGE == "_T" & URBANISATION == "_T"
+  ) |> 
+    pivot_data360() |> 
+  rename(
+    ps_share_total_emp = wb_wwbi_bi_emp_totl_pb,
+    ps_share_paid_emp = wb_wwbi_bi_emp_pwrk_pb,
+    ps_share_formal_emp = wb_wwbi_bi_emp_frml_pb
+  )
+
 wwbi <- wwbi_educational_attainment |>
   full_join(
     wwbi_wage_premium,
     by = c("country_code", "year")
   ) |>
+  full_join(
+    wwbi_employment,
+    by = c("country_code", "year")
+  ) |> 
   mutate(
     across(
       -c(country_code),
