@@ -651,9 +651,11 @@ fastprop <- function(.data, ...){
   group_vars <- rlang::ensyms(...)
 
   prop_dt <- .data |>
+    dtplyr::lazy_dt() |> 
     dplyr::group_by(!!!group_vars) |>
     dplyr::mutate(prop = n / sum(n, na.rm = TRUE)) |>
-    dplyr::ungroup()
+    dplyr::ungroup() |> 
+    as_tibble()
 
   prop_dt
 }

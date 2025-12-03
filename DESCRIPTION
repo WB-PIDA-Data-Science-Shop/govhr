@@ -26,7 +26,8 @@ Imports:
     ggplot2,
     ggrepel,
     ggthemes,
-    data.table
+    data.table,
+    dtplyr
 RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0)

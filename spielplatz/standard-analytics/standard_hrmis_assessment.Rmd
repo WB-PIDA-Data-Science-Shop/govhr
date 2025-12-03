@@ -40,6 +40,8 @@ contract_df <- govhr::bra_hrmis_contract |>
     year = lubridate::year(ref_date)
   )
 
+est_df <- govhr::bra_hrmis_est
+
 knitr::opts_chunk$set(
   echo = FALSE,
   warning = FALSE,
@@ -391,6 +393,156 @@ contract_df |>
     fill = "Paygrade"
   )
 ```
+
+### 3.3.5. Share of women workers in the public sector
+
+```{r}
+personnel_df |>
+  filter(
+    !is.na(gender)
+  ) |> 
+  fastcount(
+    gender, year
+  ) |> 
+  fastprop(year) |>
+  filter(
+    gender == "FEMININO"
+  ) |> 
+  ggplot_point_line(
+    year,
+    prop,
+    color = gender
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of Women Workers",
+    color = "Paygrade"
+  )
+```
+
+### 3.3.6. Share of women workers by occupation
+
+```{r}
+contract_df |>
+  left_join(
+    personnel_df |>
+      select(
+        personnel_id,
+        ref_date,
+        gender
+      ) |> 
+      distinct(),
+    by = c("personnel_id", "ref_date")
+  ) |> 
+  filter(
+    !is.na(gender)
+  ) |> 
+  fastcount(
+    gender, occupation_isconame, year
+  ) |> 
+  fastprop(occupation_isconame, year) |>
+  filter(
+    gender == "FEMININO" &
+      occupation_isconame %in% sample(unique(.data[["occupation_isconame"]]), 10)
+  ) |> 
+  ggplot_point_line(
+    year,
+    prop
+  ) +
+  facet_wrap(
+    vars(occupation_isconame)
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of Women Workers"
+  )
+```
+
+### 3.3.7. Share of women workers by ministry
+
+```{r}
+contract_df |> 
+  mutate(
+    est_id = stringr::str_remove_all(est_id, "[-0-9]")
+  ) |> 
+  left_join(
+    personnel_df |> 
+      select(
+        personnel_id,
+        ref_date,
+        gender
+      ),
+    by = c("personnel_id", "ref_date"),
+    relationship = "many-to-many"
+  ) |> 
+  dtplyr::lazy_dt() |> 
+  group_by(est_id, year) |> 
+  summarise(
+    prop_women = n_distinct(personnel_id[gender == "FEMININO"])/
+      n_distinct(personnel_id),
+    .groups = "drop"
+  ) |> 
+  as_tibble() |> 
+  sample_group(est_id, n = 8) |>
+  ggplot_point_line(
+    year,
+    prop_women
+  ) +
+  facet_wrap(
+    vars(est_id),
+    nrow = 2
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of Women Workers"
+  )
+```
+
+## 3.4. Wage competitiveness {.tabset-dropdown}
+
+Public sector wage levels are crucial for attracting and retaining competent workers for expenditure efficiency, fiscal sustainability, and for equilibrium outcomes in the entire labor market. This section provides some key stylized facts that provide evidence of the competitiveness of public sector wages. These include: public sector wage premiums relative to the private sector, wage levels by occupation and education level, and trends in public sector wages relative to private sector wages.
+
+Guidance questions for the assessment:
+
+1. Does the public sector over or under-pay (taking into account all elements of compensation) compared to the private
+sector in aggregate and for different industries, occupations, locations, and demographic groups?
+2. How does pay for occupations with limited domestic private sector comparators compare to that in the public sectors
+of other relevant countries?
+3. Is there sufficient flexibility in wage practices to better align public sector wages to the needs of specific labor markets
+to attract specialized and high demand talent? How does this flexibility impact wage inequity and is the tradeoff well
+managed?
+4. Does the government use data to model fiscal impact and identify salary mismatches and to inform wage policy?
+
+### 3.4.1. Public sector wage premium
+
+```{r}
+wwbi |> 
+  filter(country_code == "BRA") |>
+  ggplot_point_line(
+    year,
+    ps_wage_premium_pooled
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) |> 
+  labs(
+    x = "Year",
+    y = "Public Sector Wage Premium"
+  )
+```
+
+### 3.4.2. Public sector wage premium by education level
+
+
 
 ## 3.6. Wage incentives {.tabset-dropdown}
 
