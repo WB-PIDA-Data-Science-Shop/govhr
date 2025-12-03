@@ -618,8 +618,8 @@ compute_hrmreport_stats <- function(contract_dt,
 #' @importFrom dtplyr lazy_dt
 #' @import dplyr
 #' @importFrom tibble as_tibble
-fastcount <- function(data, ..., wt = NULL, sort = FALSE, name = NULL, prop_by = NULL) {
-  count_dt <- dtplyr::lazy_dt(data, immutable = TRUE) |>
+fastcount <- function(x, ..., wt = NULL, sort = FALSE, name = NULL) {
+  count_dt <- dtplyr::lazy_dt(x, immutable = TRUE) |>
     dplyr::count(..., wt = {{ wt }}, sort = sort, name = name) |>
     tibble::as_tibble()
 

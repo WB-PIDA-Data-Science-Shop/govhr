@@ -31,7 +31,7 @@ sample_group <- function(.data, group, n) {
   }
 
   n_draw <- min(length(uniq_vals), as.integer(n))
-  sampled_vals <- stats::sample(uniq_vals, size = n_draw)
+  sampled_vals <- sample(uniq_vals, size = n_draw)
 
   res_dt <- dt[get(group_col) %in% sampled_vals]
 

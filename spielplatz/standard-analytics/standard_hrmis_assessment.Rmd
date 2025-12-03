@@ -542,7 +542,59 @@ wwbi |>
 
 ### 3.4.2. Public sector wage premium by education level
 
+```{r}
+wwbi |>
+  filter(country_code == "BRA") |>
+  select(country_code, year, starts_with("ps_wage_premium_isced")) |>
+  pivot_longer(
+    cols = c(starts_with("ps_wage_premium_")),
+    names_prefix = "ps_wage_premium_isced"
+  ) |>
+  mutate(
+    name = case_when(
+      name == "_n" ~ "No education",
+      name == "_1" ~ "Primary education",
+      name == "_2_3" ~ "Secondary education",
+      name == "_5t8" ~ "Tertiary education"
+    )
+  ) |> 
+  ggplot_point_line(
+    year,
+    value,
+    group = name
+  )
+```
 
+### 3.4.3. Pay compression ratios in the public sector
+
+```{r}
+contract_df |>
+  filter(
+    paygrade %in% c(1, 4)
+  ) |>
+  compute_fastsummary(
+    cols = "base_salary_lcu",
+    groups = c("paygrade", "year"),
+    fns = list(median = ~median(.x, na.rm = TRUE)),
+    output = "wide"
+  ) |>
+  pivot_wider(
+    names_from = paygrade,
+    values_from = base_salary_lcu_median,
+    names_prefix = "paygrade_"
+  ) |>
+  mutate(
+    pay_compression_ratio = paygrade_4 / paygrade_1
+  ) |>
+  ggplot_point_line(
+    year,
+    pay_compression_ratio
+  ) +
+  labs(
+    x = "Year",
+    y = "Pay Compression Ratio (Paygrade 4 / Paygrade 1)"
+  )
+```
 
 ## 3.6. Wage incentives {.tabset-dropdown}
 

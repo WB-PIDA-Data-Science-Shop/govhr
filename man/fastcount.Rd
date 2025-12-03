@@ -4,9 +4,12 @@
 \alias{fastcount}
 \title{Fast counting via dtplyr}
 \usage{
-fastcount(data, ..., wt = NULL, sort = FALSE, name = NULL, prop_by = NULL)
+fastcount(x, ..., wt = NULL, sort = FALSE, name = NULL)
 }
 \arguments{
+\item{x}{A data frame, data frame extension (e.g. a tibble), or a
+lazy data frame (e.g. from dbplyr or dtplyr).}
+
 \item{...}{<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to group
 by.}
 
