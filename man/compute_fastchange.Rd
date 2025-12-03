@@ -2,12 +2,12 @@
 % Please edit documentation in R/summary_statistics.R
 \name{compute_fastchange}
 \alias{compute_fastchange}
-\title{Calculate year-over-year growth for a numeric column (data.table version)}
+\title{Calculate year-over-year growth for a numeric column}
 \usage{
 compute_fastchange(data, col, date_col)
 }
 \arguments{
-\item{data}{A data.table containing the data.}
+\item{data}{A dataset.}
 
 \item{col}{A numeric column (either unquoted or as a string) for which the
 year-over-year growth rate will be calculated.}
@@ -16,14 +16,15 @@ year-over-year growth rate will be calculated.}
 used to order the data and define the time sequence (typically a year column).}
 }
 \value{
-A data.table with:
+A dataset with:
 \itemize{
   \item The completed `date_col` sequence.
   \item A new column named `"growth_<col>"` containing the year-over-year growth rates.
 }
+  The returned object will match the class of the input `data`.
 }
 \description{
-Computes the year-over-year growth rate for a numeric column in a data.table.
+Computes the year-over-year growth rate for a numeric column in a dataset.
 The function ensures a complete sequence of years between the minimum and maximum
 in the date column, fills in any missing years, and calculates the growth rate
 using lagged values.
@@ -33,16 +34,15 @@ using lagged values.
 - Missing values in `col` result in `NA` for the corresponding growth rate.
 - The first observation (or any row where the lag is missing) will have `NA`.
 - The function can accept both unquoted column names or strings.
-- To compute growth rates by group (e.g., country), subset or loop by group before calling this function.
+- To compute growth rates by group (e.g., country), use `group_by()` from `dplyr`.
 }
 \examples{
 library(data.table)
 
-dt <- data.table(
+dt <- data.table::data.table(
   year = c(2020, 2021, 2023),
   gdp = c(100, 110, 130)
 )
-
 
 # Using strings
 compute_fastchange(dt, "gdp", "year")

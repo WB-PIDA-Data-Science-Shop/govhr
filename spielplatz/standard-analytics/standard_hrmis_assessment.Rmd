@@ -1,5 +1,5 @@
 ---
-title: "HRMIS Analytics: Standard Report"
+title: "HRMIS Analytics: Standard Report Prototype"
 author: "Galileu Kim"
 date: "October 20, 2025"
 output: 
@@ -242,11 +242,11 @@ macro_indicators |>
     )
 ```
 
-### 3.2.2. Filled positions as a proportion of budgeted positions
+<!-- ### 3.2.2. Filled positions as a proportion of budgeted positions
 
 ### 3.2.3. Ghost workers as a percentage of total workers
 
-### 3.2.3. Wage bill arrears as a  percentage of total wage bill expenditures
+### 3.2.3. Wage bill arrears as a  percentage of total wage bill expenditures -->
 
 ## 3.3. Employment Level and Distribution {.tabset-dropdown}
 
@@ -264,11 +264,132 @@ b. Is there horizontal and vertical segregation in employment?
 5. Is there a dual labor regime with a large segment of contract workers, and what are its implications for public
 sector employment?
 
-### 3.3.1. Public sector employment as a share of total employment
+### 3.3.1. Public sector employment as a share of total, paid, and formal employment
 
 ```{r}
-wwbi |> 
-  filter(country_code == "BRA")
+govhr::wwbi |> 
+  filter(country_code == "BRA") |> 
+  select(country_code, year, starts_with("ps_share")) |> 
+  pivot_longer(
+    cols = c(starts_with("ps_share")),
+    names_prefix = "ps_share_"
+  ) |>
+  ggplot_point_line(
+    year,
+    value,
+    group = name
+  ) +
+    scale_color_discrete(
+      labels = c("Formal Employment", "Paid Employment", "Total Employment"),
+      name = "Type of Employment"
+    ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Public Sector Employment as Share of Total Employment"
+  )
+```
+
+### 3.3.2. Industry and occupational distribution of public sector employment
+
+```{r}
+contract_df |>
+  filter(
+    year == max(year)
+  ) |>
+  compute_fastsummary(
+    cols = "personnel_id",
+    groups = c("occupation_isconame", "year"),
+    fns = list(n_distinct = ~n_distinct(.x)),
+    output = "long"
+  ) |> 
+  mutate(
+    share = value / sum(value)
+  ) |> 
+  slice_max(
+    prop = 0.1,
+    order_by = share
+  ) |>
+  filter(
+    !is.na(occupation_isconame)
+  ) |> 
+  ggplot(
+    aes(share, fct_reorder(occupation_isconame, share))
+  ) +
+  geom_col() +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Share of Personnel",
+    y = "Occupation (ISCO)"
+  ) 
+```
+
+### 3.3.3. Educational profile of public sector employees
+
+```{r}
+personnel_df |>
+  compute_fastsummary(
+    cols = "personnel_id",
+    groups = c("educat7", "year"),
+    fns = list(n_distinct = ~n_distinct(.x)),
+    output = "long"
+  ) |> 
+  filter(
+    !is.na(educat7)
+  ) |> 
+  group_by(year) |>
+  mutate(
+    share = value / sum(value)
+  ) |>
+  ggplot(
+    aes(
+      year,
+      share,
+      fill = educat7
+    )
+  ) +
+  geom_area() +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of Personnel",
+    fill = "Education Level"
+  )
+```
+
+### 3.3.4. Distribution of public sector workers by pay grade
+
+```{r}
+contract_df |>
+  filter(
+    paygrade %in% c(1:4)
+  ) |>
+  fastcount(
+    paygrade, year
+  ) |> 
+  fastprop(year) |>
+  ggplot(
+    aes(
+      year,
+      prop,
+      fill = paygrade
+    )
+  ) +
+  geom_area() +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of Personnel",
+    fill = "Paygrade"
+  )
 ```
 
 ## 3.6. Wage incentives {.tabset-dropdown}
@@ -285,7 +406,7 @@ Guidance questions for the assessment:
 ### 3.6.1. Percentage of staff receiving highest performance ratings
 
 ```{r}
-
+print("Not available: no performance rating data available")
 ```
 
 ### 3.6.2. The size of annual, within-grade pay increases

@@ -15,7 +15,6 @@ The goal of `govhr` is to provide a set of open-source tools that:
 1.  Standardize and efficiently clean human resource management
     information system (HRMIS) data.
 2.  Produce analytical insights in a standard, but customizable, format.
-3.  Quality assures both 1 and 2.
 
 `govhr` is based on the [Public Sector Employment and Compensation
 Assessment

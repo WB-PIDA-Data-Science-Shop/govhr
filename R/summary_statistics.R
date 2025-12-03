@@ -1,118 +1,3 @@
-
-#' Compute Fast Summary Statistics by Group
-#'
-#' `compute_fastsummary()` computes summary statistics for selected columns
-#' of a `data.table`, optionally grouped by one or more variables. It allows
-#' the user to specify a set of functions to apply, either from a predefined
-#' set or custom formulas/functions.
-#'
-#' @param data A `data.table`. The dataset on which to compute the summaries.
-#'   Must be of class `data.table`.
-#' @param cols A character vector. Names of the columns to summarize.
-#' @param fns Optional. Either:
-#'   \itemize{
-#'     \item `NULL` (default): use all default functions defined by
-#'       `define_fns()`.
-#'     \item A character vector of function names matching `define_fns()`.
-#'     \item A list of functions or formulas, possibly mixed with character
-#'       names referring to `define_fns()`.
-#'   }
-#' @param groups A character vector. Column(s) by which to group the data
-#'   before computing the summary statistics.
-#' @param output Character. Either `"long"` (default) or `"wide"` to specify
-#'   the output format. `"long"` returns one row per group per summary
-#'   statistic, `"wide"` returns one row per group with multiple columns for
-#'   each summary statistic.
-#' @param tbl Logical. If `TRUE`, converts the result to a tibble (`tibble::as_tibble()`).
-#'
-#' @return A `data.table` (or tibble if `tbl = TRUE`) containing the summary
-#'   statistics for the selected columns. The output will be either long or
-#'   wide depending on the `output` argument.
-#'
-#' @details
-#' The function constructs the summary calls efficiently using `bquote()`
-#' and evaluates them within the `data.table` environment. This allows for
-#' fast computation even with large datasets. Custom functions can be
-#' supplied as formulas (e.g., `~ mean(.x, na.rm = TRUE)`) or as
-#' pre-defined function names from `define_fns()`.
-#'
-#' @examples
-#' \dontrun{
-#' library(data.table)
-#' dt <- data.table(x = rnorm(100), y = rnorm(100), group = sample(1:2, 100, TRUE))
-#' # Compute mean and sd by group
-#' compute_fastsummary(dt, cols = c("x", "y"), fns = c("mean", "sd"), groups = "group")
-#'
-#' # Use a custom function
-#' compute_fastsummary(
-#'   dt,
-#'   cols = "x",
-#'   fns = list(mean = ~mean(.x, na.rm = TRUE)),
-#'   groups = "group",
-#'   output = "long",
-#'   tbl = TRUE
-#' )
-#' }
-#'
-#' @importFrom data.table is.data.table melt
-#' @importFrom tibble as_tibble
-#' @importFrom rlang is_formula as_function
-#' @importFrom glue glue
-#' 
-#' @export
-compute_fastsummary <- function(data,
-                                cols,
-                                fns = NULL,
-                                groups,
-                                output = c("long", "wide"),
-                                tbl = FALSE) {
-
-  output <- match.arg(output)
-  if (!data.table::is.data.table(data)) data <- data.table::as.data.table(data)
-
-  default_fns <- define_fns()
-
-  # resolve fns -> selected_fns : named list of functions/formulas
-  if (is.null(fns)) {
-    selected_fns <- default_fns
-  } else if (is.character(fns)) {
-    unknown <- setdiff(fns, names(default_fns))
-    if (length(unknown) > 0) stop(glue::glue("Unknown function name(s): {toString(unknown)}"))
-    selected_fns <- default_fns[fns]
-  } else if (is.list(fns)) {
-    # mix of names and formulas
-    char_fns <- fns[sapply(fns, is.character)]
-    formula_fns <- fns[sapply(fns, rlang::is_formula)]
-    selected_fns <- c(default_fns[intersect(unlist(char_fns), names(default_fns))], formula_fns)
-  } else stop("`fns` must be NULL, character vector, or a list")
-
-  # Build call list (fast)
-  calls <- list()
-  for (v in cols) {
-    for (fname in names(selected_fns)) {
-      fn <- selected_fns[[fname]]
-      if (rlang::is_formula(fn)) fn <- rlang::as_function(fn)
-      # create expression like mean(col) but using the actual function object
-      calls[[paste(v, fname, sep = "_")]] <- bquote(.(fn)(.(as.name(v))))
-    }
-  }
-
-  j_call <- as.call(c(as.name("list"), calls))
-
-  # Evaluate inside data.table
-  stats_dt <- data[, eval(j_call), by = groups]
-
-  # reshape data to long or wide depending on user preferences
-  if (output == "long") {
-    stats_dt <- data.table::melt(stats_dt,
-                                 id.vars = groups,
-                                 variable.name = "indicator",
-                                 value.name = "value")
-  }
-  if (tbl) stats_dt <- tibble::as_tibble(stats_dt)
-  stats_dt
-}
-
 #' Compute Fast Summary Statistics by Group
 #'
 #' `compute_fastsummary()` computes summary statistics for selected columns
@@ -715,101 +600,60 @@ compute_hrmreport_stats <- function(contract_dt,
   return(hrm_list)
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#' Fast counting via dtplyr
+#'
+#' `fastcount()` delegates [dplyr::count()] to a `data.table` backend by
+#' converting the input to a lazy `dtplyr` table first. This preserves the
+#' familiar `count()` interface while exploiting `data.table` performance.
+#'
+#' @inheritParams dplyr::count
+#' @param prop_by Optional. A grouping variable to compute proportions within each group.
+#' 
+#' @return A tibble with one row per group and a count column.
+#'
+#' @examples
+#' df <- tibble::tibble(group = c("a", "a", "b"))
+#' fastcount(df, group)
+#'
+#' @importFrom dtplyr lazy_dt
+#' @import dplyr
+#' @importFrom tibble as_tibble
+fastcount <- function(data, ..., wt = NULL, sort = FALSE, name = NULL, prop_by = NULL) {
+  count_dt <- dtplyr::lazy_dt(data, immutable = TRUE) |>
+    dplyr::count(..., wt = {{ wt }}, sort = sort, name = name) |>
+    tibble::as_tibble()
+
+  count_dt
+}
+
+#' Compute group-wise proportions from counts
+#'
+#' fastprop() computes the proportion of counts within groups.
+#' It expects the input to already contain a count column named `n`
+#' (for example the output of `dplyr::count()` or `fastcount()`).
+#'
+#' @param .data A data frame or tibble containing a count column `n`.
+#' @param ... Grouping variables. Proportions are
+#'   computed within the combinations of these variables.
+#'
+#' @return A tibble with the same columns as `.data` plus a numeric
+#'   `prop` column giving the group share (0–1). Missing `n` values are
+#'   ignored in the denominator via `na.rm = TRUE`.
+#'
+#' @examples
+#' library(dplyr)
+#' df <- tibble::tibble(group = c("a","a","b"))
+#' df |> count(group) |> fastprop(group)
+#'
+#' @seealso dplyr::count, fastcount
+#' @export
+fastprop <- function(.data, ...){
+  group_vars <- rlang::ensyms(...)
+
+  prop_dt <- .data |>
+    dplyr::group_by(!!!group_vars) |>
+    dplyr::mutate(prop = n / sum(n, na.rm = TRUE)) |>
+    dplyr::ungroup()
+
+  prop_dt
+}
