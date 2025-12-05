@@ -16,6 +16,8 @@ library(purrr)
 library(lubridate)
 library(ggthemes)
 library(forcats)
+library(data.table)
+library(tidyr)
 library(govhr)
 
 # set default color palette with scale_color_brewer
