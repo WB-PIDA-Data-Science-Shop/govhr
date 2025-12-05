@@ -7,8 +7,7 @@ output: rmarkdown::html_document
 knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
-  dpi = 300,
-  eval = FALSE
+  dpi = 300
 )
 
 library(dplyr)
@@ -19,6 +18,7 @@ library(data.table)
 library(stringr)
 library(tidyr)
 library(purrr)
+library(govhr)
 
 # set default color palette with scale_color_brewer
 theme_set(
@@ -50,8 +50,6 @@ The second part assesses the impact of these employment and compensation practic
 We have designed a convenient function, `govhr::compute_hrmreport_stats`, that produces all summary statistics necessary to produce the standard report on HR. All you need to do is provide the three standard modules as inputs to the function.
 
 ```{r, include = TRUE}
-library(govhr)
-
 hrm_report_stats <- compute_hrmreport_stats(
   contract_dt = govhr::bra_hrmis_contract,
   personnel_dt = govhr::bra_hrmis_personnel,

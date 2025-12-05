@@ -16,6 +16,7 @@ library(purrr)
 library(lubridate)
 library(ggthemes)
 library(forcats)
+library(govhr)
 
 # set default color palette with scale_color_brewer
 theme_set(
@@ -113,8 +114,6 @@ political considerations?
 3.1.1. Wage bill as share of GDP, expenditures, and revenues
 
 ```{r}
-library(govhr)
-
 wage_vars <- c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")
 
 lcu_vars <- colnames(govhr::macro_indicators)[grepl(
