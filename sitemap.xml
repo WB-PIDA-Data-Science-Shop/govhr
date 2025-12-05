@@ -6,6 +6,7 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/articles/02-harmonization.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/articles/03-analytics.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/articles/04-standard_report.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/articles/05-standard_hrmis_assessment.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/articles/index.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/authors.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/index.html</loc></url>
@@ -36,12 +37,16 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_reallocation.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/enterprise_surveys.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/fastcount.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/fastprop.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/find_duplicate_ids.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/find_inconsistent_colnames.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/flag_outlier.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/get_data360_api.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/get_metadata360.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/ggplot_coef.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/ggplot_point_line.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/ggplot_segment.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/govhr-package.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/harmonization_dict.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/harmonize_columns.html</loc></url>
@@ -52,6 +57,7 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_contractmod.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_estmod.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_personnel.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/sample_group.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/social_sustainability.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/wwbi.html</loc></url>
 </urlset>

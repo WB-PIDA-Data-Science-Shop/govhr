@@ -26,6 +26,7 @@ $$Real_{h}^{PPP} = (CPI_t / CPI_{2021}) * (Nominal_{h,t} / PPP_{2021})$$"><meta 
     <li><a class="dropdown-item" href="../articles/02-harmonization.html">HR Data Harmonization</a></li>
     <li><a class="dropdown-item" href="../articles/03-analytics.html">HR Analytics</a></li>
     <li><a class="dropdown-item" href="../articles/04-standard_report.html">HR Analytics Standard Report</a></li>
+    <li><a class="dropdown-item" href="../articles/05-standard_hrmis_assessment.html">HR Analytics: Standard Report Prototype</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -61,7 +62,7 @@ $$Real_{h}^{PPP} = (CPI_t / CPI_{2021}) * (Nominal_{h,t} / PPP_{2021})$$</p>
 
 
 <dt id="arg-cols">cols<a class="anchor" aria-label="anchor" href="#arg-cols"></a></dt>
-<dd><p>Column name to convert to constant PPP in international 2021 dollars.</p></dd>
+<dd><p>A character vector with column name to convert to constant PPP in international 2021 dollars.</p></dd>
 
 
 <dt id="arg-macro-indicators">macro_indicators<a class="anchor" aria-label="anchor" href="#arg-macro-indicators"></a></dt>
@@ -94,7 +95,7 @@ $$Real_{h}^{PPP} = (CPI_t / CPI_{2021}) * (Nominal_{h,t} / PPP_{2021})$$</p>
 <span class="r-in"><span>  cpi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">85</span>, <span class="fl">100</span><span class="op">)</span>, ppp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.5</span>, <span class="fl">3.5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">convert_constant_ppp</span><span class="op">(</span><span class="va">hh</span>, <span class="va">wage</span>, <span class="va">macro_indicators</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">convert_constant_ppp</span><span class="op">(</span><span class="va">hh</span>, <span class="st">"wage"</span>, <span class="va">macro_indicators</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   country_code year   wage `"2021"`   cpi   ppp</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>

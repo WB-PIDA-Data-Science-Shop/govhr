@@ -72,6 +72,41 @@ A data frame with 993 rows and 11 variables:
   double Public sector wage premium for all public sector personnels,
   compared to formal sector personnels in the private sector.
 
+- `ps_share_total_emp`:
+
+  double Public sector employment, as a share of total employment
+
+- `ps_share_paid_emp`:
+
+  double Public sector employment, as a share of paid employment
+
+- `ps_share_formal_emp`:
+
+  double Public sector employment, as a share of formal employment
+
+- `ps_wage_premium_isced_n`:
+
+  double Public sector wage premium for personnels with no education,
+  compared to formal sector personnels in the private sector.
+
+- `ps_wage_premium_isced_1`:
+
+  double Public sector wage premium for personnels with primary
+  education completed, compared to formal sector personnels in the
+  private sector.
+
+- `ps_wage_premium_isced_2_3`:
+
+  double Public sector wage premium for personnels with secondary
+  education completed, compared to formal sector personnels in the
+  private sector.
+
+- `ps_wage_premium_isced_5t8`:
+
+  double Public sector wage premium for personnels with tertiary
+  education completed, compared to formal sector personnels in the
+  private sector.
+
 ## Source
 
 World Bank <https://data360.worldbank.org/en/int/dataset/WB_WWBI>

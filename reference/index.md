@@ -19,8 +19,7 @@
 - [`complete_dates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/complete_dates.md)
   : Complete Panel Data by Identifier and Reference Dates
 - [`compute_fastchange()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastchange.md)
-  : Calculate year-over-year growth for a numeric column (data.table
-  version)
+  : Calculate year-over-year growth for a numeric column
 - [`compute_fastshare()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastshare.md)
   : Compute ratio indicators of summarized variables over macro
   indicators
@@ -57,6 +56,10 @@
   : Detect Personnel Retirement Events
 - [`enterprise_surveys`](https://wb-pida-data-science-shop.github.io/govhr/reference/enterprise_surveys.md)
   : World Bank Enterprise Surveys
+- [`fastcount()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fastcount.md)
+  : Fast counting via dtplyr
+- [`fastprop()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fastprop.md)
+  : Compute group-wise proportions from counts
 - [`find_duplicate_ids()`](https://wb-pida-data-science-shop.github.io/govhr/reference/find_duplicate_ids.md)
   : Find Duplicate Identifiers in a Data Frame
 - [`find_inconsistent_colnames()`](https://wb-pida-data-science-shop.github.io/govhr/reference/find_inconsistent_colnames.md)
@@ -67,8 +70,12 @@
   : This function retrieves data from the Data360 API.
 - [`get_metadata360()`](https://wb-pida-data-science-shop.github.io/govhr/reference/get_metadata360.md)
   : Retrieve dataset metadata from the World Bank Data360 API
+- [`ggplot_coef()`](https://wb-pida-data-science-shop.github.io/govhr/reference/ggplot_coef.md)
+  : Plot model coefficients with confidence intervals
 - [`ggplot_point_line()`](https://wb-pida-data-science-shop.github.io/govhr/reference/ggplot_point_line.md)
   : Plot grouped line chart with labeled points
+- [`ggplot_segment()`](https://wb-pida-data-science-shop.github.io/govhr/reference/ggplot_segment.md)
+  : Plot segments overlaid with points, ordered by median
 - [`harmonization_dict`](https://wb-pida-data-science-shop.github.io/govhr/reference/harmonization_dict.md)
   : HRMIS Harmonization Data Dictionary
 - [`harmonize_columns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/harmonize_columns.md)
@@ -85,6 +92,8 @@
   : Quality Check for Harmonized Establishment Module
 - [`qualitycheck_personnel()`](https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_personnel.md)
   : Quality checks for Personnel Module data
+- [`sample_group()`](https://wb-pida-data-science-shop.github.io/govhr/reference/sample_group.md)
+  : Sample groups and return all rows for those groups
 - [`social_sustainability`](https://wb-pida-data-science-shop.github.io/govhr/reference/social_sustainability.md)
   : Social Sustainability Global Database
 - [`wwbi`](https://wb-pida-data-science-shop.github.io/govhr/reference/wwbi.md)

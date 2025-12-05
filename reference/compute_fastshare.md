@@ -3,14 +3,14 @@
 \`compute_fastshare()\` summarizes selected numeric columns by specified
 groups, merges the result with macroeconomic indicators, computes ratios
 of summarized variables per macro variable, and returns either a long or
-wide-format data.table.
+wide-format dataset.
 
 ## Usage
 
 ``` r
 compute_fastshare(
   data,
-  macro_data = as.data.table(macro_indicators),
+  macro_data = data.table::as.data.table(macro_indicators),
   macro_cols,
   cols,
   groups,
@@ -23,13 +23,14 @@ compute_fastshare(
 
 - data:
 
-  A data.frame or data.table containing the raw data to summarize.
+  A dataset containing the raw data to summarize.
 
 - macro_data:
 
-  A data.frame or data.table containing macro-level indicators. Must
-  share at least one common grouping variable with \`data\`. Default is
-  \`macro_indicators\`.
+  A \`data.frame\`, \`data.table\`, or tibble containing macro-level
+  indicators. Must share at least one common grouping variable with
+  \`data\`. Default is \`macro_indicators\`. The result will be returned
+  in the same class as the input.
 
 - macro_cols:
 
@@ -60,11 +61,12 @@ compute_fastshare(
 
 ## Value
 
-A \`data.table\` containing: - In \`"long"\` format: group variables,
+A dataset containing: - In \`"long"\` format: group variables,
 \`macro_var\`, \`macro_value\`, \`summary_var\`, \`summary_value\`,
 \`indicator\`, and \`value\`. - In \`"wide"\` format: group variables,
 one column per indicator (\`summary_var\` per \`macro_var\`), and
-original macro and summary values.
+original macro and summary values. The returned object will match the
+class of the input \`data\`.
 
 ## Details
 
@@ -82,7 +84,6 @@ format with one column per indicator.
 if (FALSE) { # \dontrun{
 
 dt <- contract_harmonized |> mutate(year = year(est_date)) |> as.data.table()
-
 
 compute_fastshare(
   data = dt,

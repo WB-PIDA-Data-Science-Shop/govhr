@@ -18,7 +18,8 @@ convert_constant_ppp(data, cols, macro_indicators)
 
 - cols:
 
-  Column name to convert to constant PPP in international 2021 dollars.
+  A character vector with column name to convert to constant PPP in
+  international 2021 dollars.
 
 - macro_indicators:
 
@@ -50,7 +51,7 @@ macro_indicators <- tibble(
   cpi = c(85, 100), ppp = c(1.5, 3.5)
 )
 
-convert_constant_ppp(hh, wage, macro_indicators)
+convert_constant_ppp(hh, "wage", macro_indicators)
 #> # A tibble: 3 × 6
 #>   country_code year   wage `"2021"`   cpi   ppp
 #>   <chr>        <chr> <dbl> <chr>    <dbl> <dbl>

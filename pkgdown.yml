@@ -6,7 +6,8 @@ articles:
   articles/02-harmonization: 02-harmonization.html
   articles/03-analytics: 03-analytics.html
   articles/04-standard_report: 04-standard_report.html
-last_built: 2025-12-01T21:05Z
+  articles/05-standard_hrmis_assessment: 05-standard_hrmis_assessment.html
+last_built: 2025-12-05T18:57Z
 urls:
   reference: https://wb-pida-data-science-shop.github.io/govhr/reference
   article: https://wb-pida-data-science-shop.github.io/govhr/articles

@@ -1,9 +1,9 @@
-# Calculate year-over-year growth for a numeric column (data.table version)
+# Calculate year-over-year growth for a numeric column
 
 Computes the year-over-year growth rate for a numeric column in a
-data.table. The function ensures a complete sequence of years between
-the minimum and maximum in the date column, fills in any missing years,
-and calculates the growth rate using lagged values.
+dataset. The function ensures a complete sequence of years between the
+minimum and maximum in the date column, fills in any missing years, and
+calculates the growth rate using lagged values.
 
 ## Usage
 
@@ -15,7 +15,7 @@ compute_fastchange(data, col, date_col)
 
 - data:
 
-  A data.table containing the data.
+  A dataset.
 
 - col:
 
@@ -29,12 +29,14 @@ compute_fastchange(data, col, date_col)
 
 ## Value
 
-A data.table with:
+A dataset with:
 
 - The completed \`date_col\` sequence.
 
 - A new column named \`"growth\_\<col\>"\` containing the year-over-year
   growth rates.
+
+The returned object will match the class of the input \`data\`.
 
 ## Details
 
@@ -42,19 +44,18 @@ A data.table with:
 values in \`col\` result in \`NA\` for the corresponding growth rate. -
 The first observation (or any row where the lag is missing) will have
 \`NA\`. - The function can accept both unquoted column names or
-strings. - To compute growth rates by group (e.g., country), subset or
-loop by group before calling this function.
+strings. - To compute growth rates by group (e.g., country), use
+\`group_by()\` from \`dplyr\`.
 
 ## Examples
 
 ``` r
 library(data.table)
 
-dt <- data.table(
+dt <- data.table::data.table(
   year = c(2020, 2021, 2023),
   gdp = c(100, 110, 130)
 )
-
 
 # Using strings
 compute_fastchange(dt, "gdp", "year")

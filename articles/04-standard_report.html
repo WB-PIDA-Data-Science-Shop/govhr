@@ -42,6 +42,7 @@
     <li><a class="dropdown-item" href="../articles/02-harmonization.html">HR Data Harmonization</a></li>
     <li><a class="dropdown-item" href="../articles/03-analytics.html">HR Analytics</a></li>
     <li><a class="dropdown-item" href="../articles/04-standard_report.html">HR Analytics Standard Report</a></li>
+    <li><a class="dropdown-item" href="../articles/05-standard_hrmis_assessment.html">HR Analytics: Standard Report Prototype</a></li>
   </ul>
 </li>
       </ul>
@@ -106,9 +107,7 @@ statistics necessary to produce the standard report on HR. All you need
 to do is provide the three standard modules as inputs to the
 function.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://wb-pida-data-science-shop.github.io/govhr/">govhr</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">hrm_report_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_hrmreport_stats.html">compute_hrmreport_stats</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">hrm_report_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_hrmreport_stats.html">compute_hrmreport_stats</a></span><span class="op">(</span></span>
 <span>  contract_dt <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_contract.html">bra_hrmis_contract</a></span>,</span>
 <span>  personnel_dt <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
 <span>  est_dt <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_est.html">bra_hrmis_est</a></span>,</span>
@@ -158,9 +157,8 @@ option scenarios based on wage bill modeling?</li>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="va">wagebill_annual</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/compute_fastchange.html">compute_fastchange</a></span><span class="op">(</span></span>
-<span>    <span class="st">"value"</span>,</span>
-<span>    date_col <span class="op">=</span> <span class="st">"year"</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    value_growth <span class="op">=</span> <span class="op">(</span><span class="va">value</span> <span class="op">-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span>,</span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span></span>
@@ -168,11 +166,11 @@ option scenarios based on wage bill modeling?</li>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">scale_y_continuous</span><span class="op">(</span></span>
 <span>    labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/percent_format.html" class="external-link">percent_format</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span>  <span class="fu">labs</span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="st">"Fiscal balance"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Wage bill (annual growth)"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
+<p><img src="04-standard_report_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="Plot of correlation between wage bill growth and fiscal balances." width="2187.5"></p>
 </div>
 <div class="section level4">
 <h4 id="decomposition-of-wage-growth-employment-and-wages">Decomposition of wage growth: employment and wages<a class="anchor" aria-label="anchor" href="#decomposition-of-wage-growth-employment-and-wages"></a>
@@ -209,6 +207,7 @@ option scenarios based on wage bill modeling?</li>
 <span>    x <span class="op">=</span> <span class="st">"Year"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Indicator"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
+<p><img src="04-standard_report_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="Plot of decomposition of wage growth" width="2187.5"></p>
 </div>
 </div>
 <div class="section level3">
@@ -256,44 +255,7 @@ personnels to serve in hard-to-staff locations such as rural areas?</li>
 <span>    y <span class="op">=</span> <span class="st">"Allowance as Share of Gross Salary"</span>,</span>
 <span>    title <span class="op">=</span> <span class="st">"Allowance as Share of Gross Salary, by Paygrade"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<!-- ### Percentage of staff receiving a performance bonus -->
-<!-- ```{r} -->
-<!-- #| fig.alt: > -->
-<!-- #|   Plot of staff receiving a performance bonus -->
-<!-- performance_bonus_personnel <- govhr::bra_hrmis_contract |> -->
-<!--   filter( -->
-<!--     !is.na(allowance_lcu) & -->
-<!--       lubridate::year(ref_date) <= 2017 -->
-<!--   ) |> -->
-<!--   group_by(year) |> -->
-<!--   summarise( -->
-<!--     total_performance = n_distinct(personnel_id) -->
-<!--   ) -->
-<!-- govhr::bra_hrmis_contract |> -->
-<!--   group_by(year) |> -->
-<!--   summarise( -->
-<!--     total = n_distinct(personnel_id) -->
-<!--   ) |> -->
-<!--   left_join( -->
-<!--     performance_bonus_personnel, -->
-<!--     by = "year" -->
-<!--   ) |> -->
-<!--   mutate( -->
-<!--     year = as.numeric(year), -->
-<!--     share_performance = total_performance/total -->
-<!--   ) |> -->
-<!--   ggplot_point_line( -->
-<!--     year, -->
-<!--     share_performance -->
-<!--   ) + -->
-<!--   scale_y_continuous( -->
-<!--     labels = scales::percent_format() -->
-<!--   ) + -->
-<!--   labs( -->
-<!--     x = "Year", -->
-<!--     y = "Share of personnel" -->
-<!--   ) -->
-<!-- ``` -->
+<p><img src="04-standard_report_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="Plot of allowance as a share of gross pay." width="2187.5"></p>
 </div>
 </div>
 </div>
