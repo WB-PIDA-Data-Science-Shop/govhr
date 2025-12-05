@@ -81,11 +81,3 @@ test_that("compute_fastsummary errors on unknown function names", {
     "Unknown function name"
   )
 })
-
-test_that("compute_fastsummary errors if data is not a data.table", {
-  df <- data.frame(x = 1:3, y = 3:1, group = c("A", "B", "C"))
-  expect_error(
-    compute_fastsummary(df, cols = "x", groups = "group"),
-    "data.table"
-  )
-})

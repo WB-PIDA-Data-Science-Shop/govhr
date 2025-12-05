@@ -14,8 +14,9 @@ compute_fastsummary(
 )
 }
 \arguments{
-\item{data}{A `data.table`. The dataset on which to compute the summaries.
-Must be of class `data.table`.}
+\item{data}{A `data.table`, `data.frame`, or tibble. The dataset on which to compute the summaries.
+If not a `data.table`, it will be converted internally for computation.
+The result will be returned in the same class as the input (unless `tbl = TRUE`).}
 
 \item{cols}{A character vector. Names of the columns to summarize.}
 
@@ -39,13 +40,13 @@ each summary statistic.}
 \item{tbl}{Logical. If `TRUE`, converts the result to a tibble (`tibble::as_tibble()`).}
 }
 \value{
-A `data.table` (or tibble if `tbl = TRUE`) containing the summary
-  statistics for the selected columns. The output will be either long or
-  wide depending on the `output` argument.
+A dataset containing the summary statistics for the selected columns.
+  The output will be either long or wide depending on the `output` argument.
+  The returned object will match the class of the input `data` (unless `tbl = TRUE`).
 }
 \description{
 `compute_fastsummary()` computes summary statistics for selected columns
-of a `data.table`, optionally grouped by one or more variables. It allows
+of a dataset, optionally grouped by one or more variables. It allows
 the user to specify a set of functions to apply, either from a predefined
 set or custom formulas/functions.
 }

@@ -15,7 +15,7 @@ test_that("convert_constant_ppp computes correct PPP-adjusted values", {
     ppp = c(1.5, 3.5)
   )
 
-  result <- convert_constant_ppp(data, wage_lcu, macro_indicators)
+  result <- convert_constant_ppp(data, "wage_lcu", macro_indicators)
 
   # expected computation:
   # 2010: (85 / 100) * (20000 / 3.5) = 4857.14
@@ -29,7 +29,7 @@ test_that("convert_constant_ppp errors when required columns are missing", {
   macro_indicators <- tibble(country_code = "A", year = 2021, cpi = 100, ppp = 3.5)
 
   expect_error(
-    convert_constant_ppp(bad_data, wage, macro_indicators),
+    convert_constant_ppp(bad_data, "wage", macro_indicators),
     "must contain columns: country_code, year"
   )
 })
@@ -49,6 +49,6 @@ test_that("convert_constant_ppp preserves original columns", {
     ppp = 2
   )
 
-  result <- convert_constant_ppp(data, wage_lcu, macro_indicators)
+  result <- convert_constant_ppp(data, "wage_lcu", macro_indicators)
   expect_true("sector" %in% names(result))
 })

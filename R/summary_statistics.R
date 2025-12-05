@@ -1,13 +1,13 @@
-
 #' Compute Fast Summary Statistics by Group
 #'
 #' `compute_fastsummary()` computes summary statistics for selected columns
-#' of a `data.table`, optionally grouped by one or more variables. It allows
+#' of a dataset, optionally grouped by one or more variables. It allows
 #' the user to specify a set of functions to apply, either from a predefined
 #' set or custom formulas/functions.
 #'
-#' @param data A `data.table`. The dataset on which to compute the summaries.
-#'   Must be of class `data.table`.
+#' @param data A `data.table`, `data.frame`, or tibble. The dataset on which to compute the summaries.
+#'   If not a `data.table`, it will be converted internally for computation.
+#'   The result will be returned in the same class as the input (unless `tbl = TRUE`).
 #' @param cols A character vector. Names of the columns to summarize.
 #' @param fns Optional. Either:
 #'   \itemize{
@@ -25,9 +25,9 @@
 #'   each summary statistic.
 #' @param tbl Logical. If `TRUE`, converts the result to a tibble (`tibble::as_tibble()`).
 #'
-#' @return A `data.table` (or tibble if `tbl = TRUE`) containing the summary
-#'   statistics for the selected columns. The output will be either long or
-#'   wide depending on the `output` argument.
+#' @return A dataset containing the summary statistics for the selected columns.
+#'   The output will be either long or wide depending on the `output` argument.
+#'   The returned object will match the class of the input `data` (unless `tbl = TRUE`).
 #'
 #' @details
 #' The function constructs the summary calls efficiently using `bquote()`
@@ -54,11 +54,11 @@
 #' )
 #' }
 #'
-#' @importFrom data.table is.data.table melt
+#' @importFrom data.table is.data.table as.data.table melt
 #' @importFrom tibble as_tibble
 #' @importFrom rlang is_formula as_function
 #' @importFrom glue glue
-#' 
+#'
 #' @export
 compute_fastsummary <- function(data,
                                 cols,
@@ -68,7 +68,8 @@ compute_fastsummary <- function(data,
                                 tbl = FALSE) {
 
   output <- match.arg(output)
-  stopifnot(data.table::is.data.table(data))
+  orig_class <- class(data)
+  if (!data.table::is.data.table(data)) data <- data.table::as.data.table(data)
 
   default_fns <- define_fns()
 
@@ -80,7 +81,6 @@ compute_fastsummary <- function(data,
     if (length(unknown) > 0) stop(glue::glue("Unknown function name(s): {toString(unknown)}"))
     selected_fns <- default_fns[fns]
   } else if (is.list(fns)) {
-    # mix of names and formulas
     char_fns <- fns[sapply(fns, is.character)]
     formula_fns <- fns[sapply(fns, rlang::is_formula)]
     selected_fns <- c(default_fns[intersect(unlist(char_fns), names(default_fns))], formula_fns)
@@ -92,18 +92,13 @@ compute_fastsummary <- function(data,
     for (fname in names(selected_fns)) {
       fn <- selected_fns[[fname]]
       if (rlang::is_formula(fn)) fn <- rlang::as_function(fn)
-      # create expression like mean(col) but using the actual function object
       calls[[paste(v, fname, sep = "_")]] <- bquote(.(fn)(.(as.name(v))))
     }
   }
 
   j_call <- as.call(c(as.name("list"), calls))
-
-  # Evaluate inside data.table
   stats_dt <- data[, eval(j_call), by = groups]
 
-
-  # reshape data to long or wide depending on user preferences
   if (output == "long") {
     stats_dt <- data.table::melt(stats_dt,
                                  id.vars = groups,
@@ -111,20 +106,30 @@ compute_fastsummary <- function(data,
                                  value.name = "value")
   }
   if (tbl) stats_dt <- tibble::as_tibble(stats_dt)
+
+  # Convert back to original class if needed
+  if (!tbl) {
+    if ("tbl_df" %in% orig_class) {
+      stats_dt <- tibble::as_tibble(stats_dt)
+    } else if ("data.frame" %in% orig_class && !"data.table" %in% orig_class) {
+      stats_dt <- as.data.frame(stats_dt)
+    }
+    # If original was data.table, do nothing
+  }
   stats_dt
 }
-
 
 #' Compute ratio indicators of summarized variables over macro indicators
 #'
 #' `compute_fastshare()` summarizes selected numeric columns by specified groups,
 #' merges the result with macroeconomic indicators, computes ratios
 #' of summarized variables per macro variable, and returns either a
-#' long or wide-format data.table.
+#' long or wide-format dataset.
 #'
-#' @param data A data.frame or data.table containing the raw data to summarize.
-#' @param macro_data A data.frame or data.table containing macro-level indicators.
+#' @param data A dataset containing the raw data to summarize.
+#' @param macro_data A `data.frame`, `data.table`, or tibble containing macro-level indicators.
 #'   Must share at least one common grouping variable with `data`. Default is `macro_indicators`.
+#'   The result will be returned in the same class as the input.
 #' @param macro_cols A character vector of column names in `macro_data` to use as denominators
 #'   for ratio calculations.
 #' @param cols A character vector of column names in `data` to summarize.
@@ -136,9 +141,10 @@ compute_fastsummary <- function(data,
 #'   - `"long"` returns a tidy table with columns: group variables, `macro_var`, `summary_var`, `indicator`, and `value`.
 #'   - `"wide"` returns a table with one column per indicator and original macro/summary values.
 #'
-#' @return A `data.table` containing:
+#' @return A dataset containing:
 #' - In `"long"` format: group variables, `macro_var`, `macro_value`, `summary_var`, `summary_value`, `indicator`, and `value`.
 #' - In `"wide"` format: group variables, one column per indicator (`summary_var` per `macro_var`), and original macro and summary values.
+#'   The returned object will match the class of the input `data`.
 #'
 #' @details
 #' The function works as follows:
@@ -153,7 +159,6 @@ compute_fastsummary <- function(data,
 #' \dontrun{
 #'
 #' dt <- contract_harmonized |> mutate(year = year(est_date)) |> as.data.table()
-#'
 #'
 #' compute_fastshare(
 #'   data = dt,
@@ -172,24 +177,26 @@ compute_fastsummary <- function(data,
 #'   fns = c("sum", "mean"),
 #'   output = "wide",
 #'   groups = c("country_code", "year"))
-#' 
+#'
 #' }
 #'
-#' @importFrom data.table as.data.table melt dcast merge.data.table := setkeyv
+#' @importFrom data.table as.data.table melt dcast setkeyv merge.data.table
 #' @importFrom stats as.formula
+#' @importFrom tibble as_tibble
 #' @export
-
-
 compute_fastshare <- function(data,
-                              macro_data = macro_indicators |> as.data.table(),
+                              macro_data = macro_indicators |> data.table::as.data.table(),
                               macro_cols,
                               cols,
                               groups,
                               fns,
                               output = c("long", "wide")) {
   output <- match.arg(output)
+  orig_class <- class(data)
+  orig_macro_class <- class(macro_data)
+  if (!data.table::is.data.table(data)) data <- data.table::as.data.table(data)
+  if (!data.table::is.data.table(macro_data)) macro_data <- data.table::as.data.table(macro_data)
 
-  # --- 1. Compute summarized data ---
   summary_dt <- compute_fastsummary(
     data = data,
     cols = cols,
@@ -198,25 +205,23 @@ compute_fastshare <- function(data,
     output = "wide"
   )
 
-  # --- 2. Detect join keys automatically ---
   join_vars <- intersect(names(summary_dt), names(macro_data))
   if (length(join_vars) == 0)
     stop("No common grouping variables found between data and macro_data.")
 
-  setkeyv(summary_dt, join_vars)
-  setkeyv(macro_data, join_vars)
+  data.table::setkeyv(summary_dt, join_vars)
+  data.table::setkeyv(macro_data, join_vars)
 
-  merged_dt <- macro_data[summary_dt]
+  merged_dt <- data.table::merge.data.table(macro_data, summary_dt)
 
-  # --- 4. Compute shares (always work in long form internally) ---
-  long_macro <- melt(
+  long_macro <- data.table::melt(
     merged_dt,
     measure.vars = macro_cols,
     variable.name = "macro_var",
     value.name = "macro_value"
   )
 
-  long_summary <- melt(
+  long_summary <- data.table::melt(
     summary_dt,
     measure.vars = setdiff(names(summary_dt), join_vars),
     variable.name = "summary_var",
@@ -236,84 +241,85 @@ compute_fastshare <- function(data,
                                   "summary_var", "summary_value", "indicator", "value")
                     ]
 
-  # --- 5. Format output ---
   if (output == "wide") {
     keep_macro <- unique(ratio_dt[, c(join_vars, "macro_var", "macro_value"), with = FALSE])
-    keep_macro <- dcast(
+    keep_macro <- data.table::dcast(
       keep_macro,
-      as.formula(paste(paste(join_vars, collapse = " + "), "~ macro_var")),
+      stats::as.formula(paste(paste(join_vars, collapse = " + "), "~ macro_var")),
       value.var = "macro_value"
     )
 
     keep_summary <- unique(ratio_dt[, c(join_vars, "summary_var", "summary_value"), with = FALSE])
-    keep_summary <- dcast(
+    keep_summary <- data.table::dcast(
       keep_summary,
-      as.formula(paste(paste(join_vars, collapse = " + "), "~ summary_var")),
+      stats::as.formula(paste(paste(join_vars, collapse = " + "), "~ summary_var")),
       value.var = "summary_value"
     )
 
     keep_dt <- merge(keep_macro, keep_summary, by = join_vars, all = TRUE)
 
     ratio_dt <- unique(ratio_dt[, c(join_vars, "indicator", "value"), with = FALSE])
-    ratio_dt <- dcast(
+    ratio_dt <- data.table::dcast(
       ratio_dt,
-      as.formula(paste(paste(join_vars, collapse = " + "), "~ indicator")),
+      stats::as.formula(paste(paste(join_vars, collapse = " + "), "~ indicator")),
       value.var = "value"
     )
 
     ratio_dt <- merge(ratio_dt, keep_dt, by = join_vars, all.x = TRUE)
   }
 
-  return(ratio_dt)
+  # Convert back to original class if needed
+  if ("tbl_df" %in% orig_class) {
+    ratio_dt <- tibble::as_tibble(ratio_dt)
+  } else if ("data.frame" %in% orig_class && !"data.table" %in% orig_class) {
+    ratio_dt <- as.data.frame(ratio_dt)
+  }
+  ratio_dt
 }
 
-
-#' Calculate year-over-year growth for a numeric column (data.table version)
+#' Calculate year-over-year growth for a numeric column
 #'
-#' @description
-#' Computes the year-over-year growth rate for a numeric column in a data.table.
+#' Computes the year-over-year growth rate for a numeric column in a dataset.
 #' The function ensures a complete sequence of years between the minimum and maximum
 #' in the date column, fills in any missing years, and calculates the growth rate
 #' using lagged values.
 #'
-#' @param data A data.table containing the data.
+#' @param data A dataset.
 #' @param col A numeric column (either unquoted or as a string) for which the
 #'   year-over-year growth rate will be calculated.
 #' @param date_col A date or numeric column (either unquoted or as a string)
 #'   used to order the data and define the time sequence (typically a year column).
 #'
-#' @return A data.table with:
+#' @return A dataset with:
 #' \itemize{
 #'   \item The completed `date_col` sequence.
 #'   \item A new column named `"growth_<col>"` containing the year-over-year growth rates.
 #' }
+#'   The returned object will match the class of the input `data`.
 #'
 #' @details
 #' - Missing years in the sequence are added automatically.
 #' - Missing values in `col` result in `NA` for the corresponding growth rate.
 #' - The first observation (or any row where the lag is missing) will have `NA`.
 #' - The function can accept both unquoted column names or strings.
-#' - To compute growth rates by group (e.g., country), subset or loop by group before calling this function.
+#' - To compute growth rates by group (e.g., country), use `group_by()` from `dplyr`.
 #'
 #' @examples
 #' library(data.table)
 #'
-#' dt <- data.table(
+#' dt <- data.table::data.table(
 #'   year = c(2020, 2021, 2023),
 #'   gdp = c(100, 110, 130)
 #' )
 #'
-#'
 #' # Using strings
 #' compute_fastchange(dt, "gdp", "year")
 #'
-#' @importFrom data.table as.data.table setnames := shift
-#'
+#' @importFrom data.table as.data.table setnames shift
 #' @export
-
-
 compute_fastchange <- function(data, col, date_col) {
-  dt <- as.data.table(data)
+  orig_class <- class(data)
+  dt <- data.table::as.data.table(data)
 
   # if col/date_col are symbols, convert to strings
   if (!is.character(col)) col <- deparse(substitute(col))
@@ -324,19 +330,24 @@ compute_fastchange <- function(data, col, date_col) {
                     max(dt[[date_col]], na.rm = TRUE))
 
   # Complete the table
-  dt_full <- data.table(years_full)
-  setnames(dt_full, "years_full", date_col)
+  dt_full <- data.table::data.table(years_full)
+  data.table::setnames(dt_full, "years_full", date_col)
   dt_full <- merge(dt_full, dt[, .SD, .SDcols = c(date_col, col)],
                    by = date_col, all.x = TRUE)
 
   # Compute year-over-year growth
   growth_col <- paste0(col, "_growth")
-  dt_full[, (growth_col) := get(col) / shift(get(col)) - 1]
+  dt_full[, (growth_col) := get(col) / data.table::shift(get(col)) - 1]
+
+  # Convert back to original class if needed
+  if ("tbl_df" %in% orig_class) {
+    dt_full <- tibble::as_tibble(dt_full)
+  } else if ("data.frame" %in% orig_class && !"data.table" %in% orig_class) {
+    dt_full <- as.data.frame(dt_full)
+  }
 
   return(dt_full)
-
 }
-
 
 ################################################################################
 ##################### PUBLIC SECTOR REPORTING FUNCTIONS ########################
@@ -589,101 +600,63 @@ compute_hrmreport_stats <- function(contract_dt,
   return(hrm_list)
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#' Fast counting via dtplyr
+#'
+#' `fastcount()` delegates [dplyr::count()] to a `data.table` backend by
+#' converting the input to a lazy `dtplyr` table first. This preserves the
+#' familiar `count()` interface while exploiting `data.table` performance.
+#'
+#' @inheritParams dplyr::count
+#' 
+#' @return A tibble with one row per group and a count column.
+#'
+#' @examples
+#' df <- tibble::tibble(group = c("a", "a", "b"))
+#' fastcount(df, group)
+#'
+#' @importFrom dtplyr lazy_dt
+#' @import dplyr
+#' @importFrom tibble as_tibble
+#' 
+#' @export
+fastcount <- function(x, ..., wt = NULL, sort = FALSE, name = NULL) {
+  count_dt <- dtplyr::lazy_dt(x, immutable = TRUE) |>
+    dplyr::count(..., wt = {{ wt }}, sort = sort, name = name) |>
+    tibble::as_tibble()
+
+  count_dt
+}
+
+#' Compute group-wise proportions from counts
+#'
+#' fastprop() computes the proportion of counts within groups.
+#' It expects the input to already contain a count column named `n`
+#' (for example the output of `dplyr::count()` or `fastcount()`).
+#'
+#' @param .data A data frame or tibble containing a count column `n`.
+#' @param ... Grouping variables. Proportions are
+#'   computed within the combinations of these variables.
+#'
+#' @return A tibble with the same columns as `.data` plus a numeric
+#'   `prop` column giving the group share (0–1). Missing `n` values are
+#'   ignored in the denominator via `na.rm = TRUE`.
+#'
+#' @examples
+#' library(dplyr)
+#' df <- tibble::tibble(group = c("a","a","b"))
+#' df |> count(group) |> fastprop(group)
+#'
+#' @seealso dplyr::count, fastcount
+#' @export
+fastprop <- function(.data, ...){
+  group_vars <- rlang::ensyms(...)
+
+  prop_dt <- .data |>
+    dtplyr::lazy_dt() |> 
+    dplyr::group_by(!!!group_vars) |>
+    dplyr::mutate(prop = n / sum(n, na.rm = TRUE)) |>
+    dplyr::ungroup() |> 
+    as_tibble()
+
+  prop_dt
+}

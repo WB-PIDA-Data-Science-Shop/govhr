@@ -1,17 +1,13 @@
 ---
 title: "HR Analytics Standard Report"
-output: 
-  html_document:
-    toc: true
-    toc_float: true
+output: rmarkdown::html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
-  dpi = 300,
-  eval = FALSE
+  dpi = 300
 )
 
 library(dplyr)
@@ -22,6 +18,7 @@ library(data.table)
 library(stringr)
 library(tidyr)
 library(purrr)
+library(govhr)
 
 # set default color palette with scale_color_brewer
 theme_set(
@@ -53,8 +50,6 @@ The second part assesses the impact of these employment and compensation practic
 We have designed a convenient function, `govhr::compute_hrmreport_stats`, that produces all summary statistics necessary to produce the standard report on HR. All you need to do is provide the three standard modules as inputs to the function.
 
 ```{r, include = TRUE}
-library(govhr)
-
 hrm_report_stats <- compute_hrmreport_stats(
   contract_dt = govhr::bra_hrmis_contract,
   personnel_dt = govhr::bra_hrmis_personnel,
@@ -97,9 +92,8 @@ wagebill_annual <- hrm_report_stats |>
   )
 
 wagebill_annual |> 
-  compute_fastchange(
-    "value",
-    date_col = "year"
+  mutate(
+    value_growth = (value - lag(value))/lag(value),
   ) |>
   ggplot() +
   geom_point(
@@ -107,8 +101,7 @@ wagebill_annual |>
   ) +
   scale_y_continuous(
     labels = scales::percent_format()
-  ) +
-  labs(
+  ) +  labs(
     x = "Fiscal balance",
     y = "Wage bill (annual growth)"
   )
@@ -187,45 +180,3 @@ hrm_report_stats |>
     title = "Allowance as Share of Gross Salary, by Paygrade"
   )
 ```
-<!-- ### Percentage of staff receiving a performance bonus -->
-
-<!-- ```{r} -->
-<!-- #| fig.alt: > -->
-<!-- #|   Plot of staff receiving a performance bonus -->
-
-<!-- performance_bonus_personnel <- govhr::bra_hrmis_contract |> -->
-<!--   filter( -->
-<!--     !is.na(allowance_lcu) & -->
-<!--       lubridate::year(ref_date) <= 2017 -->
-<!--   ) |> -->
-<!--   group_by(year) |> -->
-<!--   summarise( -->
-<!--     total_performance = n_distinct(personnel_id) -->
-<!--   ) -->
-
-<!-- govhr::bra_hrmis_contract |> -->
-<!--   group_by(year) |> -->
-<!--   summarise( -->
-<!--     total = n_distinct(personnel_id) -->
-<!--   ) |> -->
-<!--   left_join( -->
-<!--     performance_bonus_personnel, -->
-<!--     by = "year" -->
-<!--   ) |> -->
-<!--   mutate( -->
-<!--     year = as.numeric(year), -->
-<!--     share_performance = total_performance/total -->
-<!--   ) |> -->
-<!--   ggplot_point_line( -->
-<!--     year, -->
-<!--     share_performance -->
-<!--   ) + -->
-<!--   scale_y_continuous( -->
-<!--     labels = scales::percent_format() -->
-<!--   ) + -->
-<!--   labs( -->
-<!--     x = "Year", -->
-<!--     y = "Share of personnel" -->
-<!--   ) -->
-<!-- ``` -->
-
