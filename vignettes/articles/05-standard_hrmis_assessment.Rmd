@@ -22,8 +22,6 @@ theme_set(
   theme_few()
 )
 
-devtools::load_all()
-
 set.seed(2025)
 
 # read-in data ------------------------------------------------------------
