@@ -30,6 +30,8 @@ Imports:
     broom
 RoxygenNote: 7.3.3
 Suggests: 
+    forcats,
+    readr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Depends: 
