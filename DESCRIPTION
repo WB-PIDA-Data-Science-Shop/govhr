@@ -12,7 +12,6 @@ Imports:
     dplyr,
     purrr,
     tibble,
-    tidyselect,
     rlang,
     pointblank,
     stringr,
@@ -27,7 +26,8 @@ Imports:
     ggrepel,
     ggthemes,
     data.table,
-    dtplyr
+    dtplyr,
+    broom
 RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0)

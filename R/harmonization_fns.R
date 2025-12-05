@@ -49,12 +49,12 @@ find_inconsistent_colnames <- function(data_list) {
 #' detect_inconsistent_cols(df, c("c", "d")) # returns FALSE
 #' detect_inconsistent_cols(df, c("a", "c")) # returns TRUE
 #'
-#' @importFrom dplyr select if_else
-#' @importFrom tidyselect any_of
+#' @importFrom dplyr select if_else any_of
+#' 
 #' @export
 detect_inconsistent_cols <- function(data, inconsistent_cols) {
   n_inconsistent_cols <- data |>
-    dplyr::select(tidyselect::any_of(inconsistent_cols)) |>
+    dplyr::select(dplyr::any_of(inconsistent_cols)) |>
     ncol()
 
   dplyr::if_else(n_inconsistent_cols > 0, TRUE, FALSE)

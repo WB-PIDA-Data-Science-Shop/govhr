@@ -1,7 +1,6 @@
 url: https://wb-pida-data-science-shop.github.io/govhr/
 template:
   bootstrap: 5
-  bootswatch: litera
   logo: man/figures/logo.png
 authors:
   "Ifeanyi Edochie":

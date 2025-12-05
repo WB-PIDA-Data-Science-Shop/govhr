@@ -27,8 +27,6 @@ Can be \code{NULL} or a variable:
 If omitted, it will default to \code{n}. If there's already a column called \code{n},
 it will use \code{nn}. If there's a column called \code{n} and \code{nn}, it'll use
 \code{nnn}, and so on, adding \code{n}s until it gets a new name.}
-
-\item{prop_by}{Optional. A grouping variable to compute proportions within each group.}
 }
 \value{
 A tibble with one row per group and a count column.

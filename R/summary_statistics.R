@@ -607,7 +607,6 @@ compute_hrmreport_stats <- function(contract_dt,
 #' familiar `count()` interface while exploiting `data.table` performance.
 #'
 #' @inheritParams dplyr::count
-#' @param prop_by Optional. A grouping variable to compute proportions within each group.
 #' 
 #' @return A tibble with one row per group and a count column.
 #'
@@ -618,6 +617,8 @@ compute_hrmreport_stats <- function(contract_dt,
 #' @importFrom dtplyr lazy_dt
 #' @import dplyr
 #' @importFrom tibble as_tibble
+#' 
+#' @export
 fastcount <- function(x, ..., wt = NULL, sort = FALSE, name = NULL) {
   count_dt <- dtplyr::lazy_dt(x, immutable = TRUE) |>
     dplyr::count(..., wt = {{ wt }}, sort = sort, name = name) |>

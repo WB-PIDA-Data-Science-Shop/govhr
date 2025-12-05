@@ -1,0 +1,82 @@
+---
+title: "Output Rendering"
+subtitle: "Subtitle is skipped from the TOC"
+author: "Author is skipped from the TOC"
+date: "Date is skipped from the TOC"
+---
+
+```{r}
+#| include: FALSE
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Tabsets
+
+## Tabset with pills {.tabset .tabset-pills}
+
+### Tab 1 
+
+### Subtab 1
+
+blablablabla
+
+```r
+1 + 1
+```
+
+Should be "cool" heading below
+
+### cool
+
+Stuff
+
+### Tab 2
+
+blop
+
+## Tabset without pills {.tabset}
+
+### Tab 1
+
+something nice
+
+```{r}
+#| fig.alt: Another test plot
+plot(1:42)
+```
+
+### Tab 2
+
+Very nice
+
+#### Tab 2 {.active}
+
+This tab should be active
+
+### Fading tabset {.tabset .tabset-fade}
+
+#### English
+
+Hello!
+
+#### French
+
+Bonjour!
+
+#### German
+
+Guten tag.
+
+## Deep headings
+
+### Heading 3
+
+#### Heading 4
+
+##### Heading 5
+
+## Very long words
+
+This word should be broken across multiple lines on mobile, rather than making the page scroll horizontally:
+
+Ccccccccccccaaaaaaaaaaaaaaatttttttttttttttttssssssssssssssss 

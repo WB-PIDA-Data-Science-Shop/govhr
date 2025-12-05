@@ -54,7 +54,7 @@ wwbi_wage_premium <- wwbi_raw |>
     names_from = c(INDICATOR, COMP_BREAKDOWN_1, SEX),
     names_sep = "_"
   ) |>
-  rename(
+  transmute(
     country_code = REF_AREA,
     year = TIME_PERIOD,
     ps_wage_premium_pooled = WB_WWBI_BI_WAG_PREM_PE__Z__T,
