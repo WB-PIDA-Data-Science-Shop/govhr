@@ -239,7 +239,6 @@ detect_reallocation <- function(data, personnel_hire) {
   return(data_reallocation)
 }
 
-
 #' Add Contract Information to Event Records
 #'
 #' @description
@@ -369,7 +368,6 @@ add_contract_to_event <- function(event_dt,
 #' )
 #'
 #' @export
-
 
 detect_career_transitions <- function(contract_dt,
                                       vars,

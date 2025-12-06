@@ -1,13 +1,8 @@
 ---
-title: "HRMIS Analytics: Standard Report Prototype"
+title: "HR Analytics: Standard Report Prototype"
 author: "Galileu Kim"
-date: "October 20, 2025"
-output: 
-  html_document:
-    toc: true
-    toc_float: true
+date: "12/4/2025"
 ---
-
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 # reference:
 # https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf
@@ -21,13 +16,14 @@ library(purrr)
 library(lubridate)
 library(ggthemes)
 library(forcats)
+library(data.table)
+library(tidyr)
+library(govhr)
 
 # set default color palette with scale_color_brewer
 theme_set(
   theme_few()
 )
-
-devtools::load_all()
 
 set.seed(2025)
 
@@ -74,7 +70,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Introduction {}
+## Standard HR Analytics Report {.tabset .tabset-pill}
+
+### Overview
 
 This report provides a standard set of indicators and visualizations on HRMIS analytics, building on the World Bank's [Public Sector and Employment Assessment Framework](https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf). The objective of this assessment is to conduct public sector employment and compensation assessments that can help develop evidence-based reforms.
 
@@ -93,7 +91,7 @@ The second part assesses the impact of these employment and compensation practic
 2. Public sector productivity.
 3. Labor allocation between the public and private sectors.
 
-## 3.1. Wage bill planning {.tabset .tabset-dropdown}
+### 3.1. Wage bill planning
 
 The wage bill represents a large and less flexible component of government expenditures with significant future liabilities. Globally, and noting the difficulties with cross-country comparisons, the wage bill represents approximately 30 percent of government expenditures,
 with significant variation around this average. This section presents some indicators that can help governments better understand and manage their wage bill.
@@ -115,7 +113,7 @@ subnational governments?
 political considerations?
 6. Is there any public debate or public disclosure around wage bill policies?
 
-### 3.1.1. Wage bill as share of GDP, expenditures, and revenues
+3.1.1. Wage bill as share of GDP, expenditures, and revenues
 
 ```{r}
 wage_vars <- c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")
@@ -125,7 +123,7 @@ lcu_vars <- colnames(govhr::macro_indicators)[grepl(
   colnames(govhr::macro_indicators)
 )]
 
-### compute ppp variables
+# compute ppp variables
 bra_wagebill <- contract_df |>
   convert_constant_ppp(
     cols = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
@@ -172,7 +170,7 @@ wagebill_shares_dt |>
   )
 ```
 
-### 3.1.2. Wage bill decomposed by administrative and industry classification
+3.1.2. Wage bill decomposed by administrative and industry classification
 
 ```{r}
 bra_wagebill |>
@@ -205,7 +203,7 @@ bra_wagebill |>
   )
 ```
 
-### Annual recruitment patterns over time
+3.1.3. Annual recruitment patterns over time
 
 ```{r}
 personnel_hire_df <- personnel_df |> 
@@ -225,7 +223,7 @@ personnel_hire_df |>
   geom_line()
 ```
 
-## 3.2. Wage Bill Controls {.tabset .tabset-dropdown}
+### 3.2. Wage Bill Controls
 
 Wage bill ceilings are effective only when ministries must adhere to them, which depends on how ceilings are defined, how much reallocation flexibility agencies have, and the strength of oversight. Large gaps between budgeted and actual wage spending, or between authorized and filled positions, indicate weak control. Robust payroll–HR systems are essential to prevent ghost workers and illegal payments. Where such control systems are absent, payroll audits, employee censuses, and electronic payment systems help strengthen control and reduce salary arrears.
 
@@ -246,7 +244,7 @@ workers, retirees still on the payroll, or legitimate employees getting illegal 
 to identify issues?
 4. Is there are problem of salary arrears and delays in the payment of salaries for public servants
 
-### 3.2.1. Deviations between budgeted and actual general government wage bill expenditures
+3.2.1. Deviations between budgeted and actual general government wage bill expenditures
 
 ```{r}
 macro_indicators |> 
@@ -268,13 +266,13 @@ macro_indicators |>
     )
 ```
 
-<!-- ### 3.2.2. Filled positions as a proportion of budgeted positions
+3.2.2. Filled positions as a proportion of budgeted positions
 
-### 3.2.3. Ghost workers as a percentage of total workers
+3.2.3. Ghost workers as a percentage of total workers
 
-### 3.2.3. Wage bill arrears as a  percentage of total wage bill expenditures -->
+3.2.3. Wage bill arrears as a  percentage of total wage bill expenditures
 
-## 3.3. Employment Level and Distribution {.tabset .tabset-dropdown}
+### 3.3. Employment Level and Distribution
 
 This section assesses whether a public sector is over- or under-staffed by comparing public employment to total, paid, and formal-sector employment.  Globally, the public sector accounts on average for about 16% of total employment, 30% of wage employment and 37% of formal-sector wage employment — though there is wide cross-country variation, with public-sector shares ranging from under 2% to over 40%.  The share of public sector employment tends to rise with a country’s income level, reflecting greater government roles as economies develop, but there is no clear relationship between income and the share of salaried employment that is public — implying that public and private formal wage employment often expand together.  The analysis of employment distribution should also examine whether the right number of staff are employed in the right functions, locations, and sectors — to ensure efficiency and avoid distortions.
 
@@ -290,7 +288,7 @@ b. Is there horizontal and vertical segregation in employment?
 5. Is there a dual labor regime with a large segment of contract workers, and what are its implications for public
 sector employment?
 
-### 3.3.1. Public sector employment as a share of total, paid, and formal employment
+3.3.1. Public sector employment as a share of total, paid, and formal employment
 
 ```{r}
 govhr::wwbi |> 
@@ -318,7 +316,7 @@ govhr::wwbi |>
   )
 ```
 
-### 3.3.2. Industry and occupational distribution of public sector employment
+3.3.2. Industry and occupational distribution of public sector employment
 
 ```{r}
 contract_df |>
@@ -354,7 +352,7 @@ contract_df |>
   ) 
 ```
 
-### 3.3.3. Educational profile of public sector employees
+3.3.3. Educational profile of public sector employees
 
 ```{r}
 personnel_df |>
@@ -389,7 +387,7 @@ personnel_df |>
   )
 ```
 
-### 3.3.4. Distribution of public sector workers by pay grade
+3.3.4. Distribution of public sector workers by pay grade
 
 ```{r}
 contract_df |>
@@ -418,7 +416,7 @@ contract_df |>
   )
 ```
 
-### 3.3.5. Share of women workers in the public sector
+3.3.5. Share of women workers in the public sector
 
 ```{r}
 personnel_df |>
@@ -447,7 +445,7 @@ personnel_df |>
   )
 ```
 
-### 3.3.6. Share of women workers by occupation
+3.3.6. Share of women workers by occupation
 
 ```{r}
 contract_df |>
@@ -488,7 +486,7 @@ contract_df |>
   )
 ```
 
-### 3.3.7. Share of women workers by ministry
+3.3.7. Share of women workers by ministry
 
 ```{r}
 contract_df |> 
@@ -531,7 +529,7 @@ contract_df |>
   )
 ```
 
-## 3.4. Wage competitiveness {.tabset .tabset-dropdown}
+### 3.4. Wage competitiveness
 
 Public sector wage levels are crucial for attracting and retaining competent workers for expenditure efficiency, fiscal sustainability, and for equilibrium outcomes in the entire labor market. This section provides some key stylized facts that provide evidence of the competitiveness of public sector wages. These include: public sector wage premiums relative to the private sector, wage levels by occupation and education level, and trends in public sector wages relative to private sector wages.
 
@@ -546,7 +544,7 @@ to attract specialized and high demand talent? How does this flexibility impact 
 managed?
 4. Does the government use data to model fiscal impact and identify salary mismatches and to inform wage policy?
 
-### 3.4.1. Public sector wage premium
+3.4.1. Public sector wage premium
 
 ```{r}
 wwbi |> 
@@ -564,7 +562,7 @@ wwbi |>
   )
 ```
 
-### 3.4.2. Public sector wage premium by education level
+3.4.2. Public sector wage premium by education level
 
 ```{r}
 wwbi |>
@@ -589,13 +587,13 @@ wwbi |>
   )
 ```
 
-### 3.4.3. Pay comparisons for occupations across public sectors
+3.4.3. Pay comparisons for occupations across public sectors
 
 ```{r}
 print("Not available: no cross-country occupation wage data available")
 ```
 
-## 3.5. Wage equity {.tabset .tabset-dropdown}
+### 3.5. Wage equity
 
 Wage equity -- whether workers in similar jobs, with similar skills, similar years of service, and similar
 performance are paid equally, and differences in salary between different occupations are deemed legitimate -- is important for both employee motivation and public sector productivity. This section provides some key stylized facts that provide evidence of wage equity in the public sector.
@@ -609,7 +607,7 @@ address gender inequity?
 3. What are the sources of wage inequity? Are pay relativities in salary scales derived from robust job evaluations? Are there discretionary elements of pay, such as cash payments or allowances?
 4. Is there a justifiable tradeoff between wage inequity and wage competitiveness in order to attract high-demand talent while maintaining general coherence of pay across the public sector?
 
-### 3.5.1. Pay compression ratio in the public sector
+3.5.1. Pay compression ratio in the public sector
 
 ```{r}
 contract_df |>
@@ -632,7 +630,7 @@ contract_df |>
   )
 ```
 
-### 3.5.2. Pay dispersion in the public sector
+3.5.2. Pay dispersion in the public sector
 
 ```{r}
 salary_dispersion <- contract_df |>
@@ -658,7 +656,7 @@ salary_dispersion <- contract_df |>
   )
 ```
 
-### 3.5.3. Within-occupation public sector pay dispersion
+3.5.3. Within-occupation public sector pay dispersion
 
 ```{r}
 salary_dispersion_occupation <- contract_df |>
@@ -686,7 +684,7 @@ salary_dispersion_occupation |>
   )
 ```
 
-### 3.5.4. Female-male wage ratio
+3.5.4. Female-male wage ratio
 
 ```{r}
 contract_df |>
@@ -725,7 +723,7 @@ contract_df |>
     )
 ```
 
-### 3.5.5. Gender wage premium
+3.5.5. Gender wage premium
 
 ```{r}
 gender_df <- contract_df |>
@@ -758,7 +756,9 @@ gender_premium_ols |>
   )
 ```
 
-## 3.6. Wage incentives {.tabset .tabset-dropdown}
+### 3.6. Wage incentives
+
+Overview
 
 The extent to which wage increases are explicitly linked to performance is important for both employee motivation and public sector productivity. This section provide some key stylized facts that provide evidence of the productivity and fiscal implications of pay incentives. These include: the magnitude of promotion-based and seniority-based annual wage increases, expected wage increases over an employee's career and the coverage and key design features of performance bonuses.
 
@@ -769,13 +769,13 @@ Guidance questions for the assessment:
 3. Are there performance bonus schemes and if so what occupation groups and percentage of the staff receive them; and how large is the bonus that staff are expected to receive?
 4. Is there targeted, significant additional pay for essential personnels to serve in hard-to-staff locations such as rural areas?
 
-### 3.6.1. Percentage of staff receiving highest performance ratings
+3.6.1. Percentage of staff receiving highest performance ratings
 
 ```{r}
 print("Not available: no performance rating data available")
 ```
 
-### 3.6.2. The size of annual, within-grade pay increases
+3.6.2. The size of annual, within-grade pay increases
 
 ```{r}
 # 3.6.2. annual, within-grade pay increases
@@ -816,7 +816,7 @@ contract_df |>
   )
 ```
 
-### 3.6.3. percentage of staff receiving a performance bonus
+3.6.3. percentage of staff receiving a performance bonus
 
 ```{r}
 # 3.6.3. percentage of staff receiving a performance bonus
@@ -858,7 +858,7 @@ contract_df |>
 # n/a: no data on hardship available
 ```
 
-###  3.6.4. Performance bonus as a percentage of basic pay
+ 3.6.4. Performance bonus as a percentage of basic pay
 
 ```{r}
 contract_df |>
@@ -899,7 +899,7 @@ contract_df |>
   )
 ```
 
-## 4.1. Fiscal sustainability {.tabset .tabset-dropdown}
+### 4.1. Fiscal sustainability
 
 The wage bill can potentially have a major effect on fiscal balances, but there are no simple benchmarks for the “right” size of the wage bill. In fact, cross-national evidence suggests that there is no strong correlation between the size of the wage bill and fiscal balance. Wage bill dynamics are a better predictor of fiscal sustainability. In general, increases in the wage bill are associated with worsening of the fiscal balance. In addition, wage expenditures are pro-cyclical, rising during periods of economic growth, but not falling as much during downturns due to structural rigidity.
 
@@ -909,7 +909,7 @@ Guidance questions for the assessment:
 2. What are the main drivers of wage bill growth?
 3. What are the wage bill projections for baseline and different policy option scenarios based on wage bill modeling?
 
-### 4.1.1. Correlation between wage bill growth and fiscal balances
+4.1.1. Correlation between wage bill growth and fiscal balances
 
 ```{r}
 contract_annual_growth <- contract_df |>
@@ -944,7 +944,7 @@ contract_annual_growth |>
   )
 ```
 
-### 4.1.2.Correlation between wage bill growth and changes in capital and non-wage recurrent expenditures
+4.1.2.Correlation between wage bill growth and changes in capital and non-wage recurrent expenditures
 
 ```{r}
 contract_annual_growth |>
@@ -961,7 +961,7 @@ contract_annual_growth |>
   )
 ```
 
-### 4.1.3. Decomposition of wage growth: employment and wages
+4.1.3. Decomposition of wage growth: employment and wages
 
 ```{r}
 contract_growth |> 
@@ -986,7 +986,7 @@ contract_growth |>
   )
 ```
 
-## 4.2. Public sector productivity {.tabset .tabset-dropdown}
+### 4.2. Public sector productivity
 
 A key question is whether the public sector workforce is performing well and delivering high quality infrastructure, services, and regulations, which is really a question of public sector labor productivity. Productivity measures the efficiency with which inputs, like labor, are converted into outputs, and is a more precise and economically meaningful concept than “performance,” since presumably performance can be improved by spending more while productivity measures whether more is produced and delivered for a given wage bill.
 
@@ -999,7 +999,7 @@ Guidance questions for the assessment.
 subnational measures—for example, recent rapid growth or declines in a particular subnational entity)? What might be the underlying features explaining the existence of such outliers?
 3. Are total labor expenditures and public sector wages correlated with measures of institutional quality over time? Measures of institutional quality include the Worldwide Governance Indicators, perceptions of the quality of governance through household surveys – such as Eurobarometer, Afrobarometer, or World Values Surveys – the OECD’s Government at a Glance Indicators, the Quality of Government Index, and the World Bank’s Doing Business Indicators. With household level data and any other subnational data on measures of institutional quality, are there any outliers across subnational entities in the current distribution of institutional quality or outliers in the trends of measures of institutional quality?
 
-### 4.2.1. Correlation between wage bill growth and public-sector outputs and outcomes.
+4.2.1. Correlation between wage bill growth and public-sector outputs and outcomes.
 
 ```{r, eval = FALSE}
 # confidence in government
@@ -1009,7 +1009,7 @@ subnational measures—for example, recent rapid growth or declines in a particu
 print("Not available")
 ```
 
-## 4.3. Labor allocation between public and private sectors {.tabset .tabset-dropdown}
+### 4.3. Labor allocation between public and private sectors
 
 Public sector employment and compensation policies
 can have major impacts on the entire labor market,
@@ -1021,7 +1021,7 @@ Guidance questions:
 1. Is the public sector crowding out the labor market, impeding private-sector job growth for specific skills, occupation, demographic, and geographical groups?
 2. Is the public sector having a distortionary impact on younger cohorts, particularly fresh university graduates, causing them to queue for public sector jobs and reject private sector jobs?
 
-### 4.3.1. Public sector wage premium
+4.3.1. Public sector wage premium
 
 ```{r}
 wwbi |>
@@ -1061,10 +1061,10 @@ wwbi |>
   )
 ```
 
-### 4.3.2. Number of applications per position
+4.3.2. Number of applications per position
 N/A
 
-### 4.3.3. Correlation between public sector employment growth or recruitment patterns and private-sector employment growth or recruitment patterns (by skill, demographic, occupation, and geographical groups)
+4.3.3. Correlation between public sector employment growth or recruitment patterns and private-sector employment growth or recruitment patterns (by skill, demographic, occupation, and geographical groups)
 
 ```{r}  
 contract_growth |> 
@@ -1090,7 +1090,7 @@ contract_growth |>
   )
 ```
 
-### 4.3.4. Trends in educational profiles of public-sector personnels relative to private-sector personnels (by demographic, occupation, and geographical groups)
+4.3.4. Trends in educational profiles of public-sector personnels relative to private-sector personnels (by demographic, occupation, and geographical groups)
 ```{r}
 personnel_df |>
   group_by(country_code, year) |>
@@ -1120,7 +1120,7 @@ personnel_df |>
   )
 ```
 
-### 4.3.5. Correlation between public-sector wage premium and relative employment growth in the public sector (by skill, demographic, occupation, and geographical groups)
+4.3.5. Correlation between public-sector wage premium and relative employment growth in the public sector (by skill, demographic, occupation, and geographical groups)
 
 ```{r}
 contract_growth |>
@@ -1146,9 +1146,8 @@ contract_growth |>
   )
 ```
 
-### 4.3.6. Skills shortages in the private sector (from firm surveys)
+4.3.6. Skills shortages in the private sector (from firm surveys)
 
 ```{r}
 print("Enterprise surveys coverage is limited.")
 ```
-

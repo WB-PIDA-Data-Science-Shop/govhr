@@ -49,12 +49,12 @@ find_inconsistent_colnames <- function(data_list) {
 #' detect_inconsistent_cols(df, c("c", "d")) # returns FALSE
 #' detect_inconsistent_cols(df, c("a", "c")) # returns TRUE
 #'
-#' @importFrom dplyr select if_else
-#' @importFrom tidyselect any_of
+#' @importFrom dplyr select if_else any_of
+#' 
 #' @export
 detect_inconsistent_cols <- function(data, inconsistent_cols) {
   n_inconsistent_cols <- data |>
-    dplyr::select(tidyselect::any_of(inconsistent_cols)) |>
+    dplyr::select(dplyr::any_of(inconsistent_cols)) |>
     ncol()
 
   dplyr::if_else(n_inconsistent_cols > 0, TRUE, FALSE)
@@ -311,7 +311,7 @@ complete_columns <- function(data, cols) {
 #' - `ppp` has columns: country_code, ppp  (ppp = LCU per 2021 Intl$)
 #'
 #' @param data Data frame with columns (country_code, year, wage).
-#' @param cols Column name to convert to constant PPP in international 2021 dollars.
+#' @param cols A character vector with column name to convert to constant PPP in international 2021 dollars.
 #' @param macro_indicators Macroeconomic indicators, can be lazy loaded.
 #' @return `data_out` augmented with columns converted to international 2021 dollars.
 #' @examples
@@ -327,7 +327,7 @@ complete_columns <- function(data, cols) {
 #'   cpi = c(85, 100), ppp = c(1.5, 3.5)
 #' )
 #'
-#' convert_constant_ppp(hh, wage, macro_indicators)
+#' convert_constant_ppp(hh, "wage", macro_indicators)
 #'
 #' @importFrom dplyr filter select rename left_join mutate
 #' @import glue
@@ -360,7 +360,7 @@ convert_constant_ppp <- function(data, cols, macro_indicators) {
     ) |>
     mutate(
       across(
-        {{cols}},
+        all_of({{cols}}),
         ~ (cpi / base_cpi) * (.x / ppp_2021),
         .names = "{sub('_lcu$', '_ppp', .col)}"
       )

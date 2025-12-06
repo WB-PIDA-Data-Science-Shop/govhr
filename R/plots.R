@@ -65,3 +65,116 @@ ggplot_point_line <- function(data,
 
   return(plot)
 }
+
+#' Plot segments overlaid with points, ordered by median
+#'
+#' Compute per-group min/max/median for a numeric column and plot one horizontal
+#' segment per group with individual points overlaid. Groups are
+#' ordered from highest median to lowest.
+#'
+#' @param .data A data.frame or tibble.
+#' @param col Unquoted numeric column (values).
+#' @param group Unquoted grouping column.
+#' 
+#' @return A ggplot object.
+#' @examples
+#' \dontrun{
+#'    ggplot_segment(df, salary, occupation)
+#' }
+#' @export
+#' @importFrom rlang enquo as_label sym
+#' @importFrom dtplyr lazy_dt
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr group_by summarise mutate arrange pull desc
+#' @importFrom ggplot2 ggplot geom_segment geom_point position_jitter scale_y_discrete labs theme_minimal arrow
+#' @importFrom grid unit
+#' @importFrom stats median
+ggplot_segment <- function(.data, col, group) {
+  colq <- rlang::enquo(col)
+  gq   <- rlang::enquo(group)
+
+  col_name <- rlang::as_label(colq)
+  g_name   <- rlang::as_label(gq)
+
+  df <- .data
+
+  summary_df <- df |>
+    dtplyr::lazy_dt() |>
+    dplyr::group_by(!!gq) |>
+    dplyr::summarise(
+      xmin   = min(!!colq, na.rm = TRUE),
+      xmax   = max(!!colq, na.rm = TRUE),
+      median = stats::median(!!colq, na.rm = TRUE),
+      .groups = "drop"
+    ) |>
+    dplyr::mutate(
+      xmin = ifelse(is.infinite(.data[["xmin"]]), NA_real_, .data[["xmin"]]),
+      xmax = ifelse(is.infinite(.data[["xmax"]]), NA_real_, .data[["xmax"]])
+    ) |> 
+    tibble::as_tibble()
+
+  ordered_levels <- summary_df |>
+    dplyr::arrange(dplyr::desc(median)) |>
+    dplyr::pull(!!gq) |>
+    as.character()
+
+  # ensure factor ordering for plotting
+  summary_df[[g_name]] <- factor(as.character(summary_df[[g_name]]), levels = rev(ordered_levels))
+  plot_data <- df |>
+    dplyr::mutate(!!g_name := factor(as.character(df[[g_name]]), levels = rev(ordered_levels)))
+
+  col_sym   <- rlang::sym(col_name)
+  group_sym <- rlang::sym(g_name)
+
+  ggplot2::ggplot() +
+    ggplot2::geom_segment(
+      data = summary_df,
+      ggplot2::aes(x = xmin, xend = xmax, y = !!group_sym, yend = !!group_sym),
+      color = "grey70",
+      linewidth = 1,
+      arrow = ggplot2::arrow(length = grid::unit(0.2, "cm"), ends = "both", type = "closed")
+    ) +
+    ggplot2::geom_point(
+      data = plot_data,
+      ggplot2::aes(x = !!col_sym, y = !!group_sym),
+      alpha = 0.7,
+      size = 2.5,
+      shape = 1 # a hollow circle shape
+    ) +
+    ggplot2::scale_y_discrete() +
+    ggplot2::labs(x = col_name, y = g_name) +
+    ggplot2::theme_minimal()
+}
+
+#' Plot model coefficients with confidence intervals
+#' @param model A fitted model object (e.g., lm, glm).
+#' @param coefs A character vector of coefficient names to plot.
+#' @return A ggplot object showing coefficients with error bars.
+#' @examples
+#' \dontrun{
+#'   model <- lm(mpg ~ wt + hp, data = mtcars)
+#'   ggplot_coef(model)
+#' }
+#' @importFrom broom tidy
+#' @import ggplot2
+#' 
+#' @export
+ggplot_coef <- function(model, coefs){
+  model |> 
+    broom::tidy(conf.int = TRUE) |>
+    filter(
+      term %in% coefs
+    ) |> 
+    ggplot2::ggplot(ggplot2::aes(x = estimate, y = term)) +
+    ggplot2::geom_point() +
+    ggplot2::geom_linerange(
+      ggplot2::aes(xmin = conf.low, xmax = conf.high)
+    ) +
+    ggplot2::geom_vline(
+      xintercept = 0,
+      linetype = "dashed",
+      color = "grey50"
+    ) +
+    ggplot2::labs(x = "Coefficient", y = "Estimate") +
+    ggplot2::theme_minimal()
+}
