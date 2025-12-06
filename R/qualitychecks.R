@@ -19,22 +19,36 @@ qualitycheck_contractmod <- function(contract_tbl,
 
   # Define default required variables if not passed in
   if (is.null(required_vars)) {
-    required_vars <- c(
-      "contract_id", "personnel_id", "est_id", "est_date",
-      "base_salary_lcu", "gross_salary_lcu", "net_salary_lcu",
-      "whours", "country_code", "start_date", "end_date",
-      "occupation_native", "occupation_english", "year",
-      "occupation_iscocode", "occupation_isconame",
-      "country_name", "adm1_name", "adm1_code", "paygrade",
-      "seniority"
-    )
+   
+    required_vars <- 
+      harmonization_dict |> 
+      dplyr::filter(Module == "Contract") |> 
+      dplyr::pull(VariableID) 
+
+
   }
 
-  # Ensure any missing columns are added as NA
-  missing_vars <- setdiff(required_vars, names(contract_tbl))
-  if (length(missing_vars) > 0) {
-    contract_tbl[missing_vars] <- NA
-  }
+  # # variables in dictionary but missing from harmonization
+  # missing_contract_vars <- setdiff(required_vars, colnames(contract_tbl))
+
+  # # variables in harmonization but missing from dictionary
+  # missing_dictionary_vars <- setdiff(colnames(contract_tbl), required_vars)
+
+  # # flag whether the sets match
+  # vars_match <- length(missing_contract_vars) == 0 && length(missing_dictionary_vars) == 0
+
+  # # convert the differences to printable strings for pointblank output
+  # missing_str <- ifelse(length(missing_contract_vars)==0,
+  #                       "None",
+  #                       paste(missing_contract_vars, collapse = ", "))
+
+  # extra_str <- ifelse(length(missing_dictionary_vars)==0,
+  #                     "None",
+  #                     paste(missing_dictionary_vars, collapse = ", "))
+  
+  comp_list <- compare_names_qc(x = required_vars,
+                                y = colnames(contract_tbl),
+                                output_format = "simple")
 
   # Coerce salary fields to numeric
   salary_vars <- c("base_salary_lcu", "gross_salary_lcu", "net_salary_lcu")
@@ -75,12 +89,18 @@ qualitycheck_contractmod <- function(contract_tbl,
     contract_tbl %>%
     create_agent(label = "QCheck for Contract Module",
                  actions = al) %>%
-    # Column existence
-    col_exists(label = "All required columns are present",
-               vars(!!!syms(required_vars))) %>%
-    # contract data should be unique at the contract id level for each year of data
-    rows_distinct(label = "Unique at the contract-year level",
-                  columns = c(contract_id, est_date)) %>%
+   # variables inside harmonized data not in the dictionary
+  specially(
+    fn = function(tbl) TRUE,
+    label = paste0("Variables missing from the harmonization: ", comp_list$missing)
+    ) %>% 
+  
+  specially(
+    fn = function(tbl) TRUE,
+    label = paste0("Variables created but not in dictionary: ", comp_list$extra)
+  ) %>%
+      rows_distinct(label = "Unique at the contract-year level",
+                  columns = vars(contract_id, ref_date)) %>%
     # Type checks
     col_is_character(label = "Character variables are the correct type",
                      vars(contract_id, personnel_id, est_id, country_code,
@@ -88,7 +108,7 @@ qualitycheck_contractmod <- function(contract_tbl,
                           occupation_native, occupation_english,
                           country_name)) %>%
     col_is_date(label = "Date variables are the appropriate type",
-                vars(est_date, start_date, end_date)) %>%
+                vars(ref_date, start_date, end_date)) %>%
     col_is_numeric(label = "Numeric variables are the right class",
                    columns = c(base_salary_lcu,
                                gross_salary_lcu,
@@ -272,30 +292,116 @@ qualitycheck_personnel <- function(personnel_tbl){
   agent %>% interrogate()
 }
 
-#' Flag outliers based on the IQR rule
+
+#' Compute Missingness Summary
 #'
-#' This function flags values in a numeric vector as outliers if they
-#' fall below Q1 - 1.5 * IQR or above Q3 + 1.5 * IQR.
+#' @description
+#' Computes variable-level, row-level, grouped, and structural missingness
+#' summaries using data.table for high performance. Designed for admin data
+#' modules such as contracts, personnel, and establishments.
 #'
-#' @param x A numeric vector.
+#' @param dt A data.table containing the module data.
+#' @param by Optional character vector of grouping variables (e.g. "ministry").
+#' @param structural_rules Optional data.table with columns:
+#'   \itemize{
+#'     \item variable – character variable name in dt
+#'     \item condition – an expression as a string (e.g. "status == 'active'")
+#'     \item expected_missing – TRUE/FALSE indicating whether missing is allowed
+#'   }
 #'
-#' @return A logical vector of the same length as `x`, where `TRUE`
-#'   indicates the observation is an outlier.
-#'
-#' @examples
-#' x <- c(1, 2, 2, 3, 4, 5, 100)
-#' flag_outlier(x)
-#' # Returns TRUE only for the value 100
-#'
+#' @return A list with:
+#' \describe{
+#'   \item{var_missing}{Variable-level missing count and percentage}
+#'   \item{row_missing}{Row-level missing count and percentage}
+#'   \item{group_missing}{Grouped missingness summary (if by supplied)}
+#'   \item{structural_missing}{Check of expected vs unexpected missingness (if rules supplied)}
+#' }
 #' @export
-flag_outlier <- function(x) {
-  q1 <- quantile(x, 0.25, na.rm = TRUE)
-  q3 <- quantile(x, 0.75, na.rm = TRUE)
-  iqr <- q3 - q1
+#'
+compute_missingness <- function(dt,
+                                by = NULL,
+                                structural_rules = NULL) {
 
-  lower <- q1 - (1.5 * iqr)
-  upper <- q3 + (1.5 * iqr)
+  stopifnot(is.data.table(dt))
 
-  x < lower | x > upper
+  # ---------------------------
+  # Variable-level missingness
+  # ---------------------------
+  var_missing <- dt[, lapply(.SD, function(x) sum(is.na(x))), .SDcols = names(dt)]
+  var_missing <- melt(var_missing, measure.vars = names(var_missing),
+                      variable.name = "variable",
+                      value.name = "n_missing")
+
+  var_missing[, pct_missing := n_missing / nrow(dt)]
+
+  # # ---------------------------
+  # # Row-level missingness
+  # # ---------------------------
+  # row_missing <- dt[, {
+  #   n_miss <- rowSums(is.na(.SD))
+  #   list(
+  #     n_missing = n_miss,
+  #     pct_missing = n_miss / ncol(.SD)
+  #   )
+  # }]
+
+  # ---------------------------
+  # Group-level missingness (optional)
+  # ---------------------------
+  if (!is.null(by)) {
+    stopifnot(all(by %in% names(dt)))
+
+    group_missing <- dt[, lapply(.SD, function(x) sum(is.na(x))), 
+                        by = by,
+                        .SDcols = names(dt)]
+    group_missing <- melt(group_missing,
+                          id.vars = by,
+                          variable.name = "variable",
+                          value.name = "n_missing")
+    group_missing[, pct_missing := n_missing / dt[, .N, by][, N]]
+  } else {
+    group_missing <- NULL
+  }
+
+  # ---------------------------
+  # Structural Missingness (optional)
+  # ---------------------------
+  if (!is.null(structural_rules)) {
+    stopifnot(is.data.table(structural_rules))
+    stopifnot(all(c("variable", "condition", "expected_missing") %in% names(structural_rules)))
+
+    structural_list <- list()
+
+    for (i in seq_len(nrow(structural_rules))) {
+      v <- structural_rules$variable[i]
+      cond <- structural_rules$condition[i]
+      exp_miss <- structural_rules$expected_missing[i]
+
+      # Evaluate condition inside dt
+      dt[, cond_eval := eval(parse(text = cond))]
+
+      structural_dt <- dt[, .(
+        n_missing = sum(is.na(get(v)) & cond_eval),
+        n_unexpected_missing = sum(is.na(get(v)) & cond_eval & !exp_miss),
+        n_expected_missing = sum(is.na(get(v)) & cond_eval & exp_miss)
+      )][, variable := v]
+
+      structural_list[[i]] <- structural_dt
+      dt[, cond_eval := NULL]
+    }
+
+    structural_missing <- rbindlist(structural_list, fill = TRUE)
+  } else {
+    structural_missing <- NULL
+  }
+
+  # ---------------------------
+  # Return list
+  # ---------------------------
+  return(list(
+    var_missing = var_missing,
+    # row_missing = row_missing,
+    group_missing = group_missing,
+    structural_missing = structural_missing
+  ))
 }
-

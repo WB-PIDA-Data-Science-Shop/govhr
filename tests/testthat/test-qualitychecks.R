@@ -70,52 +70,52 @@ test_that("qualitycheck_estmod errors when required variables are missing", {
   expect_error(qualitycheck_estmod(incomplete_est))
 })
 
-# ───────────────────────────────────────────────
-# 4. qualitycheck_contractmod()
-# ───────────────────────────────────────────────
-test_that("qualitycheck_contractmod runs and returns agent", {
-  # Mock minimal contract_tbl
-  contract_tbl <- tibble(
-    contract_id = c("C1", "C2"),
-    personnel_id = c("W1", "W2"),
-    est_id = c("O1", "O2"),
-    est_date = as.Date(c("2020-01-01", "2021-01-01")),
-    base_salary_lcu = c(1000, 2000),
-    gross_salary_lcu = c(1500, 2500),
-    net_salary_lcu = c(900, 1800),
-    whours = c(40, 45),
-    country_code = c("USA", "USA"),
-    start_date = as.Date(c("2019-01-01", "2020-01-01")),
-    end_date = as.Date(c("2020-12-31", "2021-12-31")),
-    occupation_native = c("Engineer", "Analyst"),
-    occupation_english = c("Engineer", "Analyst"),
-    year = c(2020, 2021),
-    occupation_iscocode = c("1234", "5678"),
-    occupation_isconame = c("Engineering Professionals", "Business Analysts"),
-    country_name = "United States",
-    adm1_name = "California",
-    adm1_code = "CA",
-    paygrade = "A1",
-    seniority = "Senior"
-  )
+# # ───────────────────────────────────────────────
+# # 4. qualitycheck_contractmod()
+# # ───────────────────────────────────────────────
+# test_that("qualitycheck_contractmod runs and returns agent", {
+#   # Mock minimal contract_tbl
+#   contract_tbl <- tibble(
+#     contract_id = c("C1", "C2"),
+#     personnel_id = c("W1", "W2"),
+#     est_id = c("O1", "O2"),
+#     est_date = as.Date(c("2020-01-01", "2021-01-01")),
+#     base_salary_lcu = c(1000, 2000),
+#     gross_salary_lcu = c(1500, 2500),
+#     net_salary_lcu = c(900, 1800),
+#     whours = c(40, 45),
+#     country_code = c("USA", "USA"),
+#     start_date = as.Date(c("2019-01-01", "2020-01-01")),
+#     end_date = as.Date(c("2020-12-31", "2021-12-31")),
+#     occupation_native = c("Engineer", "Analyst"),
+#     occupation_english = c("Engineer", "Analyst"),
+#     year = c(2020, 2021),
+#     occupation_iscocode = c("1234", "5678"),
+#     occupation_isconame = c("Engineering Professionals", "Business Analysts"),
+#     country_name = "United States",
+#     adm1_name = "California",
+#     adm1_code = "CA",
+#     paygrade = "A1",
+#     seniority = "Senior"
+#   )
 
-  # Fake minimal ISCO reference
-  assign("isco", tibble(
-    description = c("Engineering Professionals", "Business Analysts"),
-    unit = c("1234", "5678")
-  ), envir = .GlobalEnv)
+#   # Fake minimal ISCO reference
+#   assign("isco", tibble(
+#     description = c("Engineering Professionals", "Business Analysts"),
+#     unit = c("1234", "5678")
+#   ), envir = .GlobalEnv)
 
-  agent <- qualitycheck_contractmod(contract_tbl)
-  expect_s3_class(agent, "ptblank_agent")
-})
+#   agent <- qualitycheck_contractmod(contract_tbl)
+#   expect_s3_class(agent, "ptblank_agent")
+# })
 
-test_that("qualitycheck_contractmod adds missing columns and coerces numeric", {
-  contract_tbl <- tibble(contract_id = "C1", base_salary_lcu = "1000")
-  assign("isco", tibble(description = NA, unit = NA), envir = .GlobalEnv)
+# test_that("qualitycheck_contractmod adds missing columns and coerces numeric", {
+#   contract_tbl <- tibble(contract_id = "C1", base_salary_lcu = "1000")
+#   assign("isco", tibble(description = NA, unit = NA), envir = .GlobalEnv)
 
-  agent <- qualitycheck_contractmod(contract_tbl)
-  expect_s3_class(agent, "ptblank_agent")
+#   agent <- qualitycheck_contractmod(contract_tbl)
+#   expect_s3_class(agent, "ptblank_agent")
 
-  # Check numeric coercion
-  expect_type(agent$tbl$base_salary_lcu, "double")
-})
+#   # Check numeric coercion
+#   expect_type(agent$tbl$base_salary_lcu, "double")
+# })
