@@ -11,8 +11,7 @@ compute_volatility(
   vol_fn = c("pct_change", "sd", "cv", "rolling_sd", "rolling_cv", "rolling_pct_change"),
   time,
   groups,
-  window_size = NULL,
-  ...
+  window_size = NULL
 )
 }
 \arguments{
@@ -38,9 +37,6 @@ compute volatility for the entire dataset without grouping.}
 
 \item{window_size}{Integer window length for rolling volatility functions. 
 Required when `vol_fn` is one of the rolling variants.}
-
-\item{...}{Additional arguments passed to `data.table::frollapply()` 
-(e.g., `align`, `adaptive`).}
 }
 \value{
 A `data.table` containing:
@@ -94,11 +90,11 @@ compute_volatility(
 # Rolling 3-period coefficient of variation
 compute_volatility(
   data      = bra_hrmis_contract,
-  col       = "hours",
+  col       = "whours",
   agg_fn    = "mean",
   vol_fn    = "rolling_cv",
   time      = "ref_date",
-  groups    = c("establishment_id", "occupation"),
+  groups    = "occupation_native",
   window_size = 3
 )
 }

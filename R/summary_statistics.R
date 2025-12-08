@@ -649,8 +649,6 @@ compute_hrmreport_stats <- function(contract_dt,
 #'   compute volatility for the entire dataset without grouping.
 #' @param window_size Integer window length for rolling volatility functions. 
 #'   Required when `vol_fn` is one of the rolling variants.
-#' @param ... Additional arguments passed to `data.table::frollapply()` 
-#'   (e.g., `align`, `adaptive`).
 #'
 #' @return 
 #' A `data.table` containing:
@@ -834,93 +832,6 @@ define_vol_fns <- function(window_size = NULL) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #' Fast counting via dtplyr
 #'
 #' `fastcount()` delegates [dplyr::count()] to a `data.table` backend by
@@ -981,3 +892,4 @@ fastprop <- function(.data, ...){
 
   prop_dt
 }
+

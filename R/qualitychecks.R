@@ -293,115 +293,91 @@ qualitycheck_personnel <- function(personnel_tbl){
 }
 
 
-#' Compute Missingness Summary
+#' Compute Missingness Counts and Percentages
 #'
-#' @description
-#' Computes variable-level, row-level, grouped, and structural missingness
-#' summaries using data.table for high performance. Designed for admin data
-#' modules such as contracts, personnel, and establishments.
+#' Computes the number and percentage of missing values for each variable
+#' in a dataset. The function supports both overall missingness (when
+#' \code{by = NULL}) and grouped missingness (when grouping variables are
+#' supplied through the \code{by} argument).
 #'
-#' @param dt A data.table containing the module data.
-#' @param by Optional character vector of grouping variables (e.g. "ministry").
-#' @param structural_rules Optional data.table with columns:
-#'   \itemize{
-#'     \item variable – character variable name in dt
-#'     \item condition – an expression as a string (e.g. "status == 'active'")
-#'     \item expected_missing – TRUE/FALSE indicating whether missing is allowed
+#' When \code{by = NULL}, the function returns one row per variable with the
+#' total number of missing values and the percent missing out of all rows.
+#' When \code{by} is provided, missingness is computed within each group,
+#' and the percent missing is calculated relative to the group size.
+#'
+#' @param data A data.frame or data.table containing the dataset to analyze.
+#' @param by Optional. A character vector of column names specifying grouping
+#'   variables. If \code{NULL}, missingness is computed for the full dataset.
+#'
+#' @return A data.table in long format with columns:
+#'   \describe{
+#'     \item{\code{by}}{(if provided) Grouping variables.}
+#'     \item{\code{variable}}{The variable name.}
+#'     \item{\code{n_missing}}{Number of missing values.}
+#'     \item{\code{pct_missing}}{Percentage of missingness within group or overall.}
 #'   }
 #'
-#' @return A list with:
-#' \describe{
-#'   \item{var_missing}{Variable-level missing count and percentage}
-#'   \item{row_missing}{Row-level missing count and percentage}
-#'   \item{group_missing}{Grouped missingness summary (if by supplied)}
-#'   \item{structural_missing}{Check of expected vs unexpected missingness (if rules supplied)}
+#' @examples
+#' \dontrun{
+#' compute_missingness(df)                # overall missingness
+#' compute_missingness(df, by = "contract_type_code") # missingness by contract type
 #' }
-#' @export
 #'
-compute_missingness <- function(dt,
-                                by = NULL,
-                                structural_rules = NULL) {
+#' @importFrom data.table as.data.table melt merge.data.table
+#' @export
+compute_missingness <- function(data,
+                                by = NULL) {
+  
+  ## convert to data.table
+  dt <- as.data.table(data)
 
-  stopifnot(is.data.table(dt))
-
-  # ---------------------------
-  # Variable-level missingness
-  # ---------------------------
-  var_missing <- dt[, lapply(.SD, function(x) sum(is.na(x))), .SDcols = names(dt)]
-  var_missing <- melt(var_missing, measure.vars = names(var_missing),
-                      variable.name = "variable",
-                      value.name = "n_missing")
-
-  var_missing[, pct_missing := n_missing / nrow(dt)]
-
-  # # ---------------------------
-  # # Row-level missingness
-  # # ---------------------------
-  # row_missing <- dt[, {
-  #   n_miss <- rowSums(is.na(.SD))
-  #   list(
-  #     n_missing = n_miss,
-  #     pct_missing = n_miss / ncol(.SD)
-  #   )
-  # }]
-
-  # ---------------------------
-  # Group-level missingness (optional)
-  # ---------------------------
-  if (!is.null(by)) {
-    stopifnot(all(by %in% names(dt)))
-
-    group_missing <- dt[, lapply(.SD, function(x) sum(is.na(x))), 
-                        by = by,
-                        .SDcols = names(dt)]
-    group_missing <- melt(group_missing,
-                          id.vars = by,
-                          variable.name = "variable",
-                          value.name = "n_missing")
-    group_missing[, pct_missing := n_missing / dt[, .N, by][, N]]
+  ## if by = NULL, we treat it as having no groups
+  if (is.null(by)) {
+    
+    ## overall missingness
+    missing_dt <- dt[, lapply(.SD, function(x) sum(is.na(x)))]
+    
+    ## reshape to long
+    missing_dt <- melt(
+      missing_dt,
+      measure.vars = names(missing_dt),
+      variable.name = "variable",
+      value.name = "n_missing"
+    )
+    
+    ## add percent missing
+    missing_dt[, pct_missing := n_missing / nrow(dt)]
+    
+    return(missing_dt[])
+    
   } else {
-    group_missing <- NULL
+    
+    ## grouped missingness
+    missing_dt <- dt[, lapply(.SD, function(x) sum(is.na(x))), 
+                     .SDcols = setdiff(names(dt), by), 
+                     by = by]
+    
+    ## melt long
+    missing_dt <- melt(
+      missing_dt,
+      id.vars = by,
+      variable.name = "variable",
+      value.name = "n_missing"
+    )
+    
+    ## group-specific denominator
+    totals_dt <- dt[, .N, by = by]
+    
+    ## merge totals
+    missing_dt <- data.table::merge.data.table(missing_dt, totals_dt, by = by, all.x = TRUE)
+    
+    ## compute group-wise percent missing
+    missing_dt[, pct_missing := n_missing / N]
+    
+    ## drop the total count column
+    missing_dt[, N := NULL]
+    
+    return(missing_dt[])
   }
-
-  # ---------------------------
-  # Structural Missingness (optional)
-  # ---------------------------
-  if (!is.null(structural_rules)) {
-    stopifnot(is.data.table(structural_rules))
-    stopifnot(all(c("variable", "condition", "expected_missing") %in% names(structural_rules)))
-
-    structural_list <- list()
-
-    for (i in seq_len(nrow(structural_rules))) {
-      v <- structural_rules$variable[i]
-      cond <- structural_rules$condition[i]
-      exp_miss <- structural_rules$expected_missing[i]
-
-      # Evaluate condition inside dt
-      dt[, cond_eval := eval(parse(text = cond))]
-
-      structural_dt <- dt[, .(
-        n_missing = sum(is.na(get(v)) & cond_eval),
-        n_unexpected_missing = sum(is.na(get(v)) & cond_eval & !exp_miss),
-        n_expected_missing = sum(is.na(get(v)) & cond_eval & exp_miss)
-      )][, variable := v]
-
-      structural_list[[i]] <- structural_dt
-      dt[, cond_eval := NULL]
-    }
-
-    structural_missing <- rbindlist(structural_list, fill = TRUE)
-  } else {
-    structural_missing <- NULL
-  }
-
-  # ---------------------------
-  # Return list
-  # ---------------------------
-  return(list(
-    var_missing = var_missing,
-    # row_missing = row_missing,
-    group_missing = group_missing,
-    structural_missing = structural_missing
-  ))
 }
+
