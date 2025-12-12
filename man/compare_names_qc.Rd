@@ -9,35 +9,39 @@ compare_names_qc(x, y, output_format = c("simple", "bullet", "badges"))
 \arguments{
 \item{x}{A vector of values to compare.}
 
-\item{y}{A second vector of values to compare with `x`.}
+\item{y}{A second vector of values to compare with \code{x}.}
 
 \item{output_format}{Character string indicating the output format.
-Must be one of `"simple"`, `"bullet"`, or `"badges"`.}
+Must be one of \code{"simple"}, \code{"bullet"}, or \code{"badges"}.}
 }
 \value{
 A named list containing:
+
 \describe{
-  \item{`missing`}{Formatted HTML showing values in `x` but not in `y`.}
-  \item{`extra`}{Formatted HTML showing values in `y` but not in `x`.}
-  \item{`x_missing_y`}{Raw vector of elements in `x` but not in `y`.}
-  \item{`y_missing_x`}{Raw vector of elements in `y` but not in `x`.}
+  \item{\code{missing}}{Formatted HTML showing values in \code{x} but not in \code{y}.}
+  \item{\code{extra}}{Formatted HTML showing values in \code{y} but not in \code{x}.}
+  \item{\code{x_missing_y}}{Raw vector of elements in \code{x} but not in \code{y}.}
+  \item{\code{y_missing_x}}{Raw vector of elements in \code{y} but not in \code{x}.}
 }
 }
 \description{
 This function compares two vectors and identifies:
-\itemize{
-  \item Elements in `x` that are missing in `y`
-  \item Elements in `y` that are missing in `x`
-}
-It returns both the raw differences and formatted HTML output for use
-in reports, Shiny apps, or pointblank validation messages.
 }
 \details{
+\itemize{
+  \item Elements in \code{x} that are missing in \code{y}.
+  \item Elements in \code{y} that are missing in \code{x}.
+}
+
+It returns both the raw differences and formatted HTML output for use
+in reports, Shiny apps, or pointblank validation messages.
+
 Three output formats are supported:
+
 \describe{
-  \item{`"simple"`}{Colored comma-separated strings (HTML).}
-  \item{`"bullet"`}{HTML unordered lists.}
-  \item{`"badges"`}{Bootstrap-style colored badges.}
+  \item{\code{"simple"}}{Colored comma-separated strings (HTML).}
+  \item{\code{"bullet"}}{HTML unordered lists.}
+  \item{\code{"badges"}}{Bootstrap-style colored badges.}
 }
 }
 \examples{

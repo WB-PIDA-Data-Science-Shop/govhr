@@ -1,0 +1,243 @@
+---
+title: "Standard HR Data Quality Control Report (Q-Check)"
+author: "Ifeanyi Edochie"
+date: "`r Sys.Date()`"
+params:
+  contract_dt: NULL
+  personnel_dt: NULL
+  est_dt: NULL
+  qc_obj: NULL
+  run_qc: TRUE
+    
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(gt)
+library(data.table)
+library(naniar)
+library(viridis)
+
+
+```
+
+# Standard HR Quality Control Analytics Report 
+
+## Overview
+
+This report presents a comprehensive quality control assessment of the harmonized payroll data comprising the **Contract**, **Personnel**, and **Establishment** modules according to the standard harmonization dictionary (`govhr::harmonization_dict()`). All diagnostic tables are generated automatically using the `compute_qualitycontrol()` function, which evaluates the aforementioned harmonized modules .
+
+The quality control report is subdivided as follows:
+
+- **Data Basics**  
+  High-level statistics summarizing the size, structure, and key characteristics of harmonized data.
+
+- **Variable Structure & Dictionary Conformity**  
+  Comparison of each module’s variable names against the harmonization dictionary to identify missing, extra, or mismatched fields.
+
+- **Primary Key Integrity**  
+  Validation that the Contract module’s identifying keys uniquely and consistently describe individual records.
+
+- **Cross-Module Orphan Checks**  
+  Verification that all referenced `personnel_id` and `est_id` values in the Contract module exist in the corresponding Personnel and Establishment modules and vice versa.
+
+- **Salary Logic Checks**  
+  Screening for numeric inconsistencies, negative values, and violations of expected salary relationships (e.g., base > gross, net > gross).
+
+- **Date Logic Validation**  
+  Detection of invalid employment record sequences, such as end dates occurring before start dates.
+
+- **Missingness Diagnostics**  
+  Measurement and visualization of missing data overall and across key analytical dimensions (occupation, ISCO mapping, reference period, and establishment).
+
+- **Volatility and Stability Metrics**  
+  Time-series diagnostics evaluating changes in salary aggregates, wagebill, staff counts, and contract counts across reference periods.
+
+A final section consolidates all checks into a unified **pointblank** summary report, providing a high-level view of which components pass, fail, or warrant further attention.
+
+
+## Diagnostic Sections {.tabset .tabset-pill}
+
+### Data Basics 
+
+This section provides a high-level profile of the harmonized payroll data and summarizes the structure of the three core modules—**Contract**, **Personnel**, and **Establishment**—before detailed diagnostics are introduced.
+
+#### Module Dimensions
+
+The harmonized dataset includes the following components:
+
+```{r, echo = FALSE}
+
+
+dim_dt <- data.table(
+  Module = c("Contract", "Personnel", "Establishment"),
+  Observations = c(
+    params$qc_obj$n_obs,
+    if (!is.null(params$personnel_dt)) nrow(params$personnel_dt) else NA,
+    if (!is.null(params$est_dt)) nrow(params$est_dt) else NA
+  ),
+  Variables = c(
+    params$qc_obj$n_vars,
+    if (!is.null(params$personnel_dt)) ncol(params$personnel_dt) else NA,
+    if (!is.null(params$est_dt)) ncol(params$est_dt) else NA
+  )
+)
+
+dim_dt |>
+  gt() |>
+  tab_header(
+    title = md("### Module Dimensions Summary")
+  ) |>
+  fmt_number(
+    columns = c(Observations, Variables),
+    use_seps = TRUE,
+    decimals = 0
+  ) |>
+  cols_align(
+    align = "center",
+    columns = c(Observations, Variables)
+  ) |>
+  tab_style(
+    style = list(
+      cell_fill(color = "#f7f7f7")
+    ),
+    locations = cells_body()
+  ) |>
+  opt_table_outline() |>
+  opt_row_striping()
+
+
+```
+  
+
+These modules are expected to integrate cleanly through common identifiers (`personnel_id`, `est_id`, and `ref_date`), and later sections evaluate the extent to which these linkages hold.
+
+## Missingness Report
+
+This section examines patterns of missing data across the Contract, Personnel, and Establishment modules.  
+Understanding missingness is essential for data quality control because it highlights variables that may require cleaning, imputation, or further validation by the data provider.
+
+We evaluate:
+
+1. **Variable-level missingness** (percent missing in each variable)  
+2. **Module-level summaries**  
+3. **Visualizations**  
+   - Missingness barplots  
+   - Missingness heatmaps  
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=9, fig.height=6}
+
+overall_dt <- params$qc_obj$missingness$overall
+
+ggplot(overall_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Overall Missingness by Variable",
+    x = "Variable",
+    y = "Percent Missing"
+  ) +
+  theme_minimal(base_size = 13)
+
+
+```
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=10, fig.height=7}
+
+miss_occ <- params$qc_obj$missingness$by_occupation
+
+# pick top occupations by missingness severity
+top_occ <- miss_occ[
+  , .(mean_missing = mean(pct_missing)), by = occupation_native
+][order(-mean_missing)][1:30, occupation_native]
+
+plot_dt <- miss_occ[occupation_native %in% top_occ]
+
+ggplot(plot_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ occupation_native, scales = "free_y") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Missingness by Variable — Top 30 Occupations",
+    x = "Variable",
+    y = "Percent Missing"
+  ) +
+  theme_minimal(base_size = 11)
+
+```
+
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=10, fig.height=7}
+
+miss_isco <- params$qc_obj$missingness$by_isco
+
+top_isco <- miss_isco[
+  , .(mean_missing = mean(pct_missing)), by = occupation_isconame
+][order(-mean_missing)][1:30, occupation_isconame]
+
+plot_dt <- miss_isco[occupation_isconame %in% top_isco]
+
+ggplot(plot_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ occupation_isconame, scales = "free_y") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Missingness by Variable — Top 30 ISCO Groups",
+    x = "Variable",
+    y = "Percent Missing"
+  ) +
+  theme_minimal(base_size = 11)
+
+```
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=10, fig.height=6}
+
+miss_ref <- params$qc_obj$missingness$by_ref
+  
+ggplot(miss_ref, aes(x = factor(lubridate::year(ref_date)), y = variable, fill = pct_missing)) +
+  geom_tile(color = "white", linewidth = 0.3) +
+  scale_fill_viridis(option = "C", labels = scales::percent_format()) +
+  labs(
+    title = "Missingness Heatmap by Reference Date",
+    x = "Reference Date",
+    y = "Variable",
+    fill = "% Missing"
+  ) +
+  theme_minimal(base_size = 12)
+
+```
+
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=10, fig.height=7}
+
+miss_est <- params$qc_obj$missingness$by_est
+
+top_est <- miss_est[
+  , .(mean_missing = mean(pct_missing)), by = est_id
+][order(-mean_missing)][1:30, est_id]
+
+plot_dt <- miss_est[est_id %in% top_est]
+
+ggplot(plot_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ est_id, scales = "free_y") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Missingness by Variable — Top 30 Establishments",
+    x = "Variable",
+    y = "Percent Missing"
+  ) +
+  theme_minimal(base_size = 10)
+
+```
