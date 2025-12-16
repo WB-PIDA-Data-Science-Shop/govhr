@@ -74,6 +74,7 @@ cv <- function(x, na.rm = TRUE) {
 #' cp_ratio(wages)             # default 90/10 ratio
 #' cp_ratio(wages, 0.75, 0.25) # 75/25 ratio
 #'
+#' @importFrom stats quantile
 #' @export
 cp_ratio <- function(x, upper = 0.9, lower = 0.1, na.rm = TRUE){
 

@@ -1,4 +1,64 @@
 
+#' Generate Quality Control Report for HR Data
+#'
+#' @description
+#' Produces a comprehensive HTML quality control report for harmonized HR data.
+#' The report includes diagnostics on data structure, primary key integrity,
+#' cross-module orphan checks, missingness patterns, and temporal volatility
+#' across Contract, Personnel, and Establishment modules.
+#'
+#' @param contract_dt A data.table containing the Contract module data with
+#'   harmonized column names according to \code{\link{harmonization_dict}}.
+#'   Should include columns such as contract_id, personnel_id, est_id,
+#'   ref_date, salary fields, and occupation information.
+#' @param personnel_dt A data.table containing the Personnel module data with
+#'   harmonized column names. Should include personnel_id and demographic
+#'   information.
+#' @param est_dt A data.table containing the Establishment module data with
+#'   harmonized column names. Should include est_id and establishment
+#'   characteristics.
+#' @param output Character string specifying the output file name. Defaults to
+#'   "qc_report.html". The file will be created in the current working
+#'   directory.
+#'
+#' @return Invisibly returns the path to the generated HTML report. The function
+#'   is primarily called for its side effect of creating the report file.
+#'
+#' @details
+#' The function performs the following steps:
+#' \enumerate{
+#'   \item Computes quality control diagnostics using
+#'     \code{\link{compute_qualitycontrol}}
+#'   \item Locates the RMarkdown template from the package installation
+#'   \item Renders the template with the provided data and diagnostics
+#' }
+#'
+#' The generated report includes:
+#' \itemize{
+#'   \item Module dimensions and variable structure conformity
+#'   \item Primary key uniqueness checks
+#'   \item Cross-module orphan record identification
+#'   \item Comprehensive missingness analysis with visualizations
+#'   \item Temporal volatility metrics for salary, wagebill, and staff counts
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' # Generate quality control report for Brazilian HRMIS data
+#' generate_qc_report(
+#'   contract_dt = bra_hrmis_contract,
+#'   personnel_dt = bra_hrmis_personnel,
+#'   est_dt = bra_hrmis_est,
+#'   output = "brazil_qc_report.html"
+#' )
+#' }
+#'
+#' @seealso
+#' \code{\link{compute_qualitycontrol}} for the underlying diagnostic functions
+#' \code{\link{harmonization_dict}} for the harmonization dictionary
+#'
+#' @importFrom rmarkdown render
+#' @export
 generate_qc_report <- function(contract_dt,
                                personnel_dt,
                                est_dt,

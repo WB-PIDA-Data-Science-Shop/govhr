@@ -18,7 +18,11 @@ library(data.table)
 library(stringr)
 library(govhr)
 
-bra_hrmis_contract <- govhr::bra_hrmis_contract |> 
+# Load the datasets
+data("bra_hrmis_contract", package = "govhr")
+data("macro_indicators", package = "govhr")
+
+bra_hrmis_contract <- bra_hrmis_contract |> 
   as.data.table() %>% 
   .[, year := lubridate::year(ref_date)]
 

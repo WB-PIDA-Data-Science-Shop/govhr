@@ -98,19 +98,21 @@ compute_qualitycontrol <- function(contract_dt,
 
   dict_list <- split(harmonization_dict,
                      harmonization_dict$Module)
+  
 
   structure_checks <-
     mapply(FUN = function(data,
                           dict_names){
-
-
+      
+      
+      
       structure_checks <- qc_compare_names(data = data,
-                                           dict_names = dict_names$VariableName,
+                                           dict_names = dict_names$VariableID,
                                            output_format = "badges")
 
       return(structure_checks)
 
-    }, data = list(contract_dt, personnel_dt, est_dt),
+    }, data = list(contract_dt, est_dt, personnel_dt),
        dict_names = dict_list,
        SIMPLIFY = FALSE)
 
@@ -171,40 +173,52 @@ compute_qualitycontrol <- function(contract_dt,
 
   window_size = max(2, floor(gaps / 2))
 
-
-
-  volatility <-
-    list(
-      salary_vol = compute_volatility(data = contract_dt,
-                                      col = "gross_salary_lcu",
-                                      agg_fn = "sum",
-                                      vol_fn = "rolling_cv",
-                                      time = "ref_date",
-                                      groups = "occupation_native",
-                                      window_size = window_size),
-      wagebill_vol = compute_volatility(data = contract_dt,
-                                        col = "gross_salary_lcu",
-                                        agg_fn = "sum",
-                                        vol_fn = "pct_change",
-                                        time = "ref_date",
-                                        groups = "est_id",
-                                        window_size = window_size),
-      staff_count_vol = compute_volatility(data = contract_dt,
-                                           col = "personnel_id",
-                                           agg_fn = "count_unique",
-                                           vol_fn = "rolling_cv",
-                                           time = "ref_date",
-                                           groups = "est_id",
-                                           window_size = window_size),
-      contract_vol = compute_volatility(data = contract_dt,
-                                        col = "contract_id",
-                                        agg_fn = "count_unique",
-                                        vol_fn = "rolling_cv",
-                                        time = "ref_date",
-                                        groups = "est_id",
-                                        window_size = window_size))
-
-  ### put together all the objects
+  ## contract level 
+  contract_volatility <- 
+    list(salary_vol = bind_rows(compute_volatility(data = contract_dt,
+                                                   col = "gross_salary_lcu",
+                                                   agg_fn = "sum",
+                                                   vol_fn = "rolling_cv",
+                                                   time = "ref_date",
+                                                   groups = "contract_id",
+                                                   window_size = window_size),
+                                compute_volatility(data = contract_dt,
+                                                   col = "base_salary_lcu",
+                                                   agg_fn = "sum",
+                                                   vol_fn = "rolling_cv",
+                                                   time = "ref_date",
+                                                   groups = "contract_id",
+                                                   window_size = window_size),
+                                compute_volatility(data = contract_dt,
+                                                   col = "net_salary_lcu",
+                                                   agg_fn = "sum",
+                                                   vol_fn = "rolling_cv",
+                                                   time = "ref_date",
+                                                   groups = "contract_id",
+                                                   window_size = window_size),
+                                compute_volatility(data = contract_dt,
+                                                   col = "allowance_lcu",
+                                                   agg_fn = "sum",
+                                                   vol_fn = "rolling_cv",
+                                                   time = "ref_date",
+                                                   groups = "contract_id",
+                                                   window_size = window_size)),
+          ctrcount_vol = compute_volatility(data = contract_dt,
+                                            col = "contract_id",
+                                            agg_fn = "count_unique",
+                                            vol_fn = "pct_change",
+                                            time = "ref_date",
+                                            groups = "est_id",
+                                            window_size = window_size),
+          workhours_vol = compute_volatility(data = contract_dt,
+                                             col = "whours",
+                                             agg_fn = "sum",
+                                             vol_fn = "rolling_cv",
+                                             time = "ref_date",
+                                             groups = "contract_id",
+                                             window_size = window_size))
+  
+ ### put together all the objects
   qc_object <- list(n_obs = nrow(contract_dt),
                     n_vars = ncol(contract_dt),
                     structure = structure_checks,
@@ -213,7 +227,7 @@ compute_qualitycontrol <- function(contract_dt,
                     salaries = salary_checks,
                     date_logic = date_checks,
                     missingness = missingness,
-                    volatility = volatility)
+                    volatility = contract_volatility)
 
   return(qc_object)
 

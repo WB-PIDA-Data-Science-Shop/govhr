@@ -17,9 +17,9 @@ Options are \code{"simple"}, \code{"bullet"}, or \code{"badges"}.}
 \value{
 A list containing:
 \itemize{
-  \item{\code{missing_in_data}}{ Variables present in the dictionary but not in the dataset.}
-  \item{\code{extra_in_data}}{ Variables in the dataset that are not in the dictionary.}
-  \item{\code{formatted}}{ A formatted character output according to \code{output_format}.}
+  \item \code{missing_in_data}: Variables present in the dictionary but not in the dataset.
+  \item \code{extra_in_data}: Variables in the dataset that are not in the dictionary.
+  \item \code{formatted}: A formatted character output according to \code{output_format}.
 }
 }
 \description{

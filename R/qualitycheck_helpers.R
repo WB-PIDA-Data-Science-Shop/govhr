@@ -147,9 +147,10 @@ compare_names_qc <- function(x, y,
 
 }
 
-add_pb_note <- function(agent, label) {
-  specially(agent, fn = ~ TRUE, label = label)
-}
+# #' @importFrom pointblank specially
+# add_pb_note <- function(agent, label) {
+#   pointblank::specially(agent, fn = ~ TRUE, label = label)
+# }
 
 #' Compute Missingness Counts and Percentages
 #'
@@ -255,9 +256,9 @@ compute_missingness <- function(data,
 #'
 #' @return A list containing:
 #' \itemize{
-#'   \item{\code{missing_in_data}}{ Variables present in the dictionary but not in the dataset.}
-#'   \item{\code{extra_in_data}}{ Variables in the dataset that are not in the dictionary.}
-#'   \item{\code{formatted}}{ A formatted character output according to \code{output_format}.}
+#'   \item \code{missing_in_data}: Variables present in the dictionary but not in the dataset.
+#'   \item \code{extra_in_data}: Variables in the dataset that are not in the dictionary.
+#'   \item \code{formatted}: A formatted character output according to \code{output_format}.
 #' }
 #'
 #' @keywords internal

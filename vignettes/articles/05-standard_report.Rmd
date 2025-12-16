@@ -20,6 +20,12 @@ library(tidyr)
 library(purrr)
 library(govhr)
 
+# Load datasets
+data("bra_hrmis_contract", package = "govhr")
+data("bra_hrmis_personnel", package = "govhr")
+data("bra_hrmis_est", package = "govhr")
+data("macro_indicators", package = "govhr")
+
 # set default color palette with scale_color_brewer
 theme_set(
   theme_few()

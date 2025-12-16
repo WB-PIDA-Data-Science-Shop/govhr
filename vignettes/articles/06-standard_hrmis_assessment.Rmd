@@ -20,6 +20,12 @@ library(data.table)
 library(tidyr)
 library(govhr)
 
+# Load datasets
+data("bra_hrmis_contract", package = "govhr")
+data("bra_hrmis_personnel", package = "govhr")
+data("bra_hrmis_est", package = "govhr")
+data("macro_indicators", package = "govhr")
+
 # set default color palette with scale_color_brewer
 theme_set(
   theme_few()
@@ -28,23 +34,23 @@ theme_set(
 set.seed(2025)
 
 # read-in data ------------------------------------------------------------
-personnel_df <- govhr::bra_hrmis_personnel |>
+personnel_df <- bra_hrmis_personnel |>
   mutate(
     year = lubridate::year(ref_date)
   )
 
-contract_df <- govhr::bra_hrmis_contract |>
+contract_df <- bra_hrmis_contract |>
   mutate(
     year = lubridate::year(ref_date)
   )
 
-est_df <- govhr::bra_hrmis_est
+est_df <- bra_hrmis_est
 
 # process data
 contract_growth <- contract_df |> 
   convert_constant_ppp(
     cols = c("gross_salary_lcu"),
-    macro_indicators = govhr::macro_indicators
+    macro_indicators = macro_indicators
   ) |>
   dtplyr::lazy_dt() |> 
   group_by(country_code, year) |>

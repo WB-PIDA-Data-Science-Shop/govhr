@@ -24,7 +24,8 @@ Imports:
     ggthemes,
     data.table,
     dtplyr,
-    broom
+    broom,
+    rmarkdown
 RoxygenNote: 7.3.3
 Suggests: 
     forcats,
