@@ -14,19 +14,6 @@ knitr::opts_chunk$set(
 library(govhr)
 ```
 
-## Overview
-
-This article demonstrates the quality control reporting capabilities of the `govhr` package using the Brazilian HRMIS synthetic dataset.
-
-## Generate Quality Control Report
-
-The `generate_qc_report()` function creates a comprehensive HTML report that includes:
-
-- **Data Basics**: Module dimensions, temporal coverage, variable structure, primary key integrity, and cross-module orphan checks
-- **Missingness Report**: Visualizations of missing data patterns by occupation, ISCO code, time period, and establishment
-- **Volatility Analysis**: Heatmaps showing temporal stability of salary, contract counts, and work hours
-- **Q-Check Summary**: Pointblank validation checks for structure, keys, orphans, salaries, dates, missingness, and volatility
-
 ```{r generate-report, eval = FALSE}
 # Generate the quality control report
 generate_qc_report(

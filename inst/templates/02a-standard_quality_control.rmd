@@ -40,10 +40,6 @@ The quality control report is organized into four main sections:
 - **Volatility Analysis**  
   Time-series diagnostics evaluating temporal stability of salary aggregates, contract counts, and work hours across reference periods. High volatility may indicate data quality issues, organizational changes, or policy shifts requiring investigation.
 
-- **Q-Check Summary**  
-  Consolidated **pointblank** validation report integrating all quality control checks with pass/fail status, providing an executive summary of data quality assessment results.
-
-
 ## Diagnostic Sections {.tabset .tabset-pill}
 
 ### Data Basics 

@@ -8,9 +8,7 @@ date: "12/4/2025"
 # https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf
 
 # set-up ------------------------------------------------------------------
-library(here)
 library(dplyr)
-library(readr)
 library(ggplot2)
 library(purrr)
 library(lubridate)
@@ -19,12 +17,6 @@ library(forcats)
 library(data.table)
 library(tidyr)
 library(govhr)
-
-# Load datasets
-data("bra_hrmis_contract", package = "govhr")
-data("bra_hrmis_personnel", package = "govhr")
-data("bra_hrmis_est", package = "govhr")
-data("macro_indicators", package = "govhr")
 
 # set default color palette with scale_color_brewer
 theme_set(
