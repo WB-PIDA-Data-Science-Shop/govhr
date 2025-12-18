@@ -203,8 +203,7 @@ class_occup_df <- classify_occupation(
 reactable(
   head(
     class_occup_df, 
-    n = nrow(class_occup_df)), 
-    options = list(pageLength = 10
+    100
   )
 ) 
 ```
@@ -253,7 +252,7 @@ bra_hrmis <- occup_df[bra_hrmis, on = c("CARREIRA", "CARGO")]
 ### lets include the dates
 bra_hrmis[, ref_date := as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-"))]
 
-setnames(bra_hrmis, c("DATA_ADMISSAO", "DATA_APOSENTADORIA"), c("start_date", "end_date"))
+setnames(bra_hrmis, c("DATA_ADMISSAO", "DATA_APOSENTADORIA"), c("start_date", "end_date"), skip_absent = TRUE)
 bra_hrmis[, start_date := as.Date(as.integer(start_date), origin = "1899-12-30")]
 bra_hrmis[, end_date := as.Date(as.integer(end_date), origin = "1899-12-30")]
 
