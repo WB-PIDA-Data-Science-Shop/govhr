@@ -49,7 +49,7 @@ macro_indicators <-
 
 macro_indicators <-
   macro_indicators |>
-  mutate(emp_pop = emp_pop_rate * tot_pop)
+  mutate(emp_pop = 0.01 * emp_pop_rate * tot_pop)
 
 macro_indicators <-
   macro_indicators |>

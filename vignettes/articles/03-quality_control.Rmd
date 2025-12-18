@@ -1,0 +1,48 @@
+---
+title: "Quality Control Report"
+output: rmarkdown::html_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(govhr)
+```
+
+```{r generate-report, eval = FALSE}
+# Generate the quality control report
+generate_qc_report(
+  contract_dt = govhr::bra_hrmis_contract,
+  personnel_dt = govhr::bra_hrmis_personnel,
+  est_dt = govhr::bra_hrmis_est,
+  output = "quality_control_report.html"
+)
+```
+
+```{r actually-generate, echo = FALSE, results = 'hide', message = FALSE, warning = FALSE}
+# Actually generate the report for the pkgdown site
+tryCatch({
+  output_path <- file.path("articles", "quality_control_report.html")
+  
+  generate_qc_report(
+    contract_dt = govhr::bra_hrmis_contract,
+    personnel_dt = govhr::bra_hrmis_personnel,
+    est_dt = govhr::bra_hrmis_est,
+    output = govhr::output_path
+  )
+  
+  report_generated <- TRUE
+}, error = function(e) {
+  message("Report generation skipped: ", e$message)
+  report_generated <- FALSE
+})
+```
+
+```{r show-link, echo = FALSE, results = 'asis', eval = exists("report_generated") && report_generated}
+cat("\n---\n\n**[View the full Quality Control Report →](quality_control_report.html)**\n")
+```

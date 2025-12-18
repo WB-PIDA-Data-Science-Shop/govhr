@@ -152,60 +152,51 @@
 #' \url{https://data360.worldbank.org/en/int/indicator/WB_ES_T_WK10}
 "enterprise_surveys"
 
-#' HRMIS Harmonization Data Dictionary
+#' Harmonization Dictionary for Payroll Data
 #'
-#' A structured metadata dictionary describing variables harmonized across
-#' the Human Resource Management Information System (HRMIS) modules:
-#' Establishment, Personnel, and Contract. The dictionary follows
-#' SDMX-style documentation standards and specifies variable names,
-#' identifiers, data types (in R), relationships, and other metadata fields
-#' used in HRMIS data harmonization.
+#' A dictionary defining the standardized variable names, descriptions,
+#' classes, and module assignments used during the payroll data harmonization
+#' process.  
 #'
-#' @format A tibble with 48 rows and 9 variables:
+#' This dictionary is used by the harmonization pipeline to map raw payroll,
+#' contract, personnel, and establishment variables from government HRMIS /
+#' payroll systems to a consistent, analysis-ready schema. Each row represents
+#' one standardized variable name and specifies:
+#' 
+#' * **VariableName** — The human-readable name of the variable as it appears in the
+#'   final harmonized dataset.  
+#' * **VariableID** — The machine-readable variable name (snake_case) used in the
+#'   harmonized output.  
+#' * **Description** — A concise definition of the variable’s meaning and intended use.  
+#' * **VariableClass** — The R class the variable should be cast to (e.g., character,
+#'   Date, numeric, integer).  
+#' * **Module** — The module where the variable belongs (e.g., *Establishment*,
+#'   *Personnel*, *Contract*).
+#'
+#' This dictionary is designed so that automated harmonization scripts can:
+#' 1. Validate presence and structure of required variables;  
+#' 2. Rename raw variables to standardized IDs;  
+#' 3. Coerce variables to the correct data type;  
+#' 4. Split harmonized outputs into module-specific files.
+#'
+#' @format A tibble with 44 rows and 5 variables:
 #' \describe{
-#' \item{Concept Name}{Variable or concept name as used in the HRMIS module.}
-#' \item{Concept ID}{Short machine-readable variable name used in datasets.}
-#' \item{Description}{Detailed explanation of the variable or concept.}
-#' \item{Data Type}{R data type assigned to the variable (e.g., \code{character}, \code{numeric}, \code{Date}).}
-#' \item{Representation (Code list / Format)}{Expected format, code list, or data representation.}
-#' \item{Primary Key}{Indicates whether the variable uniquely identifies a record (\code{"Yes"} or \code{"No"}).}
-#' \item{Relationship}{Describes any relational links to other modules or variables.}
-#' \item{Module}{The HRMIS module the variable belongs to: \code{"Establishment"}, \code{"Personnel"}, or \code{"Contract"}.}
-#' \item{Example Value}{Illustrative example value for the variable.}
+#'   \item{VariableName}{Character. Human-readable variable name.}
+#'   \item{VariableID}{Character. Standardized snake_case variable identifier.}
+#'   \item{Description}{Character. Definition of the variable.}
+#'   \item{VariableClass}{Character. Target R class for the variable.}
+#'   \item{Module}{Character. Harmonization module using this variable.}
 #' }
 #'
-#' @details
-#' The dictionary integrates all HRMIS modules into a single metadata table.
-#' It was designed for use in R-based harmonization workflows and
-#' conforms to SDMX Content-Oriented Guidelines (COG) for defining
-#' concepts, code lists, and roles.
+#' @usage
+#' harmonization_dict
 #'
-#' @references
-#' SDMX Technical Standards v3.0 — Data Structure Definition (DSD):
-#' \url{https://sdmx.org/?page_id=5008}
-
+#' @source Created by the Public Institutions Data & Analytics Team as part of
+#' the payroll harmonization ETL framework.
 #'
-#' SDMX Content-Oriented Guidelines (COG):
-#' \url{https://sdmx.org/?page_id=4345}
-
-#'
-#' Eurostat SDMX Metadata Reference Manual:
-#' \url{https://ec.europa.eu/eurostat/web/metadata/reference-metadata-reporting-standards}
-
-#'
-#' @examples
-#'
-#' library(dplyr)
-#' data(harmonization_dict)
-#'
-#' # View structure
-#' glimpse(harmonization_dict)
-#'
-#'# Filter dictionary by module
-#' harmonization_dict |>
-#' filter(Module == "Personnel")
-#'
+#' @keywords datasets harmonization payroll
 "harmonization_dict"
+
 
 #' Brazilian Public Employee Payroll Data
 #'

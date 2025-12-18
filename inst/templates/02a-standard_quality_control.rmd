@@ -1,0 +1,653 @@
+---
+title: "Standard HR Data Quality Control Report (Q-Check)"
+author: "Ifeanyi Edochie"
+date: "`r Sys.Date()`"
+params:
+  contract_dt: NULL
+  personnel_dt: NULL
+  est_dt: NULL
+  qc_obj: NULL
+  run_qc: TRUE
+    
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(gt)
+library(data.table)
+library(naniar)
+library(viridis)
+
+
+```
+
+# Standard HR Quality Control Analytics Report 
+
+## Overview
+
+This report presents a comprehensive quality control assessment of the harmonized payroll data comprising the **Contract**, **Personnel**, and **Establishment** modules according to the standard harmonization dictionary (`govhr::harmonization_dict()`). All diagnostic tables are generated automatically using the `compute_qualitycontrol()` function, which evaluates the aforementioned harmonized modules.
+
+The quality control report is organized into four main sections:
+
+- **Data Basics**  
+  Foundational diagnostics including module dimensions, variable structure and dictionary conformity, primary key integrity, cross-module orphan checks, salary logic validation, and date logic checks. This section provides essential structural and consistency assessments before diving into detailed data quality patterns.
+
+- **Missingness Report**  
+  Comprehensive measurement and visualization of missing data patterns overall and across key analytical dimensions (occupation, ISCO mapping, reference period, and establishment). Identifies variables requiring cleaning, imputation, or further validation.
+
+- **Volatility Analysis**  
+  Time-series diagnostics evaluating temporal stability of salary aggregates, contract counts, and work hours across reference periods. High volatility may indicate data quality issues, organizational changes, or policy shifts requiring investigation.
+
+## Diagnostic Sections {.tabset .tabset-pill}
+
+### Data Basics 
+
+This section provides a high-level profile of the harmonized payroll data and summarizes the structure of the three core modules—**Contract**, **Personnel**, and **Establishment**—before detailed diagnostics are introduced.
+
+#### Module Dimensions
+
+The harmonized dataset includes the following components:
+
+```{r model-dimensions, echo = FALSE}
+
+
+dim_dt <- data.table(
+  Module = c("Contract", "Personnel", "Establishment"),
+  Observations = c(
+    params$qc_obj$n_obs,
+    if (!is.null(params$personnel_dt)) nrow(params$personnel_dt) else NA,
+    if (!is.null(params$est_dt)) nrow(params$est_dt) else NA
+  ),
+  Variables = c(
+    params$qc_obj$n_vars,
+    if (!is.null(params$personnel_dt)) ncol(params$personnel_dt) else NA,
+    if (!is.null(params$est_dt)) ncol(params$est_dt) else NA
+  )
+)
+
+dim_dt |>
+  gt() |>
+  tab_header(
+    title = md("### Module Dimensions Summary")
+  ) |>
+  fmt_number(
+    columns = c(Observations, Variables),
+    use_seps = TRUE,
+    decimals = 0
+  ) |>
+  cols_align(
+    align = "center",
+    columns = c(Observations, Variables)
+  ) |>
+  tab_style(
+    style = list(
+      cell_fill(color = "#f7f7f7")
+    ),
+    locations = cells_body()
+  ) |>
+  opt_table_outline() |>
+  opt_row_striping()
+
+
+```
+
+#### Temporal and Cross-Sectional Coverage
+
+This section visualizes data coverage across time periods, highlighting potential spikes or gaps in observations that may indicate data quality issues or structural changes.
+
+```{r coverage, echo = FALSE, fig.width = 12, fig.height = 6}
+
+# Ensure data.tables
+contract_dt <- as.data.table(params$contract_dt)
+personnel_dt <- if (!is.null(params$personnel_dt)) as.data.table(params$personnel_dt) else NULL
+est_dt <- if (!is.null(params$est_dt)) as.data.table(params$est_dt) else NULL
+
+# Contract observations by reference date
+contract_by_date <- if ("ref_date" %in% names(contract_dt)) {
+  contract_dt[, .(n_obs = .N, module = "Contract"), by = ref_date][order(ref_date)]
+} else {
+  data.table(ref_date = as.Date(character(0)), n_obs = integer(0), module = character(0))
+}
+
+# Personnel observations by reference date
+personnel_by_date <- if (!is.null(personnel_dt) && "ref_date" %in% names(personnel_dt)) {
+  personnel_dt[, .(n_obs = .N, module = "Personnel"), by = ref_date][order(ref_date)]
+} else {
+  data.table(ref_date = as.Date(character(0)), n_obs = integer(0), module = character(0))
+}
+
+# Establishment observations by reference date
+est_by_date <- if (!is.null(est_dt) && "ref_date" %in% names(est_dt)) {
+  est_dt[, .(n_obs = .N, module = "Establishment"), by = ref_date][order(ref_date)]
+} else {
+  data.table(ref_date = as.Date(character(0)), n_obs = integer(0), module = character(0))
+}
+
+# Combine all modules
+coverage_dt <- rbindlist(list(contract_by_date, personnel_by_date, est_by_date), use.names = TRUE)
+
+# Create line plot showing temporal patterns
+ggplot(coverage_dt, aes(x = factor(ref_date), y = n_obs, color = module, group = module)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2.5) +
+  scale_y_continuous(labels = scales::comma_format()) +
+  scale_color_manual(values = c("Contract" = "#1f77b4", "Personnel" = "#ff7f0e", "Establishment" = "#2ca02c")) +
+  labs(
+    title = "Observation Counts by Reference Period and Module",
+    subtitle = "Spikes or gaps may indicate data quality issues or organizational changes",
+    x = "Reference Date",
+    y = "Number of Observations",
+    color = "Module"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "top",
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+#### Variable Structure & Dictionary Conformity
+
+This section compares the variables present in each harmonized module against the standard harmonization dictionary. It identifies:
+
+- **Missing variables**: Expected by the dictionary but absent from the data
+- **Extra variables**: Present in the data but not in the dictionary
+
+```{r structure, echo = FALSE}
+
+structure_list <- params$qc_obj$structure
+
+# Convert list structure to data.table
+structure_dt <- data.table(
+  Module = c("Contract", "Establishment", "Personnel"),
+  `Missing Variables` = c(
+    structure_list[[1]]$missing,
+    structure_list[[2]]$missing,
+    structure_list[[3]]$missing
+  ),
+  `Extra Variables` = c(
+    structure_list[[1]]$extra,
+    structure_list[[2]]$extra,
+    structure_list[[3]]$extra
+  )
+)
+
+structure_dt |>
+  gt() |>
+  tab_header(
+    title = md("### Structure Diagnostics by Module")
+  ) |>
+  fmt_markdown(columns = c(`Missing Variables`, `Extra Variables`)) |>
+  cols_width(
+    Module ~ px(120),
+    `Missing Variables` ~ px(400),
+    `Extra Variables` ~ px(400)
+  ) |>
+  tab_style(
+    style = list(
+      cell_text(weight = "bold")
+    ),
+    locations = cells_body(columns = Module)
+  ) |>
+  opt_table_outline() |>
+  opt_row_striping() |>
+  tab_footnote(
+    footnote = "Red badges indicate variables expected by the dictionary but missing from the data",
+    locations = cells_column_labels(columns = `Missing Variables`)
+  ) |>
+  tab_footnote(
+    footnote = "Orange badges indicate variables present in the data but not in the dictionary",
+    locations = cells_column_labels(columns = `Extra Variables`)
+  )
+
+```
+
+#### Primary Key Integrity
+
+This section validates that the Contract module's primary keys (`contract_id`, `personnel_id`, `ref_date`) uniquely identify each record without duplication.
+
+```{r keys, echo = FALSE}
+
+keys_obj <- params$qc_obj$keys
+
+# Create summary table
+keys_dt <- data.table(
+  Check = c("Primary Keys Unique", "Number of Duplicate Groups"),
+  Status = c(
+    ifelse(keys_obj$is_unique, 
+           "<span style='background:#4caf50;color:white;padding:2px 8px;border-radius:4px;'>✓ PASS</span>",
+           "<span style='background:#f44336;color:white;padding:2px 8px;border-radius:4px;'>✗ FAIL</span>"),
+    as.character(nrow(keys_obj$duplicate_groups))
+  )
+)
+
+keys_dt |>
+  gt() |>
+  tab_header(
+    title = md("### Primary Key Uniqueness Check")
+  ) |>
+  fmt_markdown(columns = Status) |>
+  cols_width(
+    Check ~ px(250),
+    Status ~ px(150)
+  ) |>
+  opt_table_outline() |>
+  opt_row_striping()
+
+# Show duplicate groups if any exist
+if (nrow(keys_obj$duplicate_groups) > 0) {
+  keys_obj$duplicate_groups |>
+    head(20) |>
+    gt() |>
+    tab_header(
+      title = md("### Duplicate Key Groups (First 20)")
+    ) |>
+    fmt_number(columns = N, decimals = 0) |>
+    opt_table_outline() |>
+    opt_row_striping()
+}
+
+```
+
+#### Cross-Module Orphan Checks
+
+This section identifies orphaned records—IDs referenced in the Contract module that don't exist in the Personnel or Establishment modules.
+
+```{r orphans, echo = FALSE}
+
+orphans_obj <- params$qc_obj$orphans
+
+# Create summary table
+orphans_dt <- data.table(
+  Check = c(
+    "Personnel IDs in Contract missing from Personnel module",
+    "Establishment IDs in Contract missing from Establishment module"
+  ),
+  `Missing Count` = c(
+    orphans_obj$personnel_vs_contract$n_missing,
+    orphans_obj$establishment_vs_contract$n_missing
+  ),
+  Status = c(
+    ifelse(orphans_obj$personnel_vs_contract$n_missing == 0,
+           "<span style='background:#4caf50;color:white;padding:2px 8px;border-radius:4px;'>✓ PASS</span>",
+           "<span style='background:#ff9800;color:white;padding:2px 8px;border-radius:4px;'>⚠ WARNING</span>"),
+    ifelse(orphans_obj$establishment_vs_contract$n_missing == 0,
+           "<span style='background:#4caf50;color:white;padding:2px 8px;border-radius:4px;'>✓ PASS</span>",
+           "<span style='background:#ff9800;color:white;padding:2px 8px;border-radius:4px;'>⚠ WARNING</span>")
+  )
+)
+
+orphans_dt |>
+  gt() |>
+  tab_header(
+    title = md("### Orphan Records Summary")
+  ) |>
+  fmt_markdown(columns = Status) |>
+  fmt_number(columns = `Missing Count`, decimals = 0, use_seps = TRUE) |>
+  cols_width(
+    Check ~ px(450),
+    `Missing Count` ~ px(150),
+    Status ~ px(120)
+  ) |>
+  opt_table_outline() |>
+  opt_row_striping()
+
+# Show sample of orphaned establishment IDs if any exist
+if (orphans_obj$establishment_vs_contract$n_missing > 0) {
+  orphan_est_dt <- data.table(
+    `Orphaned Establishment IDs` = head(orphans_obj$establishment_vs_contract$missing_ids, 25)
+  )
+  
+  orphan_est_dt |>
+    gt() |>
+    tab_header(
+      title = md("### Sample Orphaned Establishment IDs (First 25)")
+    ) |>
+    opt_table_outline() |>
+    opt_row_striping() |>
+    tab_footnote(
+      footnote = paste0("Total orphaned establishment IDs: ", 
+                        orphans_obj$establishment_vs_contract$n_missing)
+    )
+}
+
+# Show sample of orphaned personnel IDs if any exist
+if (orphans_obj$personnel_vs_contract$n_missing > 0) {
+  orphan_pers_dt <- data.table(
+    `Orphaned Personnel IDs` = head(orphans_obj$personnel_vs_contract$missing_ids, 25)
+  )
+  
+  orphan_pers_dt |>
+    gt() |>
+    tab_header(
+      title = md("### Sample Orphaned Personnel IDs (First 25)")
+    ) |>
+    opt_table_outline() |>
+    opt_row_striping() |>
+    tab_footnote(
+      footnote = paste0("Total orphaned personnel IDs: ", 
+                        orphans_obj$personnel_vs_contract$n_missing)
+    )
+}
+
+```
+
+### Missingness Report
+
+This section examines patterns of missing data across the Contract, Personnel, and Establishment modules.  
+Understanding missingness is essential for data quality control because it highlights variables that may require cleaning, imputation, or further validation by the data provider.
+
+We evaluate:
+
+1. **Variable-level missingness** (percent missing in each variable)  
+2. **Module-level summaries**  
+3. **Visualizations**  
+   - Missingness barplots  
+   - Missingness heatmaps  
+
+
+```{r missingoverall, echo=FALSE, message=FALSE, warning=FALSE, fig.width=12, fig.height=15}
+
+overall_dt <- params$qc_obj$missingness$overall
+
+# Filter to only show variables with missing data to avoid clutter
+plot_dt <- overall_dt[pct_missing > 0]
+
+ggplot(plot_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Overall Missingness by Variable",
+    x = "Variable",
+    y = "Percent Missing"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.y = element_text(size = 11))
+
+
+```
+
+
+```{r missingoccupation, echo=FALSE, warning=FALSE, message=FALSE, fig.width=12, fig.height=15}
+
+miss_occ <- params$qc_obj$missingness$by_occupation
+
+# pick top occupations by missingness severity
+top_occ <- miss_occ[
+  , .(mean_missing = mean(pct_missing)), by = occupation_native
+][order(-mean_missing)][1:15, occupation_native]
+
+plot_dt <- miss_occ[occupation_native %in% top_occ]
+
+ggplot(plot_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ occupation_native, scales = "free_y", ncol = 3) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Missingness by Variable — Top 15 Occupations",
+    x = "Variable",
+    y = "Percent Missing"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(axis.text.y = element_text(size = 9))
+
+```
+
+
+
+```{r missingisco, echo=FALSE, warning=FALSE, message=FALSE, fig.width=12, fig.height=15}
+
+miss_isco <- params$qc_obj$missingness$by_isco
+
+top_isco <- miss_isco[
+  , .(mean_missing = mean(pct_missing)), by = occupation_isconame
+][order(-mean_missing)][1:15, occupation_isconame]
+
+plot_dt <- miss_isco[occupation_isconame %in% top_isco]
+
+ggplot(plot_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ occupation_isconame, scales = "free_y", ncol = 3) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Missingness by Variable — Top 15 ISCO Groups",
+    x = "Variable",
+    y = "Percent Missing"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(axis.text.y = element_text(size = 9))
+
+```
+
+
+```{r missingrefdate, echo=FALSE, warning=FALSE, message=FALSE, fig.width=10, fig.height=6}
+
+miss_ref <- params$qc_obj$missingness$by_ref
+  
+ggplot(miss_ref, aes(x = factor(lubridate::year(ref_date)), y = variable, fill = pct_missing)) +
+  geom_tile(color = "white", linewidth = 0.3) +
+  scale_fill_viridis(option = "C", labels = scales::percent_format()) +
+  labs(
+    title = "Missingness Heatmap by Reference Date",
+    x = "Reference Date",
+    y = "Variable",
+    fill = "% Missing"
+  ) +
+  theme_minimal(base_size = 12)
+
+```
+
+
+
+```{r missingestablishment, echo=FALSE, warning=FALSE, message=FALSE, fig.width=12, fig.height=15}
+
+miss_est <- params$qc_obj$missingness$by_est
+
+top_est <- miss_est[
+  , .(mean_missing = mean(pct_missing)), by = est_id
+][order(-mean_missing)][1:15, est_id]
+
+plot_dt <- miss_est[est_id %in% top_est]
+
+ggplot(plot_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ est_id, scales = "free_y", ncol = 3) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Missingness by Variable — Top 15 Establishments",
+    x = "Variable",
+    y = "Percent Missing"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(axis.text.y = element_text(size = 8))
+
+```
+
+### Volatility Analysis
+
+This section evaluates temporal stability across key HR metrics—salary aggregates, wagebill, staff counts, and contract counts. Volatility is measured using rolling coefficients of variation (CV) or percent changes to identify establishments with unstable patterns over time.
+
+High volatility may indicate:
+
+- Data quality issues (inconsistent reporting, missing periods)
+- Legitimate organizational changes (restructuring, budget changes)
+- Seasonal patterns or policy changes
+
+The heatmaps below show volatility metrics for the top 50 contracts with the highest average salary volatility, allowing identification of patterns that warrant further investigation. 
+
+#### Contract Volatility in Salary
+
+```{r salary-volatility, warning = FALSE, message = FALSE, echo = FALSE, fig.width = 14, fig.height = 18}
+
+
+prepare_topcontracts <- function(vol_dt,
+                                 vol_col = "rolling_cv",
+                                 agg_fn = max,
+                                 n_top = 50,
+                                 by_vars = c("contract_id", "indicator"),
+                                 return_cols = c("contract_id", "ref_date", "indicator")) {
+  
+  # Determine the ID column (first element of by_vars, typically contract_id or est_id)
+  id_col <- by_vars[1]
+  
+  # Create aggregation column name
+  agg_col_name <- paste0("agg_", vol_col)
+  
+  # Calculate aggregated volatility metric per ID-indicator
+  vol_dt[, (agg_col_name) := agg_fn(get(vol_col), na.rm = TRUE), 
+         by = by_vars]
+  
+  # Get top N ID-indicator combinations
+  # Use dynamic column reference for the paste operation
+  top_contracts <- vol_dt[
+    !is.na(indicator)
+  ][
+    order(-get(agg_col_name))
+  ][
+    !duplicated(paste(get(id_col), indicator))
+  ][
+    , .SD[1:n_top], by = "indicator"
+  ][
+    , .SD, .SDcols = c(id_col, "indicator")
+  ]
+  
+  # Join back to get all time periods for top IDs
+  # Dynamic join based on by_vars
+  join_cols <- c(id_col, "indicator")
+  result_dt <- vol_dt[top_contracts, on = join_cols]
+  
+  # Add volatility column to return columns if not already there
+  if (!vol_col %in% return_cols) {
+    return_cols <- c(return_cols, vol_col)
+  }
+  
+  # Select and return specified columns
+  return(result_dt[, ..return_cols][])
+}
+
+volcontracts_dt <- prepare_topcontracts(vol_dt = params$qc_obj$volatility$salary_vol,
+                                        vol_col = "rolling_cv",
+                                        agg_fn = max,
+                                        n_top = 50,
+                                        by_vars = c("contract_id", "indicator"),
+                                        return_cols = c("contract_id", "ref_date", "indicator"))
+
+
+# Get full scale range for consistent coloring
+scale_limits <- range(volcontracts_dt$rolling_cv, na.rm = TRUE)
+
+ggplot(volcontracts_dt, aes(x = factor(ref_date), y = contract_id, fill = rolling_cv)) +
+  geom_tile(color = "white", linewidth = 0.2) +
+  facet_wrap(~ indicator, scales = "free_y", ncol = 1) +
+  scale_fill_viridis(
+    option = "plasma",
+    na.value = "grey90",
+    labels = scales::comma_format(accuracy = 0.01),
+    limits = scale_limits
+  ) +
+  labs(
+    title = "Salary Volatility (Rolling CV) — Top 50 Most Volatile Contracts",
+    subtitle = "Contracts ordered by average volatility within each indicator",
+    x = "Reference Date",
+    y = "Contract ID",
+    fill = "Rolling CV"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    axis.text.y = element_text(size = 7),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(face = "bold", size = 10),
+    panel.grid = element_blank()
+  )
+
+```
+
+#### Contract Count Volatility
+```{r contractcount-volatility, warning = FALSE, message = FALSE, echo = FALSE, fig.width=12, fig.height=15}
+
+
+
+## for the percent change volatility of the contract count
+volctrcounts_dt <- prepare_topcontracts(vol_dt = params$qc_obj$volatility$ctrcount_vol,
+                                        vol_col = "pct_change",
+                                        agg_fn = max,
+                                        n_top = 50,
+                                        by_vars = c("est_id", "indicator"),
+                                        return_cols = c("est_id", "ref_date", "indicator"))
+
+# Get full scale range for consistent coloring
+scale_limits <- range(volctrcounts_dt$pct_change, na.rm = TRUE)
+
+ggplot(volctrcounts_dt, aes(x = factor(ref_date), y = est_id, fill = pct_change)) +
+  geom_tile(color = "white", linewidth = 0.2) +
+  scale_fill_viridis(
+    option = "plasma",
+    na.value = "grey90",
+    labels = scales::comma_format(accuracy = 0.01),
+    limits = scale_limits
+  ) +
+  labs(
+    title = "Contract Count Volatility (% change) — Top 50 Most Volatile Establishments by Contract",
+    subtitle = "Number of Countracts order by most volatile establishments within the government",
+    x = "Reference Date",
+    y = "Establishment ID",
+    fill = "% change"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    axis.text.y = element_text(size = 7),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(face = "bold", size = 10),
+    panel.grid = element_blank()
+  )
+
+
+```
+
+
+#### Contract Level Volatility in Hours Worked
+```{r, hours-volatility, warning = FALSE, message = FALSE, echo = FALSE, fig.width=12, fig.height=15}
+
+whcontracts_dt <- prepare_topcontracts(vol_dt = params$qc_obj$volatility$workhours_vol,
+                                        vol_col = "rolling_cv",
+                                        agg_fn = max,
+                                        n_top = 50,
+                                        by_vars = c("contract_id", "indicator"),
+                                        return_cols = c("contract_id", "ref_date", "indicator"))
+
+
+# Get full scale range for consistent coloring
+scale_limits <- range(whcontracts_dt$rolling_cv, na.rm = TRUE)
+
+ggplot(whcontracts_dt, aes(x = factor(ref_date), y = contract_id, fill = rolling_cv)) +
+  geom_tile(color = "white", linewidth = 0.2) +
+  scale_fill_viridis(
+    option = "plasma",
+    na.value = "grey90",
+    labels = scales::comma_format(accuracy = 0.01),
+    limits = scale_limits
+  ) +
+  labs(
+    title = "Hours Worked Volatility (Rolling CV) — Top 50 Most Volatile Contracts",
+    subtitle = "Contracts ordered by average volatility within each indicator",
+    x = "Reference Date",
+    y = "Contract ID",
+    fill = "Rolling CV"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    axis.text.y = element_text(size = 7),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(face = "bold", size = 10),
+    panel.grid = element_blank()
+  )
+
+```
+

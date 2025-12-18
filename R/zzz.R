@@ -19,7 +19,9 @@ if (getRversion() >= "2.15.1"){
     "ts_ratio", "value", "wage_value", "wage_var", ".", "sd",
     "summary_value", "summary_var", ".groups", ":=", "val", "N",
     "allowance_ind", "allowance_lcu", "allowshare", "gender", "educat7",
-    "paygrade", "seniority", "from", "est_to", "paygrade", "seniority"
+    "paygrade", "seniority", "from", "est_to", "paygrade", "seniority",
+    "Module", "VariableID", "harmonization_dict", "..groups", "n_missing",
+    "pct_missing"
   ))
 
 }

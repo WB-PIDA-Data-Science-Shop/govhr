@@ -600,6 +600,238 @@ compute_hrmreport_stats <- function(contract_dt,
   return(hrm_list)
 }
 
+
+
+
+#' Compute Volatility Measures Over Time
+#'
+#' @description
+#' Computes a variety of volatility statistics (e.g., percent change, 
+#' rolling standard deviation, coefficient of variation) for a variable 
+#' aggregated over time and optionally by grouping variables.  
+#' Missing time periods are automatically filled for all groups, ensuring 
+#' consistent temporal coverage before volatility is calculated.
+#'
+#' @details
+#' This function first summarizes the input data using 
+#' [compute_fastsummary()], aggregating `col` using `agg_fn` for each 
+#' combination of `groups` and `time`.  
+#'
+#' After aggregation, the function constructs a full grid of all time periods 
+#' crossed with all unique group combinations using `data.table::CJ()`, filling 
+#' implicit missing time–group combinations with `NA`.  
+#'
+#' Volatility measures are computed by calling an internal registry of 
+#' volatility functions defined in [`define_vol_fns()`].  
+#'
+#' Available volatility methods include:
+#'
+#' * **pct_change** — period-to-period percent change  
+#' * **sd** — standard deviation of the aggregated values over time  
+#' * **cv** — coefficient of variation (`sd(x) / mean(x)`)  
+#' * **rolling_sd** — rolling standard deviation using a fixed window  
+#' * **rolling_cv** — rolling coefficient of variation  
+#' * **rolling_pct_change** — percent change over a rolling window  
+#'
+#' @param data A data.frame or data.table containing the dataset.
+#' @param col A character string specifying the column whose volatility 
+#'   should be computed.
+#' @param agg_fn A character string specifying the aggregation function 
+#'   to apply before volatility is calculated. Must match a function 
+#'   name available to `compute_fastsummary()`.
+#' @param vol_fn A character string specifying the volatility measure 
+#'   to compute. Options are:
+#'   `"pct_change"`, `"sd"`, `"cv"`, `"rolling_sd"`, `"rolling_cv"`,
+#'   `"rolling_pct_change"`.
+#' @param time A character string representing the time variable. Must be 
+#'   sortable (e.g., Date, year, numeric).
+#' @param groups A character vector of grouping variables. Use `NULL` to 
+#'   compute volatility for the entire dataset without grouping.
+#' @param window_size Integer window length for rolling volatility functions. 
+#'   Required when `vol_fn` is one of the rolling variants.
+#'
+#' @return 
+#' A `data.table` containing:
+#' * grouping variables (if provided),  
+#' * the time variable (for rolling and period-based volatility), and  
+#' * the computed volatility statistic, named using `vol_fn`.  
+#'
+#' For non-rolling aggregate volatility functions (`sd`, `cv`), the function 
+#' returns one row per group.
+#' 
+#' @importFrom data.table as.data.table setorderv CJ merge.data.table setnames shift frollapply
+#' @importFrom stats sd
+#'
+#' @examples
+#' \dontrun{
+#' # Percent change in base salary by occupation over time
+#' compute_volatility(
+#'   data      = bra_hrmis_contract,
+#'   col       = "base_salary_lcu",
+#'   agg_fn    = "sum",
+#'   vol_fn    = "pct_change",
+#'   time      = "ref_date",
+#'   groups    = "occupation_isconame"
+#' )
+#'
+#' # Rolling 3-period coefficient of variation
+#' compute_volatility(
+#'   data      = bra_hrmis_contract,
+#'   col       = "whours",
+#'   agg_fn    = "mean",
+#'   vol_fn    = "rolling_cv",
+#'   time      = "ref_date",
+#'   groups    = "occupation_native",
+#'   window_size = 3
+#' )
+#' }
+#'
+#' @seealso 
+#' * [`define_vol_fns()`] for the internal volatility function registry  
+#' * [`compute_fastsummary()`] for the aggregation step  
+#'
+#' @export
+
+
+compute_volatility <- function(data, 
+                               col,
+                               agg_fn , 
+                               vol_fn = c("pct_change", "sd", "cv", 
+                                          "rolling_sd", "rolling_cv", 
+                                          "rolling_pct_change"),
+                               time,  
+                               groups,
+                               window_size = NULL) {
+  
+  vol_fn <- match.arg(vol_fn)
+
+
+  agg_dt <- 
+    compute_fastsummary(data = data |> as.data.table(),
+                        cols = col,
+                        fns = agg_fn,
+                        groups = c(groups, time)) 
+  
+  data.table::setorderv(agg_dt, c(groups, time))
+  
+  ## fill in the implicit missing values
+
+  time_list <- sort(unique(agg_dt[[time]]))
+
+  if (is.null(groups)){
+
+    grid_dt <- data.table(ref = time_list)
+    setnames(grid_dt, "ref", time)
+
+  } else {
+
+    group_values <- unique(agg_dt[, ..groups])
+
+    ## construct the inputs for data.table::CJ function and wrap in a do.call
+    cj_inputs <- c(as.list(group_values), list(ref = time_list))
+
+    grid_dt <- do.call(data.table::CJ, c(cj_inputs, list(unique = TRUE)))
+
+    setnames(grid_dt, "ref", time)
+
+  }
+  
+
+  ### compute volatility based on selected method
+  agg_dt <- data.table::merge.data.table(grid_dt, agg_dt, by = c(groups, time), all.x = TRUE)
+
+  ### compare registry of volatility functions to selected functions
+  vol_fns <- define_vol_fns(window_size = window_size)
+
+  fn <- vol_fns[[vol_fn]]
+
+  if (is.null(fn)) stop("Volatility function not defined: ", vol_fn)
+  
+  ### lets apply the function now
+  if (vol_fn %in% c("pct_change", "rolling_sd", 
+                    "rolling_cv", "rolling_pct_change")) {
+    
+    agg_dt[, (vol_fn) := fn(value), by = groups]
+
+  } else if (vol_fn %in% c("sd", "cv")) {
+
+    agg_dt <- agg_dt[, fn(value), by = groups]
+
+    data.table::setnames(agg_dt, "V1", vol_fn)
+
+
+  } else {
+
+    stop("Volatility function not recognized: ", vol_fn)
+
+  }
+  
+  return(agg_dt[])
+}
+
+
+#' Internal: Registry of Volatility Functions
+#'
+#' @description
+#' Creates and returns a named list of volatility functions used internally by 
+#' [`compute_volatility()`]. Each element of the list corresponds to a volatility 
+#' method such as percent change, standard deviation, coefficient of variation, 
+#' or rolling variants of these measures.
+#'
+#' @details
+#' The returned list maps volatility function names (e.g., `"pct_change"`, 
+#' `"rolling_sd"`) to functions that operate on numeric vectors.  
+#' Rolling functions rely on `data.table::frollapply()` and require 
+#' that the calling function supply a `window_size`.
+#'
+#' This function is not exported and is intended for internal use only.
+#'
+#' @param window_size Integer window length for rolling statistics. Defaults to 
+#'   `NULL` but must be provided when calling any rolling volatility function.
+#'
+#' @return A named list of functions used by `compute_volatility()`.
+#'
+#' @keywords internal
+#' @noRd
+
+
+
+define_vol_fns <- function(window_size = NULL) {
+
+  list(pct_change = function(x) {
+
+        (x - shift(x)) / shift(x)
+      },
+
+      sd = function(x) {
+        stats::sd(x, na.rm = TRUE)
+      },
+
+      cv = function(x) {
+        stats::sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)
+      },
+
+      rolling_sd = function(x) {
+        data.table::frollapply(x, n = window_size, FUN = sd, fill = NA)
+      },
+
+      rolling_cv = function(x) {
+        data.table::frollapply(x,
+                               n = window_size,
+                               FUN = function(w) stats::sd(w, na.rm = TRUE) / mean(w, na.rm = TRUE), 
+                               fill = NA)
+      },
+      rolling_pct_change = function(x) {
+        data.table::frollapply(x,
+                               n = window_size,
+                               FUN = function(w) (w[length(w)] - w[1]) / w[1],
+                               fill = NA)
+      }
+    )
+}
+
+
+
 #' Fast counting via dtplyr
 #'
 #' `fastcount()` delegates [dplyr::count()] to a `data.table` backend by
@@ -660,3 +892,4 @@ fastprop <- function(.data, ...){
 
   prop_dt
 }
+

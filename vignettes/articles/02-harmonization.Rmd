@@ -129,7 +129,7 @@ The `bra_hrmis` data is written in Portuguese which might require translation to
 ```{r colname-dictionary}
 
 raw_dictionary <- 
-  tibble(raw_colnames_pt = colnames(bra_hrmis),
+  tibble(raw_colnames_pt = colnames(govhr::bra_hrmis),
          raw_colnames_eng = polyglotr::google_translate(colnames(bra_hrmis), "pt", "en"))
 
 kable(raw_dictionary)
@@ -182,13 +182,12 @@ occup_df <- unique(occup_df)
 # Add translated vars
 occup_df[, occupation_native := tolower(CARREIRA)]
 
-occup_df[, occupation_english := tolower(google_translate(text = CARREIRA,
+occup_df[, occupation_english := tolower(polyglotr::google_translate(text = occupation_native,
                                                           source_language = "pt",
                                                           target_language = "en"))]
+```
 
-#-----------------------------
-# 3. Classify occupations
-#-----------------------------
+```{r}
 class_occup_df <- copy(occup_df)[,
   .(id = .I, text = occupation_english)
 ]
@@ -199,16 +198,14 @@ class_occup_df <- classify_occupation(
   lang = "en",
   num_leaves = 1
 )
-
-
-datatable(
+```
+```{r, echo = FALSE}
+reactable(
   head(
     class_occup_df, 
-    n = nrow(class_occup_df)), 
-    options = list(pageLength = 10
+    100
   )
 ) 
-
 ```
  
 ```{r merge-harmonized-occupation}
@@ -255,7 +252,7 @@ bra_hrmis <- occup_df[bra_hrmis, on = c("CARREIRA", "CARGO")]
 ### lets include the dates
 bra_hrmis[, ref_date := as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-"))]
 
-setnames(bra_hrmis, c("DATA_ADMISSAO", "DATA_APOSENTADORIA"), c("start_date", "end_date"))
+setnames(bra_hrmis, c("DATA_ADMISSAO", "DATA_APOSENTADORIA"), c("start_date", "end_date"), skip_absent = TRUE)
 bra_hrmis[, start_date := as.Date(as.integer(start_date), origin = "1899-12-30")]
 bra_hrmis[, end_date := as.Date(as.integer(end_date), origin = "1899-12-30")]
 
@@ -364,7 +361,9 @@ bra_hrmis_contract <-
 Here is what our final data looks like:
 ```{r output-final-contract-harmonization, echo = FALSE}
 
-glimpse(bra_hrmis_contract)
+reactable(
+  head(bra_hrmis_contract, 100)
+)
 
 ```
 
@@ -382,7 +381,6 @@ personnel_count <-
 bra_hrmis |>
   dplyr::select(personnel_id, est_id, ref_date) |>
   uniqueN()
-
 
 ```
 
@@ -445,8 +443,6 @@ bra_hrmis[, birth_date := as.Date(as.integer(birth_date), origin = "1899-12-30")
 
 ```
 
-
-
 The remainder of the variables (`tribe`, `race``) appear to be missing from the `bra_hrmis` raw data. Therefore, we create them as missing variables (`NA`). 
 
 ```{r}
@@ -472,9 +468,11 @@ bra_hrmis_personnel <-
 
 Let's take a look at the `bra_hrmis_personnel`
 
-```{r}
+```{r, echo = FALSE}
 
-glimpse(bra_hrmis_personnel)
+reactable(
+  head(bra_hrmis_personnel, 100)
+)
 
 ```
 
@@ -497,106 +495,13 @@ bra_hrmis_est <-
     country_code, country_name, adm1_name, adm1_code
   ) |>
   unique() |>
+  head(10) |> 
   mutate(est_name_en = polyglotr::google_translate(est_name_native, target_language = "en"))
 
-
-glimpse(bra_hrmis_est)
-
 ```
 
-
-
-
-# Quality Check for Harmonized Data 
-
-## Quality Control for the Contract Module
-
-The function `qualitycheck_contractmod()` performs a comprehensive set of checks on a harmonized HRMIS contract table. It ensures that all required variables exist, validates their data types, verifies uniqueness conditions, and conducts salary outlier analysis using interquartile range (IQR) thresholds.
-
-Key Checks Performed
-
-* Column existence: Ensures all required fields such as contract_id, personnel_id, est_id, salary fields, date fields, and administrative codes are present.
-
-* Uniqueness: Observations must be unique at the contract_id–est_date level.
-
-* Type validation: Ensures character, date, and numeric variables are correctly typed.
-
-* Salary Outlier Detection: For base_salary_lcu, gross_salary_lcu, and net_salary_lcu, the function computes an IQR-based lower and upper bound and checks that all values fall within expected ranges.
-
-* Logical constraints: whours must be between 0 and 60. Country codes must follow the 3-letter ISO3 format.
-
-* ISCO validation: Checks that occupation codes and occupation names exist in the official ISCO classification list.
-
-
-Please see the check below: 
-```{r quality-check-contract}
-
-qualitycheck_contractmod(bra_hrmis_contract |> as_tibble())
-
+```{r, echo = FALSE}
+reactable(
+  head(bra_hrmis_est, 10)
+)
 ```
-
-
-## Quality Control for the Personnel Module
-
-Personnel-level harmonization requires the presence and validity of demographic, identification, and reference date information.
-The function `qualitycheck_personnel()` applies minimal but essential validation steps to ensure basic integrity of the personnel table.
-
-Key Checks Performed
-
-* Required variables exist: Including personnel_id, ref_date, birth_date, gender, educat7, tribe, race, and status.
-
-* Uniqueness: Personnel IDs must be unique within each reference date (ref_date).
-
-* Non-missingness: Required fields cannot be NA.
-
-* Birthdate validation: Birth dates must fall between 1900-01-01 and 2000-01-01, which reduces data entry anomalies and impossible DOBs.
-
-
-Please see the check below: 
-```{r quality-check-personnel}
-
-qualitycheck_personnel(bra_hrmis_personnel |> as_tibble())
-
-```
-
-
-## Quality Control for the Establishment Module 
-
-The establishment module captures ministry/department/agency identifiers, names, hierarchical parent-child relationships of public sector establishments, and geographic attributes. The function `qualitycheck_estmod()` validates structural and coding integrity.
-
-Key Checks Performed
-
-* Required variables exist: est_id, est_name_native, est_parent, est_child, country_code, country_name: adm1_name, adm1_code, English name (est_name_en)
-
-* Row uniqueness: Each est_id must be unique.
-
-* Non-missingness: All required variables must be populated.
-
-* Type validation: All establishment fields must be character.
-
-* ISO3 Validation: Ensures country_code belongs to the official World Bank/ISO list using the `countrycode` package.
-
-
-Please see the check below: 
-```{r quality-check-org}
-
-qualitycheck_estmod(bra_hrmis_est |> as_tibble())
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
