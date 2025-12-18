@@ -7,7 +7,6 @@ output: rmarkdown::html_document
 # https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf
 
 # set-up ------------------------------------------------------------------
-library(here)
 library(dplyr)
 library(readr)
 library(ggplot2)
