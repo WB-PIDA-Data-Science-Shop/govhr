@@ -207,7 +207,7 @@ support translation. This can be applied as follows:
 
 ``` r
 raw_dictionary <- 
-  tibble(raw_colnames_pt = colnames(bra_hrmis),
+  tibble(raw_colnames_pt = colnames(govhr::bra_hrmis),
          raw_colnames_eng = polyglotr::google_translate(colnames(bra_hrmis), "pt", "en"))
 
 kable(raw_dictionary)
@@ -326,13 +326,12 @@ occup_df <- unique(occup_df)
 # Add translated vars
 occup_df[, occupation_native := tolower(CARREIRA)]
 
-occup_df[, occupation_english := tolower(google_translate(text = CARREIRA,
+occup_df[, occupation_english := tolower(polyglotr::google_translate(text = occupation_native,
                                                           source_language = "pt",
                                                           target_language = "en"))]
+```
 
-#-----------------------------
-# 3. Classify occupations
-#-----------------------------
+``` r
 class_occup_df <- copy(occup_df)[,
   .(id = .I, text = occupation_english)
 ]
@@ -343,16 +342,13 @@ class_occup_df <- classify_occupation(
   lang = "en",
   num_leaves = 1
 )
-
-
-datatable(
-  head(
-    class_occup_df, 
-    n = nrow(class_occup_df)), 
-    options = list(pageLength = 10
-  )
-) 
 ```
+
+    ## Warning in merge.data.table(predictions, occupations_bundle[, list(conceptUri,
+    ## : Unknown argument 'on' has been passed.
+
+    ## Warning in merge.data.table(predictions, isco_occupations_bundle, on =
+    ## "iscoGroup"): Unknown argument 'on' has been passed.
 
 ``` r
 #-----------------------------
@@ -398,7 +394,7 @@ bra_hrmis <- occup_df[bra_hrmis, on = c("CARREIRA", "CARGO")]
 ### lets include the dates
 bra_hrmis[, ref_date := as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-"))]
 
-setnames(bra_hrmis, c("DATA_ADMISSAO", "DATA_APOSENTADORIA"), c("start_date", "end_date"))
+setnames(bra_hrmis, c("DATA_ADMISSAO", "DATA_APOSENTADORIA"), c("start_date", "end_date"), skip_absent = TRUE)
 bra_hrmis[, start_date := as.Date(as.integer(start_date), origin = "1899-12-30")]
 bra_hrmis[, end_date := as.Date(as.integer(end_date), origin = "1899-12-30")]
 
@@ -511,33 +507,6 @@ bra_hrmis_contract <-
 
 Here is what our final data looks like:
 
-    ## Rows: 17,246
-    ## Columns: 24
-    ## $ contract_id         <chr> "11189", "165842", "37500", "124527", "5851", "169…
-    ## $ personnel_id        <chr> "9daf216845f5cc884941a9b94d08fedb01e347fe40abfa5a6…
-    ## $ est_id              <chr> "ALAGOAS PREVIDENCIA", "UNIVERSIDADE ESTADUAL DE C…
-    ## $ start_date          <date> 1978-03-31, 2016-02-25, 1987-12-02, 2000-01-05, 1…
-    ## $ end_date            <date> 2007-08-23, NA, 2013-10-01, NA, 2015-01-21, NA, N…
-    ## $ ref_date            <date> 2018-09-01, 2018-09-01, 2017-09-01, 2018-09-01, 2…
-    ## $ base_salary_lcu     <dbl> NA, NA, NA, NA, NA, 1200.00, NA, NA, NA, 1162.12, …
-    ## $ gross_salary_lcu    <dbl> NA, NA, NA, NA, NA, 1200.00, NA, NA, NA, 1626.96, …
-    ## $ net_salary_lcu      <dbl> NA, NA, NA, NA, NA, 1113.60, NA, NA, NA, 1499.13, …
-    ## $ base_salary_ppp     <dbl> NA, NA, NA, NA, NA, 393.9256, NA, NA, NA, 381.4907…
-    ## $ gross_salary_ppp    <dbl> NA, NA, NA, NA, NA, 393.9256, NA, NA, NA, 534.0843…
-    ## $ net_salary_ppp      <dbl> NA, NA, NA, NA, NA, 365.5629, NA, NA, NA, 492.1214…
-    ## $ contract_type       <chr> "short-term", "permanent", "short-term", "permanen…
-    ## $ occupation_iscocode <chr> NA, "5321", NA, NA, NA, "2320", NA, NA, NA, "9311"…
-    ## $ occupation_native   <chr> NA, "enfermeiro", NA, NA, NA, "professor", NA, NA,…
-    ## $ occupation_english  <chr> "na", "nurse", "na", "na", "na", "teacher", "na", …
-    ## $ occupation_isconame <chr> NA, "Health Care Assistants", NA, NA, NA, "Vocatio…
-    ## $ country_code        <chr> "BRA", "BRA", "BRA", "BRA", "BRA", "BRA", "BRA", "…
-    ## $ country_name        <chr> "Brazil", "Brazil", "Brazil", "Brazil", "Brazil", …
-    ## $ adm1_name           <chr> "Alagoas", "Alagoas", "Alagoas", "Alagoas", "Alago…
-    ## $ adm1_code           <chr> "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", "A…
-    ## $ whours              <dbl> NA, 30, NA, NA, NA, 0, NA, NA, NA, 30, NA, 30, 40,…
-    ## $ paygrade            <chr> "D", "A", NA, NA, NA, NA, "B", NA, NA, "B", NA, "C…
-    ## $ seniority           <chr> "ACEND40", "ASSEA30", "NSP", "SDCOMB", "AEESD40", …
-
 ### Harmonizing the Personnel Module
 
 The Personnel Module standardizes individual-level information about
@@ -643,23 +612,6 @@ bra_hrmis_personnel <-
 
 Let’s take a look at the `bra_hrmis_personnel`
 
-``` r
-glimpse(bra_hrmis_personnel)
-```
-
-    ## Rows: 17,230
-    ## Columns: 10
-    ## $ personnel_id <chr> "9daf216845f5cc884941a9b94d08fedb01e347fe40abfa5a6920658d…
-    ## $ est_id       <chr> "ALAGOAS PREVIDENCIA", "UNIVERSIDADE ESTADUAL DE CIENCIAS…
-    ## $ ref_date     <date> 2018-09-01, 2018-09-01, 2017-09-01, 2018-09-01, 2017-09-…
-    ## $ birth_date   <date> 1954-02-06, 1986-04-09, 1959-12-25, 1972-03-25, 1958-12-…
-    ## $ gender       <chr> "FEMININO", "FEMININO", "MASCULINO", "FEMININO", "FEMININ…
-    ## $ educat7      <chr> "Primary incomplete", "Higher than secondary but not univ…
-    ## $ country_name <chr> "Brazil", "Brazil", "Brazil", "Brazil", "Brazil", "Brazil…
-    ## $ country_code <chr> "BRA", "BRA", "BRA", "BRA", "BRA", "BRA", "BRA", "BRA", "…
-    ## $ adm1_name    <chr> "Alagoas", "Alagoas", "Alagoas", "Alagoas", "Alagoas", "A…
-    ## $ adm1_code    <chr> "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL…
-
 ### Harmonizing the Establishment Module
 
 The Establishment Module extracts, standardizes, and structures
@@ -681,124 +633,6 @@ bra_hrmis_est <-
     country_code, country_name, adm1_name, adm1_code
   ) |>
   unique() |>
+  head(10) |> 
   mutate(est_name_en = polyglotr::google_translate(est_name_native, target_language = "en"))
-
-
-glimpse(bra_hrmis_est)
 ```
-
-    ## Rows: 238
-    ## Columns: 11
-    ## $ est_id          <chr> "ALAGOAS PREVIDENCIA", "UNIVERSIDADE ESTADUAL DE CIENC…
-    ## $ est_name_native <chr> "ALAGOAS PREVIDENCIA", "UNIVERSIDADE ESTADUAL DE CIENC…
-    ## $ ref_date        <date> 2018-09-01, 2018-09-01, 2017-09-01, 2016-09-01, 2014-…
-    ## $ est_type        <lgl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
-    ## $ est_parent      <lgl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
-    ## $ est_child       <lgl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
-    ## $ country_code    <chr> "BRA", "BRA", "BRA", "BRA", "BRA", "BRA", "BRA", "BRA"…
-    ## $ country_name    <chr> "Brazil", "Brazil", "Brazil", "Brazil", "Brazil", "Bra…
-    ## $ adm1_name       <chr> "Alagoas", "Alagoas", "Alagoas", "Alagoas", "Alagoas",…
-    ## $ adm1_code       <chr> "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", …
-    ## $ est_name_en     <chr> "ALAGOAS PENSION", "STATE UNIVERSITY OF HEALTH SCIENCE…
-
-## Quality Check for Harmonized Data
-
-### Quality Control for the Contract Module
-
-The function
-[`qualitycheck_contractmod()`](https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_contractmod.md)
-performs a comprehensive set of checks on a harmonized HRMIS contract
-table. It ensures that all required variables exist, validates their
-data types, verifies uniqueness conditions, and conducts salary outlier
-analysis using interquartile range (IQR) thresholds.
-
-Key Checks Performed
-
-- Column existence: Ensures all required fields such as contract_id,
-  personnel_id, est_id, salary fields, date fields, and administrative
-  codes are present.
-
-- Uniqueness: Observations must be unique at the contract_id–est_date
-  level.
-
-- Type validation: Ensures character, date, and numeric variables are
-  correctly typed.
-
-- Salary Outlier Detection: For base_salary_lcu, gross_salary_lcu, and
-  net_salary_lcu, the function computes an IQR-based lower and upper
-  bound and checks that all values fall within expected ranges.
-
-- Logical constraints: whours must be between 0 and 60. Country codes
-  must follow the 3-letter ISO3 format.
-
-- ISCO validation: Checks that occupation codes and occupation names
-  exist in the official ISCO classification list.
-
-Please see the check below:
-
-``` r
-qualitycheck_contractmod(bra_hrmis_contract |> as_tibble())
-```
-
-[TABLE]
-
-### Quality Control for the Personnel Module
-
-Personnel-level harmonization requires the presence and validity of
-demographic, identification, and reference date information. The
-function
-[`qualitycheck_personnel()`](https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_personnel.md)
-applies minimal but essential validation steps to ensure basic integrity
-of the personnel table.
-
-Key Checks Performed
-
-- Required variables exist: Including personnel_id, ref_date,
-  birth_date, gender, educat7, tribe, race, and status.
-
-- Uniqueness: Personnel IDs must be unique within each reference date
-  (ref_date).
-
-- Non-missingness: Required fields cannot be NA.
-
-- Birthdate validation: Birth dates must fall between 1900-01-01 and
-  2000-01-01, which reduces data entry anomalies and impossible DOBs.
-
-Please see the check below:
-
-``` r
-qualitycheck_personnel(bra_hrmis_personnel |> as_tibble())
-```
-
-[TABLE]
-
-### Quality Control for the Establishment Module
-
-The establishment module captures ministry/department/agency
-identifiers, names, hierarchical parent-child relationships of public
-sector establishments, and geographic attributes. The function
-[`qualitycheck_estmod()`](https://wb-pida-data-science-shop.github.io/govhr/reference/qualitycheck_estmod.md)
-validates structural and coding integrity.
-
-Key Checks Performed
-
-- Required variables exist: est_id, est_name_native, est_parent,
-  est_child, country_code, country_name: adm1_name, adm1_code, English
-  name (est_name_en)
-
-- Row uniqueness: Each est_id must be unique.
-
-- Non-missingness: All required variables must be populated.
-
-- Type validation: All establishment fields must be character.
-
-- ISO3 Validation: Ensures country_code belongs to the official World
-  Bank/ISO list using the `countrycode` package.
-
-Please see the check below:
-
-``` r
-qualitycheck_estmod(bra_hrmis_est |> as_tibble())
-```
-
-[TABLE]

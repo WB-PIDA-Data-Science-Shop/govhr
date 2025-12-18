@@ -1,11 +1,8 @@
-# HRMIS Harmonization Data Dictionary
+# Harmonization Dictionary for Payroll Data
 
-A structured metadata dictionary describing variables harmonized across
-the Human Resource Management Information System (HRMIS) modules:
-Establishment, Personnel, and Contract. The dictionary follows
-SDMX-style documentation standards and specifies variable names,
-identifiers, data types (in R), relationships, and other metadata fields
-used in HRMIS data harmonization.
+A dictionary defining the standardized variable names, descriptions,
+classes, and module assignments used during the payroll data
+harmonization process.
 
 ## Usage
 
@@ -15,89 +12,51 @@ harmonization_dict
 
 ## Format
 
-A tibble with 48 rows and 9 variables:
+A tibble with 44 rows and 5 variables:
 
-- Concept Name:
+- VariableName:
 
-  Variable or concept name as used in the HRMIS module.
+  Character. Human-readable variable name.
 
-- Concept ID:
+- VariableID:
 
-  Short machine-readable variable name used in datasets.
+  Character. Standardized snake_case variable identifier.
 
 - Description:
 
-  Detailed explanation of the variable or concept.
+  Character. Definition of the variable.
 
-- Data Type:
+- VariableClass:
 
-  R data type assigned to the variable (e.g., `character`, `numeric`,
-  `Date`).
-
-- Representation (Code list / Format):
-
-  Expected format, code list, or data representation.
-
-- Primary Key:
-
-  Indicates whether the variable uniquely identifies a record (`"Yes"`
-  or `"No"`).
-
-- Relationship:
-
-  Describes any relational links to other modules or variables.
+  Character. Target R class for the variable.
 
 - Module:
 
-  The HRMIS module the variable belongs to: `"Establishment"`,
-  `"Personnel"`, or `"Contract"`.
+  Character. Harmonization module using this variable.
 
-- Example Value:
+## Source
 
-  Illustrative example value for the variable.
+Created by the Public Institutions Data & Analytics Team as part of the
+payroll harmonization ETL framework.
 
 ## Details
 
-The dictionary integrates all HRMIS modules into a single metadata
-table. It was designed for use in R-based harmonization workflows and
-conforms to SDMX Content-Oriented Guidelines (COG) for defining
-concepts, code lists, and roles.
+This dictionary is used by the harmonization pipeline to map raw
+payroll, contract, personnel, and establishment variables from
+government HRMIS / payroll systems to a consistent, analysis-ready
+schema. Each row represents one standardized variable name and
+specifies:
 
-## References
+\* \*\*VariableName\*\* — The human-readable name of the variable as it
+appears in the final harmonized dataset. \* \*\*VariableID\*\* — The
+machine-readable variable name (snake_case) used in the harmonized
+output. \* \*\*Description\*\* — A concise definition of the variable’s
+meaning and intended use. \* \*\*VariableClass\*\* — The R class the
+variable should be cast to (e.g., character, Date, numeric, integer). \*
+\*\*Module\*\* — The module where the variable belongs (e.g.,
+\*Establishment\*, \*Personnel\*, \*Contract\*).
 
-SDMX Technical Standards v3.0 — Data Structure Definition (DSD):
-<https://sdmx.org/?page_id=5008>
-
-SDMX Content-Oriented Guidelines (COG): <https://sdmx.org/?page_id=4345>
-
-Eurostat SDMX Metadata Reference Manual:
-<https://ec.europa.eu/eurostat/web/metadata/reference-metadata-reporting-standards>
-
-## Examples
-
-``` r
-library(dplyr)
-data(harmonization_dict)
-
-# View structure
-glimpse(harmonization_dict)
-#> Rows: 48
-#> Columns: 9
-#> $ `Concept Name`                        <chr> "Organization ID", "Organization…
-#> $ `Concept ID`                          <chr> "org_id", "org_name_native", "or…
-#> $ Description                           <chr> "Unique identifier assigned to e…
-#> $ `Data Type`                           <chr> "character", "character", "chara…
-#> $ `Representation (Code list / Format)` <chr> "Alphanumeric (e.g., 'MOF001')",…
-#> $ `Primary Key`                         <chr> "Yes", "No", "No", "No", "No", "…
-#> $ Relationship                          <chr> "Referenced in Worker, Contract"…
-#> $ Module                                <chr> "Organization", "Organization", …
-#> $ `Example Value`                       <chr> "MOF001", "Ministère des Finance…
-
-# Filter dictionary by module
-harmonization_dict |>
-filter(Module == "Personnel")
-#> # A tibble: 0 × 9
-#> # ℹ 9 variables: Concept Name <chr>, Concept ID <chr>, Description <chr>,
-#> #   Data Type <chr>, Representation (Code list / Format) <chr>,
-#> #   Primary Key <chr>, Relationship <chr>, Module <chr>, Example Value <chr>
-```
+This dictionary is designed so that automated harmonization scripts
+can: 1. Validate presence and structure of required variables; 2. Rename
+raw variables to standardized IDs; 3. Coerce variables to the correct
+data type; 4. Split harmonized outputs into module-specific files.
