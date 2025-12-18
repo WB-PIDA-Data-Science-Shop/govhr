@@ -182,7 +182,7 @@ occup_df <- unique(occup_df)
 # Add translated vars
 occup_df[, occupation_native := tolower(CARREIRA)]
 
-occup_df[, occupation_english := tolower(google_translate(text = CARREIRA,
+occup_df[, occupation_english := tolower(polyglotr::google_translate(text = occupation_native,
                                                           source_language = "pt",
                                                           target_language = "en"))]
 ```
