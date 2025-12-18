@@ -1,4 +1,3 @@
-
 ---
 title: "Quality Control Report"
 ---
@@ -17,9 +16,9 @@ library(govhr)
 ```{r generate-report, eval = FALSE}
 # Generate the quality control report
 generate_qc_report(
-  contract_dt = bra_hrmis_contract,
-  personnel_dt = bra_hrmis_personnel,
-  est_dt = bra_hrmis_est,
+  contract_dt = govhr::bra_hrmis_contract,
+  personnel_dt = govhr::bra_hrmis_personnel,
+  est_dt = govhr::bra_hrmis_est,
   output = "quality_control_report.html"
 )
 ```
@@ -30,10 +29,10 @@ tryCatch({
   output_path <- file.path("articles", "quality_control_report.html")
   
   generate_qc_report(
-    contract_dt = bra_hrmis_contract,
-    personnel_dt = bra_hrmis_personnel,
-    est_dt = bra_hrmis_est,
-    output = output_path
+    contract_dt = govhr::bra_hrmis_contract,
+    personnel_dt = govhr::bra_hrmis_personnel,
+    est_dt = govhr::bra_hrmis_est,
+    output = govhr::output_path
   )
   
   report_generated <- TRUE

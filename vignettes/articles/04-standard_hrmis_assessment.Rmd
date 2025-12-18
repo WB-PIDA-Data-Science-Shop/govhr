@@ -1,14 +1,14 @@
 ---
 title: "HR Analytics: Standard Report Prototype"
-author: "Galileu Kim"
-date: "12/4/2025"
 ---
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 # reference:
 # https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf
 
 # set-up ------------------------------------------------------------------
+library(here)
 library(dplyr)
+library(readr)
 library(ggplot2)
 library(purrr)
 library(lubridate)
@@ -26,23 +26,23 @@ theme_set(
 set.seed(2025)
 
 # read-in data ------------------------------------------------------------
-personnel_df <- bra_hrmis_personnel |>
+personnel_df <- govhr::bra_hrmis_personnel |>
   mutate(
     year = lubridate::year(ref_date)
   )
 
-contract_df <- bra_hrmis_contract |>
+contract_df <- govhr::bra_hrmis_contract |>
   mutate(
     year = lubridate::year(ref_date)
   )
 
-est_df <- bra_hrmis_est
+est_df <- govhr::bra_hrmis_est
 
 # process data
 contract_growth <- contract_df |> 
   convert_constant_ppp(
     cols = c("gross_salary_lcu"),
-    macro_indicators = macro_indicators
+    macro_indicators = govhr::macro_indicators
   ) |>
   dtplyr::lazy_dt() |> 
   group_by(country_code, year) |>

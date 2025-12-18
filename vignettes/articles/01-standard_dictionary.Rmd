@@ -1,6 +1,5 @@
 ---
 title: "HR Standard Data Dictionary"
-output: rmarkdown::html_document
 ---
 
 ```{r setup, include=FALSE}

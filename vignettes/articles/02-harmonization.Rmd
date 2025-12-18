@@ -1,6 +1,5 @@
 ---
 title: "HR Data Harmonization"
-output: rmarkdown::html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -129,7 +128,7 @@ The `bra_hrmis` data is written in Portuguese which might require translation to
 ```{r colname-dictionary}
 
 raw_dictionary <- 
-  tibble(raw_colnames_pt = colnames(bra_hrmis),
+  tibble(raw_colnames_pt = colnames(govhr::bra_hrmis),
          raw_colnames_eng = polyglotr::google_translate(colnames(bra_hrmis), "pt", "en"))
 
 kable(raw_dictionary)
@@ -364,7 +363,9 @@ bra_hrmis_contract <-
 Here is what our final data looks like:
 ```{r output-final-contract-harmonization, echo = FALSE}
 
-glimpse(bra_hrmis_contract)
+reactable(
+  head(bra_hrmis_contract, 100)
+)
 
 ```
 
@@ -382,7 +383,6 @@ personnel_count <-
 bra_hrmis |>
   dplyr::select(personnel_id, est_id, ref_date) |>
   uniqueN()
-
 
 ```
 
@@ -445,8 +445,6 @@ bra_hrmis[, birth_date := as.Date(as.integer(birth_date), origin = "1899-12-30")
 
 ```
 
-
-
 The remainder of the variables (`tribe`, `race``) appear to be missing from the `bra_hrmis` raw data. Therefore, we create them as missing variables (`NA`). 
 
 ```{r}
@@ -472,9 +470,11 @@ bra_hrmis_personnel <-
 
 Let's take a look at the `bra_hrmis_personnel`
 
-```{r}
+```{r, echo = FALSE}
 
-glimpse(bra_hrmis_personnel)
+reactable(
+  head(bra_hrmis_personnel, 100)
+)
 
 ```
 
@@ -497,9 +497,13 @@ bra_hrmis_est <-
     country_code, country_name, adm1_name, adm1_code
   ) |>
   unique() |>
+  head(10) |> 
   mutate(est_name_en = polyglotr::google_translate(est_name_native, target_language = "en"))
 
+```
 
-glimpse(bra_hrmis_est)
-
+```{r, echo = FALSE}
+reactable(
+  head(bra_hrmis_est, 10)
+)
 ```
