@@ -1,5 +1,6 @@
 ---
 title: "Quality Control Report"
+output: rmarkdown::html_document
 ---
 
 ```{r, include = FALSE}

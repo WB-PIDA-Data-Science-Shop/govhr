@@ -1,5 +1,6 @@
 ---
 title: "HR Data Harmonization"
+output: rmarkdown::html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -184,10 +185,9 @@ occup_df[, occupation_native := tolower(CARREIRA)]
 occup_df[, occupation_english := tolower(google_translate(text = CARREIRA,
                                                           source_language = "pt",
                                                           target_language = "en"))]
+```
 
-#-----------------------------
-# 3. Classify occupations
-#-----------------------------
+```{r}
 class_occup_df <- copy(occup_df)[,
   .(id = .I, text = occupation_english)
 ]
@@ -198,16 +198,15 @@ class_occup_df <- classify_occupation(
   lang = "en",
   num_leaves = 1
 )
-
-
-datatable(
+```
+```{r, echo = FALSE}
+reactable(
   head(
     class_occup_df, 
     n = nrow(class_occup_df)), 
     options = list(pageLength = 10
   )
 ) 
-
 ```
  
 ```{r merge-harmonized-occupation}

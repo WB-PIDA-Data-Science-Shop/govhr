@@ -1,5 +1,6 @@
 ---
 title: "HR Analytics: Standard Report Prototype"
+output: rmarkdown::html_document
 ---
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 # reference:
