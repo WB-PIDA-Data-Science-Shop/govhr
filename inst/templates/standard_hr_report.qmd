@@ -1,0 +1,1157 @@
+---
+title: "HR Analytics: Standard Report Prototype"
+format:
+  html:
+    df-print: paged
+params:
+  contract_dt: NULL
+  personnel_dt: NULL
+  country_code: NULL
+---
+```{r setup-libraries, message=FALSE, warning=FALSE, echo=FALSE}
+# reference:
+# https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf
+
+# set-up ------------------------------------------------------------------
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(purrr)
+library(lubridate)
+library(ggthemes)
+library(forcats)
+library(data.table)
+library(tidyr)
+library(govhr)
+
+# set default color palette with scale_color_brewer
+theme_set(
+  theme_few()
+)
+
+set.seed(2025)
+
+# read-in data ------------------------------------------------------------
+personnel_df <- params$personnel_dt |>
+  mutate(
+    year = lubridate::year(ref_date)
+  )
+
+contract_df <- params$contract_dt |>
+  mutate(
+    year = lubridate::year(ref_date)
+  )
+
+est_df <- params$est_df
+
+# process data
+contract_growth <- contract_df |> 
+  convert_constant_ppp(
+    cols = c("gross_salary_lcu"),
+    macro_indicators = govhr::macro_indicators
+  ) |>
+  dtplyr::lazy_dt() |> 
+  group_by(country_code, year) |>
+  summarise(
+    median_wage_ppp = median(gross_salary_ppp, na.rm = TRUE),
+    total_headcount = n(),
+    .groups = "drop"
+  ) |>
+  mutate(
+    growth_median_wage_ppp = (median_wage_ppp - lag(median_wage_ppp))/lag(median_wage_ppp) * 100
+  ) |>
+  left_join(
+    macro_indicators,
+    by = c("country_code", "year")
+  ) |> 
+  as_tibble()
+
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  dpi = 300
+)
+```
+
+## Standard HR Analytics Report {.tabset .tabset-pill}
+
+### Overview
+
+This report provides a standard set of indicators and visualizations on HRMIS analytics, building on the World Bank's [Public Sector and Employment Assessment Framework](https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf). The objective of this assessment is to conduct public sector employment and compensation assessments that can help develop evidence-based reforms.
+
+The assessment framework consists of two parts. The first part assesses both the institutional and behavioral aspects of employment and compensation practices. It comprises six dimensions:
+
+1. Wage bill planning.
+2. Wage bill controls.
+3. Employment levels and distribution of the public sector workforce.
+4. Wage competitiveness of the public sector.
+5. Wage equity.
+6. Wage incentives.
+
+The second part assesses the impact of these employment and compensation practices on:
+
+1. Fiscal sustainability.
+2. Public sector productivity.
+3. Labor allocation between the public and private sectors.
+
+### 3.1. Wage bill planning
+
+The wage bill represents a large and less flexible component of government expenditures with significant future liabilities. Globally, and noting the difficulties with cross-country comparisons, the wage bill represents approximately 30 percent of government expenditures,
+with significant variation around this average. This section presents some indicators that can help governments better understand and manage their wage bill.
+
+Guidance questions for the assessment:
+
+1. What are the main stylized facts about the wage bill: its actual size, evolution, and decomposition into employment
+and wages?
+2. Is wage bill management anchored in comprehensive, accurate, and timely data?
+    a. Does the data cover all government employees paid from the budget and from extra-budgetary funds?
+    b. Is the data derived from integrated payroll and human resource systems that are updated every pay cycle?
+    c. Are budget classifications transparent so that all payroll expenditures are accurately recorded?
+3. Is wage bill planning integrated in a broader medium-term fiscal framework? Are forward budget estimates derived
+from models of future wage bill commitments?
+4. How does the institutional regime for salary setting impact wage bill planning? Are there particular challenges
+for subnational wage bill planning due to mismatches in staffing decisions and funding between central and
+subnational governments?
+5. Are staffing increases informed by needs and medium-term strategic planning, or primarily by short-term
+political considerations?
+6. Is there any public debate or public disclosure around wage bill policies?
+
+3.1.1. Wage bill as share of GDP, expenditures, and revenues
+
+```{r wagebill-shares}
+wage_vars <- c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")
+
+lcu_vars <- colnames(govhr::macro_indicators)[grepl(
+  "_lcu",
+  colnames(govhr::macro_indicators)
+)]
+
+# compute ppp variables
+wagebill <- contract_df |>
+  convert_constant_ppp(
+    cols = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
+    macro_indicators = govhr::macro_indicators
+  )
+
+ppp_vars <- colnames(contract_df)[grepl("_ppp", colnames(contract_df))]
+
+wagebill_shares_dt <- wagebill |>
+  as.data.table() |>
+  compute_fastshare(
+    cols = wage_vars,
+    macro_cols = lcu_vars,
+    groups = c("country_code", "year"),
+    fns = "sum",
+    output = "long"
+  )
+
+wagebill_shares_dt |>
+  filter(
+    indicator %in%
+      c(
+        "gross_salary_lcu_sum_per_gdp_lcu",
+        "gross_salary_lcu_sum_per_pexpenditure_lcu",
+        "gross_salary_lcu_sum_per_prevenue_lcu"
+      ) &
+      year < 2018
+  ) |>
+  ggplot(
+    aes(year, value, color = indicator)
+  ) +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share (percentage)",
+    title = "Wage Bill as Share of GDP, expenditures and revenues"
+  ) +
+  theme(
+    legend.position = "bottom"
+  )
+```
+
+3.1.2. Wage bill decomposed by administrative and industry classification
+
+```{r wagebill-decomposition}
+wagebill |>
+  as.data.table() |>
+  compute_fastsummary(
+    cols = wage_vars,
+    groups = c("occupation_native", "year"),
+    fns = "sum",
+    output = "long"
+  ) |>
+  filter(
+    year == 2017 &
+      !is.na(occupation_native)
+  ) |>
+  # extract top fifth percentile
+  slice_max(
+    prop = 0.05,
+    order_by = value
+  ) |> 
+  ggplot() +
+  geom_col(
+    aes(value, fct_reorder(occupation_native, value, .fun = mean))
+  ) +
+  scale_x_continuous(
+    labels = scales::label_comma()
+  ) +
+  labs(
+    x = "Total",
+    y = "Occupation (ISCO)"
+  )
+```
+
+3.1.3. Annual recruitment patterns over time
+
+```{r recruitment-patterns}
+personnel_hire_df <- personnel_df |> 
+  detect_personnel_event(
+    id_col = "personnel_id",
+    event_type = "hire",
+    start_date = "2014-09-01",
+    end_date = "2018-09-01"
+  )
+
+personnel_hire_df |> 
+  count(ref_date) |> 
+  ggplot(
+    aes(ref_date, n)
+  ) +
+  geom_point() +
+  geom_line()
+```
+
+### 3.2. Wage Bill Controls
+
+Wage bill ceilings are effective only when ministries must adhere to them, which depends on how ceilings are defined, how much reallocation flexibility agencies have, and the strength of oversight. Large gaps between budgeted and actual wage spending, or between authorized and filled positions, indicate weak control. Robust payroll–HR systems are essential to prevent ghost workers and illegal payments. Where such control systems are absent, payroll audits, employee censuses, and electronic payment systems help strengthen control and reduce salary arrears.
+
+Guidance questions for the assessment:
+
+1. Are wage bill ceilings set by the Ministry of Finance adhered to by line ministries?
+    a. Are ceilings set based on positions or actual personnel?
+    b. Do ministries agencies have discretion in spending the savings from vacant positions?
+    c. If agencies have flexibility in reappropriations from payroll to other expenditures, are these being done
+    transparently?
+2. How effective are payroll controls as measured by PEFA indicator PI-23?
+    a. Integration of personnel and payroll records
+    b. Management of payroll changes
+    c. Internal control of payroll
+    d. Use of payroll audits
+3. Is there a high incidence of ghost workers? What are the reasons for these workers being on the payroll (fake
+workers, retirees still on the payroll, or legitimate employees getting illegal pay)? Has a payroll audit been conducted
+to identify issues?
+4. Is there are problem of salary arrears and delays in the payment of salaries for public servants
+
+3.2.1. Deviations between budgeted and actual general government wage bill expenditures
+
+```{r budget-execution}
+macro_indicators |> 
+    filter(
+      country_code == params$country_code &
+        between(year, 2014, 2018)
+    ) |> 
+    mutate(
+      budget_execution_rate = pexpenditure_lcu/prevenue_lcu
+    ) |> 
+    ggplot(
+      aes(year, budget_execution_rate)
+    ) +
+    geom_point() +
+    geom_line() +
+    geom_hline(
+      yintercept = 1,
+      linetype = "dashed"
+    )
+```
+
+3.2.2. Filled positions as a proportion of budgeted positions
+
+3.2.3. Ghost workers as a percentage of total workers
+
+3.2.3. Wage bill arrears as a  percentage of total wage bill expenditures
+
+### 3.3. Employment Level and Distribution
+
+This section assesses whether a public sector is over- or under-staffed by comparing public employment to total, paid, and formal-sector employment.  Globally, the public sector accounts on average for about 16% of total employment, 30% of wage employment and 37% of formal-sector wage employment — though there is wide cross-country variation, with public-sector shares ranging from under 2% to over 40%.  The share of public sector employment tends to rise with a country’s income level, reflecting greater government roles as economies develop, but there is no clear relationship between income and the share of salaried employment that is public — implying that public and private formal wage employment often expand together.  The analysis of employment distribution should also examine whether the right number of staff are employed in the right functions, locations, and sectors — to ensure efficiency and avoid distortions.
+
+Guidance questions for the assessment:
+
+1. Is the public sector over- or understaffed in aggregate and what have been the employment trends over time?
+2. Is the public sector over- or understaffed for particular skills and occupations, both in aggregate and in specific
+organizational and territorial jurisdictions?
+3. Are there a large proportion of public sector workers with low educational qualifications or in low-skilled jobs?
+4. Is the public sector a gender-equal employer?
+a. What are the proportion of women in aggregate?
+b. Is there horizontal and vertical segregation in employment?
+5. Is there a dual labor regime with a large segment of contract workers, and what are its implications for public
+sector employment?
+
+3.3.1. Public sector employment as a share of total, paid, and formal employment
+
+```{r employment-shares}
+govhr::wwbi |> 
+  filter(country_code == params$country_code) |> 
+  select(country_code, year, starts_with("ps_share")) |> 
+  pivot_longer(
+    cols = c(starts_with("ps_share")),
+    names_prefix = "ps_share_"
+  ) |>
+  ggplot_point_line(
+    year,
+    value,
+    group = name
+  ) +
+    scale_color_discrete(
+      labels = c("Formal Employment", "Paid Employment", "Total Employment"),
+      name = "Type of Employment"
+    ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Public Sector Employment as Share of Total Employment"
+  )
+```
+
+3.3.2. Industry and occupational distribution of public sector employment
+
+```{r occupation-distribution}
+contract_df |>
+  filter(
+    year == max(year)
+  ) |>
+  compute_fastsummary(
+    cols = "personnel_id",
+    groups = c("occupation_native", "year"),
+    fns = list(n_distinct = ~n_distinct(.x)),
+    output = "long"
+  ) |> 
+  mutate(
+    share = value / sum(value)
+  ) |> 
+  slice_max(
+    prop = 0.05,
+    order_by = share
+  ) |>
+  filter(
+    !is.na(occupation_native)
+  ) |> 
+  ggplot(
+    aes(share, fct_reorder(occupation_native, share))
+  ) +
+  geom_col() +
+  scale_x_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Share of Personnel",
+    y = "Occupation (ISCO)"
+  ) 
+```
+
+3.3.3. Educational profile of public sector employees
+
+```{r education-profile}
+personnel_df |>
+  compute_fastsummary(
+    cols = "personnel_id",
+    groups = c("educat7", "year"),
+    fns = list(n_distinct = ~n_distinct(.x)),
+    output = "long"
+  ) |> 
+  filter(
+    !is.na(educat7)
+  ) |> 
+  group_by(year) |>
+  mutate(
+    share = value / sum(value)
+  ) |>
+  ggplot(
+    aes(
+      year,
+      share,
+      fill = educat7
+    )
+  ) +
+  geom_area() +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of Personnel",
+    fill = "Education Level"
+  )
+```
+
+3.3.4. Distribution of public sector workers by pay grade
+
+```{r paygrade-distribution}
+contract_df |>
+  filter(
+    paygrade %in% c(1:4)
+  ) |>
+  fastcount(
+    paygrade, year
+  ) |> 
+  fastprop(year) |>
+  ggplot(
+    aes(
+      year,
+      prop,
+      fill = paygrade
+    )
+  ) +
+  geom_area() +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of Personnel",
+    fill = "Paygrade"
+  )
+```
+
+3.3.5. Share of women workers in the public sector
+
+```{r women-share}
+personnel_df |>
+  filter(
+    !is.na(gender)
+  ) |> 
+  fastcount(
+    gender, year
+  ) |> 
+  fastprop(year) |>
+  filter(
+    gender == "FEMININO"
+  ) |> 
+  ggplot_point_line(
+    year,
+    prop,
+    color = gender
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of Women Workers",
+    color = "Paygrade"
+  )
+```
+
+3.3.6. Share of women workers by occupation
+
+```{r women-occupation}
+contract_df |>
+  left_join(
+    personnel_df |>
+      select(
+        personnel_id,
+        ref_date,
+        gender
+      ) |> 
+      distinct(),
+    by = c("personnel_id", "ref_date")
+  ) |> 
+  filter(
+    !is.na(gender)
+  ) |> 
+  fastcount(
+    gender, occupation_isconame, year
+  ) |> 
+  fastprop(occupation_isconame, year) |>
+  filter(
+    gender == "FEMININO" &
+      occupation_isconame %in% sample(unique(.data[["occupation_isconame"]]), 10)
+  ) |> 
+  ggplot_point_line(
+    year,
+    prop
+  ) +
+  facet_wrap(
+    vars(occupation_isconame)
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of Women Workers"
+  )
+```
+
+3.3.7. Share of women workers by ministry
+
+```{r women-ministry}
+contract_df |> 
+  mutate(
+    est_id = stringr::str_remove_all(est_id, "[-0-9]")
+  ) |> 
+  left_join(
+    personnel_df |> 
+      select(
+        personnel_id,
+        ref_date,
+        gender
+      ),
+    by = c("personnel_id", "ref_date"),
+    relationship = "many-to-many"
+  ) |> 
+  dtplyr::lazy_dt() |> 
+  group_by(est_id, year) |> 
+  summarise(
+    prop_women = n_distinct(personnel_id[gender == "FEMININO"])/
+      n_distinct(personnel_id),
+    .groups = "drop"
+  ) |> 
+  as_tibble() |> 
+  sample_group(est_id, n = 8) |>
+  ggplot_point_line(
+    year,
+    prop_women
+  ) +
+  facet_wrap(
+    vars(est_id),
+    nrow = 2
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of Women Workers"
+  )
+```
+
+### 3.4. Wage competitiveness
+
+Public sector wage levels are crucial for attracting and retaining competent workers for expenditure efficiency, fiscal sustainability, and for equilibrium outcomes in the entire labor market. This section provides some key stylized facts that provide evidence of the competitiveness of public sector wages. These include: public sector wage premiums relative to the private sector, wage levels by occupation and education level, and trends in public sector wages relative to private sector wages.
+
+Guidance questions for the assessment:
+
+1. Does the public sector over or under-pay (taking into account all elements of compensation) compared to the private
+sector in aggregate and for different industries, occupations, locations, and demographic groups?
+2. How does pay for occupations with limited domestic private sector comparators compare to that in the public sectors
+of other relevant countries?
+3. Is there sufficient flexibility in wage practices to better align public sector wages to the needs of specific labor markets
+to attract specialized and high demand talent? How does this flexibility impact wage inequity and is the tradeoff well
+managed?
+4. Does the government use data to model fiscal impact and identify salary mismatches and to inform wage policy?
+
+3.4.1. Public sector wage premium
+
+```{r wage-premium}
+wwbi |> 
+  filter(country_code == params$country_code) |>
+  ggplot_point_line(
+    year,
+    ps_wage_premium_pooled
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Public Sector Wage Premium"
+  )
+```
+
+3.4.2. Public sector wage premium by education level
+
+```{r premium-education}
+wwbi |>
+  filter(country_code == params$country_code) |>
+  select(country_code, year, starts_with("ps_wage_premium_isced")) |>
+  pivot_longer(
+    cols = c(starts_with("ps_wage_premium_")),
+    names_prefix = "ps_wage_premium_isced"
+  ) |>
+  mutate(
+    name = case_when(
+      name == "_n" ~ "No education",
+      name == "_1" ~ "Primary education",
+      name == "_2_3" ~ "Secondary education",
+      name == "_5t8" ~ "Tertiary education"
+    )
+  ) |> 
+  ggplot_point_line(
+    year,
+    value,
+    group = name
+  )
+```
+
+3.4.3. Pay comparisons for occupations across public sectors
+
+```{r pay-comparisons}
+print("Not available: no cross-country occupation wage data available")
+```
+
+### 3.5. Wage equity
+
+Wage equity -- whether workers in similar jobs, with similar skills, similar years of service, and similar
+performance are paid equally, and differences in salary between different occupations are deemed legitimate -- is important for both employee motivation and public sector productivity. This section provides some key stylized facts that provide evidence of wage equity in the public sector.
+
+Guidance questions for the assessment:
+
+1. Is there “equal pay for equal work”? Do workers in similar jobs with similar skills get similar wages? Answering this
+question requires an assessment of the public sector salary structure.
+2. Is there gender equality in pay in aggregate and across major occupations? Does government have a policy to
+address gender inequity?
+3. What are the sources of wage inequity? Are pay relativities in salary scales derived from robust job evaluations? Are there discretionary elements of pay, such as cash payments or allowances?
+4. Is there a justifiable tradeoff between wage inequity and wage competitiveness in order to attract high-demand talent while maintaining general coherence of pay across the public sector?
+
+3.5.1. Pay compression ratio in the public sector
+
+```{r compression-ratio}
+contract_df |>
+  filter(
+    year < 2018
+  ) |> 
+  compute_fastsummary(
+    cols = "base_salary_lcu",
+    groups = c("year"),
+    fns = c("cp_ratio"),
+    output = "wide"
+  ) |>
+  ggplot_point_line(
+    year,
+    base_salary_lcu_cp_ratio
+  ) +
+  labs(
+    x = "Year",
+    y = "Pay Compression Ratio"
+  )
+```
+
+3.5.2. Pay dispersion in the public sector
+
+```{r pay-dispersion}
+salary_dispersion <- contract_df |>
+  filter(year < 2018) |> 
+  convert_constant_ppp(
+    cols = c("base_salary_lcu"),
+    macro_indicators = govhr::macro_indicators
+  ) |>
+  compute_fastsummary(
+    cols = "base_salary_ppp",
+    groups = c("occupation_isconame", "year"),
+    fns = "median",
+    output = "long"
+  ) |> 
+  ggplot_segment(
+    col = value,
+    group = year
+  ) +
+  coord_flip() +
+  labs(
+    x = "Median base salary (constant 2021 international dollars)",
+    y = "Year"
+  )
+```
+
+3.5.3. Within-occupation public sector pay dispersion
+
+```{r occupation-dispersion}
+salary_dispersion_occupation <- contract_df |>
+  filter(year < 2018) |> 
+  convert_constant_ppp(
+    cols = c("base_salary_lcu"),
+    macro_indicators = govhr::macro_indicators
+  ) |>
+  sample_group(
+    occupation_native,
+    n = 25
+  ) |>
+  filter(!is.na(occupation_native))
+
+salary_dispersion_occupation |>
+  ggplot_segment(
+    col = base_salary_ppp,
+    group = occupation_native
+  ) +
+  scale_x_continuous(labels = scales::label_comma()) +
+  labs(
+    x = "Year",
+    y = "Median base salary (2021 constant international dollars)",
+    title = "Annual distribution of salaries by occupation"
+  )
+```
+
+3.5.4. Female-male wage ratio
+
+```{r gender-ratio}
+contract_df |>
+  left_join(
+    personnel_df |>
+      select(
+        personnel_id,
+        ref_date,
+        gender
+      ),
+      relationship = "many-to-many"
+    ) |> 
+    compute_fastsummary(
+      cols = "base_salary_lcu",
+      groups = c("gender", "year"),
+      fns = "median"
+    ) |> 
+    filter(
+      !is.na(gender) &
+        year < 2018
+    ) |> 
+    pivot_wider(
+      names_from = gender,
+      values_from = value
+    ) |> 
+    mutate(
+      ratio = FEMININO / MASCULINO
+    ) |> 
+    ggplot_point_line(
+      year,
+      ratio
+    ) +
+    labs(
+      x = "Year",
+      y = "Ratio"
+    )
+```
+
+3.5.5. Gender wage premium
+
+```{r gender-premium}
+gender_df <- contract_df |>
+  left_join(
+    personnel_df |>
+      select(
+        personnel_id,
+        ref_date,
+        gender,
+        educat7
+      ),
+      relationship = "many-to-many"
+    ) |> 
+    slice_sample(
+      n = 10000
+    ) |> 
+    mutate(
+      gender = factor(gender, levels = c("MASCULINO", "FEMININO"))
+    )
+
+gender_premium_ols <- lm(
+  base_salary_lcu ~ gender + as.factor(year) + as.factor(occupation_native) +
+  educat7 + paygrade + seniority + whours,
+  data = gender_df
+)
+
+gender_premium_ols |> 
+  ggplot_coef(
+    coefs = "genderFEMININO"
+  )
+```
+
+### 3.6. Wage incentives
+
+Overview
+
+The extent to which wage increases are explicitly linked to performance is important for both employee motivation and public sector productivity. This section provide some key stylized facts that provide evidence of the productivity and fiscal implications of pay incentives. These include: the magnitude of promotion-based and seniority-based annual wage increases, expected wage increases over an employee's career and the coverage and key design features of performance bonuses.
+
+Guidance questions for the assessment:
+
+1. What wage growth is typical for public sector employees in different occupational groups over the course of their career? How of much of this wage growth is dependent on promotions and how much can occur “within grade”?
+2. Does the annual performance management system distinguish between high and low performers? Are promotion decisions largely seniority based and/or automatic?
+3. Are there performance bonus schemes and if so what occupation groups and percentage of the staff receive them; and how large is the bonus that staff are expected to receive?
+4. Is there targeted, significant additional pay for essential personnels to serve in hard-to-staff locations such as rural areas?
+
+3.6.1. Percentage of staff receiving highest performance ratings
+
+```{r performance-ratings}
+print("Not available: no performance rating data available")
+```
+
+3.6.2. The size of annual, within-grade pay increases
+
+```{r grade-increases}
+# 3.6.2. annual, within-grade pay increases
+contract_df |>
+  convert_constant_ppp(
+    "base_salary_lcu",
+    macro_indicators = govhr::macro_indicators
+  ) |> 
+  filter(
+    paygrade %in% seq(1, 4, 1)
+  ) |>
+  mutate(
+    year = as.numeric(year)
+  ) |>
+  group_by(
+    paygrade,
+    year
+  ) |>
+  summarise(
+    mean_base_salary_ppp = mean(base_salary_ppp),
+    median_base_salary_ppp = median(base_salary_ppp)
+  ) |>
+  ggplot_point_line(
+    year,
+    median_base_salary_ppp,
+    group = paygrade
+  ) +
+  scale_color_brewer(
+    name = "Paygrade",
+    palette = "Paired"
+  ) +
+  theme(
+    legend.position = "bottom"
+  ) +
+  labs(
+    x = "Year",
+    y = "Median Salary (Constant International Dollars)"
+  )
+```
+
+3.6.3. percentage of staff receiving a performance bonus
+
+```{r bonus-percentage}
+# 3.6.3. percentage of staff receiving a performance bonus
+performance_bonus_personnel <- contract_df |>
+  filter(
+    !is.na(allowance_lcu)
+  ) |>
+  group_by(year) |>
+  summarise(
+    total_performance = n_distinct(personnel_id)
+  )
+
+contract_df |>
+  group_by(year) |>
+  summarise(
+    total = n_distinct(personnel_id)
+  ) |>
+  left_join(
+    performance_bonus_personnel,
+    by = "year"
+  ) |>
+  mutate(
+    year = as.numeric(year),
+    share_performance = total_performance / total
+  ) |>
+  ggplot_point_line(
+    year,
+    share_performance
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of personnel"
+  )
+
+# 3.6.6. hardship allowance and percentage of staff receiving it
+# n/a: no data on hardship available
+```
+
+ 3.6.4. Performance bonus as a percentage of basic pay
+
+```{r bonus-basic}
+contract_df |>
+  convert_constant_ppp(
+    cols = c("base_salary_lcu", "allowance_lcu"),
+    macro_indicators = govhr::macro_indicators
+  ) |> 
+  compute_fastsummary(
+    cols = c("base_salary_ppp", "allowance_ppp"),
+    groups = c("paygrade", "year"),
+    fns = "mean",
+    output = "wide"
+  ) |> 
+  mutate(
+    share_allowance = allowance_ppp_mean / base_salary_ppp_mean
+  ) |>
+  filter(
+    paygrade %in% seq(1, 4, 1)
+  ) |>
+  ggplot_point_line(
+    year,
+    share_allowance,
+    group = paygrade
+  ) +
+  facet_wrap(
+    vars(paygrade)
+  ) +
+  scale_color_brewer(
+    name = "Paygrade",
+    palette = "Paired"
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of personnel"
+  )
+```
+
+### 4.1. Fiscal sustainability
+
+The wage bill can potentially have a major effect on fiscal balances, but there are no simple benchmarks for the “right” size of the wage bill. In fact, cross-national evidence suggests that there is no strong correlation between the size of the wage bill and fiscal balance. Wage bill dynamics are a better predictor of fiscal sustainability. In general, increases in the wage bill are associated with worsening of the fiscal balance. In addition, wage expenditures are pro-cyclical, rising during periods of economic growth, but not falling as much during downturns due to structural rigidity.
+
+Guidance questions for the assessment:
+
+1. What are the wage bill dynamics and how are changes in the wage bill being financed - i.e. through deficits, raising revenues, or reducing other expenditures?
+2. What are the main drivers of wage bill growth?
+3. What are the wage bill projections for baseline and different policy option scenarios based on wage bill modeling?
+
+4.1.1. Correlation between wage bill growth and fiscal balances
+
+```{r fiscal-correlation}
+contract_annual_growth <- contract_df |>
+  convert_constant_ppp(
+    cols = c("base_salary_lcu"),
+    macro_indicators = govhr::macro_indicators
+  ) |> 
+  compute_fastsummary(
+    cols = "base_salary_ppp",
+    groups = c("year"),
+    fns = "median",
+    output = "wide"
+  ) |> 
+  compute_fastchange(
+    col = "base_salary_ppp_median",
+    date_col = "year"
+  ) |> 
+  left_join(
+    govhr::macro_indicators |>
+      filter(country_code == params$country_code),
+    by = c("year")
+  ) 
+  
+contract_annual_growth |> 
+  ggplot() +
+  geom_point(
+    aes(base_salary_ppp_median_growth, fiscal_balance)
+  ) +
+  labs(
+    x = "Wage Bill Growth",
+    y = "Fiscal Balance (% of GDP)"
+  )
+```
+
+4.1.2.Correlation between wage bill growth and changes in capital and non-wage recurrent expenditures
+
+```{r}
+contract_annual_growth |>
+  ggplot(
+    aes(
+      government_expenditure_gdp,
+      base_salary_ppp_median_growth
+    )
+  ) +
+  geom_point() +
+  labs(
+    x = "Government Expenditure (Share of GDP)",
+    y = "Wage growth"
+  )
+```
+
+4.1.3. Decomposition of wage growth: employment and wages
+
+```{r}
+contract_growth |> 
+  filter(year <= 2017) |>
+  transmute(
+    year,
+    `Median Wage (PPP)` = median_wage_ppp /
+      median_wage_ppp[year == min(year)] *
+      100,
+    `Total Headcount` = total_headcount  /
+      total_headcount[year == min(year)] *
+      100
+  ) |>
+  pivot_longer(
+    -c(year),
+    names_to = "Indicator"
+  ) |>
+  ggplot_point_line(
+    year,
+    value,
+    group = Indicator
+  )
+```
+
+### 4.2. Public sector productivity
+
+A key question is whether the public sector workforce is performing well and delivering high quality infrastructure, services, and regulations, which is really a question of public sector labor productivity. Productivity measures the efficiency with which inputs, like labor, are converted into outputs, and is a more precise and economically meaningful concept than “performance,” since presumably performance can be improved by spending more while productivity measures whether more is produced and delivered for a given wage bill.
+
+Measuring labor productivity in government is challenging, mainly because of the difficulty in defining and measuring government outputs. For example, functions such as defense, foreign relations, and environmental protection are difficult to quantify with respect to prices, as well as services for which there are no market transactions. Given these challenges, a diversified approach to measuring outputs must be used. These alternative measures can be distinguished into macro approaches, which provide information at the level of an establishment, sector, or service as a whole; and micro approaches, which be applied to the individual employee, task, project, and process.
+
+Guidance questions for the assessment.
+
+1. Is total labor expenditure in the sector, including staff wages, outsourced labor costs, and external consultancy fees,correlated with sector-specific improvements in public-sector outputs and outcomes, so that productivity measures are stable or increasing within sector over time?
+2. Using subnational data, if available, are there any outliers in the current distribution of total labor expenditure, publicsector output measures, outcome measures, or measures of productivity? Are there any outliers in the trends of these
+subnational measures—for example, recent rapid growth or declines in a particular subnational entity)? What might be the underlying features explaining the existence of such outliers?
+3. Are total labor expenditures and public sector wages correlated with measures of institutional quality over time? Measures of institutional quality include the Worldwide Governance Indicators, perceptions of the quality of governance through household surveys – such as Eurobarometer, Afrobarometer, or World Values Surveys – the OECD’s Government at a Glance Indicators, the Quality of Government Index, and the World Bank’s Doing Business Indicators. With household level data and any other subnational data on measures of institutional quality, are there any outliers across subnational entities in the current distribution of institutional quality or outliers in the trends of measures of institutional quality?
+
+4.2.1. Correlation between wage bill growth and public-sector outputs and outcomes.
+
+```{r, eval = FALSE}
+# confidence in government
+# challenge: confidence in government is measured at the national level and
+# generally for only a few years
+# not representative at the institutional level
+print("Not available")
+```
+
+### 4.3. Labor allocation between public and private sectors
+
+Public sector employment and compensation policies
+can have major impacts on the entire labor market,
+particularly in low- and middle-income countries where the public sector is the dominant formal sector employer. Globally, the public sector accounts for 38
+percent of formal employment, reaching almost 50 percent for low-income and lower-middle and countries. This large labor market presence, combined with public sector wage premia and job security, can lead to unemployment, particularly for fresh university graduates who queue for public sector entry level job openings and reject private sector job offers.
+
+Guidance questions:
+
+1. Is the public sector crowding out the labor market, impeding private-sector job growth for specific skills, occupation, demographic, and geographical groups?
+2. Is the public sector having a distortionary impact on younger cohorts, particularly fresh university graduates, causing them to queue for public sector jobs and reject private sector jobs?
+
+4.3.1. Public sector wage premium
+
+```{r}
+wwbi |>
+  filter(country_code == params$country_code) |>
+  ggplot_point_line(
+    year,
+    ps_wage_premium_pooled
+  ) +
+  labs(
+    x = "Year",
+    y = "Public Sector Wage Premium"
+  )
+
+wwbi |>
+  filter(country_code == params$country_code) |>
+  select(country_code, year, starts_with("ps_wage")) |>
+  pivot_longer(
+    cols = c(starts_with("ps_wage_")),
+    names_prefix = "ps_wage_premium_"
+  ) |>
+  mutate(
+    name = case_when(
+      name == "edu_sector" ~ "Education",
+      name == "hea_sector" ~ "Health",
+      name == "female" ~ "Female personnel",
+      name == "male" ~ "Male personnel",
+      name == "pooled" ~ "Overall"
+    )
+  ) |>
+  filter(
+    between(year, 2002, 2015)
+  ) |>
+  ggplot_point_line(
+    year,
+    value,
+    group = name
+  )
+```
+
+4.3.2. Number of applications per position
+N/A
+
+4.3.3. Correlation between public sector employment growth or recruitment patterns and private-sector employment growth or recruitment patterns (by skill, demographic, occupation, and geographical groups)
+
+```{r}  
+contract_growth |> 
+  transmute(
+    year,
+    `Total Headcount` = total_headcount / total_headcount[year ==  min(year)] * 100,
+    `Total labor force` = labor_force_total /
+      labor_force_total[year == min(year)] *
+      100
+  ) |>
+  pivot_longer(
+    -c(year),
+    names_to = "Indicator"
+  ) |>
+  ggplot_point_line(
+    year,
+    value,
+    group = Indicator
+  ) +
+  labs(
+    x = "Year",
+    y = "Index (2014 = 100)"
+  )
+```
+
+4.3.4. Trends in educational profiles of public-sector personnels relative to private-sector personnels (by demographic, occupation, and geographical groups)
+```{r}
+personnel_df |>
+  group_by(country_code, year) |>
+  summarise(
+    ps_share_tertiary = mean(
+      educat7 %in%
+        c(
+          "Higher than secondary but not university",
+          "University incomplete or complete"
+        ),
+      na.rm = TRUE
+    ) *
+      100,
+    .groups = "drop"
+  ) |>
+  left_join(
+    macro_indicators,
+    by = c("country_code", "year")
+  ) |>
+  pivot_longer(
+    cols = c(ps_share_tertiary, labor_force_advanced_edu)
+  ) |>
+  ggplot_point_line(
+    year,
+    value,
+    group = name
+  )
+```
+
+4.3.5. Correlation between public-sector wage premium and relative employment growth in the public sector (by skill, demographic, occupation, and geographical groups)
+
+```{r}
+contract_growth |>
+  compute_fastchange(
+    "total_headcount",
+    "year"
+  ) |>
+  mutate(
+    country_code = params$country_code
+  ) |>
+  ungroup() |>
+  left_join(
+    wwbi,
+    by = c("country_code", "year")
+  ) |>
+  ggplot(
+    aes(ps_wage_premium_pooled, total_headcount_growth)
+  ) +
+  geom_point() +
+  labs(
+    x = "Public Sector Wage Premium",
+    y = "Growth in headcount"
+  )
+```
+
+4.3.6. Skills shortages in the private sector (from firm surveys)
+
+```{r}
+print("Enterprise surveys coverage is limited.")
+```
