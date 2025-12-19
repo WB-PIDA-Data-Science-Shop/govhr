@@ -120,40 +120,6 @@ political considerations?
 3.1.1. Wage bill as share of GDP, expenditures, and revenues
 
 ```{r wagebill-shares}
-compute_wagebill <- function(
-  .data, 
-  wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
-  groups = c("country_code", "year"),
-  share_macro = FALSE,
-  macro_vars = c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu"),
-  drop_na = TRUE
-) {  
-  data_ppp <- .data |>
-    convert_constant_ppp(
-    cols = wage_vars,
-    macro_indicators = govhr::macro_indicators
-    )
-  
-  if(share_macro) {
-    data_ppp |> 
-      compute_fastshare(
-        cols = wage_vars,
-        macro_cols = lcu_vars,
-        groups = groups,
-        fns = "sum",
-        output = "long"
-      )
-  } else{
-    data_ppp |> 
-      compute_fastsummary(
-        cols = wage_vars,
-        groups = groups,
-        fns = "sum",
-        output = "long"
-      )
-  }
-}
-
 wagebill_shares_dt <- contract_df |> 
   compute_wagebill(
     groups = c("country_code", "year")
