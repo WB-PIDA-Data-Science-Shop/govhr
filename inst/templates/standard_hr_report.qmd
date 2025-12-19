@@ -120,30 +120,43 @@ political considerations?
 3.1.1. Wage bill as share of GDP, expenditures, and revenues
 
 ```{r wagebill-shares}
-wage_vars <- c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")
-
-lcu_vars <- colnames(govhr::macro_indicators)[grepl(
-  "_lcu",
-  colnames(govhr::macro_indicators)
-)]
-
-# compute ppp variables
-wagebill <- contract_df |>
-  convert_constant_ppp(
-    cols = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
-    macro_indicators = govhr::macro_indicators
-  )
-
-ppp_vars <- colnames(contract_df)[grepl("_ppp", colnames(contract_df))]
-
-wagebill_shares_dt <- wagebill |>
-  as.data.table() |>
-  compute_fastshare(
+compute_wagebill <- function(
+  .data, 
+  wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
+  groups = c("country_code", "year"),
+  share_macro = FALSE,
+  macro_vars = c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu"),
+  drop_na = TRUE
+) {  
+  data_ppp <- .data |>
+    convert_constant_ppp(
     cols = wage_vars,
-    macro_cols = lcu_vars,
-    groups = c("country_code", "year"),
-    fns = "sum",
-    output = "long"
+    macro_indicators = govhr::macro_indicators
+    )
+  
+  if(share_macro) {
+    data_ppp |> 
+      compute_fastshare(
+        cols = wage_vars,
+        macro_cols = lcu_vars,
+        groups = groups,
+        fns = "sum",
+        output = "long"
+      )
+  } else{
+    data_ppp |> 
+      compute_fastsummary(
+        cols = wage_vars,
+        groups = groups,
+        fns = "sum",
+        output = "long"
+      )
+  }
+}
+
+wagebill_shares_dt <- contract_df |> 
+  compute_wagebill(
+    groups = c("country_code", "year")
   )
 
 wagebill_shares_dt |>
@@ -153,8 +166,7 @@ wagebill_shares_dt |>
         "gross_salary_lcu_sum_per_gdp_lcu",
         "gross_salary_lcu_sum_per_pexpenditure_lcu",
         "gross_salary_lcu_sum_per_prevenue_lcu"
-      ) &
-      year < 2018
+      )
   ) |>
   ggplot(
     aes(year, value, color = indicator)
@@ -177,22 +189,18 @@ wagebill_shares_dt |>
 3.1.2. Wage bill decomposed by administrative and industry classification
 
 ```{r wagebill-decomposition}
-wagebill |>
-  as.data.table() |>
-  compute_fastsummary(
-    cols = wage_vars,
-    groups = c("occupation_native", "year"),
-    fns = "sum",
-    output = "long"
-  ) |>
+contract_df |> 
+  compute_wagebill(
+    wage_vars = c("gross_salary_lcu"),
+    groups = c("occupation_native")
+  ) |> 
   filter(
-    year == 2017 &
-      !is.na(occupation_native)
+    !is.na(occupation_native)
   ) |>
   # extract top fifth percentile
   slice_max(
-    prop = 0.05,
-    order_by = value
+    value,
+    n = 10
   ) |> 
   ggplot() +
   geom_col(
@@ -202,8 +210,8 @@ wagebill |>
     labels = scales::label_comma()
   ) +
   labs(
-    x = "Total",
-    y = "Occupation (ISCO)"
+    x = "Cumulative wage bill (constant international dollars)",
+    y = "Occupation"
   )
 ```
 
@@ -218,13 +226,53 @@ personnel_hire_df <- personnel_df |>
     end_date = "2018-09-01"
   )
 
-personnel_hire_df |> 
-  count(ref_date) |> 
+personnel_hire_df |>
+  mutate(
+    year = lubridate::year(ref_date)
+  ) |> 
+  count(year) |> 
   ggplot(
-    aes(ref_date, n)
+    aes(year, n)
   ) +
   geom_point() +
-  geom_line()
+  geom_line() +
+  labs(
+    x = "Year",
+    y = "Total Hires"
+  ) +
+  coord_cartesian(
+    ylim = c(0, NA)
+  )
+```
+
+3.1.3. Annual dismissal patterns over time
+
+```{r dismissal-patterns}
+personnel_fire_df <- personnel_df |> 
+  detect_personnel_event(
+    id_col = "personnel_id",
+    event_type = "fire",
+    start_date = "2014-09-01",
+    end_date = "2018-09-01"
+  )
+
+personnel_fire_df |>
+  mutate(
+    year = lubridate::year(ref_date)
+  ) |> 
+  count(year) |> 
+  ggplot(
+    aes(year, n)
+  ) +
+  geom_point() +
+  geom_line() +
+  labs(
+    x = "Year",
+    y = "Total Dismissals"
+  ) +
+  coord_cartesian(
+    ylim = c(0, NA)
+  )
 ```
 
 ### 3.2. Wage Bill Controls
