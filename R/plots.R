@@ -60,7 +60,6 @@ ggplot_point_line <- function(data,
   }
 
   plot <- plot +
-    theme_minimal(base_size = 14) +
     theme(legend.position = "bottom")
 
   return(plot)

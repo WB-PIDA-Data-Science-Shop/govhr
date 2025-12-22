@@ -29,6 +29,15 @@ theme_set(
   theme_few()
 )
 
+theme_update(
+  geom = element_geom(colour = "#006068", fill = "#006068")
+)
+
+options(
+  ggplot2.discrete.fill = ggthemes::scale_fill_few,
+  ggplot2.discrete.color = ggthemes::scale_color_few
+)
+
 set.seed(2025)
 
 # read-in data ------------------------------------------------------------
@@ -267,8 +276,7 @@ to identify issues?
 ```{r budget-execution}
 macro_indicators |> 
     filter(
-      country_code == params$country_code &
-        between(year, 2014, 2018)
+      country_code == params$country_code
     ) |> 
     mutate(
       budget_execution_rate = pexpenditure_lcu/prevenue_lcu
@@ -292,7 +300,7 @@ macro_indicators |>
 
 ### 3.3. Employment Level and Distribution
 
-This section assesses whether a public sector is over- or under-staffed by comparing public employment to total, paid, and formal-sector employment.  Globally, the public sector accounts on average for about 16% of total employment, 30% of wage employment and 37% of formal-sector wage employment — though there is wide cross-country variation, with public-sector shares ranging from under 2% to over 40%.  The share of public sector employment tends to rise with a country’s income level, reflecting greater government roles as economies develop, but there is no clear relationship between income and the share of salaried employment that is public — implying that public and private formal wage employment often expand together.  The analysis of employment distribution should also examine whether the right number of staff are employed in the right functions, locations, and sectors — to ensure efficiency and avoid distortions.
+This section assesses whether a public sector is over- or under-staffed by comparing public employment to total, paid, and formal-sector employment.  Globally, the public sector accounts on average for about 16% of total employment, 30% of wage employment and 37% of formal-sector wage employment — though there is wide cross-country variation, with public-sector shares ranging from under 2% to over 40%. The analysis of employment distribution examines examine whether the right number of staff are employed in the right functions, locations, and sectors — to ensure efficiency and avoid distortions.
 
 Guidance questions for the assessment:
 
@@ -321,10 +329,10 @@ govhr::wwbi |>
     value,
     group = name
   ) +
-    scale_color_discrete(
-      labels = c("Formal Employment", "Paid Employment", "Total Employment"),
-      name = "Type of Employment"
-    ) +
+  scale_colour_colourblind(
+    labels = c("Formal Employment", "Paid Employment", "Total Employment"),
+    name = "Type of Employment"
+  ) +
   scale_y_continuous(
     labels = scales::percent_format()
   ) +
@@ -351,7 +359,7 @@ contract_df |>
     share = value / sum(value)
   ) |> 
   slice_max(
-    prop = 0.05,
+    n = 20,
     order_by = share
   ) |>
   filter(
@@ -367,7 +375,7 @@ contract_df |>
   labs(
     x = "Share of Personnel",
     y = "Occupation (ISCO)"
-  ) 
+  )
 ```
 
 3.3.3. Educational profile of public sector employees
@@ -408,9 +416,11 @@ personnel_df |>
 3.3.4. Distribution of public sector workers by pay grade
 
 ```{r paygrade-distribution}
+paygrade_levels <- c(1:4)
+
 contract_df |>
   filter(
-    paygrade %in% c(1:4)
+    paygrade %in% paygrade_levels
   ) |>
   fastcount(
     paygrade, year
@@ -448,18 +458,20 @@ personnel_df |>
   filter(
     gender == "FEMININO"
   ) |> 
+  mutate(
+    prop = round(prop, 3) * 100
+  ) |> 
   ggplot_point_line(
     year,
     prop,
-    color = gender
+    label = prop
   ) +
   scale_y_continuous(
     labels = scales::percent_format()
   ) +
   labs(
     x = "Year",
-    y = "Share of Women Workers",
-    color = "Paygrade"
+    y = "Share of Women Workers"
   )
 ```
 
