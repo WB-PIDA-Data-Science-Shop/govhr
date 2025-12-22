@@ -4,12 +4,12 @@
 \alias{ggplot_coef}
 \title{Plot model coefficients with confidence intervals}
 \usage{
-ggplot_coef(model, coefs)
+ggplot_coef(model, coef)
 }
 \arguments{
 \item{model}{A fitted model object (e.g., lm, glm).}
 
-\item{coefs}{A character vector of coefficient names to plot.}
+\item{coef}{A character string of coefficient name to plot. It can be a regular expression (e.g., "^term").}
 }
 \value{
 A ggplot object showing coefficients with error bars.

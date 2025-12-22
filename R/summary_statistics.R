@@ -902,7 +902,7 @@ fastprop <- function(.data, ...){
 #' Optionally computes wage bill shares relative to macro-fiscal aggregates
 #' (e.g., GDP, public expenditure, revenue).
 #'
-#' @param .data A data.frame or tibble containing contract-level salary data.
+#' @param contract_df A data.frame or tibble containing contract-level salary data.
 #'   Must include the columns specified in `wage_vars` and `groups`.
 #' @param wage_vars Character vector of salary column names to aggregate.
 #'   Defaults to `c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")`.
@@ -945,14 +945,14 @@ fastprop <- function(.data, ...){
 #'
 #' @export
 compute_wagebill <- function(
-  .data, 
+  contract_df, 
   wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
   groups = c("country_code", "year"),
   share_macro = FALSE,
   macro_vars = c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu"),
   drop_na = TRUE
 ) {  
-  data_ppp <- .data |>
+  data_ppp <- contract_df |>
     convert_constant_ppp(
       cols = wage_vars,
       macro_indicators = govhr::macro_indicators

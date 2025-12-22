@@ -5,7 +5,7 @@
 \title{Compute wage bill aggregates with optional macro-fiscal shares}
 \usage{
 compute_wagebill(
-  .data,
+  contract_df,
   wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
   groups = c("country_code", "year"),
   share_macro = FALSE,
@@ -14,7 +14,7 @@ compute_wagebill(
 )
 }
 \arguments{
-\item{.data}{A data.frame or tibble containing contract-level salary data.
+\item{contract_df}{A data.frame or tibble containing contract-level salary data.
 Must include the columns specified in `wage_vars` and `groups`.}
 
 \item{wage_vars}{Character vector of salary column names to aggregate.

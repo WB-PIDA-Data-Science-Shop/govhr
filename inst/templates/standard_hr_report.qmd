@@ -625,9 +625,53 @@ govhr::wwbi |>
     n = 1
   ) |> 
   ungroup() |> 
-  ggplot() +
-  geom_density(
-    aes(ps_wage_premium_edu_sector)
+  select(
+    country_code,
+    ps_wage_premium_clerk:ps_wage_premium_technical
+  ) |> 
+  pivot_longer(
+    -country_code
+  ) |> 
+  ggplot(
+    aes(value, name)
+  ) +
+  geom_text_repel(
+    aes(label = country_code),
+    color = "#006450",
+    max.overlaps = Inf,
+    segment.color = NA,
+    seed = 2025
+  ) +
+  geom_segment(
+    aes(x = min(value), xend = max(value), yend = name)     
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed",
+    color = "#98252B"
+  ) +
+  scale_y_discrete(
+    limits = c(
+      "ps_wage_premium_technical",
+      "ps_wage_premium_professional",
+      "ps_wage_premium_manager",
+      "ps_wage_premum_elementary",
+      "ps_wage_premium_clerk"
+    ),
+    labels = c(
+      "Technical",
+      "Professional",
+      "Manager or Senior Official",
+      "Elementary position",
+      "Clerk"
+    )
+  ) +
+  scale_x_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Public Sector Wage Premium",
+    y = ""
   )
 ```
 
@@ -665,14 +709,13 @@ contract_df |>
   labs(
     x = "Year",
     y = "Pay Compression Ratio"
-  )
+  ) 
 ```
 
 3.5.2. Pay dispersion in the public sector
 
 ```{r pay-dispersion}
-salary_dispersion <- contract_df |>
-  filter(year < 2018) |> 
+contract_df |>
   convert_constant_ppp(
     cols = c("base_salary_lcu"),
     macro_indicators = govhr::macro_indicators
@@ -741,8 +784,7 @@ contract_df |>
       fns = "median"
     ) |> 
     filter(
-      !is.na(gender) &
-        year < 2018
+      !is.na(gender)
     ) |> 
     pivot_wider(
       names_from = gender,
@@ -754,6 +796,11 @@ contract_df |>
     ggplot_point_line(
       year,
       ratio
+    ) +
+    geom_hline(
+      yintercept = 1,
+      linetype = "dashed",
+      color = "#98252B"
     ) +
     labs(
       x = "Year",
@@ -777,9 +824,6 @@ gender_df <- contract_df |>
     ) |> 
     slice_sample(
       n = 10000
-    ) |> 
-    mutate(
-      gender = factor(gender, levels = c("MASCULINO", "FEMININO"))
     )
 
 gender_premium_ols <- lm(
@@ -790,7 +834,7 @@ gender_premium_ols <- lm(
 
 gender_premium_ols |> 
   ggplot_coef(
-    coefs = "genderFEMININO"
+    coef = "^gender"
   )
 ```
 

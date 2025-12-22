@@ -130,12 +130,13 @@ ggplot_segment <- function(.data, col, group) {
       data = summary_df,
       ggplot2::aes(x = xmin, xend = xmax, y = !!group_sym, yend = !!group_sym),
       color = "grey70",
-      linewidth = 1,
-      arrow = ggplot2::arrow(length = grid::unit(0.2, "cm"), ends = "both", type = "closed")
+      linewidth = 1
     ) +
-    ggplot2::geom_point(
+    ggplot2::geom_jitter(
       data = plot_data,
       ggplot2::aes(x = !!col_sym, y = !!group_sym),
+      height = 0.1,
+      width = 0.1,
       alpha = 0.7,
       size = 2.5,
       shape = 1 # a hollow circle shape
@@ -147,7 +148,7 @@ ggplot_segment <- function(.data, col, group) {
 
 #' Plot model coefficients with confidence intervals
 #' @param model A fitted model object (e.g., lm, glm).
-#' @param coefs A character vector of coefficient names to plot.
+#' @param coef A character string of coefficient name to plot. It can be a regular expression (e.g., "^term").
 #' @return A ggplot object showing coefficients with error bars.
 #' @examples
 #' \dontrun{
@@ -156,13 +157,15 @@ ggplot_segment <- function(.data, col, group) {
 #' }
 #' @importFrom broom tidy
 #' @import ggplot2
+#' @importFrom stringr str_detect
+#' @importFrom dplyr filter
 #' 
 #' @export
-ggplot_coef <- function(model, coefs){
+ggplot_coef <- function(model, coef){
   model |> 
     broom::tidy(conf.int = TRUE) |>
-    filter(
-      term %in% coefs
+    dplyr::filter(
+      stringr::str_detect(term, coef)
     ) |> 
     ggplot2::ggplot(ggplot2::aes(x = estimate, y = term)) +
     ggplot2::geom_point() +
