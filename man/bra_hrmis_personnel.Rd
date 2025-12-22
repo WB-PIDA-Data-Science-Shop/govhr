@@ -22,7 +22,7 @@ A data frame with N rows and 9 variables:
 bra_hrmis_personnel
 }
 \description{
-This dataset contains demographic and employment information for personnels,
+This dataset contains demographic and employment information for personnel,
 including identifiers, education, tribal/racial classification, employment status,
 and geographic context. Each row represents a unique personnel record.
 }

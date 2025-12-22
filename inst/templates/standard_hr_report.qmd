@@ -520,9 +520,6 @@ contract_df |>
 
 ```{r women-ministry}
 contract_df |> 
-  mutate(
-    est_id = stringr::str_remove_all(est_id, "[-0-9]")
-  ) |> 
   left_join(
     personnel_df |> 
       select(
@@ -595,7 +592,7 @@ wwbi |>
 3.4.2. Public sector wage premium by education level
 
 ```{r premium-education}
-wwbi |>
+govhr::wwbi |>
   filter(country_code == params$country_code) |>
   select(country_code, year, starts_with("ps_wage_premium_isced")) |>
   pivot_longer(
@@ -620,7 +617,18 @@ wwbi |>
 3.4.3. Pay comparisons for occupations across public sectors
 
 ```{r pay-comparisons}
-print("Not available: no cross-country occupation wage data available")
+govhr::wwbi |>
+  # extract last record by country
+  group_by(country_code) |> 
+  slice_max(
+    order_by = year,
+    n = 1
+  ) |> 
+  ungroup() |> 
+  ggplot() +
+  geom_density(
+    aes(ps_wage_premium_edu_sector)
+  )
 ```
 
 ### 3.5. Wage equity

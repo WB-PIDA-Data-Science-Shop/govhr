@@ -65,7 +65,12 @@ wwbi_wage_premium <- wwbi_raw |>
     ps_wage_premium_isced_n = WB_WWBI_BI_WAG_PREM_FW_ISCED11_N__T,
     ps_wage_premium_isced_1 = WB_WWBI_BI_WAG_PREM_FW_ISCED11_1__T,
     ps_wage_premium_isced_2_3 = WB_WWBI_BI_WAG_PREM_FW_ISCED11_2_3__T,
-    ps_wage_premium_isced_5t8 = WB_WWBI_BI_WAG_PREM_FW_ISCED11_5T8__T
+    ps_wage_premium_isced_5t8 = WB_WWBI_BI_WAG_PREM_FW_ISCED11_5T8__T,
+    ps_wage_premium_clerk = WB_WWBI_BI_WAG_PREM_FW_WB_WWBI_OCCK__T,
+    ps_wage_premium_elementary = WB_WWBI_BI_WAG_PREM_FW_WB_WWBI_OCEO__T,
+    ps_wage_premium_professional = WB_WWBI_BI_WAG_PREM_FW_WB_WWBI_OCPN__T,
+    ps_wage_premium_manager = WB_WWBI_BI_WAG_PREM_FW_WB_WWBI_OCSN__T,
+    ps_wage_premium_technical = WB_WWBI_BI_WAG_PREM_FW_WB_WWBI_OCTN__T
   )
 
 wwbi_employment <- wwbi_raw |> 

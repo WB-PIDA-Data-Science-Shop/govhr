@@ -23,7 +23,7 @@ A tibble with 11652 rows and 14 variables:
   \item{ppp}{Purchasing Power Parity (local currency units per international USD). Original WDI code: WB_WDI_PA_NUS_PRVT_PP.}
   \item{fiscal_balance}{Overall Fiscal Balance, USD, percentage of GDP.}
   \item{emp_pop}{The population of employed i.e. `emp_pop_rate` * `tot_pop`.}
-  \item{salaried_pop}{The population of salaried personnels i.e. `salaried_rate` * `emp_pop`.}
+  \item{salaried_pop}{The population of salaried personnel i.e. `salaried_rate` * `emp_pop`.}
 }
 }
 \source{
