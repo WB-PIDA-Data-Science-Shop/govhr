@@ -75,6 +75,10 @@ contract_growth <- contract_df |>
   ) |> 
   as_tibble()
 
+paygrade_levels <- c(1:4)
+
+women_gender <- "FEMININO"
+
 knitr::opts_chunk$set(
   echo = FALSE,
   warning = FALSE,
@@ -416,8 +420,6 @@ personnel_df |>
 3.3.4. Distribution of public sector workers by pay grade
 
 ```{r paygrade-distribution}
-paygrade_levels <- c(1:4)
-
 contract_df |>
   filter(
     paygrade %in% paygrade_levels
@@ -842,7 +844,7 @@ gender_premium_ols |>
 
 Overview
 
-The extent to which wage increases are explicitly linked to performance is important for both employee motivation and public sector productivity. This section provide some key stylized facts that provide evidence of the productivity and fiscal implications of pay incentives. These include: the magnitude of promotion-based and seniority-based annual wage increases, expected wage increases over an employee's career and the coverage and key design features of performance bonuses.
+The extent to which wage increases are explicitly linked to performance is important for both employee motivation and public sector productivity. This section provide some indicators to measure the productivity and fiscal implications of pay incentives. These include: the magnitude of promotion-based and seniority-based annual wage increases, expected wage increases over an employee's career and the coverage and key design features of performance bonuses.
 
 Guidance questions for the assessment:
 
@@ -854,7 +856,7 @@ Guidance questions for the assessment:
 3.6.1. Percentage of staff receiving highest performance ratings
 
 ```{r performance-ratings}
-print("Not available: no performance rating data available")
+cat("Not available: no performance rating data available")
 ```
 
 3.6.2. The size of annual, within-grade pay increases
@@ -867,7 +869,7 @@ contract_df |>
     macro_indicators = govhr::macro_indicators
   ) |> 
   filter(
-    paygrade %in% seq(1, 4, 1)
+    paygrade %in% paygrade_levels
   ) |>
   mutate(
     year = as.numeric(year)
@@ -898,7 +900,7 @@ contract_df |>
   )
 ```
 
-3.6.3. percentage of staff receiving a performance bonus
+3.6.3. Percentage of staff receiving a performance bonus
 
 ```{r bonus-percentage}
 # 3.6.3. percentage of staff receiving a performance bonus
@@ -958,7 +960,7 @@ contract_df |>
     share_allowance = allowance_ppp_mean / base_salary_ppp_mean
   ) |>
   filter(
-    paygrade %in% seq(1, 4, 1)
+    paygrade %in% paygrade_levels
   ) |>
   ggplot_point_line(
     year,
@@ -983,7 +985,7 @@ contract_df |>
 
 ### 4.1. Fiscal sustainability
 
-The wage bill can potentially have a major effect on fiscal balances, but there are no simple benchmarks for the “right” size of the wage bill. In fact, cross-national evidence suggests that there is no strong correlation between the size of the wage bill and fiscal balance. Wage bill dynamics are a better predictor of fiscal sustainability. In general, increases in the wage bill are associated with worsening of the fiscal balance. In addition, wage expenditures are pro-cyclical, rising during periods of economic growth, but not falling as much during downturns due to structural rigidity.
+The wage bill potentially has a significant effect on fiscal balances, but there are no simple benchmarks for the “right” size of the wage bill. Cross-national evidence suggests that there is no strong correlation between the size of the wage bill and fiscal balance. Wage bill dynamics are a better predictor of fiscal sustainability. In general, increases in the wage bill are associated with worsening of the fiscal balance. In addition, wage expenditures are pro-cyclical, rising during periods of economic growth, but not falling as much during downturns due to structural rigidity.
 
 Guidance questions for the assessment:
 
@@ -1013,7 +1015,7 @@ contract_annual_growth <- contract_df |>
     govhr::macro_indicators |>
       filter(country_code == params$country_code),
     by = c("year")
-  ) 
+  )
   
 contract_annual_growth |> 
   ggplot() +
@@ -1021,14 +1023,27 @@ contract_annual_growth |>
     aes(base_salary_ppp_median_growth, fiscal_balance)
   ) +
   labs(
-    x = "Wage Bill Growth",
+    x = "Wage Bill (Annual Growth)",
     y = "Fiscal Balance (% of GDP)"
+  ) +
+  scale_x_continuous(
+    labels = scales::percent_format()
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed",
+    color = "#98252B"
+  ) +
+  geom_hline(
+    yintercept = 0,
+    linetype = "dashed",
+    color = "#98252B"
   )
 ```
 
 4.1.2.Correlation between wage bill growth and changes in capital and non-wage recurrent expenditures
 
-```{r}
+```{r wagebill-correlation}
 contract_annual_growth |>
   ggplot(
     aes(
@@ -1045,9 +1060,8 @@ contract_annual_growth |>
 
 4.1.3. Decomposition of wage growth: employment and wages
 
-```{r}
+```{r headcount-wagebill}
 contract_growth |> 
-  filter(year <= 2017) |>
   transmute(
     year,
     `Median Wage (PPP)` = median_wage_ppp /
@@ -1065,14 +1079,19 @@ contract_growth |>
     year,
     value,
     group = Indicator
+  ) +
+  geom_hline(
+    yintercept = 100,
+    linetype = "dashed",
+    color = "#98252B"
   )
 ```
 
 ### 4.2. Public sector productivity
 
-A key question is whether the public sector workforce is performing well and delivering high quality infrastructure, services, and regulations, which is really a question of public sector labor productivity. Productivity measures the efficiency with which inputs, like labor, are converted into outputs, and is a more precise and economically meaningful concept than “performance,” since presumably performance can be improved by spending more while productivity measures whether more is produced and delivered for a given wage bill.
+A key question is whether the public sector workforce performs well and delivers high quality infrastructure, services, and regulations. In other words, public sector labor productivity. Productivity measures the efficiency with which inputs, like labor, are converted into outputs, and is a more precise and economically meaningful concept than “performance,” since presumably performance can be improved by spending more while productivity measures whether more is produced and delivered for a given amount of labor.
 
-Measuring labor productivity in government is challenging, mainly because of the difficulty in defining and measuring government outputs. For example, functions such as defense, foreign relations, and environmental protection are difficult to quantify with respect to prices, as well as services for which there are no market transactions. Given these challenges, a diversified approach to measuring outputs must be used. These alternative measures can be distinguished into macro approaches, which provide information at the level of an establishment, sector, or service as a whole; and micro approaches, which be applied to the individual employee, task, project, and process.
+Measuring labor productivity in government is challenging, partially because of the difficulty in defining and measuring government outputs. For example, functions such as defense, foreign relations, and environmental protection are difficult to quantify with respect to prices, as well as services for which there are no market transactions. Given these challenges, a diversified approach to measuring outputs must be used. These alternative measures can be distinguished into macro approaches, which provide information at the level of an establishment, sector, or service as a whole; and micro approaches, which be applied to the individual employee, task, project, and process.
 
 Guidance questions for the assessment.
 
@@ -1088,15 +1107,12 @@ subnational measures—for example, recent rapid growth or declines in a particu
 # challenge: confidence in government is measured at the national level and
 # generally for only a few years
 # not representative at the institutional level
-print("Not available")
+cat("This visualization requires measures of public sector outputs.")
 ```
 
 ### 4.3. Labor allocation between public and private sectors
 
-Public sector employment and compensation policies
-can have major impacts on the entire labor market,
-particularly in low- and middle-income countries where the public sector is the dominant formal sector employer. Globally, the public sector accounts for 38
-percent of formal employment, reaching almost 50 percent for low-income and lower-middle and countries. This large labor market presence, combined with public sector wage premia and job security, can lead to unemployment, particularly for fresh university graduates who queue for public sector entry level job openings and reject private sector job offers.
+Public sector employment and compensation policies can have major impacts on the labor market, particularly in low- and middle-income countries where the public sector is the dominant formal sector employer. The large labor market presence of the public sector, combined with public sector wage premia and job security, affects labor market dynamics in the private sector as well. For example, fresh university graduates may queue for public sector entry level job openings and reject private sector job offers. Data enables a granular assessment of the impact of the public sector on the private sector labor market.
 
 Guidance questions:
 
@@ -1105,7 +1121,7 @@ Guidance questions:
 
 4.3.1. Public sector wage premium
 
-```{r}
+```{r wage-premum}
 wwbi |>
   filter(country_code == params$country_code) |>
   ggplot_point_line(
@@ -1130,11 +1146,12 @@ wwbi |>
       name == "hea_sector" ~ "Health",
       name == "female" ~ "Female personnel",
       name == "male" ~ "Male personnel",
-      name == "pooled" ~ "Overall"
+      name == "pooled" ~ "Overall",
+      T ~ NA_character_
     )
   ) |>
   filter(
-    between(year, 2002, 2015)
+    !is.na(name)
   ) |>
   ggplot_point_line(
     year,
@@ -1144,7 +1161,10 @@ wwbi |>
 ```
 
 4.3.2. Number of applications per position
-N/A
+
+```{r}
+cat("This requires candidate data.")
+```
 
 4.3.3. Correlation between public sector employment growth or recruitment patterns and private-sector employment growth or recruitment patterns (by skill, demographic, occupation, and geographical groups)
 
@@ -1152,7 +1172,7 @@ N/A
 contract_growth |> 
   transmute(
     year,
-    `Total Headcount` = total_headcount / total_headcount[year ==  min(year)] * 100,
+    `Total headcount` = total_headcount / total_headcount[year ==  min(year)] * 100,
     `Total labor force` = labor_force_total /
       labor_force_total[year == min(year)] *
       100
@@ -1173,7 +1193,9 @@ contract_growth |>
 ```
 
 4.3.4. Trends in educational profiles of public-sector personnels relative to private-sector personnels (by demographic, occupation, and geographical groups)
-```{r}
+
+Educational profile:
+```{r education-comparison}
 personnel_df |>
   group_by(country_code, year) |>
   summarise(
@@ -1199,6 +1221,16 @@ personnel_df |>
     year,
     value,
     group = name
+  )
+```
+
+Women labor forec participation:
+
+```{r women-comparison}
+personnel_df |> 
+  group_by(year) |> 
+  summarise(
+    share_women = mean(gender == women_gender, na.rm = TRUE)
   )
 ```
 

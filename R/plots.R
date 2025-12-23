@@ -25,7 +25,7 @@
 #'
 #' @import ggplot2
 #' @importFrom ggrepel geom_text_repel
-#' @importFrom ggthemes scale_color_solarized
+#' @importFrom ggthemes scale_color_few
 #' @importFrom rlang enquo
 #'
 #' @export
@@ -56,7 +56,7 @@ ggplot_point_line <- function(data,
 
   if (!rlang::quo_is_null(rlang::enquo(group))) {
     plot <- plot +
-      ggthemes::scale_colour_solarized()
+      ggthemes::scale_colour_few()
   }
 
   plot <- plot +

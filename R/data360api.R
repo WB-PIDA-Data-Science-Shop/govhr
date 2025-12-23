@@ -16,7 +16,7 @@
 #' @import dplyr
 #' @importFrom janitor clean_names
 #' @importFrom jsonlite fromJSON
-#' @importFrom tibble as_tibble
+#' @importFrom tibble as_tibble tibble
 #' @export
 get_data360_api <- function(dataset_id, indicator_id, pivot = TRUE) {
   base_url <- "https://data360api.worldbank.org/data360/data"
@@ -44,7 +44,7 @@ get_data360_api <- function(dataset_id, indicator_id, pivot = TRUE) {
 
   skip_row <- 0
   nrow_data_360 <- 0
-  data_360 <- tibble()
+  data_360 <- tibble::tibble()
 
   while(nrow_data_360 < count){
     data_url <- httr::modify_url(
