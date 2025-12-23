@@ -923,6 +923,7 @@ fastprop <- function(.data, ...){
 #' 
 #' @examples
 #' # Compute wage bill totals by country and year
+#' \dontrun{
 #' compute_wagebill(
 #'   contract_df = govhr::bra_hrmis_contract,
 #'   wage_vars = c("gross_salary_lcu"),
@@ -936,8 +937,9 @@ fastprop <- function(.data, ...){
 #'   groups = c("country_code", "year"),
 #'   share_macro = TRUE,
 #'   macro_vars = c("gdp_lcu", "pexpenditure_lcu")
-#' )
-#'
+#' ) 
+#' }
+#' 
 #' @seealso
 #' \code{\link{convert_constant_ppp}} for PPP conversion
 #' \code{\link{compute_fastsummary}} for general aggregation

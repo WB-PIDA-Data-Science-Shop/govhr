@@ -18,17 +18,12 @@ idvar_list <- list(
   "ppp" = "WB_WDI_PA_NUS_PRVT_PP"
 )
 
-macro_indicators <- get_data360_api(
-  "WB_WDI",
-  idvar_list
-) |> 
-  setNames(
-    c(
-      "country_code", 
-      "year", 
-      names(idvar_list)
-    )
-  )
+macro_indicators <- lapply(X = idvar_list,
+             FUN = get_data360_api,
+             dataset_id = "WB_WDI") |>
+      Reduce(f = "merge_wrapper") |>
+      as_tibble() |>
+      setNames(c("country_code", "year", names(idvar_list)))
 
 fiscal_balance <- get_data360_api(
   dataset_id = "WB_MPO",

@@ -1199,7 +1199,7 @@ Educational profile:
 personnel_df |>
   group_by(country_code, year) |>
   summarise(
-    ps_share_tertiary = mean(
+    `Public sector: Share with Higher Education` = mean(
       educat7 %in%
         c(
           "Higher than secondary but not university",
@@ -1211,39 +1211,49 @@ personnel_df |>
     .groups = "drop"
   ) |>
   left_join(
-    govhr::macro_indicators,
+    govhr::macro_indicators |> 
+      select(country_code, year, `Private Sector: Share with Higher Education` = labor_force_advanced_edu),
     by = c("country_code", "year")
   ) |>
   pivot_longer(
-    cols = c(ps_share_tertiary, labor_force_advanced_edu)
+    cols = -c(country_code, year),
+    names_to = "Measure",
+    values_to = "Share"
   ) |>
   ggplot_point_line(
     year,
-    value,
-    group = name
-  )
+    Share,
+    group = Measure
+  ) +
+  labs(x = "Year")
 ```
 
-Women labor forec participation:
+Women labor force participation:
 
 ```{r women-comparison}
 personnel_df |> 
   group_by(country_code, year) |> 
   summarise(
-    share_women = mean(gender == women_gender, na.rm = TRUE)
+    `Public Sector: Women in the labor force` = mean(gender == women_gender, na.rm = TRUE)
   ) |> 
   left_join(
-    govhr::macro_indicators |> select(country_code, year, labor_force_women),
+    govhr::macro_indicators |> select(country_code, year, `Private Sector: Women in the labor force` = labor_force_women),
     by = c("country_code", "year")
   ) |> 
   pivot_longer(
-    cols = c(ps_share_tertiary, labor_force_advanced_edu)
+    cols = c(matches("Women"))
   ) |>
   ggplot_point_line(
     year,
-    value,
-    group = name
-  )
+    names_to = "Measure",
+    values_to = "Share"
+  ) |>
+  ggplot_point_line(
+    year,
+    Share,
+    group = Measure
+  ) +
+  labs(x = "Year")
 ```
 
 4.3.5. Correlation between public-sector wage premium and relative employment growth in the public sector (by skill, demographic, occupation, and geographical groups)
