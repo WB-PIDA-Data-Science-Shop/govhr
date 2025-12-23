@@ -1211,7 +1211,7 @@ personnel_df |>
     .groups = "drop"
   ) |>
   left_join(
-    macro_indicators,
+    govhr::macro_indicators,
     by = c("country_code", "year")
   ) |>
   pivot_longer(
@@ -1228,9 +1228,21 @@ Women labor forec participation:
 
 ```{r women-comparison}
 personnel_df |> 
-  group_by(year) |> 
+  group_by(country_code, year) |> 
   summarise(
     share_women = mean(gender == women_gender, na.rm = TRUE)
+  ) |> 
+  left_join(
+    govhr::macro_indicators |> select(country_code, year, labor_force_women),
+    by = c("country_code", "year")
+  ) |> 
+  pivot_longer(
+    cols = c(ps_share_tertiary, labor_force_advanced_edu)
+  ) |>
+  ggplot_point_line(
+    year,
+    value,
+    group = name
   )
 ```
 
