@@ -70,7 +70,7 @@ For this vignette, we apply our tools to data provided by Brazil HRMIS system pr
 
 ```{r dataview}
 bra_hrmis <- govhr::bra_hrmis |> 
-  sample_frac(0.05)
+  sample_n(1e3)
 
 reactable(
   head(bra_hrmis, 1e3)
