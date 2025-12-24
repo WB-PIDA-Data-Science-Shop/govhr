@@ -677,6 +677,28 @@ govhr::wwbi |>
   )
 ```
 
+3.4.4. Wage and allowance growth compared to inflation
+
+```{r compensation-inflation}
+contract_df |> 
+  compute_fastsummary(
+    cols = c("base_salary_lcu", "gross_salary_lcu"),
+    fns = "mean",
+    groups = c("country_code", "year"),
+    output = "wide"
+  ) |> 
+  left_join(
+    govhr::macro_indicators |> select(country_code, year, cpi),
+    by = c("country_code", "year")
+  ) |> 
+  compute_baseline_index(
+    year,
+    base_salary_lcu_mean,
+    gross_salary_lcu_mean,
+    cpi
+  )
+```
+
 ### 3.5. Wage equity
 
 Wage equity -- whether workers in similar jobs, with similar skills, similar years of service, and similar
@@ -1241,10 +1263,7 @@ personnel_df |>
     by = c("country_code", "year")
   ) |> 
   pivot_longer(
-    cols = c(matches("Women"))
-  ) |>
-  ggplot_point_line(
-    year,
+    cols = c(matches("Women")),
     names_to = "Measure",
     values_to = "Share"
   ) |>
@@ -1280,10 +1299,4 @@ contract_growth |>
     x = "Public Sector Wage Premium",
     y = "Growth in headcount"
   )
-```
-
-4.3.6. Skills shortages in the private sector (from firm surveys)
-
-```{r}
-print("Enterprise surveys coverage is limited.")
 ```

@@ -48,6 +48,7 @@ Optionally computes wage bill shares relative to macro-fiscal aggregates
 }
 \examples{
 # Compute wage bill totals by country and year
+\dontrun{
 compute_wagebill(
   contract_df = govhr::bra_hrmis_contract,
   wage_vars = c("gross_salary_lcu"),
@@ -61,7 +62,8 @@ compute_wagebill(
   groups = c("country_code", "year"),
   share_macro = TRUE,
   macro_vars = c("gdp_lcu", "pexpenditure_lcu")
-)
+) 
+}
 
 }
 \seealso{

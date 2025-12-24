@@ -167,9 +167,7 @@ Now, we can begin creating the set of variables as defined by the `standard_dict
 
  * (1) the Industrial Standard Classification of Occupation (ISCO) variables, i.e. `occupation_isconame`, `occupation_iscocode` are derived from the original occupation variables `occupation_native`, `occupation_english`. We apply the `polyglotr::google_translate()` function to convert Portuguese named occupations to English as well as use the `LabourR::classify_occupation()` function to classify these occupations to the level-4 isco names. 
  
-```{r harmonize-occuapation, warning=FALSE}
-
-
+```{r harmonize-occupation, warning=FALSE}
 #-----------------------------
 # 2. Build occupation table (active + inactive)
 #-----------------------------

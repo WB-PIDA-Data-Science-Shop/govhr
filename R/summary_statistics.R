@@ -979,3 +979,60 @@ compute_wagebill <- function(
       )
   }
 }
+
+#' Compute index values relative to base year
+#'
+#' @description
+#' Computes index values for specified columns where the earliest year value
+#' is set to 100. All subsequent values are expressed as a percentage of the
+#' base year value. This is useful for comparing growth trends across multiple
+#' time series on a common scale.
+#'
+#' @param .data A data.frame or tibble containing the time series data.
+#' @param date_col Unquoted column name containing the time/year variable.
+#' @param ... Unquoted column names to compute indices for. Each selected
+#'   column must be numeric.
+#'
+#' @return A tibble with the date column and computed index columns. Index
+#'   column names are formed by appending "_index" to the original column names.
+#'
+#' @examples
+#' \dontrun{
+#' # Compute indices for headcount and labor force
+#' contract_df |>
+#'   compute_baseline_index(year, total_headcount, labor_force_total)
+#' }
+#'
+#' @importFrom rlang enquo as_name enquos expr
+#' @importFrom tidyselect eval_select
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr select all_of
+#'
+#' @export
+compute_baseline_index <- function(.data, date_col, ...) {
+  date_quo <- rlang::enquo(date_col)
+  date_name <- rlang::as_name(date_quo)
+  
+  cols_quos <- rlang::enquos(...)
+  if (length(cols_quos) == 0) {
+    stop("At least one column must be specified for indexing.", call. = FALSE)
+  }
+  
+  # resolve column names
+  cols_sel <- tidyselect::eval_select(rlang::expr(c(!!!cols_quos)), .data)
+  cols_names <- names(cols_sel)
+  
+  # compute indices for each column
+  indexed_df <- .data
+  for (col in cols_names) {
+    base_val <- indexed_df[[col]][indexed_df[[date_name]] == min(indexed_df[[date_name]], na.rm = TRUE)]
+    if (length(base_val) == 0 || is.na(base_val[1])) {
+      warning(sprintf("Base year value for '%s' is NA or missing; index will be NA.", col), call. = FALSE)
+      indexed_df[[paste0(col, "_index")]] <- NA_real_
+    } else {
+      indexed_df[[paste0(col, "_index")]] <- (indexed_df[[col]] / base_val[1]) * 100
+    }
+  }
+
+  indexed_df
+}
