@@ -1143,7 +1143,7 @@ Guidance questions:
 
 4.3.1. Public sector wage premium
 
-```{r wage-premum}
+```{r wage-premium}
 wwbi |>
   filter(country_code == params$country_code) |>
   ggplot_point_line(
