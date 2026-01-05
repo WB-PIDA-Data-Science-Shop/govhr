@@ -1214,7 +1214,7 @@ contract_growth |>
   )
 ```
 
-4.3.4. Trends in educational profiles of public-sector personnels relative to private-sector personnels (by demographic, occupation, and geographical groups)
+4.3.4. Trends in educational profiles of public-sector personnel relative to private-sector personnel (by demographic, occupation, and geographical groups)
 
 Educational profile:
 ```{r education-comparison}
