@@ -657,7 +657,7 @@ govhr::wwbi |>
       "ps_wage_premium_technical",
       "ps_wage_premium_professional",
       "ps_wage_premium_manager",
-      "ps_wage_premum_elementary",
+      "ps_wage_premium_elementary",
       "ps_wage_premium_clerk"
     ),
     labels = c(
