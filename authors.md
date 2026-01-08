@@ -8,14 +8,14 @@
 
 ## Citation
 
-Kim G, Edochie I (2025). *govhr: What the Package Does (Title Case)*. R
-package version 0.1.0,
+Kim G, Edochie I (2026). *govhr: Clean and analyze data that informs
+human resource management*. R package version 0.1.1,
 <https://wb-pida-data-science-shop.github.io/govhr/>.
 
     @Manual{,
-      title = {govhr: What the Package Does (Title Case)},
+      title = {govhr: Clean and analyze data that informs human resource management},
       author = {Galileu Kim and Ifeanyi Edochie},
-      year = {2025},
-      note = {R package version 0.1.0},
+      year = {2026},
+      note = {R package version 0.1.1},
       url = {https://wb-pida-data-science-shop.github.io/govhr/},
     }

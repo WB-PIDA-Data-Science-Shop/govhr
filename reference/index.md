@@ -20,6 +20,8 @@
   : Complete columns in a dataframe
 - [`complete_dates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/complete_dates.md)
   : Complete Panel Data by Identifier and Reference Dates
+- [`compute_baseline_index()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_baseline_index.md)
+  : Compute index values relative to base year
 - [`compute_fastchange()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastchange.md)
   : Calculate year-over-year growth for a numeric column
 - [`compute_fastshare()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastshare.md)
@@ -36,6 +38,8 @@
   Data
 - [`compute_volatility()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_volatility.md)
   : Compute Volatility Measures Over Time
+- [`compute_wagebill()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wagebill.md)
+  : Compute wage bill aggregates with optional macro-fiscal shares
 - [`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.md)
   : Convert nominal wages to real PPP-adjusted wages (2021 base year)
 - [`convert_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_data.md)
@@ -75,6 +79,8 @@
   : A function to identify inconsistent column names across data frames
 - [`flag_outlier()`](https://wb-pida-data-science-shop.github.io/govhr/reference/flag_outlier.md)
   : Flag outliers based on the IQR rule
+- [`generate_hr_report()`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_hr_report.md)
+  : Generate Standard HR Analytics Report
 - [`generate_qc_report()`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_qc_report.md)
   : Generate Quality Control Report for HR Data
 - [`get_data360_api()`](https://wb-pida-data-science-shop.github.io/govhr/reference/get_data360_api.md)

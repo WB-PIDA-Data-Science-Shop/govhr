@@ -73,16 +73,25 @@ Guidance questions for the assessment:
 
 3.1.1. Wage bill as share of GDP, expenditures, and revenues
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-2-1.png)
+![Line plot showing wage bill as percentage of GDP, public expenditure,
+and public revenue over time from 2014-2017. Three colored lines track
+the trends of gross salary relative to each macro
+indicator.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-2-1.png)
 
 3.1.2. Wage bill decomposed by administrative and industry
 classification
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-3-1.png)
+![Horizontal bar chart showing total wage bill by occupation (ISCO
+classification) for 2017. Displays the top 5% of occupations ranked by
+total wage
+expenditure.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-3-1.png)
 
 3.1.3. Annual recruitment patterns over time
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-4-1.png)
+![Scatter plot with connected lines showing the number of new hires by
+reference date from September 2014 to September 2018. Points represent
+hiring events detected in the personnel
+data.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-4-1.png)
 
 Wage bill ceilings are effective only when ministries must adhere to
 them, which depends on how ceilings are defined, how much reallocation
@@ -119,7 +128,10 @@ Guidance questions for the assessment:
 3.2.1. Deviations between budgeted and actual general government wage
 bill expenditures
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-5-1.png)
+![Line plot showing budget execution rate (public expenditure divided by
+public revenue) from 2014-2018. A horizontal dashed line at 1.0
+indicates balanced budget. Points above the line indicate deficit
+spending.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-5-1.png)
 
 3.2.2. Filled positions as a proportion of budgeted positions
 
@@ -166,32 +178,55 @@ Guidance questions for the assessment:
 3.3.1. Public sector employment as a share of total, paid, and formal
 employment
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-6-1.png)
+![Multi-line plot showing public sector employment as a percentage of
+total, paid, and formal employment over time. Three colored lines track
+different employment categories, with formal employment showing the
+highest
+share.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-6-1.png)
 
 3.3.2. Industry and occupational distribution of public sector
 employment
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-7-1.png)
+![Horizontal bar chart showing share of personnel by occupation (ISCO)
+for the most recent year. Displays top 5% of occupations ranked by
+personnel
+share.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-7-1.png)
 
 3.3.3. Educational profile of public sector employees
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-8-1.png)
+![Stacked area chart showing the distribution of education levels among
+public sector personnel from 2014-2018. Different colors represent
+education categories from primary through university education, showing
+compositional changes over
+time.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-8-1.png)
 
 3.3.4. Distribution of public sector workers by pay grade
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-9-1.png)
+![Stacked area chart showing the proportion of workers in pay grades 1-4
+from 2014-2018. Different colored areas represent each pay grade,
+illustrating changes in the composition of the workforce across pay
+grades over
+time.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-9-1.png)
 
 3.3.5. Share of women workers in the public sector
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-10-1.png)
+![Line plot showing the proportion of women workers in the public sector
+from 2014-2018. A single line tracks the percentage trend over
+time.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-10-1.png)
 
 3.3.6. Share of women workers by occupation
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-11-1.png)
+![Faceted line plots showing the share of women workers across 10
+randomly sampled occupations from 2014-2018. Each panel represents a
+different occupation, with lines showing temporal trends in gender
+composition.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-11-1.png)
 
 3.3.7. Share of women workers by ministry
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-12-1.png)
+![Faceted line plots showing the proportion of women workers across 8
+sampled ministries from 2014-2018. Each panel represents a different
+establishment, displaying trends in gender composition by organizational
+unit.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-12-1.png)
 
 Public sector wage levels are crucial for attracting and retaining
 competent workers for expenditure efficiency, fiscal sustainability, and
@@ -220,11 +255,19 @@ Guidance questions for the assessment:
 
 3.4.1. Public sector wage premium
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-13-1.png)
+![Line plot showing the public sector wage premium (percentage
+difference between public and private sector wages) over time. Points
+connected by lines show the trend in the wage premium controlling for
+observable
+characteristics.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-13-1.png)
 
 3.4.2. Public sector wage premium by education level
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-14-1.png)
+![Multi-line plot showing public sector wage premiums by education level
+(no education, primary, secondary, and tertiary) over time. Different
+colored lines represent each education category, showing how wage
+premiums vary across educational
+attainment.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-14-1.png)
 
 3.4.3. Pay comparisons for occupations across public sectors
 
@@ -254,21 +297,36 @@ Guidance questions for the assessment:
 
 3.5.1. Pay compression ratio in the public sector
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-16-1.png)
+![Line plot showing the pay compression ratio (ratio of high to low
+salaries) in the public sector from 2014-2017. Points connected by lines
+illustrate changes in pay inequality over
+time.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-16-1.png)
 
 3.5.2. Pay dispersion in the public sector
 
 3.5.3. Within-occupation public sector pay dispersion
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-18-1.png)
+![Horizontal segment plot showing salary distributions (minimum to
+maximum) within 25 sampled occupations. Each horizontal line represents
+the range of base salaries in constant 2021 international dollars for a
+specific occupation, ordered by median
+salary.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-18-1.png)
 
 3.5.4. Female-male wage ratio
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-19-1.png)
+![Line plot showing the ratio of female to male median base salaries
+from 2014-2017. A ratio of 1.0 indicates equal pay; values below 1.0
+indicate a gender pay gap favoring
+men.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-19-1.png)
 
 3.5.5. Gender wage premium
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-20-1.png)
+![Coefficient plot showing the estimated gender wage gap (female
+coefficient) from an OLS regression controlling for year, occupation,
+education, pay grade, seniority, and hours worked. Point estimate with
+95% confidence interval indicates the percentage wage difference between
+male and female workers after controlling for observable
+characteristics.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-20-1.png)
 
 Overview
 
@@ -301,15 +359,26 @@ Guidance questions for the assessment:
 
 3.6.2. The size of annual, within-grade pay increases
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-22-1.png)
+![Multi-line plot showing median base salary in constant international
+dollars by pay grade (1-4) from 2014-2018. Different colored lines
+represent each pay grade, illustrating within-grade salary progression
+over
+time.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-22-1.png)
 
 3.6.3. percentage of staff receiving a performance bonus
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-23-1.png)
+![Line plot showing the share of personnel receiving performance bonuses
+(allowances) from 2014-2018. Points connected by lines show the
+percentage of workers with allowance payments over
+time.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-23-1.png)
 
 3.6.4. Performance bonus as a percentage of basic pay
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-24-1.png)
+![Faceted line plots showing performance bonus (allowance) as a
+percentage of base salary by pay grade (1-4) from 2014-2018. Each panel
+represents a different pay grade, with lines showing how the bonus share
+varies over
+time.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-24-1.png)
 
 The wage bill can potentially have a major effect on fiscal balances,
 but there are no simple benchmarks for the “right” size of the wage
@@ -332,16 +401,27 @@ Guidance questions for the assessment:
 
 4.1.1. Correlation between wage bill growth and fiscal balances
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-25-1.png)
+![Scatter plot showing the relationship between wage bill growth
+(x-axis) and fiscal balance as percentage of GDP (y-axis). Each point
+represents a year, illustrating whether wage increases are associated
+with fiscal
+deterioration.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-25-1.png)
 
 4.1.2.Correlation between wage bill growth and changes in capital and
 non-wage recurrent expenditures
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-26-1.png)
+![Scatter plot showing the relationship between government expenditure
+as share of GDP (x-axis) and wage growth (y-axis). Points represent
+individual years, showing whether wage increases correlate with overall
+government
+spending.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-26-1.png)
 
 4.1.3. Decomposition of wage growth: employment and wages
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-27-1.png)
+![Multi-line plot showing indexed trends (2014=100) for median wage in
+PPP and total headcount from 2014-2017. Two colored lines decompose wage
+bill growth into price (wage) and quantity (headcount)
+components.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-27-1.png)
 
 A key question is whether the public sector workforce is performing well
 and delivering high quality infrastructure, services, and regulations,
@@ -414,7 +494,19 @@ Guidance questions:
 
 4.3.1. Public sector wage premium
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-29-1.png)![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-29-2.png)
+![Line plot showing the pooled public sector wage premium over time.
+Points connected by lines show the percentage wage difference between
+public and private sectors controlling for worker
+characteristics.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-29-1.png)![Line
+plot showing the pooled public sector wage premium over time. Points
+connected by lines show the percentage wage difference between public
+and private sectors controlling for worker
+characteristics.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-29-2.png)
+
+**Multi-line plot showing public sector wage premiums by sector
+(education, health) and gender from 2002-2015. Different colored lines
+show how wage premiums vary across demographic groups and sectors over
+time.**
 
 4.3.2. Number of applications per position N/A
 
@@ -422,18 +514,30 @@ Guidance questions:
 recruitment patterns and private-sector employment growth or recruitment
 patterns (by skill, demographic, occupation, and geographical groups)
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-30-1.png)
+![Multi-line plot comparing indexed trends (2014=100) of total public
+sector headcount and total labor force from 2014-2017. Two colored lines
+show whether public sector employment growth aligns with or diverges
+from overall labor market
+trends.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-30-1.png)
 
 4.3.4. Trends in educational profiles of public-sector personnels
 relative to private-sector personnels (by demographic, occupation, and
-geographical groups)
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-31-1.png)
+geographical groups) ![Multi-line plot comparing the share of workers
+with tertiary education in the public sector versus the labor force with
+advanced education from 2014-2018. Two colored lines show whether the
+public sector is attracting relatively more or fewer educated workers
+compared to the overall labor
+market.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-31-1.png)
 
 4.3.5. Correlation between public-sector wage premium and relative
 employment growth in the public sector (by skill, demographic,
 occupation, and geographical groups)
 
-![](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-32-1.png)
+![Scatter plot showing the relationship between public sector wage
+premium (x-axis) and headcount growth in the public sector (y-axis).
+Each point represents a year, testing whether higher wage premiums are
+associated with faster employment
+growth.](04-standard_hrmis_assessment_files/figure-html/unnamed-chunk-32-1.png)
 
 4.3.6. Skills shortages in the private sector (from firm surveys)
 

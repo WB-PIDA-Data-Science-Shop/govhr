@@ -1,7 +1,8 @@
-# govhr: What the Package Does (Title Case)
+# govhr: Clean and analyze data that informs human resource management
 
-More about what it does (maybe more than one line) Use four spaces when
-indenting paragraphs within the Description.
+This package is a toolkit developed by the World Bank. It cleans,
+harmonizes, and analyzes human resource data with a standardized
+methodology.
 
 ## See also
 

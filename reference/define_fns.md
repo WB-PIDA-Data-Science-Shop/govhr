@@ -135,16 +135,16 @@ compute_fastsummary(
 )
 #>     country_code             indicator        value
 #>           <char>                <fctr>        <num>
-#>  1:            A gross_salary_lcu_mean 1.010456e+03
-#>  2:            B gross_salary_lcu_mean 2.009664e+03
-#>  3:            A   gross_salary_lcu_sd 1.033554e+02
-#>  4:            B   gross_salary_lcu_sd 1.042561e+02
-#>  5:            A   gross_salary_lcu_cv 1.022859e-01
-#>  6:            B   gross_salary_lcu_cv 5.187739e-02
-#>  7:            A   net_salary_lcu_mean 7.028759e+02
-#>  8:            B   net_salary_lcu_mean 1.416506e+03
-#>  9:            A     net_salary_lcu_sd 1.023298e+02
-#> 10:            B     net_salary_lcu_sd 1.007025e+02
-#> 11:            A     net_salary_lcu_cv 1.455874e-01
-#> 12:            B     net_salary_lcu_cv 7.109214e-02
+#>  1:            A gross_salary_lcu_mean 1.013239e+03
+#>  2:            B gross_salary_lcu_mean 2.007788e+03
+#>  3:            A   gross_salary_lcu_sd 1.031824e+02
+#>  4:            B   gross_salary_lcu_sd 1.033784e+02
+#>  5:            A   gross_salary_lcu_cv 1.018342e-01
+#>  6:            B   gross_salary_lcu_cv 5.148870e-02
+#>  7:            A   net_salary_lcu_mean 7.047327e+02
+#>  8:            B   net_salary_lcu_mean 1.415248e+03
+#>  9:            A     net_salary_lcu_sd 1.033869e+02
+#> 10:            B     net_salary_lcu_sd 1.000377e+02
+#> 11:            A     net_salary_lcu_cv 1.467037e-01
+#> 12:            B     net_salary_lcu_cv 7.068561e-02
 ```

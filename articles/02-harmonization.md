@@ -67,7 +67,7 @@ the original data. See the data below:
 
 ``` r
 bra_hrmis <- govhr::bra_hrmis |> 
-  sample_frac(0.05)
+  sample_n(1e3)
 
 reactable(
   head(bra_hrmis, 1e3)
@@ -75,7 +75,7 @@ reactable(
 ```
 
 We illustrate the harmonization workflow using this dataset. `bra_hrmis`
-contains 17246 rows and 34 columns, covering covering demographic,
+contains 1000 rows and 34 columns, covering covering demographic,
 employment, establishmental, and payroll information for public sector
 personnels.
 
@@ -85,7 +85,7 @@ A quick glimpse of the dataset:
 glimpse(bra_hrmis)
 ```
 
-    ## Rows: 17,246
+    ## Rows: 1,000
     ## Columns: 34
     ## $ ANO_PAGAMENTO                     <chr> "2018", "2018", "2017", "2018", "201…
     ## $ MES_REFERENCIA                    <chr> "9", "9", "9", "9", "9", "9", "9", "…
@@ -277,11 +277,11 @@ kable(cpf_summary)
 
 | ANO_PAGAMENTO | unique_cpf | nobs |
 |:--------------|-----------:|-----:|
-| 2018          |       3710 | 3717 |
-| 2017          |       3711 | 3727 |
-| 2016          |       3635 | 3647 |
-| 2014          |       3002 | 3007 |
-| 2015          |       3142 | 3148 |
+| 2018          |        212 |  212 |
+| 2017          |        197 |  197 |
+| 2016          |        194 |  194 |
+| 2014          |        195 |  195 |
+| 2015          |        202 |  202 |
 
 ``` r
 kable(mtr_summary)
@@ -289,11 +289,11 @@ kable(mtr_summary)
 
 | ANO_PAGAMENTO | unique_mtr | nobs |
 |:--------------|-----------:|-----:|
-| 2018          |       3717 | 3717 |
-| 2017          |       3727 | 3727 |
-| 2016          |       3647 | 3647 |
-| 2014          |       3007 | 3007 |
-| 2015          |       3148 | 3148 |
+| 2018          |        212 |  212 |
+| 2017          |        197 |  197 |
+| 2016          |        194 |  194 |
+| 2014          |        195 |  195 |
+| 2015          |        202 |  202 |
 
 This clearly shows that `MATRICULA` is the contract ID while `CPF` is
 possibly the identifier for the personnel, the latter will come in handy
@@ -344,11 +344,10 @@ class_occup_df <- classify_occupation(
 )
 ```
 
-    ## Warning in merge.data.table(predictions, occupations_bundle[, list(conceptUri,
-    ## : Unknown argument 'on' has been passed.
-
-    ## Warning in merge.data.table(predictions, isco_occupations_bundle, on =
-    ## "iscoGroup"): Unknown argument 'on' has been passed.
+    ## Warning in .maybe_warn_merge_dots(...): merge.data.table() received 1 unknown
+    ## keyword argument which will be ignored: [on]
+    ## Warning in .maybe_warn_merge_dots(...): merge.data.table() received 1 unknown
+    ## keyword argument which will be ignored: [on]
 
 ``` r
 #-----------------------------
@@ -527,7 +526,7 @@ bra_hrmis |>
   uniqueN()
 ```
 
-This tells us that we have 17217 unique personnel_id-est_id-refdate
+This tells us that we have 1000 unique personnel_id-est_id-refdate
 combinations in the entire dataset. The goal is to ensure that once all
 the other variables of the personnel module are added. The size of the
 personnel module remains the same. As we did, in the contract module, we
@@ -587,9 +586,6 @@ bra_hrmis |>
 ### lets prepare the birth date variables
 bra_hrmis[, birth_date := as.Date(as.integer(birth_date), origin = "1899-12-30")]
 ```
-
-    ## Warning in as.Date(as.integer(birth_date), origin = "1899-12-30"): NAs
-    ## introduced by coercion
 
 The remainder of the variables (`tribe`,
 ``` race``) appear to be missing from the ```bra_hrmis`raw data. Therefore, we create them as missing variables (`NA\`).

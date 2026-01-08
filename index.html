@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>What the Package Does (Title Case) • govhr</title>
+<title>Clean and analyze data that informs human resource management • govhr</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -15,9 +15,9 @@
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="What the Package Does (Title Case)">
-<meta name="description" content="More about what it does (maybe more than one line) Use four spaces when indenting paragraphs within the Description.">
-<meta property="og:description" content="More about what it does (maybe more than one line) Use four spaces when indenting paragraphs within the Description.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Clean and analyze data that informs human resource management">
+<meta name="description" content="This package is a toolkit developed by the World Bank. It cleans, harmonizes, and analyzes human resource data with a standardized methodology.">
+<meta property="og:description" content="This package is a toolkit developed by the World Bank. It cleans, harmonizes, and analyzes human resource data with a standardized methodology.">
 <meta property="og:image" content="https://wb-pida-data-science-shop.github.io/govhr/logo.png">
 </head>
 <body>
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,8 @@
 </ol>
 <p><code>govhr</code> is based on the <a href="https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf#page=37.23" class="external-link">Public Sector Employment and Compensation Assessment Framework</a> developed by the World Bank.</p>
 <div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+<h2 id="hammer-installation">
+<span class="emoji" data-emoji="hammer">🔨</span> Installation<a class="anchor" aria-label="anchor" href="#hammer-installation"></a>
 </h2>
 <p>You can install the development version of <code>govhr</code> from <a href="https://github.com/WB-PIDA-Data-Science-Shop/govhr" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -83,12 +84,16 @@
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"WB-PIDA-Data-Science-Shop/govhr"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+<h2 id="link-get-started">
+<span class="emoji" data-emoji="link">🔗</span> Get started:<a class="anchor" aria-label="anchor" href="#link-get-started"></a>
 </h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://wb-pida-data-science-shop.github.io/govhr/">govhr</a></span><span class="op">)</span></span>
-<span><span class="co">## basic example code</span></span></code></pre></div>
+<ol style="list-style-type: decimal">
+<li>
+<a href="https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html">Standard dictionary for human resources (HR) data.</a>.</li>
+<li><a href="https://wb-pida-data-science-shop.github.io/govhr/articles/02-harmonization.html">How to harmonize your HR data.</a></li>
+<li><a href="https://wb-pida-data-science-shop.github.io/govhr/articles/03-quality_control.html">How to generate a data quality assessment.</a></li>
+<li><a href="https://wb-pida-data-science-shop.github.io/govhr/articles/04-standard_hrmis_assessment.html">How to generate a standard HR analytics report</a></li>
+</ol>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">

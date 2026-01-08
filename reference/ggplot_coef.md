@@ -5,7 +5,7 @@ Plot model coefficients with confidence intervals
 ## Usage
 
 ``` r
-ggplot_coef(model, coefs)
+ggplot_coef(model, coef)
 ```
 
 ## Arguments
@@ -14,9 +14,10 @@ ggplot_coef(model, coefs)
 
   A fitted model object (e.g., lm, glm).
 
-- coefs:
+- coef:
 
-  A character vector of coefficient names to plot.
+  A character string of coefficient name to plot. It can be a regular
+  expression (e.g., "^term").
 
 ## Value
 

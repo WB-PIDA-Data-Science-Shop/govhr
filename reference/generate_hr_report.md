@@ -1,19 +1,19 @@
-# Generate Quality Control Report for HR Data
+# Generate Standard HR Analytics Report
 
-Produces a comprehensive HTML quality control report for harmonized HR
-data. The report includes diagnostics on data structure, primary key
-integrity, cross-module orphan checks, missingness patterns, and
-temporal volatility across Contract, Personnel, and Establishment
-modules.
+Produces a comprehensive HTML analytics report for harmonized HR data
+using a Quarto template. The report includes descriptive statistics,
+visualizations, and optional quality control diagnostics across
+Contract, Personnel, and Establishment modules.
 
 ## Usage
 
 ``` r
-generate_qc_report(
+generate_hr_report(
   contract_dt,
   personnel_dt,
   est_dt,
-  output = "qc_report.html"
+  country_code,
+  output = "hr_report.html"
 )
 ```
 
@@ -37,45 +37,39 @@ generate_qc_report(
   A data.table containing the Establishment module data with harmonized
   column names. Should include est_id and establishment characteristics.
 
+- country_code:
+
+  The reference country code. Must be specified in the three-letter,
+  World Bank standard (e.g., BRA for Brazil).
+
 - output:
 
   Character string specifying the output file name. Defaults to
-  "qc_report.html". The file will be created in the current working
+  "hr_report.html". The file will be created in the current working
   directory.
 
 ## Value
 
-A quality control report, in HTML.
-
-The generated report includes:
-
-- Module dimensions and variable structure conformity
-
-- Primary key uniqueness checks
-
-- Cross-module orphan record identification
-
-- Comprehensive missingness analysis with visualizations
-
-- Temporal volatility metrics for salary, wagebill, and staff counts
+An HR report, in HTML.
 
 ## See also
 
-[`compute_qualitycontrol`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_qualitycontrol.md)
-for the underlying diagnostic functions
+[`generate_qc_report`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_qc_report.md)
+for the data quality assessment report.
 [`harmonization_dict`](https://wb-pida-data-science-shop.github.io/govhr/reference/harmonization_dict.md)
-for the harmonization dictionary
+for the harmonization dictionary.
 
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
-# Generate quality control report for Brazilian HRMIS data
-generate_qc_report(
+# Generate HR analytics report for Brazilian HRMIS data
+generate_hr_report(
   contract_dt = bra_hrmis_contract,
   personnel_dt = bra_hrmis_personnel,
   est_dt = bra_hrmis_est,
-  output = "brazil_qc_report.html"
+  country_code = "BRA",
+  output = "brazil_hr_report.html"
 )
 } # }
 ```

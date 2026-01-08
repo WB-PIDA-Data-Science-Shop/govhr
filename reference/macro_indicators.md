@@ -59,6 +59,11 @@ A tibble with 11652 rows and 14 variables:
   population with advanced education). Original WDI code:
   WB_WDI_SL_TLF_ADVN_ZS.
 
+- labor_force_women:
+
+  Labor force, women (percentage of total labor force). Original WDI
+  code: WB_WDI_SL_TLF_TOTL_FE_ZS.
+
 - tot_pop:
 
   Total population. Original WDI code: WB_WDI_SP_POP_TOTL.
@@ -92,7 +97,7 @@ A tibble with 11652 rows and 14 variables:
 
 - salaried_pop:
 
-  The population of salaried personnels i.e. \`salaried_rate\` \*
+  The population of salaried personnel i.e. \`salaried_rate\` \*
   \`emp_pop\`.
 
 ## Source

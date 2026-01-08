@@ -1,7 +1,7 @@
 # Personnel Dataset
 
 This dataset contains demographic and employment information for
-personnels, including identifiers, education, tribal/racial
+personnel, including identifiers, education, tribal/racial
 classification, employment status, and geographic context. Each row
 represents a unique personnel record.
 
