@@ -30,23 +30,7 @@ characteristics.}
 directory.}
 }
 \value{
-Invisibly returns the path to the generated HTML report. The function
-  is primarily called for its side effect of creating the report file.
-}
-\description{
-Produces a comprehensive HTML quality control report for harmonized HR data.
-The report includes diagnostics on data structure, primary key integrity,
-cross-module orphan checks, missingness patterns, and temporal volatility
-across Contract, Personnel, and Establishment modules.
-}
-\details{
-The function performs the following steps:
-\enumerate{
-  \item Computes quality control diagnostics using
-    \code{\link{compute_qualitycontrol}}
-  \item Locates the RMarkdown template from the package installation
-  \item Renders the template with the provided data and diagnostics
-}
+A quality control report, in HTML.
 
 The generated report includes:
 \itemize{
@@ -56,6 +40,12 @@ The generated report includes:
   \item Comprehensive missingness analysis with visualizations
   \item Temporal volatility metrics for salary, wagebill, and staff counts
 }
+}
+\description{
+Produces a comprehensive HTML quality control report for harmonized HR data.
+The report includes diagnostics on data structure, primary key integrity,
+cross-module orphan checks, missingness patterns, and temporal volatility
+across Contract, Personnel, and Establishment modules.
 }
 \examples{
 \dontrun{

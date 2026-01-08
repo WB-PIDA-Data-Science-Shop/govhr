@@ -4,11 +4,11 @@
 \name{govhr-package}
 \alias{govhr}
 \alias{govhr-package}
-\title{govhr: What the Package Does (Title Case)}
+\title{govhr: Clean and analyze data that informs human resource management}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-More about what it does (maybe more than one line) Use four spaces when indenting paragraphs within the Description.
+This package is a toolkit developed by the World Bank. It cleans, harmonizes, and analyzes human resource data with a standardized methodology.
 }
 \seealso{
 Useful links:

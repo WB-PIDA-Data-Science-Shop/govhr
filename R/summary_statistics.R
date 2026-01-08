@@ -893,3 +893,146 @@ fastprop <- function(.data, ...){
   prop_dt
 }
 
+#' Compute wage bill aggregates with optional macro-fiscal shares
+#'
+#' @description
+#' Computes aggregate wage bill statistics from contract-level salary data.
+#' The function converts salary variables to constant purchasing power parity
+#' (PPP) using macro indicators, then aggregates by specified grouping variables.
+#' Optionally computes wage bill shares relative to macro-fiscal aggregates
+#' (e.g., GDP, public expenditure, revenue).
+#'
+#' @param contract_df A data.frame or tibble containing contract-level salary data.
+#'   Must include the columns specified in `wage_vars` and `groups`.
+#' @param wage_vars Character vector of salary column names to aggregate.
+#'   Defaults to `c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")`.
+#' @param groups Character vector of grouping columns for aggregation.
+#'   Defaults to `c("country_code", "year")`.
+#' @param share_macro Logical; if `TRUE`, computes wage bill shares relative
+#'   to macro-fiscal aggregates specified in `macro_vars`. Defaults to `FALSE`.
+#' @param macro_vars Character vector of macro indicator column names to use
+#'   as denominators when `share_macro = TRUE`. Defaults to
+#'   `c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu")`.
+#' @param drop_na Logical; if `TRUE`, removes `NA` values before aggregation.
+#'   Defaults to `TRUE`.
+#'
+#' @return A wage bill table with optional grouping variables,
+#'   an `indicator` column (describing the wage variable and level of analysis),
+#'   and a `value` column. When `share_macro = TRUE`, values represent
+#'   shares (wage bill / macro aggregate).
+#' 
+#' @examples
+#' # Compute wage bill totals by country and year
+#' \dontrun{
+#' compute_wagebill(
+#'   contract_df = govhr::bra_hrmis_contract,
+#'   wage_vars = c("gross_salary_lcu"),
+#'   groups = c("country_code", "year")
+#' )
+#'
+#' # Compute wage bill as share of GDP and public expenditure
+#' compute_wagebill(
+#'   contract_df = govhr::bra_hrmis_contract,
+#'   wage_vars = c("gross_salary_lcu", "net_salary_lcu"),
+#'   groups = c("country_code", "year"),
+#'   share_macro = TRUE,
+#'   macro_vars = c("gdp_lcu", "pexpenditure_lcu")
+#' ) 
+#' }
+#' 
+#' @seealso
+#' \code{\link{convert_constant_ppp}} for PPP conversion
+#' \code{\link{compute_fastsummary}} for general aggregation
+#' \code{\link{compute_fastshare}} for share computation (when `share_macro = TRUE`)
+#'
+#' @export
+compute_wagebill <- function(
+  contract_df, 
+  wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
+  groups = c("country_code", "year"),
+  share_macro = FALSE,
+  macro_vars = c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu"),
+  drop_na = TRUE
+) {  
+  data_ppp <- contract_df |>
+    convert_constant_ppp(
+      cols = wage_vars,
+      macro_indicators = govhr::macro_indicators
+    )
+  
+  if(share_macro) {
+    data_ppp |> 
+      compute_fastshare(
+        cols = wage_vars,
+        macro_cols = macro_vars,
+        groups = groups,
+        fns = "sum",
+        output = "long"
+      )
+  } else {
+    data_ppp |> 
+      compute_fastsummary(
+        cols = wage_vars,
+        groups = groups,
+        fns = "sum",
+        output = "long"
+      )
+  }
+}
+
+#' Compute index values relative to base year
+#'
+#' @description
+#' Computes index values for specified columns where the earliest year value
+#' is set to 100. All subsequent values are expressed as a percentage of the
+#' base year value. This is useful for comparing growth trends across multiple
+#' time series on a common scale.
+#'
+#' @param .data A data.frame or tibble containing the time series data.
+#' @param date_col Unquoted column name containing the time/year variable.
+#' @param ... Unquoted column names to compute indices for. Each selected
+#'   column must be numeric.
+#'
+#' @return A tibble with the date column and computed index columns. Index
+#'   column names are formed by appending "_index" to the original column names.
+#'
+#' @examples
+#' \dontrun{
+#' # Compute indices for headcount and labor force
+#' contract_df |>
+#'   compute_baseline_index(year, total_headcount, labor_force_total)
+#' }
+#'
+#' @importFrom rlang enquo as_name enquos expr
+#' @importFrom tidyselect eval_select
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr select all_of
+#'
+#' @export
+compute_baseline_index <- function(.data, date_col, ...) {
+  date_quo <- rlang::enquo(date_col)
+  date_name <- rlang::as_name(date_quo)
+  
+  cols_quos <- rlang::enquos(...)
+  if (length(cols_quos) == 0) {
+    stop("At least one column must be specified for indexing.", call. = FALSE)
+  }
+  
+  # resolve column names
+  cols_sel <- tidyselect::eval_select(rlang::expr(c(!!!cols_quos)), .data)
+  cols_names <- names(cols_sel)
+  
+  # compute indices for each column
+  indexed_df <- .data
+  for (col in cols_names) {
+    base_val <- indexed_df[[col]][indexed_df[[date_name]] == min(indexed_df[[date_name]], na.rm = TRUE)]
+    if (length(base_val) == 0 || is.na(base_val[1])) {
+      warning(sprintf("Base year value for '%s' is NA or missing; index will be NA.", col), call. = FALSE)
+      indexed_df[[paste0(col, "_index")]] <- NA_real_
+    } else {
+      indexed_df[[paste0(col, "_index")]] <- (indexed_df[[col]] / base_val[1]) * 100
+    }
+  }
+
+  indexed_df
+}

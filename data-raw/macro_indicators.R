@@ -1,4 +1,5 @@
 ## code to prepare `economy_wide` variables for wage diagnostics
+# last updated: 12/23/2025
 library(purrr)
 
 idvar_list <- list(
@@ -8,6 +9,7 @@ idvar_list <- list(
   "taxrevenue_lcu" = "WB_WDI_GC_TAX_TOTL_CN",
   "emp_pop_rate" = "WB_WDI_SL_EMP_TOTL_SP_NE_ZS",
   "labor_force_total" = "WB_WDI_SL_TLF_TOTL_IN",
+  "labor_force_women" = "WB_WDI_SL_TLF_TOTL_FE_ZS",
   "labor_force_advanced_edu" = "WB_WDI_SL_TLF_ADVN_ZS",
   "tot_pop" = "WB_WDI_SP_POP_TOTL",
   "salaried_rate" = "WB_WDI_SL_EMP_WORK_ZS",

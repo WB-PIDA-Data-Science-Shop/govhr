@@ -16,6 +16,7 @@ A tibble with 11652 rows and 14 variables:
   \item{emp_pop_rate}{Employment-to-population ratio (in percent). Original WDI code: WB_WDI_SL_EMP_TOTL_SP_NE_ZS.}
   \item{labor_force_total}{Labor force, total. Original WDI code: WB_WDI_SL_TLF_TOTL_IN.}
   \item{labor_force_advanced_edu}{Labor force with advanced education (percentage of total working-age population with advanced education). Original WDI code: WB_WDI_SL_TLF_ADVN_ZS.}
+  \item{labor_force_women}{Labor force, women (percentage of total labor force). Original WDI code: WB_WDI_SL_TLF_TOTL_FE_ZS.}
   \item{tot_pop}{Total population. Original WDI code: WB_WDI_SP_POP_TOTL.}
   \item{government_expenditure_gdp}{General government final consumption expenditure (percentage of GDP). Original WDI code: WB_WDI_NE_CON_GOVT_ZS.}
   \item{salaried_rate}{Share of employed people who are salaried (in percent). Original WDI code: WB_WDI_SL_EMP_WORK_ZS.}
@@ -23,7 +24,7 @@ A tibble with 11652 rows and 14 variables:
   \item{ppp}{Purchasing Power Parity (local currency units per international USD). Original WDI code: WB_WDI_PA_NUS_PRVT_PP.}
   \item{fiscal_balance}{Overall Fiscal Balance, USD, percentage of GDP.}
   \item{emp_pop}{The population of employed i.e. `emp_pop_rate` * `tot_pop`.}
-  \item{salaried_pop}{The population of salaried personnels i.e. `salaried_rate` * `emp_pop`.}
+  \item{salaried_pop}{The population of salaried personnel i.e. `salaried_rate` * `emp_pop`.}
 }
 }
 \source{
