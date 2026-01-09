@@ -102,7 +102,7 @@ active_alagoas_tbl <-
 ##### a few diagnostics
 check_dt <-
   active_alagoas_tbl |>
-  dplyr::select(ANO_PAGAMENTO, ORGAO, COD_ORGAO) |>
+  dplyr::select(ANO_PAGAMENTO, ORGAO) |>
   unique()
 
 check_list <-
@@ -171,11 +171,15 @@ alagoas_est_tbl <-
       mutate(est_name_en = "Alagoas Retirees")
   )
 
-#### write results
+# #### write results
+# alagoas_est_tbl |>
+#   write_rds(
+#     here("spielplatz", "data", "bra_hrmis_establishment.rds"),
+#     compress = "gz"
+#   )
+
 alagoas_est_tbl |>
-  write_rds(
-    here("spielplatz", "data", "bra_hrmis_establishment.rds"),
-    compress = "gz"
-  )
+  qs::qsave("spielplatz/data/est_alagoas_tbl.qs")
+
 
 write_xlsx(check_list, "spielplatz/data/orgao_check.xlsx")

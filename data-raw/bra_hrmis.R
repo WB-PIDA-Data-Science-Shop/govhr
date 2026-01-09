@@ -6,6 +6,7 @@ library(digest)
 library(labourR)
 library(readr)
 library(here)
+library(purrr)
 
 devtools::load_all()
 
@@ -46,30 +47,63 @@ bra_hrmis <- contract_active |>
     contract_inactive
   )
 
+
+### first lets select the set of people we will take
+set.seed(123)
+  
+personnel_list <- 
+  bra_hrmis |>
+  dplyr::distinct(CPF) |>
+  dplyr::slice_sample(n = 1000) |>
+  dplyr::pull(CPF)
+
 # anonymize the CPF
-bra_hrmis <- bra_hrmis |>
+bra_hrmis <- 
+  bra_hrmis |>
+  dplyr::filter(CPF %in% personnel_list) |>
   mutate(
-    CPF = map_chr(CPF, digest, algo = "sha256")
+    CPF = purrr::map_chr(CPF, digest, algo = "sha256")
   )
 
 # import clean data -------------------------------------------------------
-bra_hrmis_contract <- read_rds(
-  here("spielplatz", "data", "bra_hrmis_contract.rds")
-) |>
-  filter(
-    lubridate::year(ref_date) >= 2014
-  )
+# bra_hrmis_contract <- read_rds(
+#   here("spielplatz", "data", "bra_hrmis_contract.rds")
+# ) |>
+#   filter(
+#     lubridate::year(ref_date) >= 2014
+#   )
 
-bra_hrmis_personnel <- read_rds(
-  here("spielplatz", "data", "bra_hrmis_personnel.rds")
-) |>
-  filter(
-    lubridate::year(ref_date) >= 2014
-  )
+# bra_hrmis_personnel <- read_rds(
+#   here("spielplatz", "data", "bra_hrmis_personnel.rds")
+# ) |>
+#   filter(
+#     lubridate::year(ref_date) >= 2014
+#   )
 
-bra_hrmis_est <- read_rds(
-  here("spielplatz", "data", "bra_hrmis_establishment.rds")
-)
+# bra_hrmis_est <- read_rds(
+#   here("spielplatz", "data", "bra_hrmis_establishment.rds")
+# )
+
+### lets select the data to be lazy loaded
+contract_tbl <- qs::qread("spielplatz/data/contract_alagoas_tbl.qs")
+personnel_tbl <- qs::qread("spielplatz/data/personnel_alagoas_tbl.qs")
+est_tbl <- qs::qread("spielplatz/data/est_alagoas_tbl.qs")
+
+
+
+
+bra_hrmis_personnel <- 
+personnel_tbl |>
+  dplyr::filter(personnel_id %in% personnel_list)
+
+bra_hrmis_contract <- 
+contract_tbl |> 
+  dplyr::filter(personnel_id %in% bra_hrmis_personnel$personnel_id)
+
+bra_hrmis_est <- 
+  est_tbl |>
+  dplyr::filter(est_id %in% unique(bra_hrmis_contract$est_id))
+
 
 # write-out ---------------------------------------------------------------
 usethis::use_data(bra_hrmis, overwrite = TRUE)

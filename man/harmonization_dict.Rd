@@ -5,7 +5,7 @@
 \alias{harmonization_dict}
 \title{Harmonization Dictionary for Payroll Data}
 \format{
-A tibble with 44 rows and 5 variables:
+A tibble with 45 rows and 5 variables:
 \describe{
   \item{VariableName}{Character. Human-readable variable name.}
   \item{VariableID}{Character. Standardized snake_case variable identifier.}
