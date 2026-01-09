@@ -185,7 +185,7 @@
 #' 3. Coerce variables to the correct data type;  
 #' 4. Split harmonized outputs into module-specific files.
 #'
-#' @format A tibble with 44 rows and 5 variables:
+#' @format A tibble with 45 rows and 5 variables:
 #' \describe{
 #'   \item{VariableName}{Character. Human-readable variable name.}
 #'   \item{VariableID}{Character. Standardized snake_case variable identifier.}

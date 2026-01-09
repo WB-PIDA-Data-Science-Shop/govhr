@@ -268,8 +268,11 @@ personnel_module_clean <- personnel_module |>
     country_code = "BRA"
   )
 
+# personnel_module_clean |>
+#   write_rds(
+#     here("spielplatz", "data", "bra_hrmis_personnel.rds"),
+#     compress = "gz"
+#   )
+
 personnel_module_clean |>
-  write_rds(
-    here("spielplatz", "data", "bra_hrmis_personnel.rds"),
-    compress = "gz"
-  )
+  qs::qsave("spielplatz/data/personnel_alagoas_tbl.qs", preset = "high")

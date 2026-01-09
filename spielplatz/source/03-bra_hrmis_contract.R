@@ -75,13 +75,31 @@ occup_df <-
       dplyr::select(CARREIRA, CARGO) |>
       mutate(status = "inactive")
   ) |>
-  distinct() |>
-  mutate(
-    occupation_native  = str_to_lower(CARREIRA),
-    occupation_english = str_to_lower(
-      google_translate(text = CARREIRA, source_language = "pt", target_language = "en")
-    )
-  )
+  distinct()
+
+### lets concatenate the set of occupations and have them all translated at once
+safe_translate <- possibly(
+  ~ google_translate(.x, target_language = "en", source_language = "auto"),
+  otherwise = NA_character_
+)
+
+translated <- map_chr(occup_df$CARREIRA, function(x) {
+  Sys.sleep(runif(1, 1, 2))   # polite delay
+  safe_translate(x)
+})
+
+# occup_df <- 
+#   mutate(
+#     occupation_native  = str_to_lower(CARREIRA),
+#     occupation_english = str_to_lower(
+#       google_translate(text = CARREIRA, source_language = "pt", target_language = "en")
+#     )
+#   )
+
+occup_df <-
+  occup_df |>
+  mutate(occupation_native = str_to_lower(CARREIRA),
+         occupation_english = str_to_lower(translated))
 
 class_occup_df <-
   occup_df |>
@@ -145,7 +163,7 @@ contract_alagoas_tbl <-
       transmute(
         contract_id = MATRICULA,
         personnel_id = CPF,
-        est_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
+        est_id = ORGAO,
         ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
         base_salary_lcu = SALARIO_BASE,
         allowance_lcu = ABONO_PERMANENCIA,
@@ -175,7 +193,7 @@ contract_alagoas_tbl <-
       transmute(
         contract_id = MATRICULA,
         personnel_id = CPF,
-        est_id = paste(ORGAO, "000000", sep = "-"),
+        est_id = ORGAO,
         ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
         base_salary_lcu = NA,
         allowance_lcu = NA,
@@ -209,8 +227,16 @@ contract_alagoas_tbl <-
     ~ as.numeric(.)
   ))
 
-qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
+# qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
 
-saveRDS(
-  contract_alagoas_tbl, "spielplatz/data/bra_hrmis_contract.rds"
-)
+# saveRDS(
+#   contract_alagoas_tbl, "spielplatz/data/bra_hrmis_contract.rds"
+# )
+
+### save the occupation classifications data
+qs::qsave(occup_df, file = "spielplatz/data/occupations_tbl.qs", preset = "high")
+
+qs::qsave(contract_alagoas_tbl, 
+          file = "spielplatz/data/contract_alagoas_tbl.qs",
+          preset = "high")
+
