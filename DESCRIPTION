@@ -37,7 +37,7 @@ Config/testthat/edition: 3
 Depends: 
     R (>= 3.5)
 URL: https://wb-pida-data-science-shop.github.io/govhr/
-Config/Needs/website: rmarkdown, remotes, polyglotr, AleKoure/labourR, DT, tidyr, here
+Config/Needs/website: rmarkdown, remotes, polyglotr, AleKoure/labourR, DT, tidyr, here, qs, tibble
 Authors@R: c(
     person("Galileu", "Kim", , "galileukim@worldbank.org", role = c("aut", "cre")),
     person("Ifeanyi", "Edochie", , "iedochie@worldbank.org", role = c("aut"))
