@@ -6,25 +6,6 @@ output: rmarkdown::html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-# # Required packages for the vignette
-# cran_pkgs <- c("polyglotr", "DT")
-# 
-# # Install missing CRAN packages
-# for (pkg in cran_pkgs) {
-#   if (!requireNamespace(pkg, quietly = TRUE)) {
-#     install.packages(pkg)
-#   }
-# }
-# 
-# # Install missing GitHub packages
-# if (!requireNamespace("labourR", quietly = TRUE)) {
-#   if (!requireNamespace("remotes", quietly = TRUE)) {
-#     install.packages("remotes")
-#   }
-#   remotes::install_github("AleKoure/labourR")
-# }
-
-
 library(reactable)
 library(govhr)
 library(dplyr)
@@ -34,6 +15,7 @@ library(polyglotr)
 library(labourR)
 library(DT)
 library(lubridate)
+library(here)
 
 ```
 
@@ -69,12 +51,15 @@ By following this procedure, governments and World Bank teams can unlock a commo
 For this vignette, we apply our tools to data provided by Brazil HRMIS system provided at the contract level. We randomly sample 5 percent of the original data. See the data below:
 
 ```{r dataview}
-bra_hrmis <- govhr::bra_hrmis |> 
-  sample_n(1e3)
+# bra_hrmis <- govhr::bra_hrmis |> 
+#   sample_n(1e3)
+bra_hrmis_display <- data.table::as.data.table(bra_hrmis)
+char_cols <- names(bra_hrmis_display)[sapply(bra_hrmis_display, is.character)]
+bra_hrmis_display[, (char_cols) := lapply(.SD, function(x) {
+  iconv(x, from = "latin1", to = "UTF-8", sub = "")
+}), .SDcols = char_cols]
 
-reactable(
-  head(bra_hrmis, 1e3)
-)
+reactable(head(bra_hrmis_display, 100))
 
 ```
 
@@ -130,7 +115,9 @@ The `bra_hrmis` data is written in Portuguese which might require translation to
 
 raw_dictionary <- 
   tibble(raw_colnames_pt = colnames(govhr::bra_hrmis),
-         raw_colnames_eng = polyglotr::google_translate(colnames(bra_hrmis), "pt", "en"))
+         raw_colnames_eng = polyglotr::google_translate(colnames(bra_hrmis), 
+                            source_language = "pt", 
+                            target_language = "en"))
 
 kable(raw_dictionary)
 
@@ -167,7 +154,7 @@ Now, we can begin creating the set of variables as defined by the `standard_dict
 
  * (1) the Industrial Standard Classification of Occupation (ISCO) variables, i.e. `occupation_isconame`, `occupation_iscocode` are derived from the original occupation variables `occupation_native`, `occupation_english`. We apply the `polyglotr::google_translate()` function to convert Portuguese named occupations to English as well as use the `LabourR::classify_occupation()` function to classify these occupations to the level-4 isco names. 
  
-```{r harmonize-occupation, warning=FALSE}
+```{r harmonize-occupation, warning=FALSE, eval = FALSE}
 #-----------------------------
 # 2. Build occupation table (active + inactive)
 #-----------------------------
@@ -181,11 +168,31 @@ occup_df <- unique(occup_df)
 occup_df[, occupation_native := tolower(CARREIRA)]
 
 occup_df[, occupation_english := tolower(polyglotr::google_translate(text = occupation_native,
-                                                          source_language = "pt",
-                                                          target_language = "en"))]
+                                                                     source_language = "pt",
+                                                                     target_language = "en"))]
 ```
 
-```{r}
+```{r fake-harmonize-occupation, include = FALSE, echo = FALSE, message = FALSE, warning = FALSE}
+
+occup_df <- bra_hrmis[, c("CARREIRA", "CARGO")] |> unique()
+
+occup_df[["CARREIRA"]] <- occup_df[["CARGO"]]
+
+fulloccup_tbl <- qs::qread(here::here("spielplatz/data/occupations_tbl.qs"))
+
+occup_df <- 
+  fulloccup_tbl |>
+  # dplyr::semi_join(occup_df, by = c("CARREIRA", "CARGO")) |>
+  distinct() |>
+  dplyr::select(CARREIRA, CARGO, occupation_native, occupation_english) |> 
+  as.data.table()
+
+
+```
+
+
+
+```{r, message = FALSE, warning = FALSE}
 class_occup_df <- copy(occup_df)[,
   .(id = .I, text = occupation_english)
 ]
@@ -236,6 +243,9 @@ setnames(occup_df, "description", "occupation_isconame")
 #-----------------------------
 # 5. Bring classified occupations back to bra_hrmis (active only)
 #-----------------------------
+
+## Remove duplicates from occup_df before merging
+occup_df <- unique(occup_df, by = c("CARREIRA", "CARGO"))
 
 ## we perform a left join with data.table syntax for speed as the merging into 
 ## the hrmis dataset could be computationally intensive
@@ -359,8 +369,15 @@ bra_hrmis_contract <-
 Here is what our final data looks like:
 ```{r output-final-contract-harmonization, echo = FALSE}
 
+# Convert to UTF-8 to avoid encoding issues
+bra_hrmis_contract_display <- data.table::copy(bra_hrmis_contract)
+char_cols <- names(bra_hrmis_contract_display)[sapply(bra_hrmis_contract_display, is.character)]
+bra_hrmis_contract_display[, (char_cols) := lapply(.SD, function(x) {
+  iconv(x, to = "UTF-8", sub = "")
+}), .SDcols = char_cols]
+
 reactable(
-  head(bra_hrmis_contract, 100)
+  head(bra_hrmis_contract_display, 100)
 )
 
 ```

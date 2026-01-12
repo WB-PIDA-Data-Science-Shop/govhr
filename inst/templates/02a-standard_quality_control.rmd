@@ -19,6 +19,7 @@ library(gt)
 library(data.table)
 library(naniar)
 library(viridis)
+library(ggplot2)
 
 
 ```
