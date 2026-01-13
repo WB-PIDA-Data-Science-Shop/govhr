@@ -13,3 +13,4 @@
 ^vignettes/articles$
 ^README\.Rmd$
 ^\.vscode$
+^\.quarto$
