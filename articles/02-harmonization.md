@@ -66,16 +66,19 @@ system provided at the contract level. We randomly sample 5 percent of
 the original data. See the data below:
 
 ``` r
-bra_hrmis <- govhr::bra_hrmis |> 
-  sample_n(1e3)
+# bra_hrmis <- govhr::bra_hrmis |> 
+#   sample_n(1e3)
+bra_hrmis_display <- data.table::as.data.table(bra_hrmis)
+char_cols <- names(bra_hrmis_display)[sapply(bra_hrmis_display, is.character)]
+bra_hrmis_display[, (char_cols) := lapply(.SD, function(x) {
+  iconv(x, from = "latin1", to = "UTF-8", sub = "")
+}), .SDcols = char_cols]
 
-reactable(
-  head(bra_hrmis, 1e3)
-)
+reactable(head(bra_hrmis_display, 100))
 ```
 
 We illustrate the harmonization workflow using this dataset. `bra_hrmis`
-contains 1000 rows and 34 columns, covering covering demographic,
+contains 4295 rows and 34 columns, covering covering demographic,
 employment, establishmental, and payroll information for public sector
 personnels.
 
@@ -85,40 +88,40 @@ A quick glimpse of the dataset:
 glimpse(bra_hrmis)
 ```
 
-    ## Rows: 1,000
+    ## Rows: 4,295
     ## Columns: 34
-    ## $ ANO_PAGAMENTO                     <chr> "2017", "2014", "2018", "2016", "201…
+    ## $ ANO_PAGAMENTO                     <chr> "2014", "2014", "2014", "2014", "201…
     ## $ MES_REFERENCIA                    <chr> "9", "9", "9", "9", "9", "9", "9", "…
-    ## $ MATRICULA                         <chr> "168416", "148011", "172839", "13398…
-    ## $ CPF                               <chr> "e2569fcad6b26dd8af3daaaba2d36f08c2d…
-    ## $ DATA_NASCIMENTO                   <chr> "27921", "23614", "25382", "30950", …
-    ## $ GENERO                            <chr> "FEMININO", "MASCULINO", "FEMININO",…
-    ## $ ESCOLARIDADE                      <chr> NA, "SEGUNDO GRAU INCOMPLETO", NA, "…
-    ## $ DATA_ADMISSAO                     <chr> "42500", "41361", "42874", "39232", …
-    ## $ ADMINISTRACAO                     <chr> "DIRETA", "INDIRETA", "DIRETA", "DIR…
-    ## $ TIPO_CONTRATO                     <chr> "TEMPORÁRIO", "EXCLUSIVAMENTE COMISS…
-    ## $ GRUPO                             <chr> "EDUCAÇÃO", "OUTROS", "EDUCA«√O", "O…
-    ## $ COD_ORGAO                         <chr> "301800", "405501", "301800", "30120…
-    ## $ ORGAO                             <chr> "SECRETARIA DE ESTADO DA EDUCACAO", …
-    ## $ CARREIRA                          <chr> "PROFESSOR", "COORDENADOR SETORIAL -…
-    ## $ CARGO                             <chr> "MONITOR", "COORDENADOR SETORIAL - C…
-    ## $ JORNADA                           <chr> "0", "40", "0", "40", NA, "40", "40"…
-    ## $ CLASSE                            <chr> NA, NA, NA, NA, NA, NA, "C", "B", NA…
-    ## $ NIVEL                             <chr> NA, "CC0936", NA, "1TEN1", "AELCD40"…
-    ## $ DATA_ULT_PROGRESSAO               <chr> NA, NA, NA, "41785", NA, "41578", "4…
-    ## $ SALARIO_BASE                      <chr> "960", "3163.31", "R$1.320,00", "821…
-    ## $ CONTRIBUICAO_PREVIDENCIA          <chr> "76.8", "347.96", "R$105,60", "903.8…
-    ## $ ADICIONAL_TEMPO_SERVICO           <chr> "0", "0", "R$-", "0", NA, "R$-", "0"…
-    ## $ COMISSAO                          <chr> "0", "0", "R$-", "760", NA, "R$-", "…
-    ## $ ABONO_PERMANENCIA                 <chr> "0", "0", "R$-", "0", NA, "R$-", "0"…
-    ## $ DECISAO_JUDICIAL                  <chr> "0", "0", "R$-", "0", NA, "R$-", "0"…
-    ## $ DEMAIS_GRATIFICACOES_TRANSITORIAS <chr> "0", "0", "R$-", "0", NA, "R$-", "0"…
-    ## $ DEMAIS_GRATIFICACOES_CARREIRA     <chr> "0", "0", "R$-", "0", NA, "R$-", "0"…
-    ## $ SALARIO_BRUTO                     <chr> "960", "3163.31", "R$1.320,00", "897…
-    ## $ SALARIO_LIQUIDO                   <chr> "883.2", "2728.08", "R$1.214,40", "6…
+    ## $ MATRICULA                         <chr> "169", "195", "1489", "1841", "1914"…
+    ## $ CPF                               <chr> "4fc0943ff0226da7588097a78fb6d4f9f27…
+    ## $ DATA_NASCIMENTO                   <chr> "23064", "23650", "23268", "25615", …
+    ## $ GENERO                            <chr> "FEMININO", "MASCULINO", "MASCULINO"…
+    ## $ ESCOLARIDADE                      <chr> "SEGUNDO GRAU COMPLETO", "SEGUNDO GR…
+    ## $ DATA_ADMISSAO                     <chr> "31226", "31237", "30732", "34444", …
+    ## $ ADMINISTRACAO                     <chr> "INDIRETA", "DIRETA", "INDIRETA", "D…
+    ## $ TIPO_CONTRATO                     <chr> "EFETIVO COMISSIONADO", "EFETIVO COM…
+    ## $ GRUPO                             <chr> "OUTROS", "OUTROS", "OUTROS", "OUTRO…
+    ## $ COD_ORGAO                         <chr> "404799", "301101", "404799", "30120…
+    ## $ ORGAO                             <chr> "GABINETE CIVIL", "GABINETE CIVIL", …
+    ## $ CARREIRA                          <chr> "OFICIAL DE APOIO TECNICO", "AGENTE …
+    ## $ CARGO                             <chr> "OFICIAL DE APOIO TECNICO", "AGENTE …
+    ## $ JORNADA                           <chr> "30", "30", "40", "40", "40", "40", …
+    ## $ CLASSE                            <chr> "B", "D", NA, NA, NA, "C", "B", "D",…
+    ## $ NIVEL                             <chr> "ACMNB30", "IMMND40", "1SGT2", "2SGT…
+    ## $ DATA_ULT_PROGRESSAO               <chr> NA, "41283", "42247", "42337", "4251…
+    ## $ SALARIO_BASE                      <chr> "712.68", "1958.54", "4496.87", "401…
+    ## $ CONTRIBUICAO_PREVIDENCIA          <chr> "0", "0", "0", "0", "0", "0", "0", "…
+    ## $ ADICIONAL_TEMPO_SERVICO           <chr> "0", "0", "0", "0", "0", "0", "0", "…
+    ## $ COMISSAO                          <chr> "316.33999999999997", "316.339999999…
+    ## $ ABONO_PERMANENCIA                 <chr> "0", "0", "0", "0", "0", "0", "0", "…
+    ## $ DECISAO_JUDICIAL                  <chr> "0", "0", "0", "0", "0", "0", "0", "…
+    ## $ DEMAIS_GRATIFICACOES_TRANSITORIAS <chr> "11.32", "568.71", "0", "0", "0", "4…
+    ## $ DEMAIS_GRATIFICACOES_CARREIRA     <chr> "0", "0", "0", "0", "0", "0", "0", "…
+    ## $ SALARIO_BRUTO                     <chr> "1040.3399999999999", "2843.59", "44…
+    ## $ SALARIO_LIQUIDO                   <chr> "1040.3399999999999", "2780.56", "41…
     ## $ DATA_APOSENTADORIA                <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-    ## $ VALOR_BRUTO                       <chr> NA, NA, NA, NA, "3106.05", NA, NA, N…
-    ## $ VALOR_LIQUIDO                     <chr> NA, NA, NA, NA, "3106.05", NA, NA, N…
+    ## $ VALOR_BRUTO                       <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+    ## $ VALOR_LIQUIDO                     <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
     ## $ TIPO                              <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
     ## $ `TEMPO DE CONTRIBUIÇÃO`           <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
 
@@ -208,47 +211,49 @@ support translation. This can be applied as follows:
 ``` r
 raw_dictionary <- 
   tibble(raw_colnames_pt = colnames(govhr::bra_hrmis),
-         raw_colnames_eng = polyglotr::google_translate(colnames(bra_hrmis), "pt", "en"))
+         raw_colnames_eng = polyglotr::google_translate(colnames(bra_hrmis), 
+                            source_language = "pt", 
+                            target_language = "en"))
 
 kable(raw_dictionary)
 ```
 
-| raw_colnames_pt                   | raw_colnames_eng                  |
-|:----------------------------------|:----------------------------------|
-| ANO_PAGAMENTO                     | ANO_PAGAMENTO                     |
-| MES_REFERENCIA                    | MES_REFERENCIA                    |
-| MATRICULA                         | MATRÍCULA                         |
-| CPF                               | CPF                               |
-| DATA_NASCIMENTO                   | DATA_NASCIMENTO                   |
-| GENERO                            | GÊNERO                            |
-| ESCOLARIDADE                      | ESCOLARIDADE                      |
-| DATA_ADMISSAO                     | DATA_ADMISSÃO                     |
-| ADMINISTRACAO                     | ADMINISTRAÇÃO                     |
-| TIPO_CONTRATO                     | TIPO_CONTRATO                     |
-| GRUPO                             | GRUPO                             |
-| COD_ORGAO                         | COD_ORGAO                         |
-| ORGAO                             | ORGAO                             |
-| CARREIRA                          | CARREIRA                          |
-| CARGO                             | CARGA                             |
-| JORNADA                           | JORNADA                           |
-| CLASSE                            | CLASSE                            |
-| NIVEL                             | NÍVEL                             |
-| DATA_ULT_PROGRESSAO               | DATA_ULT_PROGRESSÃO               |
-| SALARIO_BASE                      | SALARIO_BASE                      |
-| CONTRIBUICAO_PREVIDENCIA          | CONTRIBUICAO_PREVIDÊNCIA          |
-| ADICIONAL_TEMPO_SERVICO           | ADICIONAL_TEMPO_SERVICO           |
-| COMISSAO                          | COMISSÃO                          |
-| ABONO_PERMANENCIA                 | ABONO_PERMANENCIA                 |
-| DECISAO_JUDICIAL                  | DECISAO_JUDICIAL                  |
-| DEMAIS_GRATIFICACOES_TRANSITORIAS | DEMAIS_GRATIFICACOES_TRANSITORIAS |
-| DEMAIS_GRATIFICACOES_CARREIRA     | DEMAIS_GRATIFICACOES_CARREIRA     |
-| SALARIO_BRUTO                     | SALARIO_BRUTO                     |
-| SALARIO_LIQUIDO                   | SALARIO_LIQUIDO                   |
-| DATA_APOSENTADORIA                | DATA_APOSENTADORIA                |
-| VALOR_BRUTO                       | VALOR_BRUTO                       |
-| VALOR_LIQUIDO                     | VALOR_LIQUIDO                     |
-| TIPO                              | TIPO                              |
-| TEMPO DE CONTRIBUIÇÃO             | TEMPO DE CONTRIBUIÇÃO             |
+| raw_colnames_pt                   | raw_colnames_eng              |
+|:----------------------------------|:------------------------------|
+| ANO_PAGAMENTO                     | PAYMENT_YEAR                  |
+| MES_REFERENCIA                    | MONTH_REFERENCE               |
+| MATRICULA                         | REGISTRATION                  |
+| CPF                               | CPF                           |
+| DATA_NASCIMENTO                   | BIRTH_DATE                    |
+| GENERO                            | GENDER                        |
+| ESCOLARIDADE                      | EDUCATION                     |
+| DATA_ADMISSAO                     | ADMISSION_DATE                |
+| ADMINISTRACAO                     | ADMINISTRATION                |
+| TIPO_CONTRATO                     | CONTRACT_TYPE                 |
+| GRUPO                             | GROUP                         |
+| COD_ORGAO                         | COD_ORGAO                     |
+| ORGAO                             | ORGAN                         |
+| CARREIRA                          | CAREER                        |
+| CARGO                             | POSITION                      |
+| JORNADA                           | JOURNEY                       |
+| CLASSE                            | CLASS                         |
+| NIVEL                             | LEVEL                         |
+| DATA_ULT_PROGRESSAO               | DATA_ULT_PROGRESSAO           |
+| SALARIO_BASE                      | BASE_SALARY                   |
+| CONTRIBUICAO_PREVIDENCIA          | CONTRIBUICAO_PREVIDENCIA      |
+| ADICIONAL_TEMPO_SERVICO           | ADDITIONAL_TIME_SERVICE       |
+| COMISSAO                          | COMMISSION                    |
+| ABONO_PERMANENCIA                 | ABONO_PERMANENCIA             |
+| DECISAO_JUDICIAL                  | JUDICIAL_DECISION             |
+| DEMAIS_GRATIFICACOES_TRANSITORIAS | OTHER_TRANSIT_GRATIFICATIONS  |
+| DEMAIS_GRATIFICACOES_CARREIRA     | OTHER_GRATIFICATIONS_CARREIRA |
+| SALARIO_BRUTO                     | GROSS_SALARY                  |
+| SALARIO_LIQUIDO                   | NET_SALARY                    |
+| DATA_APOSENTADORIA                | RETIREMENT_DATE               |
+| VALOR_BRUTO                       | GROSS_VALUE                   |
+| VALOR_LIQUIDO                     | NET_VALUE                     |
+| TIPO                              | TYPE                          |
+| TEMPO DE CONTRIBUIÇÃO             | CONTRIBUTION TIME             |
 
 The first step when handling any raw payroll dataset is to find the
 individual to identifies each countract for each time period unique. We
@@ -277,11 +282,11 @@ kable(cpf_summary)
 
 | ANO_PAGAMENTO | unique_cpf | nobs |
 |:--------------|-----------:|-----:|
-| 2017          |        207 |  209 |
-| 2014          |        182 |  185 |
-| 2018          |        208 |  210 |
-| 2016          |        193 |  195 |
-| 2015          |        198 |  201 |
+| 2014          |        715 |  748 |
+| 2015          |        752 |  786 |
+| 2016          |        875 |  920 |
+| 2017          |        866 |  911 |
+| 2018          |        887 |  930 |
 
 ``` r
 kable(mtr_summary)
@@ -289,11 +294,11 @@ kable(mtr_summary)
 
 | ANO_PAGAMENTO | unique_mtr | nobs |
 |:--------------|-----------:|-----:|
-| 2017          |        209 |  209 |
-| 2014          |        185 |  185 |
-| 2018          |        210 |  210 |
-| 2016          |        195 |  195 |
-| 2015          |        201 |  201 |
+| 2014          |        748 |  748 |
+| 2015          |        786 |  786 |
+| 2016          |        920 |  920 |
+| 2017          |        911 |  911 |
+| 2018          |        930 |  930 |
 
 This clearly shows that `MATRICULA` is the contract ID while `CPF` is
 possibly the identifier for the personnel, the latter will come in handy
@@ -327,8 +332,8 @@ occup_df <- unique(occup_df)
 occup_df[, occupation_native := tolower(CARREIRA)]
 
 occup_df[, occupation_english := tolower(polyglotr::google_translate(text = occupation_native,
-                                                          source_language = "pt",
-                                                          target_language = "en"))]
+                                                                     source_language = "pt",
+                                                                     target_language = "en"))]
 ```
 
 ``` r
@@ -343,11 +348,6 @@ class_occup_df <- classify_occupation(
   num_leaves = 1
 )
 ```
-
-    ## Warning in .maybe_warn_merge_dots(...): merge.data.table() received 1 unknown
-    ## keyword argument which will be ignored: [on]
-    ## Warning in .maybe_warn_merge_dots(...): merge.data.table() received 1 unknown
-    ## keyword argument which will be ignored: [on]
 
 ``` r
 #-----------------------------
@@ -377,6 +377,9 @@ setnames(occup_df, "description", "occupation_isconame")
 #-----------------------------
 # 5. Bring classified occupations back to bra_hrmis (active only)
 #-----------------------------
+
+## Remove duplicates from occup_df before merging
+occup_df <- unique(occup_df, by = c("CARREIRA", "CARGO"))
 
 ## we perform a left join with data.table syntax for speed as the merging into 
 ## the hrmis dataset could be computationally intensive
@@ -464,12 +467,12 @@ kable(contract_dict)
 
 | TIPO_CONTRATO               | contract_type |
 |:----------------------------|:--------------|
-| TEMPORÁRIO                  | short-term    |
-| EXCLUSIVAMENTE COMISSIONADO | permanent     |
-| TEMPOR¡RIO                  | permanent     |
-| EFETIVO COMISSIONADO        | open-term     |
-| INATIVO                     | short-term    |
-| EFETIVO                     | inactive      |
+| EFETIVO COMISSIONADO        | short-term    |
+| EFETIVO                     | permanent     |
+| TEMPORÁRIO                  | permanent     |
+| EXCLUSIVAMENTE COMISSIONADO | open-term     |
+| TEMPOR¡RIO                  | short-term    |
+| INATIVO                     | inactive      |
 | PENSIONISTA                 | retired       |
 
 Let’s do a data.table join of the `contract_dict` into the `bra_hrmis`
@@ -526,7 +529,7 @@ bra_hrmis |>
   uniqueN()
 ```
 
-This tells us that we have 991 unique personnel_id-est_id-refdate
+This tells us that we have 4176 unique personnel_id-est_id-refdate
 combinations in the entire dataset. The goal is to ensure that once all
 the other variables of the personnel module are added. The size of the
 personnel module remains the same. As we did, in the contract module, we
