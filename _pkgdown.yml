@@ -2,6 +2,7 @@ url: https://wb-pida-data-science-shop.github.io/govhr/
 template:
   bootstrap: 5
   logo: man/figures/logo.png
+  assets: inst/templates/quality_control_report.html
 authors:
   "Ifeanyi Edochie":
     href: https://github.com/ifeanyi588
