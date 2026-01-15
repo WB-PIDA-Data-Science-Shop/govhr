@@ -21,6 +21,17 @@ library(naniar)
 library(viridis)
 library(ggplot2)
 
+# Helper function to check if columns exist
+has_cols <- function(dt, cols) {
+  if (is.null(dt)) return(FALSE)
+  all(cols %in% names(dt))
+}
+
+# Helper to safely get data or return empty
+safe_dt <- function(dt) {
+  if (is.null(dt)) return(data.table())
+  as.data.table(dt)
+}
 
 ```
 
@@ -105,6 +116,11 @@ contract_dt <- as.data.table(params$contract_dt)
 personnel_dt <- if (!is.null(params$personnel_dt)) as.data.table(params$personnel_dt) else NULL
 est_dt <- if (!is.null(params$est_dt)) as.data.table(params$est_dt) else NULL
 
+# Check if ref_date exists in any module
+if (!has_cols(contract_dt, "ref_date") && !has_cols(personnel_dt, "ref_date") && !has_cols(est_dt, "ref_date")) {
+  cat("⚠ No temporal coverage data available (ref_date column missing in all modules)\n")
+} else {
+
 # Contract observations by reference date
 contract_by_date <- if ("ref_date" %in% names(contract_dt)) {
   contract_dt[, .(n_obs = .N, module = "Contract"), by = ref_date][order(ref_date)]
@@ -147,6 +163,8 @@ ggplot(coverage_dt, aes(x = factor(ref_date), y = n_obs, color = module, group =
     legend.position = "top",
     panel.grid.minor = element_blank()
   )
+
+}
 
 ```
 
@@ -375,7 +393,11 @@ ggplot(plot_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
 
 ```{r missingoccupation, echo=FALSE, warning=FALSE, message=FALSE, fig.width=12, fig.height=15}
 
-miss_occ <- params$qc_obj$missingness$by_occupation
+miss_occ <- safe_dt(params$qc_obj$missingness$by_occupation)
+
+if (!has_cols(miss_occ, "occupation_native")) {
+  cat("⚠ Cannot display missingness by occupation (occupation_native column missing)\n")
+} else {
 
 # pick top occupations by missingness severity
 top_occ <- miss_occ[
@@ -397,13 +419,19 @@ ggplot(plot_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
   theme_minimal(base_size = 11) +
   theme(axis.text.y = element_text(size = 9))
 
+}
+
 ```
 
 
 
 ```{r missingisco, echo=FALSE, warning=FALSE, message=FALSE, fig.width=12, fig.height=15}
 
-miss_isco <- params$qc_obj$missingness$by_isco
+miss_isco <- safe_dt(params$qc_obj$missingness$by_isco)
+
+if (!has_cols(miss_isco, "occupation_isconame")) {
+  cat("⚠ Cannot display missingness by ISCO (occupation_isconame column missing)\n")
+} else {
 
 top_isco <- miss_isco[
   , .(mean_missing = mean(pct_missing)), by = occupation_isconame
@@ -424,12 +452,18 @@ ggplot(plot_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
   theme_minimal(base_size = 11) +
   theme(axis.text.y = element_text(size = 9))
 
+}
+
 ```
 
 
 ```{r missingrefdate, echo=FALSE, warning=FALSE, message=FALSE, fig.width=10, fig.height=6}
 
-miss_ref <- params$qc_obj$missingness$by_ref
+miss_ref <- safe_dt(params$qc_obj$missingness$by_ref)
+
+if (!has_cols(miss_ref, "ref_date")) {
+  cat("⚠ Cannot display missingness heatmap by reference date (ref_date column missing)\n")
+} else {
   
 ggplot(miss_ref, aes(x = factor(lubridate::year(ref_date)), y = variable, fill = pct_missing)) +
   geom_tile(color = "white", linewidth = 0.3) +
@@ -442,13 +476,19 @@ ggplot(miss_ref, aes(x = factor(lubridate::year(ref_date)), y = variable, fill =
   ) +
   theme_minimal(base_size = 12)
 
+}
+
 ```
 
 
 
 ```{r missingestablishment, echo=FALSE, warning=FALSE, message=FALSE, fig.width=12, fig.height=15}
 
-miss_est <- params$qc_obj$missingness$by_est
+miss_est <- safe_dt(params$qc_obj$missingness$by_est)
+
+if (!has_cols(miss_est, "est_id")) {
+  cat("⚠ Cannot display missingness by establishment (est_id column missing)\n")
+} else {
 
 top_est <- miss_est[
   , .(mean_missing = mean(pct_missing)), by = est_id
@@ -469,6 +509,8 @@ ggplot(plot_dt, aes(x = reorder(variable, pct_missing), y = pct_missing)) +
   theme_minimal(base_size = 10) +
   theme(axis.text.y = element_text(size = 8))
 
+}
+
 ```
 
 ### Volatility Analysis
@@ -487,6 +529,11 @@ The heatmaps below show volatility metrics for the top 50 contracts with the hig
 
 ```{r salary-volatility, warning = FALSE, message = FALSE, echo = FALSE, fig.width = 14, fig.height = 18}
 
+salary_vol <- safe_dt(params$qc_obj$volatility$salary_vol)
+
+if (!has_cols(salary_vol, c("contract_id", "ref_date", "rolling_cv"))) {
+  cat("⚠ Cannot display salary volatility (required columns missing from salary_vol)\n")
+} else {
 
 prepare_topcontracts <- function(vol_dt,
                                  vol_col = "rolling_cv",
@@ -533,7 +580,7 @@ prepare_topcontracts <- function(vol_dt,
   return(result_dt[, ..return_cols][])
 }
 
-volcontracts_dt <- prepare_topcontracts(vol_dt = params$qc_obj$volatility$salary_vol,
+volcontracts_dt <- prepare_topcontracts(vol_dt = salary_vol,
                                         vol_col = "rolling_cv",
                                         agg_fn = max,
                                         n_top = 50,
@@ -568,15 +615,21 @@ ggplot(volcontracts_dt, aes(x = factor(ref_date), y = contract_id, fill = rollin
     panel.grid = element_blank()
   )
 
+}
+
 ```
 
 #### Contract Count Volatility
 ```{r contractcount-volatility, warning = FALSE, message = FALSE, echo = FALSE, fig.width=12, fig.height=15}
 
+ctrcount_vol <- safe_dt(params$qc_obj$volatility$ctrcount_vol)
 
+if (!has_cols(ctrcount_vol, c("est_id", "ref_date", "pct_change"))) {
+  cat("⚠ Cannot display contract count volatility (required columns missing from ctrcount_vol)\n")
+} else {
 
 ## for the percent change volatility of the contract count
-volctrcounts_dt <- prepare_topcontracts(vol_dt = params$qc_obj$volatility$ctrcount_vol,
+volctrcounts_dt <- prepare_topcontracts(vol_dt = ctrcount_vol,
                                         vol_col = "pct_change",
                                         agg_fn = max,
                                         n_top = 50,
@@ -609,6 +662,7 @@ ggplot(volctrcounts_dt, aes(x = factor(ref_date), y = est_id, fill = pct_change)
     panel.grid = element_blank()
   )
 
+}
 
 ```
 
@@ -616,7 +670,13 @@ ggplot(volctrcounts_dt, aes(x = factor(ref_date), y = est_id, fill = pct_change)
 #### Contract Level Volatility in Hours Worked
 ```{r, hours-volatility, warning = FALSE, message = FALSE, echo = FALSE, fig.width=12, fig.height=15}
 
-whcontracts_dt <- prepare_topcontracts(vol_dt = params$qc_obj$volatility$workhours_vol,
+workhours_vol <- safe_dt(params$qc_obj$volatility$workhours_vol)
+
+if (!has_cols(workhours_vol, c("contract_id", "ref_date", "rolling_cv"))) {
+  cat("⚠ Cannot display work hours volatility (required columns missing from workhours_vol)\n")
+} else {
+
+whcontracts_dt <- prepare_topcontracts(vol_dt = workhours_vol,
                                         vol_col = "rolling_cv",
                                         agg_fn = max,
                                         n_top = 50,
@@ -649,6 +709,8 @@ ggplot(whcontracts_dt, aes(x = factor(ref_date), y = contract_id, fill = rolling
     strip.text = element_text(face = "bold", size = 10),
     panel.grid = element_blank()
   )
+
+}
 
 ```
 

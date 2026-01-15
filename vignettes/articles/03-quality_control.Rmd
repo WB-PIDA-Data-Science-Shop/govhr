@@ -26,30 +26,5 @@ generate_qc_report(
 )
 ```
 
-```{r actually-generate, echo = FALSE, results = 'hide', message = FALSE, warning = FALSE}
-# Actually generate the report for the pkgdown site
-tryCatch({
-  # Get the output directory where this HTML will be rendered
-  output_file <- file.path(getwd(), "quality_control_report.html")
-  
-  generate_qc_report(
-    contract_dt = bra_hrmis_contract,
-    personnel_dt = bra_hrmis_personnel,
-    est_dt = bra_hrmis_est,
-    output = output_file
-  )
-  
-  # Verify the file was created
-  if (file.exists(output_file)) {
-    message("✓ Quality control report generated at: ", output_file)
-  } else {
-    message("✗ Failed to create report at: ", output_file)
-  }
-}, error = function(e) {
-  message("✗ Report generation error: ", e$message)
-})
-```
 
----
-
-**[View an example Quality Control Report →](quality_control_report.html)**
+**[View an example Quality Control Report →](https://rpubs.com/ifeanyi588/bra_toy_quality_control)**
