@@ -19,7 +19,5 @@ generate_qc_report(
 )
 ```
 
-------------------------------------------------------------------------
-
 **[View an example Quality Control Report
-→](https://wb-pida-data-science-shop.github.io/govhr/articles/quality_control_report.md)**
+→](https://rpubs.com/ifeanyi588/bra_toy_quality_control)**

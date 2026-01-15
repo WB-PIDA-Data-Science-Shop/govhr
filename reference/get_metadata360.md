@@ -35,56 +35,56 @@ get_metadata360("WB_MPO")
 #> 
 #> $value
 #>    @search.score                        id                                 idno
-#> 1       34.15226   META_WB_MPO_GGBALPRIMCD 7a5b5994-5d58-4f84-b9dd-745d47d41b94
-#> 2       28.80322 META_WB_MPO_NECONPRVTPCKN c06fbf71-7e41-43f9-ac09-6a887657b2c0
-#> 3       28.31909   META_WB_MPO_NYGDPMKTPCN e29d21ff-df06-4fd1-a274-c63400006a80
-#> 4       28.31909  META_WB_MPO_NYGDPMKTPKNZ 879b7497-468a-4425-ab81-a3d31e71e9a8
-#> 5       28.31909  META_WB_MPO_NEEXPGNFSKDZ a7c87601-8870-4693-9fbd-74bfcd16f1d8
-#> 6       28.31909  META_WB_MPO_NEIMPGNFSKDZ d354b7d6-84c9-48aa-bc3d-ca40a15a9a5f
-#> 7       28.06573   META_WB_MPO_GGEXPINTPCN 3a1a10f1-9576-4864-b37f-7472903343b3
-#> 8       28.06573   META_WB_MPO_NYGDPMKTPCD b40ec5aa-46b4-4236-8208-75ed056fc0b4
-#> 9       27.81039   META_WB_MPO_GGBALOVRLCN e9e68717-89bf-43c6-b6e9-4f6560d95a11
-#> 10      27.81039   META_WB_MPO_GGBALOVRLCD 859e8798-f252-4835-88b8-641859334fc2
-#> 11      27.81039  META_WB_MPO_NEEXPGNFSCNZ 109693e4-17a7-4603-b85b-df209de73ea1
-#> 12      27.40170          META_WB_MPO_POV3 f726b67f-e51c-4467-9937-d79e3e3edcd2
-#> 13      27.37987   META_WB_MPO_NVAGRTOTLKD 74a14a60-10a1-4d42-98c2-e00f86029178
-#> 14      27.37987  META_WB_MPO_NYGDPMKTPCNZ 76f9fe15-2eb4-48e9-9657-a3db2667ca3b
-#> 15      27.37987   META_WB_MPO_BNCABFUNDCD c51eaa5e-e1e7-40de-8eef-df8ab1f0e3de
-#> 16      27.36082   META_WB_MPO_FPCPITOTLXN 4c35692b-c581-48f1-b15c-a4aa91769a9b
-#> 17      27.36082   META_WB_MPO_NEIMPGNFSKD 43dde719-fb4e-4354-9754-65fb50a851c2
-#> 18      27.20462          META_WB_MPO_POV2 038f91a4-373e-4518-8f30-c6fede87ce8e
-#> 19      26.89935   META_WB_MPO_NYGDPMKTPKD 0dfbb467-a830-41bc-8f8f-c7233d89e91b
-#> 20      26.84857  META_WB_MPO_NEGDIFTOTKN_ 7a0df92c-6e6e-4c86-8e81-c35ed6f030cd
-#> 21      26.80057  META_WB_MPO_NECONGOVTCNZ 5c2773ca-da49-4900-91c7-58d713a207d7
-#> 22      26.80057  META_WB_MPO_FPCPITOTLXNZ 439d46fe-8e6a-48c2-a3b0-93dbcebba565
-#> 23      26.80057   META_WB_MPO_NEEXPGNFSCN 93b706e8-25a0-4151-89ba-e6e19c1029f7
-#> 24      26.80057   META_WB_MPO_NEEXPGNFSKN 06aca565-f972-4487-9411-ddbf850e5196
-#> 25      26.30594   META_WB_MPO_GGEXPTOTLCD 045d144c-8dee-428d-bcc0-b069bfaf2f79
-#> 26      26.30594  META_WB_MPO_NEEXPGNFSKNZ bd4b43b7-cb3d-4724-bcea-bffb1746c028
-#> 27      26.02165          META_WB_MPO_POV1 af08c7a1-873d-415a-8cdb-2656b859e9a6
-#> 28      25.76176                    WB_MPO 16ffd22e-c3b6-477d-bb16-45c423263eb0
-#> 29      25.47332  META_WB_MPO_BNCABFUNDCD_ b36587c9-dac3-4ec3-ad20-7a10b0905c95
-#> 30      25.13176   META_WB_MPO_NVAGRTOTLCN 8c60b15a-e28e-4b07-8344-4ca68e458aa9
-#> 31      25.13176  META_WB_MPO_NYGDPMKTPKDZ d95500b3-c691-4e2f-a690-fb9c1dbdedde
-#> 32      25.13176   META_WB_MPO_NYGDPMKTPKN 55f83956-5506-4c1a-8426-8b98e708557d
-#> 33      25.13176   META_WB_MPO_NEEXPGNFSKD c914debb-6d24-48c7-a928-e1af4c388b3c
-#> 34      25.13176  META_WB_MPO_NEIMPGNFSCNZ 76838c6d-d439-44ce-9cb4-7df10159534d
-#> 35      25.12666   META_WB_MPO_GGDBTTOTLCD 150f9817-21ce-425b-9e0a-84a126800234
-#> 36      25.12666   META_WB_MPO_NECONGOVTCN d414ecc7-c477-4328-91c6-759f3f0fd8cf
-#> 37      25.12666  META_WB_MPO_NEGDIFTOTKDZ c6fdd358-391e-4076-92f2-097bbbd7fc92
-#> 38      25.12666  META_WB_MPO_NVAGRTOTLCNZ d3697223-3152-4253-bfe9-42c6740011cd
-#> 39      25.12666   META_WB_MPO_BFCAFTOTLCD b4d324f5-75bc-47d2-aa83-93362aa9d539
-#> 40      24.99714   META_WB_MPO_GGBALPRIMCN 7ad2c2ae-4685-4249-9230-85686a409847
-#> 41      24.99714   META_WB_MPO_GGREVTOTLCD 2a12a3d3-d968-4294-8ebe-abdf37d48f1a
-#> 42      24.99714   META_WB_MPO_BFCAFFFDICD 8f5c7b62-ce7a-49b8-92c3-fc1fe7e64494
-#> 43      24.99714   META_WB_MPO_NEIMPGNFSCN fdf4269f-a74c-492e-8839-8c08097f578c
-#> 44      24.93282  META_WB_MPO_GGBALOVRLCD_ d31c7795-6246-4103-832d-e260cd0ae079
-#> 45      23.88333   META_WB_MPO_NECONGOVTKD 59bb914a-e4e7-4d35-9ff3-590327aa9aa2
-#> 46      23.88333  META_WB_MPO_NECONPRVTKNZ ba2095e3-b381-4ed2-b27b-3e31cbf4574c
-#> 47      23.88333  META_WB_MPO_NEGDIFTOTCNZ b5d9c413-61e4-4e32-9a37-3bc7b1fc0eb7
-#> 48      23.80015  META_WB_MPO_BFCAFFFDICD_ b25ad081-cc00-4bba-a959-74d663ce52d0
-#> 49      23.73707  META_WB_MPO_GGBALPRIMCD_ e3c845e8-8a13-472e-8372-4285899ffa32
-#> 50      23.25812  META_WB_MPO_NVSRVTOTLKNZ e5dd7da0-0355-46e4-8a59-309fe5e9a4d6
+#> 1       34.01855   META_WB_MPO_GGBALPRIMCD 7a5b5994-5d58-4f84-b9dd-745d47d41b94
+#> 2       28.68358 META_WB_MPO_NECONPRVTPCKN c06fbf71-7e41-43f9-ac09-6a887657b2c0
+#> 3       28.53262   META_WB_MPO_NYGDPMKTPCN e29d21ff-df06-4fd1-a274-c63400006a80
+#> 4       28.53262  META_WB_MPO_NYGDPMKTPKNZ 879b7497-468a-4425-ab81-a3d31e71e9a8
+#> 5       28.53262  META_WB_MPO_NEEXPGNFSKDZ a7c87601-8870-4693-9fbd-74bfcd16f1d8
+#> 6       28.53262  META_WB_MPO_NEIMPGNFSKDZ d354b7d6-84c9-48aa-bc3d-ca40a15a9a5f
+#> 7       28.29303   META_WB_MPO_GGEXPINTPCN 3a1a10f1-9576-4864-b37f-7472903343b3
+#> 8       28.29303   META_WB_MPO_NYGDPMKTPCD b40ec5aa-46b4-4236-8208-75ed056fc0b4
+#> 9       28.10534   META_WB_MPO_GGBALOVRLCN e9e68717-89bf-43c6-b6e9-4f6560d95a11
+#> 10      28.10534   META_WB_MPO_GGBALOVRLCD 859e8798-f252-4835-88b8-641859334fc2
+#> 11      28.10534  META_WB_MPO_NEEXPGNFSCNZ 109693e4-17a7-4603-b85b-df209de73ea1
+#> 12      27.93841          META_WB_MPO_POV3 f726b67f-e51c-4467-9937-d79e3e3edcd2
+#> 13      27.93314   META_WB_MPO_NYGDPMKTPKD 0dfbb467-a830-41bc-8f8f-c7233d89e91b
+#> 14      27.86272   META_WB_MPO_FPCPITOTLXN 4c35692b-c581-48f1-b15c-a4aa91769a9b
+#> 15      27.86272   META_WB_MPO_NEIMPGNFSKD 43dde719-fb4e-4354-9754-65fb50a851c2
+#> 16      27.76708   META_WB_MPO_NVAGRTOTLKD 74a14a60-10a1-4d42-98c2-e00f86029178
+#> 17      27.76708  META_WB_MPO_NYGDPMKTPCNZ 76f9fe15-2eb4-48e9-9657-a3db2667ca3b
+#> 18      27.76708   META_WB_MPO_BNCABFUNDCD c51eaa5e-e1e7-40de-8eef-df8ab1f0e3de
+#> 19      27.41608          META_WB_MPO_POV2 038f91a4-373e-4518-8f30-c6fede87ce8e
+#> 20      27.05135  META_WB_MPO_NEGDIFTOTKN_ 7a0df92c-6e6e-4c86-8e81-c35ed6f030cd
+#> 21      26.98332          META_WB_MPO_POV1 af08c7a1-873d-415a-8cdb-2656b859e9a6
+#> 22      26.80057  META_WB_MPO_NECONGOVTCNZ 5c2773ca-da49-4900-91c7-58d713a207d7
+#> 23      26.80057  META_WB_MPO_FPCPITOTLXNZ 439d46fe-8e6a-48c2-a3b0-93dbcebba565
+#> 24      26.80057   META_WB_MPO_NEEXPGNFSCN 93b706e8-25a0-4151-89ba-e6e19c1029f7
+#> 25      26.80057   META_WB_MPO_NEEXPGNFSKN 06aca565-f972-4487-9411-ddbf850e5196
+#> 26      26.46394  META_WB_MPO_BNCABFUNDCD_ b36587c9-dac3-4ec3-ad20-7a10b0905c95
+#> 27      26.30572   META_WB_MPO_GGEXPTOTLCD 045d144c-8dee-428d-bcc0-b069bfaf2f79
+#> 28      26.30572  META_WB_MPO_NEEXPGNFSKNZ bd4b43b7-cb3d-4724-bcea-bffb1746c028
+#> 29      25.76176                    WB_MPO 16ffd22e-c3b6-477d-bb16-45c423263eb0
+#> 30      25.11876   META_WB_MPO_BFCAFTOTLCD b4d324f5-75bc-47d2-aa83-93362aa9d539
+#> 31      25.11876   META_WB_MPO_GGDBTTOTLCD 150f9817-21ce-425b-9e0a-84a126800234
+#> 32      25.11876   META_WB_MPO_NECONGOVTCN d414ecc7-c477-4328-91c6-759f3f0fd8cf
+#> 33      25.11876  META_WB_MPO_NEGDIFTOTKDZ c6fdd358-391e-4076-92f2-097bbbd7fc92
+#> 34      25.11876  META_WB_MPO_NVAGRTOTLCNZ d3697223-3152-4253-bfe9-42c6740011cd
+#> 35      25.08326   META_WB_MPO_NVAGRTOTLCN 8c60b15a-e28e-4b07-8344-4ca68e458aa9
+#> 36      25.08326  META_WB_MPO_NYGDPMKTPKDZ d95500b3-c691-4e2f-a690-fb9c1dbdedde
+#> 37      25.08326   META_WB_MPO_NYGDPMKTPKN 55f83956-5506-4c1a-8426-8b98e708557d
+#> 38      25.08326   META_WB_MPO_NEEXPGNFSKD c914debb-6d24-48c7-a928-e1af4c388b3c
+#> 39      25.08326  META_WB_MPO_NEIMPGNFSCNZ 76838c6d-d439-44ce-9cb4-7df10159534d
+#> 40      24.99097   META_WB_MPO_BFCAFFFDICD 8f5c7b62-ce7a-49b8-92c3-fc1fe7e64494
+#> 41      24.99097   META_WB_MPO_GGBALPRIMCN 7ad2c2ae-4685-4249-9230-85686a409847
+#> 42      24.99097   META_WB_MPO_GGREVTOTLCD 2a12a3d3-d968-4294-8ebe-abdf37d48f1a
+#> 43      24.99097   META_WB_MPO_NEIMPGNFSCN fdf4269f-a74c-492e-8839-8c08097f578c
+#> 44      24.93223  META_WB_MPO_GGBALOVRLCD_ d31c7795-6246-4103-832d-e260cd0ae079
+#> 45      24.16612   META_WB_MPO_NECONGOVTKD 59bb914a-e4e7-4d35-9ff3-590327aa9aa2
+#> 46      24.16612  META_WB_MPO_NECONPRVTKNZ ba2095e3-b381-4ed2-b27b-3e31cbf4574c
+#> 47      24.16612  META_WB_MPO_NEGDIFTOTCNZ b5d9c413-61e4-4e32-9a37-3bc7b1fc0eb7
+#> 48      23.75529  META_WB_MPO_BFCAFFFDICD_ b25ad081-cc00-4bba-a959-74d663ce52d0
+#> 49      23.73188  META_WB_MPO_GGBALPRIMCD_ e3c845e8-8a13-472e-8372-4285899ffa32
+#> 50      23.66232  META_WB_MPO_NEGDIFTOTKNZ 5c77c602-1c9d-418e-ba72-b2303208dd8e
 #>         type    subtype disaggregation_types isDelete cfPath doc_type
 #> 1  indicator timeseries              Vintage       NA     NA       NA
 #> 2  indicator timeseries              Vintage       NA     NA       NA
@@ -113,8 +113,8 @@ get_metadata360("WB_MPO")
 #> 25 indicator timeseries              Vintage       NA     NA       NA
 #> 26 indicator timeseries              Vintage       NA     NA       NA
 #> 27 indicator timeseries              Vintage       NA     NA       NA
-#> 28   dataset       <NA>                            NA     NA       NA
-#> 29 indicator timeseries              Vintage       NA     NA       NA
+#> 28 indicator timeseries              Vintage       NA     NA       NA
+#> 29   dataset       <NA>                            NA     NA       NA
 #> 30 indicator timeseries              Vintage       NA     NA       NA
 #> 31 indicator timeseries              Vintage       NA     NA       NA
 #> 32 indicator timeseries              Vintage       NA     NA       NA
@@ -125,9 +125,9 @@ get_metadata360("WB_MPO")
 #> 37 indicator timeseries              Vintage       NA     NA       NA
 #> 38 indicator timeseries              Vintage       NA     NA       NA
 #> 39 indicator timeseries              Vintage       NA     NA       NA
-#> 40 indicator timeseries              Vintage       NA     NA       NA
+#> 40 indicator timeseries                            NA     NA       NA
 #> 41 indicator timeseries              Vintage       NA     NA       NA
-#> 42 indicator timeseries                            NA     NA       NA
+#> 42 indicator timeseries              Vintage       NA     NA       NA
 #> 43 indicator timeseries              Vintage       NA     NA       NA
 #> 44 indicator timeseries              Vintage       NA     NA       NA
 #> 45 indicator timeseries              Vintage       NA     NA       NA
@@ -151,33 +151,33 @@ get_metadata360("WB_MPO")
 #> 12      pie, stackedBar                        PU                    Public
 #> 13      pie, stackedBar                        PU                    Public
 #> 14      pie, stackedBar                        PU                    Public
-#> 15      pie, stackedBar                        PU                    Public
+#> 15      stackedBar, pie                        PU                    Public
 #> 16      pie, stackedBar                        PU                    Public
-#> 17      stackedBar, pie                        PU                    Public
+#> 17      pie, stackedBar                        PU                    Public
 #> 18      pie, stackedBar                        PU                    Public
 #> 19      pie, stackedBar                        PU                    Public
 #> 20      pie, stackedBar                        PU                    Public
-#> 21      stackedBar, pie                        PU                    Public
+#> 21      pie, stackedBar                        PU                    Public
 #> 22      stackedBar, pie                        PU                    Public
-#> 23 map, pie, stackedBar                        PU                    Public
+#> 23      stackedBar, pie                        PU                    Public
 #> 24 map, pie, stackedBar                        PU                    Public
-#> 25      pie, stackedBar                        PU                    Public
+#> 25 map, pie, stackedBar                        PU                    Public
 #> 26      pie, stackedBar                        PU                    Public
 #> 27      pie, stackedBar                        PU                    Public
-#> 28                 <NA>                        PU                    Public
-#> 29      pie, stackedBar                        PU                    Public
-#> 30 map, pie, stackedBar                        PU                    Public
-#> 31      pie, stackedBar                        PU                    Public
-#> 32 map, pie, stackedBar                        PU                    Public
+#> 28      pie, stackedBar                        PU                    Public
+#> 29                 <NA>                        PU                    Public
+#> 30      stackedBar, pie                        PU                    Public
+#> 31      stackedBar, pie                        PU                    Public
+#> 32 map, stackedBar, pie                        PU                    Public
 #> 33      pie, stackedBar                        PU                    Public
-#> 34      stackedBar, pie                        PU                    Public
-#> 35      stackedBar, pie                        PU                    Public
-#> 36 map, stackedBar, pie                        PU                    Public
-#> 37      pie, stackedBar                        PU                    Public
+#> 34      pie, stackedBar                        PU                    Public
+#> 35 map, pie, stackedBar                        PU                    Public
+#> 36      pie, stackedBar                        PU                    Public
+#> 37 map, pie, stackedBar                        PU                    Public
 #> 38      pie, stackedBar                        PU                    Public
 #> 39      stackedBar, pie                        PU                    Public
-#> 40 map, pie, stackedBar                        PU                    Public
-#> 41      pie, stackedBar                        PU                    Public
+#> 40      pie, stackedBar                        PU                    Public
+#> 41 map, pie, stackedBar                        PU                    Public
 #> 42      pie, stackedBar                        PU                    Public
 #> 43 map, stackedBar, pie                        PU                    Public
 #> 44      stackedBar, pie                        PU                    Public
@@ -215,8 +215,8 @@ get_metadata360("WB_MPO")
 #> 25  DATA360         1.2
 #> 26  DATA360         1.2
 #> 27  DATA360         1.2
-#> 28     <NA>        <NA>
-#> 29  DATA360         1.2
+#> 28  DATA360         1.2
+#> 29     <NA>        <NA>
 #> 30  DATA360         1.2
 #> 31  DATA360         1.2
 #> 32  DATA360         1.2
@@ -266,8 +266,8 @@ get_metadata360("WB_MPO")
 #> 25 DATA_SOURCE, FREQ, REF_AREA, INDICATOR, SEX, AGE, URBANISATION, UNIT_MEASURE, COMP_BREAKDOWN_1, COMP_BREAKDOWN_2, COMP_BREAKDOWN_3, AGG_METHOD, UNIT_TYPE, DECIMALS, DATABASE_ID, TIME_FORMAT, UNIT_MULT, OBS_STATUS, OBS_CONF
 #> 26 DATA_SOURCE, FREQ, REF_AREA, INDICATOR, SEX, AGE, URBANISATION, UNIT_MEASURE, COMP_BREAKDOWN_1, COMP_BREAKDOWN_2, COMP_BREAKDOWN_3, AGG_METHOD, UNIT_TYPE, DECIMALS, DATABASE_ID, TIME_FORMAT, UNIT_MULT, OBS_STATUS, OBS_CONF
 #> 27 DATA_SOURCE, FREQ, REF_AREA, INDICATOR, SEX, AGE, URBANISATION, UNIT_MEASURE, COMP_BREAKDOWN_1, COMP_BREAKDOWN_2, COMP_BREAKDOWN_3, AGG_METHOD, UNIT_TYPE, DECIMALS, DATABASE_ID, TIME_FORMAT, UNIT_MULT, OBS_STATUS, OBS_CONF
-#> 28                                                                                                                                                                                                                               
-#> 29 DATA_SOURCE, FREQ, REF_AREA, INDICATOR, SEX, AGE, URBANISATION, UNIT_MEASURE, COMP_BREAKDOWN_1, COMP_BREAKDOWN_2, COMP_BREAKDOWN_3, AGG_METHOD, UNIT_TYPE, DECIMALS, DATABASE_ID, TIME_FORMAT, UNIT_MULT, OBS_STATUS, OBS_CONF
+#> 28 DATA_SOURCE, FREQ, REF_AREA, INDICATOR, SEX, AGE, URBANISATION, UNIT_MEASURE, COMP_BREAKDOWN_1, COMP_BREAKDOWN_2, COMP_BREAKDOWN_3, AGG_METHOD, UNIT_TYPE, DECIMALS, DATABASE_ID, TIME_FORMAT, UNIT_MULT, OBS_STATUS, OBS_CONF
+#> 29                                                                                                                                                                                                                               
 #> 30 DATA_SOURCE, FREQ, REF_AREA, INDICATOR, SEX, AGE, URBANISATION, UNIT_MEASURE, COMP_BREAKDOWN_1, COMP_BREAKDOWN_2, COMP_BREAKDOWN_3, AGG_METHOD, UNIT_TYPE, DECIMALS, DATABASE_ID, TIME_FORMAT, UNIT_MULT, OBS_STATUS, OBS_CONF
 #> 31 DATA_SOURCE, FREQ, REF_AREA, INDICATOR, SEX, AGE, URBANISATION, UNIT_MEASURE, COMP_BREAKDOWN_1, COMP_BREAKDOWN_2, COMP_BREAKDOWN_3, AGG_METHOD, UNIT_TYPE, DECIMALS, DATABASE_ID, TIME_FORMAT, UNIT_MULT, OBS_STATUS, OBS_CONF
 #> 32 DATA_SOURCE, FREQ, REF_AREA, INDICATOR, SEX, AGE, URBANISATION, UNIT_MEASURE, COMP_BREAKDOWN_1, COMP_BREAKDOWN_2, COMP_BREAKDOWN_3, AGG_METHOD, UNIT_TYPE, DECIMALS, DATABASE_ID, TIME_FORMAT, UNIT_MULT, OBS_STATUS, OBS_CONF
@@ -353,36 +353,36 @@ get_metadata360("WB_MPO")
 #> 10                                      Metadata for Overall Fiscal Balance, Value, Millions USD
 #> 11                                      Metadata for GNFS Exports, Value, Millions LCU, % change
 #> 12                             Metadata for Upper middle-income poverty rate ($6.85 in 2017 PPP)
-#> 13                                      Metadata for Agriculture, Volume, Millions 2015 real USD
-#> 14            Metadata for Gross Domestic Product at Market Price, Value, Millions LCU, % change
-#> 15                                     Metadata for Current Account Balance, Value, Millions USD
-#> 16                                     Metadata for Consumer Price Index, Implicit Deflator, LCU
-#> 17                                     Metadata for GNFS Imports, Volume, Millions 2015 real USD
-#> 18                             Metadata for Lower middle-income poverty rate ($3.65 in 2017 PPP)
-#> 19           Metadata for Gross Domestic Product at Market Price, Volume, Millions 2015 real USD
+#> 13           Metadata for Gross Domestic Product at Market Price, Volume, Millions 2015 real USD
+#> 14                                     Metadata for Consumer Price Index, Implicit Deflator, LCU
+#> 15                                     Metadata for GNFS Imports, Volume, Millions 2015 real USD
+#> 16                                      Metadata for Agriculture, Volume, Millions 2015 real USD
+#> 17            Metadata for Gross Domestic Product at Market Price, Value, Millions LCU, % change
+#> 18                                     Metadata for Current Account Balance, Value, Millions USD
+#> 19                             Metadata for Lower middle-income poverty rate ($3.65 in 2017 PPP)
 #> 20                                            Metadata for Gross Fixed Investment, LCU, % of GDP
-#> 21                            Metadata for Government Consumption, Value, Millions LCU, % change
-#> 22                       Metadata for Inflation Rate (Consumer Price Index), Value, % change LCU
-#> 23                                                Metadata for GNFS Exports, Value, Millions LCU
-#> 24                                               Metadata for GNFS Exports, Volume, Millions LCU
-#> 25                                           Metadata for Total Expenditure, Value, Millions USD
-#> 26                                     Metadata for GNFS Exports, Volume, Millions LCU, % change
-#> 27                                   Metadata for International poverty rate ($2.15 in 2017 PPP)
-#> 28                                                                   Macro Poverty Outlook (MPO)
-#> 29                                           Metadata for Current Account Balance, USD, % of GDP
-#> 30                                                 Metadata for Agriculture, Value, Millions LCU
-#> 31 Metadata for Gross Domestic Product at Market Price, Volume, Millions 2015 real USD, % change
-#> 32                     Metadata for Gross Domestic Product at Market Price, Volume, Millions LCU
-#> 33                                     Metadata for GNFS Exports, Volume, Millions 2015 real USD
-#> 34                                      Metadata for GNFS Imports, Value, Millions LCU, % change
-#> 35  Metadata for General Government Debt Stock (Millions of Local Currency), Value, Millions USD
-#> 36                                      Metadata for Government Consumption, Value, Millions LCU
-#> 37                 Metadata for Gross Fixed Investment, Volume, Millions 2015 real USD, % change
-#> 38                                       Metadata for Agriculture, Value, Millions LCU, % change
-#> 39                       Metadata for Capital and Financial Account Balance, Value, Millions USD
-#> 40                                      Metadata for Primary Fiscal Balance, Value, Millions LCU
-#> 41                                    Metadata for Total Revenue and Grants, Value, Millions USD
-#> 42                       Metadata for Net Foreign Direct Investment Outflow, Value, Millions USD
+#> 21                                   Metadata for International poverty rate ($2.15 in 2017 PPP)
+#> 22                            Metadata for Government Consumption, Value, Millions LCU, % change
+#> 23                       Metadata for Inflation Rate (Consumer Price Index), Value, % change LCU
+#> 24                                                Metadata for GNFS Exports, Value, Millions LCU
+#> 25                                               Metadata for GNFS Exports, Volume, Millions LCU
+#> 26                                           Metadata for Current Account Balance, USD, % of GDP
+#> 27                                           Metadata for Total Expenditure, Value, Millions USD
+#> 28                                     Metadata for GNFS Exports, Volume, Millions LCU, % change
+#> 29                                                                   Macro Poverty Outlook (MPO)
+#> 30                       Metadata for Capital and Financial Account Balance, Value, Millions USD
+#> 31  Metadata for General Government Debt Stock (Millions of Local Currency), Value, Millions USD
+#> 32                                      Metadata for Government Consumption, Value, Millions LCU
+#> 33                 Metadata for Gross Fixed Investment, Volume, Millions 2015 real USD, % change
+#> 34                                       Metadata for Agriculture, Value, Millions LCU, % change
+#> 35                                                 Metadata for Agriculture, Value, Millions LCU
+#> 36 Metadata for Gross Domestic Product at Market Price, Volume, Millions 2015 real USD, % change
+#> 37                     Metadata for Gross Domestic Product at Market Price, Volume, Millions LCU
+#> 38                                     Metadata for GNFS Exports, Volume, Millions 2015 real USD
+#> 39                                      Metadata for GNFS Imports, Value, Millions LCU, % change
+#> 40                       Metadata for Net Foreign Direct Investment Outflow, Value, Millions USD
+#> 41                                      Metadata for Primary Fiscal Balance, Value, Millions LCU
+#> 42                                    Metadata for Total Revenue and Grants, Value, Millions USD
 #> 43                                                Metadata for GNFS Imports, Value, Millions LCU
 #> 44                                            Metadata for Overall Fiscal Balance, USD, % of GDP
 #> 45                           Metadata for Government Consumption, Volume, Millions 2015 real USD
@@ -390,7 +390,7 @@ get_metadata360("WB_MPO")
 #> 47                            Metadata for Gross Fixed Investment, Value, Millions LCU, % change
 #> 48                             Metadata for Net Foreign Direct Investment Outflow, USD, % of GDP
 #> 49                                            Metadata for Primary Fiscal Balance, USD, % of GDP
-#> 50                                         Metadata for Services, Volume, Millions LCU, % change
+#> 50                           Metadata for Gross Fixed Investment, Volume, Millions LCU, % change
 #>               metadata_information.idno metadata_information.prod_date
 #> 1               META_WB_MPO_GGBALPRIMCD                     2024-07-02
 #> 2             META_WB_MPO_NECONPRVTPCKN                     2024-07-02
@@ -404,36 +404,36 @@ get_metadata360("WB_MPO")
 #> 10              META_WB_MPO_GGBALOVRLCD                     2024-07-02
 #> 11             META_WB_MPO_NEEXPGNFSCNZ                     2024-07-02
 #> 12                     META_WB_MPO_POV3                     2024-07-02
-#> 13              META_WB_MPO_NVAGRTOTLKD                     2024-07-02
-#> 14             META_WB_MPO_NYGDPMKTPCNZ                     2024-07-02
-#> 15              META_WB_MPO_BNCABFUNDCD                     2024-07-02
-#> 16              META_WB_MPO_FPCPITOTLXN                     2024-07-02
-#> 17              META_WB_MPO_NEIMPGNFSKD                     2024-07-02
-#> 18                     META_WB_MPO_POV2                     2024-07-02
-#> 19              META_WB_MPO_NYGDPMKTPKD                     2024-07-02
+#> 13              META_WB_MPO_NYGDPMKTPKD                     2024-07-02
+#> 14              META_WB_MPO_FPCPITOTLXN                     2024-07-02
+#> 15              META_WB_MPO_NEIMPGNFSKD                     2024-07-02
+#> 16              META_WB_MPO_NVAGRTOTLKD                     2024-07-02
+#> 17             META_WB_MPO_NYGDPMKTPCNZ                     2024-07-02
+#> 18              META_WB_MPO_BNCABFUNDCD                     2024-07-02
+#> 19                     META_WB_MPO_POV2                     2024-07-02
 #> 20             META_WB_MPO_NEGDIFTOTKN_                     2024-07-02
-#> 21             META_WB_MPO_NECONGOVTCNZ                     2024-07-02
-#> 22             META_WB_MPO_FPCPITOTLXNZ                     2024-07-02
-#> 23              META_WB_MPO_NEEXPGNFSCN                     2024-07-02
-#> 24              META_WB_MPO_NEEXPGNFSKN                     2024-07-02
-#> 25              META_WB_MPO_GGEXPTOTLCD                     2024-07-02
-#> 26             META_WB_MPO_NEEXPGNFSKNZ                     2024-07-02
-#> 27                     META_WB_MPO_POV1                     2024-07-02
-#> 28 16ffd22e-c3b6-477d-bb16-45c423263eb0                           <NA>
-#> 29             META_WB_MPO_BNCABFUNDCD_                     2024-07-02
-#> 30              META_WB_MPO_NVAGRTOTLCN                     2024-07-02
-#> 31             META_WB_MPO_NYGDPMKTPKDZ                     2024-07-02
-#> 32              META_WB_MPO_NYGDPMKTPKN                     2024-07-02
-#> 33              META_WB_MPO_NEEXPGNFSKD                     2024-07-02
-#> 34             META_WB_MPO_NEIMPGNFSCNZ                     2024-07-02
-#> 35              META_WB_MPO_GGDBTTOTLCD                     2024-07-02
-#> 36              META_WB_MPO_NECONGOVTCN                     2024-07-02
-#> 37             META_WB_MPO_NEGDIFTOTKDZ                     2024-07-02
-#> 38             META_WB_MPO_NVAGRTOTLCNZ                     2024-07-02
-#> 39              META_WB_MPO_BFCAFTOTLCD                     2024-07-02
-#> 40              META_WB_MPO_GGBALPRIMCN                     2024-07-02
-#> 41              META_WB_MPO_GGREVTOTLCD                     2024-07-02
-#> 42              META_WB_MPO_BFCAFFFDICD                     2024-07-02
+#> 21                     META_WB_MPO_POV1                     2024-07-02
+#> 22             META_WB_MPO_NECONGOVTCNZ                     2024-07-02
+#> 23             META_WB_MPO_FPCPITOTLXNZ                     2024-07-02
+#> 24              META_WB_MPO_NEEXPGNFSCN                     2024-07-02
+#> 25              META_WB_MPO_NEEXPGNFSKN                     2024-07-02
+#> 26             META_WB_MPO_BNCABFUNDCD_                     2024-07-02
+#> 27              META_WB_MPO_GGEXPTOTLCD                     2024-07-02
+#> 28             META_WB_MPO_NEEXPGNFSKNZ                     2024-07-02
+#> 29 16ffd22e-c3b6-477d-bb16-45c423263eb0                           <NA>
+#> 30              META_WB_MPO_BFCAFTOTLCD                     2024-07-02
+#> 31              META_WB_MPO_GGDBTTOTLCD                     2024-07-02
+#> 32              META_WB_MPO_NECONGOVTCN                     2024-07-02
+#> 33             META_WB_MPO_NEGDIFTOTKDZ                     2024-07-02
+#> 34             META_WB_MPO_NVAGRTOTLCNZ                     2024-07-02
+#> 35              META_WB_MPO_NVAGRTOTLCN                     2024-07-02
+#> 36             META_WB_MPO_NYGDPMKTPKDZ                     2024-07-02
+#> 37              META_WB_MPO_NYGDPMKTPKN                     2024-07-02
+#> 38              META_WB_MPO_NEEXPGNFSKD                     2024-07-02
+#> 39             META_WB_MPO_NEIMPGNFSCNZ                     2024-07-02
+#> 40              META_WB_MPO_BFCAFFFDICD                     2024-07-02
+#> 41              META_WB_MPO_GGBALPRIMCN                     2024-07-02
+#> 42              META_WB_MPO_GGREVTOTLCD                     2024-07-02
 #> 43              META_WB_MPO_NEIMPGNFSCN                     2024-07-02
 #> 44             META_WB_MPO_GGBALOVRLCD_                     2024-07-02
 #> 45              META_WB_MPO_NECONGOVTKD                     2024-07-02
@@ -441,7 +441,7 @@ get_metadata360("WB_MPO")
 #> 47             META_WB_MPO_NEGDIFTOTCNZ                     2024-07-02
 #> 48             META_WB_MPO_BFCAFFFDICD_                     2024-07-02
 #> 49             META_WB_MPO_GGBALPRIMCD_                     2024-07-02
-#> 50             META_WB_MPO_NVSRVTOTLKNZ                     2024-07-02
+#> 50             META_WB_MPO_NEGDIFTOTKNZ                     2024-07-02
 #>    metadata_information.version_statement.version
 #> 1                                             1.1
 #> 2                                             1.1
@@ -470,8 +470,8 @@ get_metadata360("WB_MPO")
 #> 25                                            1.1
 #> 26                                            1.1
 #> 27                                            1.1
-#> 28                                           <NA>
-#> 29                                            1.1
+#> 28                                            1.1
+#> 29                                           <NA>
 #> 30                                            1.1
 #> 31                                            1.1
 #> 32                                            1.1
@@ -521,8 +521,8 @@ get_metadata360("WB_MPO")
 #> 25                                          2025-03-17
 #> 26                                          2025-03-17
 #> 27                                          2025-03-17
-#> 28                                                <NA>
-#> 29                                          2025-03-17
+#> 28                                          2025-03-17
+#> 29                                                <NA>
 #> 30                                          2025-03-17
 #> 31                                          2025-03-17
 #> 32                                          2025-03-17
@@ -623,8 +623,8 @@ get_metadata360("WB_MPO")
 #> 25            Updated title formatting for consistency.
 #> 26            Updated title formatting for consistency.
 #> 27            Updated title formatting for consistency.
-#> 28                                                 <NA>
-#> 29            Updated title formatting for consistency.
+#> 28            Updated title formatting for consistency.
+#> 29                                                 <NA>
 #> 30            Updated title formatting for consistency.
 #> 31            Updated title formatting for consistency.
 #> 32            Updated title formatting for consistency.
@@ -674,8 +674,8 @@ get_metadata360("WB_MPO")
 #> 25 Development Economics Data Group, DECDG, World Bank, NA
 #> 26 Development Economics Data Group, DECDG, World Bank, NA
 #> 27 Development Economics Data Group, DECDG, World Bank, NA
-#> 28                                                    NULL
-#> 29 Development Economics Data Group, DECDG, World Bank, NA
+#> 28 Development Economics Data Group, DECDG, World Bank, NA
+#> 29                                                    NULL
 #> 30 Development Economics Data Group, DECDG, World Bank, NA
 #> 31 Development Economics Data Group, DECDG, World Bank, NA
 #> 32 Development Economics Data Group, DECDG, World Bank, NA
@@ -710,36 +710,36 @@ get_metadata360("WB_MPO")
 #> 10      WB_MPO_GGBALOVRLCD                     NA
 #> 11     WB_MPO_NEEXPGNFSCNZ                     NA
 #> 12             WB_MPO_POV3                     NA
-#> 13      WB_MPO_NVAGRTOTLKD                     NA
-#> 14     WB_MPO_NYGDPMKTPCNZ                     NA
-#> 15      WB_MPO_BNCABFUNDCD                     NA
-#> 16      WB_MPO_FPCPITOTLXN                     NA
-#> 17      WB_MPO_NEIMPGNFSKD                     NA
-#> 18             WB_MPO_POV2                     NA
-#> 19      WB_MPO_NYGDPMKTPKD                     NA
+#> 13      WB_MPO_NYGDPMKTPKD                     NA
+#> 14      WB_MPO_FPCPITOTLXN                     NA
+#> 15      WB_MPO_NEIMPGNFSKD                     NA
+#> 16      WB_MPO_NVAGRTOTLKD                     NA
+#> 17     WB_MPO_NYGDPMKTPCNZ                     NA
+#> 18      WB_MPO_BNCABFUNDCD                     NA
+#> 19             WB_MPO_POV2                     NA
 #> 20     WB_MPO_NEGDIFTOTKN_                     NA
-#> 21     WB_MPO_NECONGOVTCNZ                     NA
-#> 22     WB_MPO_FPCPITOTLXNZ                     NA
-#> 23      WB_MPO_NEEXPGNFSCN                     NA
-#> 24      WB_MPO_NEEXPGNFSKN                     NA
-#> 25      WB_MPO_GGEXPTOTLCD                     NA
-#> 26     WB_MPO_NEEXPGNFSKNZ                     NA
-#> 27             WB_MPO_POV1                     NA
-#> 28                    <NA>                     NA
-#> 29     WB_MPO_BNCABFUNDCD_                     NA
-#> 30      WB_MPO_NVAGRTOTLCN                     NA
-#> 31     WB_MPO_NYGDPMKTPKDZ                     NA
-#> 32      WB_MPO_NYGDPMKTPKN                     NA
-#> 33      WB_MPO_NEEXPGNFSKD                     NA
-#> 34     WB_MPO_NEIMPGNFSCNZ                     NA
-#> 35      WB_MPO_GGDBTTOTLCD                     NA
-#> 36      WB_MPO_NECONGOVTCN                     NA
-#> 37     WB_MPO_NEGDIFTOTKDZ                     NA
-#> 38     WB_MPO_NVAGRTOTLCNZ                     NA
-#> 39      WB_MPO_BFCAFTOTLCD                     NA
-#> 40      WB_MPO_GGBALPRIMCN                     NA
-#> 41      WB_MPO_GGREVTOTLCD                     NA
-#> 42      WB_MPO_BFCAFFFDICD                     NA
+#> 21             WB_MPO_POV1                     NA
+#> 22     WB_MPO_NECONGOVTCNZ                     NA
+#> 23     WB_MPO_FPCPITOTLXNZ                     NA
+#> 24      WB_MPO_NEEXPGNFSCN                     NA
+#> 25      WB_MPO_NEEXPGNFSKN                     NA
+#> 26     WB_MPO_BNCABFUNDCD_                     NA
+#> 27      WB_MPO_GGEXPTOTLCD                     NA
+#> 28     WB_MPO_NEEXPGNFSKNZ                     NA
+#> 29                    <NA>                     NA
+#> 30      WB_MPO_BFCAFTOTLCD                     NA
+#> 31      WB_MPO_GGDBTTOTLCD                     NA
+#> 32      WB_MPO_NECONGOVTCN                     NA
+#> 33     WB_MPO_NEGDIFTOTKDZ                     NA
+#> 34     WB_MPO_NVAGRTOTLCNZ                     NA
+#> 35      WB_MPO_NVAGRTOTLCN                     NA
+#> 36     WB_MPO_NYGDPMKTPKDZ                     NA
+#> 37      WB_MPO_NYGDPMKTPKN                     NA
+#> 38      WB_MPO_NEEXPGNFSKD                     NA
+#> 39     WB_MPO_NEIMPGNFSCNZ                     NA
+#> 40      WB_MPO_BFCAFFFDICD                     NA
+#> 41      WB_MPO_GGBALPRIMCN                     NA
+#> 42      WB_MPO_GGREVTOTLCD                     NA
 #> 43      WB_MPO_NEIMPGNFSCN                     NA
 #> 44     WB_MPO_GGBALOVRLCD_                     NA
 #> 45      WB_MPO_NECONGOVTKD                     NA
@@ -747,7 +747,7 @@ get_metadata360("WB_MPO")
 #> 47     WB_MPO_NEGDIFTOTCNZ                     NA
 #> 48     WB_MPO_BFCAFFFDICD_                     NA
 #> 49     WB_MPO_GGBALPRIMCD_                     NA
-#> 50     WB_MPO_NVSRVTOTLKNZ                     NA
+#> 50     WB_MPO_NEGDIFTOTKNZ                     NA
 #>                                                             series_description.name
 #> 1                                       Primary Fiscal Balance, Value, Millions USD
 #> 2                              Private Consumption per capita, Volume, Millions LCU
@@ -761,36 +761,36 @@ get_metadata360("WB_MPO")
 #> 10                                      Overall Fiscal Balance, Value, Millions USD
 #> 11                                      GNFS Exports, Value, Millions LCU, % change
 #> 12                             Upper middle-income poverty rate ($6.85 in 2017 PPP)
-#> 13                                      Agriculture, Volume, Millions 2015 real USD
-#> 14            Gross Domestic Product at Market Price, Value, Millions LCU, % change
-#> 15                                     Current Account Balance, Value, Millions USD
-#> 16                                     Consumer Price Index, Implicit Deflator, LCU
-#> 17                                     GNFS Imports, Volume, Millions 2015 real USD
-#> 18                             Lower middle-income poverty rate ($3.65 in 2017 PPP)
-#> 19           Gross Domestic Product at Market Price, Volume, Millions 2015 real USD
+#> 13           Gross Domestic Product at Market Price, Volume, Millions 2015 real USD
+#> 14                                     Consumer Price Index, Implicit Deflator, LCU
+#> 15                                     GNFS Imports, Volume, Millions 2015 real USD
+#> 16                                      Agriculture, Volume, Millions 2015 real USD
+#> 17            Gross Domestic Product at Market Price, Value, Millions LCU, % change
+#> 18                                     Current Account Balance, Value, Millions USD
+#> 19                             Lower middle-income poverty rate ($3.65 in 2017 PPP)
 #> 20                                            Gross Fixed Investment, LCU, % of GDP
-#> 21                            Government Consumption, Value, Millions LCU, % change
-#> 22                       Inflation Rate (Consumer Price Index), Value, % change LCU
-#> 23                                                GNFS Exports, Value, Millions LCU
-#> 24                                               GNFS Exports, Volume, Millions LCU
-#> 25                                           Total Expenditure, Value, Millions USD
-#> 26                                     GNFS Exports, Volume, Millions LCU, % change
-#> 27                                   International poverty rate ($2.15 in 2017 PPP)
-#> 28                                                      Macro Poverty Outlook (MPO)
-#> 29                                           Current Account Balance, USD, % of GDP
-#> 30                                                 Agriculture, Value, Millions LCU
-#> 31 Gross Domestic Product at Market Price, Volume, Millions 2015 real USD, % change
-#> 32                     Gross Domestic Product at Market Price, Volume, Millions LCU
-#> 33                                     GNFS Exports, Volume, Millions 2015 real USD
-#> 34                                      GNFS Imports, Value, Millions LCU, % change
-#> 35  General Government Debt Stock (Millions of Local Currency), Value, Millions USD
-#> 36                                      Government Consumption, Value, Millions LCU
-#> 37                 Gross Fixed Investment, Volume, Millions 2015 real USD, % change
-#> 38                                       Agriculture, Value, Millions LCU, % change
-#> 39                       Capital and Financial Account Balance, Value, Millions USD
-#> 40                                      Primary Fiscal Balance, Value, Millions LCU
-#> 41                                    Total Revenue and Grants, Value, Millions USD
-#> 42                       Net Foreign Direct Investment Outflow, Value, Millions USD
+#> 21                                   International poverty rate ($2.15 in 2017 PPP)
+#> 22                            Government Consumption, Value, Millions LCU, % change
+#> 23                       Inflation Rate (Consumer Price Index), Value, % change LCU
+#> 24                                                GNFS Exports, Value, Millions LCU
+#> 25                                               GNFS Exports, Volume, Millions LCU
+#> 26                                           Current Account Balance, USD, % of GDP
+#> 27                                           Total Expenditure, Value, Millions USD
+#> 28                                     GNFS Exports, Volume, Millions LCU, % change
+#> 29                                                      Macro Poverty Outlook (MPO)
+#> 30                       Capital and Financial Account Balance, Value, Millions USD
+#> 31  General Government Debt Stock (Millions of Local Currency), Value, Millions USD
+#> 32                                      Government Consumption, Value, Millions LCU
+#> 33                 Gross Fixed Investment, Volume, Millions 2015 real USD, % change
+#> 34                                       Agriculture, Value, Millions LCU, % change
+#> 35                                                 Agriculture, Value, Millions LCU
+#> 36 Gross Domestic Product at Market Price, Volume, Millions 2015 real USD, % change
+#> 37                     Gross Domestic Product at Market Price, Volume, Millions LCU
+#> 38                                     GNFS Exports, Volume, Millions 2015 real USD
+#> 39                                      GNFS Imports, Value, Millions LCU, % change
+#> 40                       Net Foreign Direct Investment Outflow, Value, Millions USD
+#> 41                                      Primary Fiscal Balance, Value, Millions LCU
+#> 42                                    Total Revenue and Grants, Value, Millions USD
 #> 43                                                GNFS Imports, Value, Millions LCU
 #> 44                                            Overall Fiscal Balance, USD, % of GDP
 #> 45                           Government Consumption, Volume, Millions 2015 real USD
@@ -798,7 +798,7 @@ get_metadata360("WB_MPO")
 #> 47                            Gross Fixed Investment, Value, Millions LCU, % change
 #> 48                             Net Foreign Direct Investment Outflow, USD, % of GDP
 #> 49                                            Primary Fiscal Balance, USD, % of GDP
-#> 50                                         Services, Volume, Millions LCU, % change
+#> 50                           Gross Fixed Investment, Volume, Millions LCU, % change
 #>    series_description.display_name series_description.database_id
 #> 1                               NA                         WB_MPO
 #> 2                               NA                         WB_MPO
@@ -878,8 +878,8 @@ get_metadata360("WB_MPO")
 #> 25            Macro Poverty Outlook                                <NA>
 #> 26            Macro Poverty Outlook                                <NA>
 #> 27            Macro Poverty Outlook                                <NA>
-#> 28      Macro Poverty Outlook (MPO)                          2025-10-10
-#> 29            Macro Poverty Outlook                                <NA>
+#> 28            Macro Poverty Outlook                                <NA>
+#> 29      Macro Poverty Outlook (MPO)                          2025-10-10
 #> 30            Macro Poverty Outlook                                <NA>
 #> 31            Macro Poverty Outlook                                <NA>
 #> 32            Macro Poverty Outlook                                <NA>
@@ -915,34 +915,34 @@ get_metadata360("WB_MPO")
 #> 11                               NA                          Percentage
 #> 12                               NA                              Number
 #> 13                               NA                          US dollars
-#> 14                               NA                          Percentage
+#> 14                               NA                   Domestic currency
 #> 15                               NA                          US dollars
-#> 16                               NA                   Domestic currency
-#> 17                               NA                          US dollars
-#> 18                               NA                              Number
-#> 19                               NA                          US dollars
+#> 16                               NA                          US dollars
+#> 17                               NA                          Percentage
+#> 18                               NA                          US dollars
+#> 19                               NA                              Number
 #> 20                               NA                          Percentage
-#> 21                               NA                          Percentage
+#> 21                               NA                              Number
 #> 22                               NA                          Percentage
-#> 23                               NA                   Domestic currency
+#> 23                               NA                          Percentage
 #> 24                               NA                   Domestic currency
-#> 25                               NA                          US dollars
+#> 25                               NA                   Domestic currency
 #> 26                               NA                          Percentage
-#> 27                               NA                              Number
-#> 28                               NA                                <NA>
-#> 29                               NA                          Percentage
-#> 30                               NA                   Domestic currency
-#> 31                               NA                          Percentage
+#> 27                               NA                          US dollars
+#> 28                               NA                          Percentage
+#> 29                               NA                                <NA>
+#> 30                               NA                          US dollars
+#> 31                               NA                          US dollars
 #> 32                               NA                   Domestic currency
-#> 33                               NA                          US dollars
+#> 33                               NA                          Percentage
 #> 34                               NA                          Percentage
-#> 35                               NA                          US dollars
-#> 36                               NA                   Domestic currency
-#> 37                               NA                          Percentage
-#> 38                               NA                          Percentage
-#> 39                               NA                          US dollars
-#> 40                               NA                   Domestic currency
-#> 41                               NA                          US dollars
+#> 35                               NA                   Domestic currency
+#> 36                               NA                          Percentage
+#> 37                               NA                   Domestic currency
+#> 38                               NA                          US dollars
+#> 39                               NA                          Percentage
+#> 40                               NA                          US dollars
+#> 41                               NA                   Domestic currency
 #> 42                               NA                          US dollars
 #> 43                               NA                   Domestic currency
 #> 44                               NA                          Percentage
@@ -980,8 +980,8 @@ get_metadata360("WB_MPO")
 #> 25                                                 <NA>
 #> 26                                                 <NA>
 #> 27                                                 <NA>
-#> 28 {"update_schedule":null,"update_frequency":"annual"}
-#> 29                                                 <NA>
+#> 28                                                 <NA>
+#> 29 {"update_schedule":null,"update_frequency":"annual"}
 #> 30                                                 <NA>
 #> 31                                                 <NA>
 #> 32                                                 <NA>
@@ -1031,8 +1031,8 @@ get_metadata360("WB_MPO")
 #> 25                         Annual                             NA
 #> 26                         Annual                             NA
 #> 27                         Annual                             NA
-#> 28                           <NA>                             NA
-#> 29                         Annual                             NA
+#> 28                         Annual                             NA
+#> 29                           <NA>                             NA
 #> 30                         Annual                             NA
 #> 31                         Annual                             NA
 #> 32                         Annual                             NA
@@ -1067,36 +1067,36 @@ get_metadata360("WB_MPO")
 #> 10                                      Overall Fiscal Balance, Value, Millions USD
 #> 11                                      GNFS Exports, Value, Millions LCU, % change
 #> 12                             Upper middle-income poverty rate ($6.85 in 2017 PPP)
-#> 13                                      Agriculture, Volume, Millions 2015 real USD
-#> 14            Gross Domestic Product at Market Price, Value, Millions LCU, % change
-#> 15                                     Current Account Balance, Value, Millions USD
-#> 16                                     Consumer Price Index, Implicit Deflator, LCU
-#> 17                                     GNFS Imports, Volume, Millions 2015 real USD
-#> 18                             Lower middle-income poverty rate ($3.65 in 2017 PPP)
-#> 19           Gross Domestic Product at Market Price, Volume, Millions 2015 real USD
+#> 13           Gross Domestic Product at Market Price, Volume, Millions 2015 real USD
+#> 14                                     Consumer Price Index, Implicit Deflator, LCU
+#> 15                                     GNFS Imports, Volume, Millions 2015 real USD
+#> 16                                      Agriculture, Volume, Millions 2015 real USD
+#> 17            Gross Domestic Product at Market Price, Value, Millions LCU, % change
+#> 18                                     Current Account Balance, Value, Millions USD
+#> 19                             Lower middle-income poverty rate ($3.65 in 2017 PPP)
 #> 20                                            Gross Fixed Investment, LCU, % of GDP
-#> 21                            Government Consumption, Value, Millions LCU, % change
-#> 22                       Inflation Rate (Consumer Price Index), Value, % change LCU
-#> 23                                                GNFS Exports, Value, Millions LCU
-#> 24                                               GNFS Exports, Volume, Millions LCU
-#> 25                                           Total Expenditure, Value, Millions USD
-#> 26                                     GNFS Exports, Volume, Millions LCU, % change
-#> 27                                   International poverty rate ($2.15 in 2017 PPP)
-#> 28                                                                             <NA>
-#> 29                                           Current Account Balance, USD, % of GDP
-#> 30                                                 Agriculture, Value, Millions LCU
-#> 31 Gross Domestic Product at Market Price, Volume, Millions 2015 real USD, % change
-#> 32                     Gross Domestic Product at Market Price, Volume, Millions LCU
-#> 33                                     GNFS Exports, Volume, Millions 2015 real USD
-#> 34                                      GNFS Imports, Value, Millions LCU, % change
-#> 35  General Government Debt Stock (Millions of Local Currency), Value, Millions USD
-#> 36                                      Government Consumption, Value, Millions LCU
-#> 37                 Gross Fixed Investment, Volume, Millions 2015 real USD, % change
-#> 38                                       Agriculture, Value, Millions LCU, % change
-#> 39                       Capital and Financial Account Balance, Value, Millions USD
-#> 40                                      Primary Fiscal Balance, Value, Millions LCU
-#> 41                                    Total Revenue and Grants, Value, Millions USD
-#> 42                       Net Foreign Direct Investment Outflow, Value, Millions USD
+#> 21                                   International poverty rate ($2.15 in 2017 PPP)
+#> 22                            Government Consumption, Value, Millions LCU, % change
+#> 23                       Inflation Rate (Consumer Price Index), Value, % change LCU
+#> 24                                                GNFS Exports, Value, Millions LCU
+#> 25                                               GNFS Exports, Volume, Millions LCU
+#> 26                                           Current Account Balance, USD, % of GDP
+#> 27                                           Total Expenditure, Value, Millions USD
+#> 28                                     GNFS Exports, Volume, Millions LCU, % change
+#> 29                                                                             <NA>
+#> 30                       Capital and Financial Account Balance, Value, Millions USD
+#> 31  General Government Debt Stock (Millions of Local Currency), Value, Millions USD
+#> 32                                      Government Consumption, Value, Millions LCU
+#> 33                 Gross Fixed Investment, Volume, Millions 2015 real USD, % change
+#> 34                                       Agriculture, Value, Millions LCU, % change
+#> 35                                                 Agriculture, Value, Millions LCU
+#> 36 Gross Domestic Product at Market Price, Volume, Millions 2015 real USD, % change
+#> 37                     Gross Domestic Product at Market Price, Volume, Millions LCU
+#> 38                                     GNFS Exports, Volume, Millions 2015 real USD
+#> 39                                      GNFS Imports, Value, Millions LCU, % change
+#> 40                       Net Foreign Direct Investment Outflow, Value, Millions USD
+#> 41                                      Primary Fiscal Balance, Value, Millions LCU
+#> 42                                    Total Revenue and Grants, Value, Millions USD
 #> 43                                                GNFS Imports, Value, Millions LCU
 #> 44                                            Overall Fiscal Balance, USD, % of GDP
 #> 45                           Government Consumption, Volume, Millions 2015 real USD
@@ -1104,7 +1104,7 @@ get_metadata360("WB_MPO")
 #> 47                            Gross Fixed Investment, Value, Millions LCU, % change
 #> 48                             Net Foreign Direct Investment Outflow, USD, % of GDP
 #> 49                                            Primary Fiscal Balance, USD, % of GDP
-#> 50                                         Services, Volume, Millions LCU, % change
+#> 50                           Gross Fixed Investment, Volume, Millions LCU, % change
 #>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        series_description.definition_long
 #> 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
 #> 2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
@@ -1133,8 +1133,8 @@ get_metadata360("WB_MPO")
 #> 25                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
 #> 26                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
 #> 27                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
-#> 28 The Macro Poverty Outlook (MPO) analyzes macroeconomic and poverty developments in 147 developing countries. The report is released twice annually for the Spring and Annual Meetings of the World Bank and the International Monetary Fund. The MPO consists of individual country notes that provide an overview of recent developments, forecasts of major macroeconomic variables and poverty during 2024-2026, and a discussion of critical challenges for economic growth, macroeconomic stability, and poverty reduction moving forward.\n\nFor further details, please refer to https://www.worldbank.org/en/publication/macro-poverty-outlook
-#> 29                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
+#> 28                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
+#> 29 The Macro Poverty Outlook (MPO) analyzes macroeconomic and poverty developments in 147 developing countries. The report is released twice annually for the Spring and Annual Meetings of the World Bank and the International Monetary Fund. The MPO consists of individual country notes that provide an overview of recent developments, forecasts of major macroeconomic variables and poverty during 2024-2026, and a discussion of critical challenges for economic growth, macroeconomic stability, and poverty reduction moving forward.\n\nFor further details, please refer to https://www.worldbank.org/en/publication/macro-poverty-outlook
 #> 30                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
 #> 31                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
 #> 32                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
@@ -1235,8 +1235,8 @@ get_metadata360("WB_MPO")
 #> 25 Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
 #> 26 Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
 #> 27 Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
-#> 28                                                                                          <NA>
-#> 29 Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
+#> 28 Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
+#> 29                                                                                          <NA>
 #> 30 Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
 #> 31 Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
 #> 32 Please refer to: https://mtimodelling.worldbank.org/resources/MTI_Macro_Econometric_Model.pdf
@@ -1592,8 +1592,8 @@ get_metadata360("WB_MPO")
 #> 25 You are encouraged to use the Datasets to benefit yourself and others in creative ways. You may extract, download, and make copies of the data contained in the Datasets, and you may share that data with third parties according to these terms of use.\nUnless specifically labeled otherwise, these Datasets are provided to you under a Creative Commons Attribution 4.0 International License (CC BY 4.0), with the additional terms below.  The basic terms may be accessed here.  When you download or use the Datasets, you are agreeing to comply with the terms of a CC BY 4.0 license, and also agreeing to the following mandatory and binding addition:\nAny and all disputes arising under this License that cannot be settled amicably shall be resolved in accordance with the following procedure:\n  Pursuant to a notice of mediation communicated by reasonable means by either You or the Licensor to the other, the dispute shall be submitted to non-binding mediation conducted in accordance with rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with those communicated in the notice of mediation. The language used in the mediation proceedings shall be English unless otherwise agreed.\n  If any such dispute has not been settled within 45 days following the date on which the notice of mediation is provided, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other, elect to have the dispute referred to and finally determined by arbitration. The arbitration shall be conducted in accordance with the rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with the UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable\nYou agree to provide attribution to The World Bank and its data providers in the following format: The World Bank: Dataset name: Data source (if known). When sharing or facilitating access to the Datasets, you agree to include the same acknowledgment requirement in any sub-licenses of the data that you grant, and a requirement that any sub-licensees do the same. You may meet this requirement by providing the uniform resource locator (URL) of these terms of use.\nYou may use our application programming interfaces (APIs) to facilitate access to the Datasets, whether through a separate Web site or through another type of software application.
 #> 26 You are encouraged to use the Datasets to benefit yourself and others in creative ways. You may extract, download, and make copies of the data contained in the Datasets, and you may share that data with third parties according to these terms of use.\nUnless specifically labeled otherwise, these Datasets are provided to you under a Creative Commons Attribution 4.0 International License (CC BY 4.0), with the additional terms below.  The basic terms may be accessed here.  When you download or use the Datasets, you are agreeing to comply with the terms of a CC BY 4.0 license, and also agreeing to the following mandatory and binding addition:\nAny and all disputes arising under this License that cannot be settled amicably shall be resolved in accordance with the following procedure:\n  Pursuant to a notice of mediation communicated by reasonable means by either You or the Licensor to the other, the dispute shall be submitted to non-binding mediation conducted in accordance with rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with those communicated in the notice of mediation. The language used in the mediation proceedings shall be English unless otherwise agreed.\n  If any such dispute has not been settled within 45 days following the date on which the notice of mediation is provided, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other, elect to have the dispute referred to and finally determined by arbitration. The arbitration shall be conducted in accordance with the rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with the UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable\nYou agree to provide attribution to The World Bank and its data providers in the following format: The World Bank: Dataset name: Data source (if known). When sharing or facilitating access to the Datasets, you agree to include the same acknowledgment requirement in any sub-licenses of the data that you grant, and a requirement that any sub-licensees do the same. You may meet this requirement by providing the uniform resource locator (URL) of these terms of use.\nYou may use our application programming interfaces (APIs) to facilitate access to the Datasets, whether through a separate Web site or through another type of software application.
 #> 27 You are encouraged to use the Datasets to benefit yourself and others in creative ways. You may extract, download, and make copies of the data contained in the Datasets, and you may share that data with third parties according to these terms of use.\nUnless specifically labeled otherwise, these Datasets are provided to you under a Creative Commons Attribution 4.0 International License (CC BY 4.0), with the additional terms below.  The basic terms may be accessed here.  When you download or use the Datasets, you are agreeing to comply with the terms of a CC BY 4.0 license, and also agreeing to the following mandatory and binding addition:\nAny and all disputes arising under this License that cannot be settled amicably shall be resolved in accordance with the following procedure:\n  Pursuant to a notice of mediation communicated by reasonable means by either You or the Licensor to the other, the dispute shall be submitted to non-binding mediation conducted in accordance with rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with those communicated in the notice of mediation. The language used in the mediation proceedings shall be English unless otherwise agreed.\n  If any such dispute has not been settled within 45 days following the date on which the notice of mediation is provided, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other, elect to have the dispute referred to and finally determined by arbitration. The arbitration shall be conducted in accordance with the rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with the UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable\nYou agree to provide attribution to The World Bank and its data providers in the following format: The World Bank: Dataset name: Data source (if known). When sharing or facilitating access to the Datasets, you agree to include the same acknowledgment requirement in any sub-licenses of the data that you grant, and a requirement that any sub-licensees do the same. You may meet this requirement by providing the uniform resource locator (URL) of these terms of use.\nYou may use our application programming interfaces (APIs) to facilitate access to the Datasets, whether through a separate Web site or through another type of software application.
-#> 28                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <NA>
-#> 29 You are encouraged to use the Datasets to benefit yourself and others in creative ways. You may extract, download, and make copies of the data contained in the Datasets, and you may share that data with third parties according to these terms of use.\nUnless specifically labeled otherwise, these Datasets are provided to you under a Creative Commons Attribution 4.0 International License (CC BY 4.0), with the additional terms below.  The basic terms may be accessed here.  When you download or use the Datasets, you are agreeing to comply with the terms of a CC BY 4.0 license, and also agreeing to the following mandatory and binding addition:\nAny and all disputes arising under this License that cannot be settled amicably shall be resolved in accordance with the following procedure:\n  Pursuant to a notice of mediation communicated by reasonable means by either You or the Licensor to the other, the dispute shall be submitted to non-binding mediation conducted in accordance with rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with those communicated in the notice of mediation. The language used in the mediation proceedings shall be English unless otherwise agreed.\n  If any such dispute has not been settled within 45 days following the date on which the notice of mediation is provided, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other, elect to have the dispute referred to and finally determined by arbitration. The arbitration shall be conducted in accordance with the rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with the UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable\nYou agree to provide attribution to The World Bank and its data providers in the following format: The World Bank: Dataset name: Data source (if known). When sharing or facilitating access to the Datasets, you agree to include the same acknowledgment requirement in any sub-licenses of the data that you grant, and a requirement that any sub-licensees do the same. You may meet this requirement by providing the uniform resource locator (URL) of these terms of use.\nYou may use our application programming interfaces (APIs) to facilitate access to the Datasets, whether through a separate Web site or through another type of software application.
+#> 28 You are encouraged to use the Datasets to benefit yourself and others in creative ways. You may extract, download, and make copies of the data contained in the Datasets, and you may share that data with third parties according to these terms of use.\nUnless specifically labeled otherwise, these Datasets are provided to you under a Creative Commons Attribution 4.0 International License (CC BY 4.0), with the additional terms below.  The basic terms may be accessed here.  When you download or use the Datasets, you are agreeing to comply with the terms of a CC BY 4.0 license, and also agreeing to the following mandatory and binding addition:\nAny and all disputes arising under this License that cannot be settled amicably shall be resolved in accordance with the following procedure:\n  Pursuant to a notice of mediation communicated by reasonable means by either You or the Licensor to the other, the dispute shall be submitted to non-binding mediation conducted in accordance with rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with those communicated in the notice of mediation. The language used in the mediation proceedings shall be English unless otherwise agreed.\n  If any such dispute has not been settled within 45 days following the date on which the notice of mediation is provided, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other, elect to have the dispute referred to and finally determined by arbitration. The arbitration shall be conducted in accordance with the rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with the UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable\nYou agree to provide attribution to The World Bank and its data providers in the following format: The World Bank: Dataset name: Data source (if known). When sharing or facilitating access to the Datasets, you agree to include the same acknowledgment requirement in any sub-licenses of the data that you grant, and a requirement that any sub-licensees do the same. You may meet this requirement by providing the uniform resource locator (URL) of these terms of use.\nYou may use our application programming interfaces (APIs) to facilitate access to the Datasets, whether through a separate Web site or through another type of software application.
+#> 29                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <NA>
 #> 30 You are encouraged to use the Datasets to benefit yourself and others in creative ways. You may extract, download, and make copies of the data contained in the Datasets, and you may share that data with third parties according to these terms of use.\nUnless specifically labeled otherwise, these Datasets are provided to you under a Creative Commons Attribution 4.0 International License (CC BY 4.0), with the additional terms below.  The basic terms may be accessed here.  When you download or use the Datasets, you are agreeing to comply with the terms of a CC BY 4.0 license, and also agreeing to the following mandatory and binding addition:\nAny and all disputes arising under this License that cannot be settled amicably shall be resolved in accordance with the following procedure:\n  Pursuant to a notice of mediation communicated by reasonable means by either You or the Licensor to the other, the dispute shall be submitted to non-binding mediation conducted in accordance with rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with those communicated in the notice of mediation. The language used in the mediation proceedings shall be English unless otherwise agreed.\n  If any such dispute has not been settled within 45 days following the date on which the notice of mediation is provided, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other, elect to have the dispute referred to and finally determined by arbitration. The arbitration shall be conducted in accordance with the rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with the UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable\nYou agree to provide attribution to The World Bank and its data providers in the following format: The World Bank: Dataset name: Data source (if known). When sharing or facilitating access to the Datasets, you agree to include the same acknowledgment requirement in any sub-licenses of the data that you grant, and a requirement that any sub-licensees do the same. You may meet this requirement by providing the uniform resource locator (URL) of these terms of use.\nYou may use our application programming interfaces (APIs) to facilitate access to the Datasets, whether through a separate Web site or through another type of software application.
 #> 31 You are encouraged to use the Datasets to benefit yourself and others in creative ways. You may extract, download, and make copies of the data contained in the Datasets, and you may share that data with third parties according to these terms of use.\nUnless specifically labeled otherwise, these Datasets are provided to you under a Creative Commons Attribution 4.0 International License (CC BY 4.0), with the additional terms below.  The basic terms may be accessed here.  When you download or use the Datasets, you are agreeing to comply with the terms of a CC BY 4.0 license, and also agreeing to the following mandatory and binding addition:\nAny and all disputes arising under this License that cannot be settled amicably shall be resolved in accordance with the following procedure:\n  Pursuant to a notice of mediation communicated by reasonable means by either You or the Licensor to the other, the dispute shall be submitted to non-binding mediation conducted in accordance with rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with those communicated in the notice of mediation. The language used in the mediation proceedings shall be English unless otherwise agreed.\n  If any such dispute has not been settled within 45 days following the date on which the notice of mediation is provided, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other, elect to have the dispute referred to and finally determined by arbitration. The arbitration shall be conducted in accordance with the rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with the UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable\nYou agree to provide attribution to The World Bank and its data providers in the following format: The World Bank: Dataset name: Data source (if known). When sharing or facilitating access to the Datasets, you agree to include the same acknowledgment requirement in any sub-licenses of the data that you grant, and a requirement that any sub-licensees do the same. You may meet this requirement by providing the uniform resource locator (URL) of these terms of use.\nYou may use our application programming interfaces (APIs) to facilitate access to the Datasets, whether through a separate Web site or through another type of software application.
 #> 32 You are encouraged to use the Datasets to benefit yourself and others in creative ways. You may extract, download, and make copies of the data contained in the Datasets, and you may share that data with third parties according to these terms of use.\nUnless specifically labeled otherwise, these Datasets are provided to you under a Creative Commons Attribution 4.0 International License (CC BY 4.0), with the additional terms below.  The basic terms may be accessed here.  When you download or use the Datasets, you are agreeing to comply with the terms of a CC BY 4.0 license, and also agreeing to the following mandatory and binding addition:\nAny and all disputes arising under this License that cannot be settled amicably shall be resolved in accordance with the following procedure:\n  Pursuant to a notice of mediation communicated by reasonable means by either You or the Licensor to the other, the dispute shall be submitted to non-binding mediation conducted in accordance with rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with those communicated in the notice of mediation. The language used in the mediation proceedings shall be English unless otherwise agreed.\n  If any such dispute has not been settled within 45 days following the date on which the notice of mediation is provided, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other, elect to have the dispute referred to and finally determined by arbitration. The arbitration shall be conducted in accordance with the rules designated by the Licensor in the copyright notice published with the Work, or if none then in accordance with the UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable\nYou agree to provide attribution to The World Bank and its data providers in the following format: The World Bank: Dataset name: Data source (if known). When sharing or facilitating access to the Datasets, you agree to include the same acknowledgment requirement in any sub-licenses of the data that you grant, and a requirement that any sub-licensees do the same. You may meet this requirement by providing the uniform resource locator (URL) of these terms of use.\nYou may use our application programming interfaces (APIs) to facilitate access to the Datasets, whether through a separate Web site or through another type of software application.
@@ -1643,8 +1643,8 @@ get_metadata360("WB_MPO")
 #> 25                                        PU
 #> 26                                        PU
 #> 27                                        PU
-#> 28                                      <NA>
-#> 29                                        PU
+#> 28                                        PU
+#> 29                                      <NA>
 #> 30                                        PU
 #> 31                                        PU
 #> 32                                        PU
@@ -1694,8 +1694,8 @@ get_metadata360("WB_MPO")
 #> 25 https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets
 #> 26 https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets
 #> 27 https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets
-#> 28                                                               <NA>
-#> 29 https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets
+#> 28 https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets
+#> 29                                                               <NA>
 #> 30 https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets
 #> 31 https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets
 #> 32 https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets
@@ -1745,8 +1745,8 @@ get_metadata360("WB_MPO")
 #> 25                                                                                                                                  <NA>
 #> 26                                                                                                                                  <NA>
 #> 27                                                                                                                                  <NA>
-#> 28 World Bank. (Year). Macro Poverty Outlook. Washington, DC: World Bank. https://www.worldbank.org/en/publication/macro-poverty-outlook
-#> 29                                                                                                                                  <NA>
+#> 28                                                                                                                                  <NA>
+#> 29 World Bank. (Year). Macro Poverty Outlook. Washington, DC: World Bank. https://www.worldbank.org/en/publication/macro-poverty-outlook
 #> 30                                                                                                                                  <NA>
 #> 31                                                                                                                                  <NA>
 #> 32                                                                                                                                  <NA>
@@ -1847,8 +1847,8 @@ get_metadata360("WB_MPO")
 #> 25                            NA                                 NA
 #> 26                            NA                                 NA
 #> 27                            NA                                 NA
-#> 28                            NA                                149
-#> 29                            NA                                 NA
+#> 28                            NA                                 NA
+#> 29                            NA                                149
 #> 30                            NA                                 NA
 #> 31                            NA                                 NA
 #> 32                            NA                                 NA
@@ -1883,36 +1883,36 @@ get_metadata360("WB_MPO")
 #> 10   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_GGBALOVRLCD.csv
 #> 11  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEEXPGNFSCNZ.csv
 #> 12          https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_POV3.csv
-#> 13   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NVAGRTOTLKD.csv
-#> 14  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NYGDPMKTPCNZ.csv
-#> 15   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_BNCABFUNDCD.csv
-#> 16   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_FPCPITOTLXN.csv
-#> 17   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEIMPGNFSKD.csv
-#> 18          https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_POV2.csv
-#> 19   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NYGDPMKTPKD.csv
+#> 13   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NYGDPMKTPKD.csv
+#> 14   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_FPCPITOTLXN.csv
+#> 15   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEIMPGNFSKD.csv
+#> 16   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NVAGRTOTLKD.csv
+#> 17  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NYGDPMKTPCNZ.csv
+#> 18   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_BNCABFUNDCD.csv
+#> 19          https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_POV2.csv
 #> 20  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEGDIFTOTKN_.csv
-#> 21  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NECONGOVTCNZ.csv
-#> 22  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_FPCPITOTLXNZ.csv
-#> 23   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEEXPGNFSCN.csv
-#> 24   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEEXPGNFSKN.csv
-#> 25   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_GGEXPTOTLCD.csv
-#> 26  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEEXPGNFSKNZ.csv
-#> 27          https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_POV1.csv
-#> 28               https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO.csv
-#> 29  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_BNCABFUNDCD_.csv
-#> 30   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NVAGRTOTLCN.csv
-#> 31  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NYGDPMKTPKDZ.csv
-#> 32   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NYGDPMKTPKN.csv
-#> 33   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEEXPGNFSKD.csv
-#> 34  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEIMPGNFSCNZ.csv
-#> 35   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_GGDBTTOTLCD.csv
-#> 36   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NECONGOVTCN.csv
-#> 37  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEGDIFTOTKDZ.csv
-#> 38  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NVAGRTOTLCNZ.csv
-#> 39   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_BFCAFTOTLCD.csv
-#> 40   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_GGBALPRIMCN.csv
-#> 41   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_GGREVTOTLCD.csv
-#> 42   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_BFCAFFFDICD.csv
+#> 21          https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_POV1.csv
+#> 22  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NECONGOVTCNZ.csv
+#> 23  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_FPCPITOTLXNZ.csv
+#> 24   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEEXPGNFSCN.csv
+#> 25   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEEXPGNFSKN.csv
+#> 26  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_BNCABFUNDCD_.csv
+#> 27   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_GGEXPTOTLCD.csv
+#> 28  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEEXPGNFSKNZ.csv
+#> 29               https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO.csv
+#> 30   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_BFCAFTOTLCD.csv
+#> 31   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_GGDBTTOTLCD.csv
+#> 32   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NECONGOVTCN.csv
+#> 33  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEGDIFTOTKDZ.csv
+#> 34  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NVAGRTOTLCNZ.csv
+#> 35   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NVAGRTOTLCN.csv
+#> 36  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NYGDPMKTPKDZ.csv
+#> 37   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NYGDPMKTPKN.csv
+#> 38   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEEXPGNFSKD.csv
+#> 39  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEIMPGNFSCNZ.csv
+#> 40   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_BFCAFFFDICD.csv
+#> 41   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_GGBALPRIMCN.csv
+#> 42   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_GGREVTOTLCD.csv
 #> 43   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEIMPGNFSCN.csv
 #> 44  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_GGBALOVRLCD_.csv
 #> 45   https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NECONGOVTKD.csv
@@ -1920,7 +1920,7 @@ get_metadata360("WB_MPO")
 #> 47  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEGDIFTOTCNZ.csv
 #> 48  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_BFCAFFFDICD_.csv
 #> 49  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_GGBALPRIMCD_.csv
-#> 50  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NVSRVTOTLKNZ.csv
+#> 50  https://data360files.worldbank.org/data360-data/data/WB_MPO/WB_MPO_NEGDIFTOTKNZ.csv
 #>    series_description.excel_link
 #> 1                             NA
 #> 2                             NA
@@ -1985,36 +1985,36 @@ get_metadata360("WB_MPO")
 #> 10   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_GGBALOVRLCD.json
 #> 11  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEEXPGNFSCNZ.json
 #> 12          https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_POV3.json
-#> 13   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NVAGRTOTLKD.json
-#> 14  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NYGDPMKTPCNZ.json
-#> 15   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_BNCABFUNDCD.json
-#> 16   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_FPCPITOTLXN.json
-#> 17   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEIMPGNFSKD.json
-#> 18          https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_POV2.json
-#> 19   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NYGDPMKTPKD.json
+#> 13   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NYGDPMKTPKD.json
+#> 14   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_FPCPITOTLXN.json
+#> 15   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEIMPGNFSKD.json
+#> 16   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NVAGRTOTLKD.json
+#> 17  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NYGDPMKTPCNZ.json
+#> 18   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_BNCABFUNDCD.json
+#> 19          https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_POV2.json
 #> 20  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEGDIFTOTKN_.json
-#> 21  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NECONGOVTCNZ.json
-#> 22  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_FPCPITOTLXNZ.json
-#> 23   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEEXPGNFSCN.json
-#> 24   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEEXPGNFSKN.json
-#> 25   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_GGEXPTOTLCD.json
-#> 26  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEEXPGNFSKNZ.json
-#> 27          https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_POV1.json
-#> 28               https://data360files.worldbank.org/data360-data/datasetmetadata/WB_MPO.json
-#> 29  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_BNCABFUNDCD_.json
-#> 30   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NVAGRTOTLCN.json
-#> 31  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NYGDPMKTPKDZ.json
-#> 32   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NYGDPMKTPKN.json
-#> 33   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEEXPGNFSKD.json
-#> 34  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEIMPGNFSCNZ.json
-#> 35   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_GGDBTTOTLCD.json
-#> 36   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NECONGOVTCN.json
-#> 37  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEGDIFTOTKDZ.json
-#> 38  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NVAGRTOTLCNZ.json
-#> 39   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_BFCAFTOTLCD.json
-#> 40   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_GGBALPRIMCN.json
-#> 41   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_GGREVTOTLCD.json
-#> 42   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_BFCAFFFDICD.json
+#> 21          https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_POV1.json
+#> 22  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NECONGOVTCNZ.json
+#> 23  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_FPCPITOTLXNZ.json
+#> 24   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEEXPGNFSCN.json
+#> 25   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEEXPGNFSKN.json
+#> 26  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_BNCABFUNDCD_.json
+#> 27   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_GGEXPTOTLCD.json
+#> 28  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEEXPGNFSKNZ.json
+#> 29               https://data360files.worldbank.org/data360-data/datasetmetadata/WB_MPO.json
+#> 30   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_BFCAFTOTLCD.json
+#> 31   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_GGDBTTOTLCD.json
+#> 32   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NECONGOVTCN.json
+#> 33  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEGDIFTOTKDZ.json
+#> 34  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NVAGRTOTLCNZ.json
+#> 35   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NVAGRTOTLCN.json
+#> 36  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NYGDPMKTPKDZ.json
+#> 37   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NYGDPMKTPKN.json
+#> 38   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEEXPGNFSKD.json
+#> 39  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEIMPGNFSCNZ.json
+#> 40   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_BFCAFFFDICD.json
+#> 41   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_GGBALPRIMCN.json
+#> 42   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_GGREVTOTLCD.json
 #> 43   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEIMPGNFSCN.json
 #> 44  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_GGBALOVRLCD_.json
 #> 45   https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NECONGOVTKD.json
@@ -2022,7 +2022,7 @@ get_metadata360("WB_MPO")
 #> 47  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEGDIFTOTCNZ.json
 #> 48  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_BFCAFFFDICD_.json
 #> 49  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_GGBALPRIMCD_.json
-#> 50  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NVSRVTOTLKNZ.json
+#> 50  https://data360files.worldbank.org/data360-data/metadata/WB_MPO/WB_MPO_NEGDIFTOTKNZ.json
 #>                                                                                        series_description.api_link
 #> 1    https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGBALPRIMCD
 #> 2  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NECONPRVTPCKN
@@ -2036,36 +2036,36 @@ get_metadata360("WB_MPO")
 #> 10   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGBALOVRLCD
 #> 11  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSCNZ
 #> 12          https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_POV3
-#> 13   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLKD
-#> 14  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPCNZ
-#> 15   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BNCABFUNDCD
-#> 16   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_FPCPITOTLXN
-#> 17   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEIMPGNFSKD
-#> 18          https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_POV2
-#> 19   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKD
+#> 13   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKD
+#> 14   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_FPCPITOTLXN
+#> 15   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEIMPGNFSKD
+#> 16   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLKD
+#> 17  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPCNZ
+#> 18   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BNCABFUNDCD
+#> 19          https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_POV2
 #> 20  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEGDIFTOTKN_
-#> 21  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NECONGOVTCNZ
-#> 22  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_FPCPITOTLXNZ
-#> 23   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSCN
-#> 24   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKN
-#> 25   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGEXPTOTLCD
-#> 26  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKNZ
-#> 27          https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_POV1
-#> 28                                https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO
-#> 29  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BNCABFUNDCD_
-#> 30   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLCN
-#> 31  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKDZ
-#> 32   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKN
-#> 33   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKD
-#> 34  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEIMPGNFSCNZ
-#> 35   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGDBTTOTLCD
-#> 36   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NECONGOVTCN
-#> 37  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEGDIFTOTKDZ
-#> 38  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLCNZ
-#> 39   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BFCAFTOTLCD
-#> 40   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGBALPRIMCN
-#> 41   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGREVTOTLCD
-#> 42   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BFCAFFFDICD
+#> 21          https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_POV1
+#> 22  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NECONGOVTCNZ
+#> 23  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_FPCPITOTLXNZ
+#> 24   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSCN
+#> 25   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKN
+#> 26  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BNCABFUNDCD_
+#> 27   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGEXPTOTLCD
+#> 28  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKNZ
+#> 29                                https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO
+#> 30   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BFCAFTOTLCD
+#> 31   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGDBTTOTLCD
+#> 32   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NECONGOVTCN
+#> 33  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEGDIFTOTKDZ
+#> 34  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLCNZ
+#> 35   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLCN
+#> 36  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKDZ
+#> 37   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKN
+#> 38   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKD
+#> 39  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEIMPGNFSCNZ
+#> 40   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BFCAFFFDICD
+#> 41   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGBALPRIMCN
+#> 42   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGREVTOTLCD
 #> 43   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEIMPGNFSCN
 #> 44  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGBALOVRLCD_
 #> 45   https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NECONGOVTKD
@@ -2073,7 +2073,7 @@ get_metadata360("WB_MPO")
 #> 47  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEGDIFTOTCNZ
 #> 48  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BFCAFFFDICD_
 #> 49  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGBALPRIMCD_
-#> 50  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVSRVTOTLKNZ
+#> 50  https://data360api.worldbank.org/data360/data?top=1000&skip=0&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEGDIFTOTKNZ
 #>    series_description.indicator_count series_description.apiservice_link
 #> 1                                  NA                                 NA
 #> 2                                  NA                                 NA
@@ -2102,8 +2102,8 @@ get_metadata360("WB_MPO")
 #> 25                                 NA                                 NA
 #> 26                                 NA                                 NA
 #> 27                                 NA                                 NA
-#> 28                                103                                 NA
-#> 29                                 NA                                 NA
+#> 28                                 NA                                 NA
+#> 29                                103                                 NA
 #> 30                                 NA                                 NA
 #> 31                                 NA                                 NA
 #> 32                                 NA                                 NA
@@ -2138,36 +2138,36 @@ get_metadata360("WB_MPO")
 #> 10   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGBALOVRLCD
 #> 11  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSCNZ
 #> 12          http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_POV3
-#> 13   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLKD
-#> 14  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPCNZ
-#> 15   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BNCABFUNDCD
-#> 16   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_FPCPITOTLXN
-#> 17   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEIMPGNFSKD
-#> 18          http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_POV2
-#> 19   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKD
+#> 13   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKD
+#> 14   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_FPCPITOTLXN
+#> 15   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEIMPGNFSKD
+#> 16   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLKD
+#> 17  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPCNZ
+#> 18   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BNCABFUNDCD
+#> 19          http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_POV2
 #> 20  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEGDIFTOTKN_
-#> 21  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NECONGOVTCNZ
-#> 22  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_FPCPITOTLXNZ
-#> 23   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSCN
-#> 24   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKN
-#> 25   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGEXPTOTLCD
-#> 26  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKNZ
-#> 27          http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_POV1
-#> 28                                http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO
-#> 29  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BNCABFUNDCD_
-#> 30   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLCN
-#> 31  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKDZ
-#> 32   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKN
-#> 33   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKD
-#> 34  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEIMPGNFSCNZ
-#> 35   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGDBTTOTLCD
-#> 36   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NECONGOVTCN
-#> 37  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEGDIFTOTKDZ
-#> 38  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLCNZ
-#> 39   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BFCAFTOTLCD
-#> 40   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGBALPRIMCN
-#> 41   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGREVTOTLCD
-#> 42   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BFCAFFFDICD
+#> 21          http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_POV1
+#> 22  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NECONGOVTCNZ
+#> 23  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_FPCPITOTLXNZ
+#> 24   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSCN
+#> 25   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKN
+#> 26  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BNCABFUNDCD_
+#> 27   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGEXPTOTLCD
+#> 28  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKNZ
+#> 29                                http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO
+#> 30   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BFCAFTOTLCD
+#> 31   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGDBTTOTLCD
+#> 32   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NECONGOVTCN
+#> 33  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEGDIFTOTKDZ
+#> 34  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLCNZ
+#> 35   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVAGRTOTLCN
+#> 36  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKDZ
+#> 37   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NYGDPMKTPKN
+#> 38   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEEXPGNFSKD
+#> 39  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEIMPGNFSCNZ
+#> 40   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BFCAFFFDICD
+#> 41   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGBALPRIMCN
+#> 42   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGREVTOTLCD
 #> 43   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEIMPGNFSCN
 #> 44  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGBALOVRLCD_
 #> 45   http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NECONGOVTKD
@@ -2175,7 +2175,7 @@ get_metadata360("WB_MPO")
 #> 47  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEGDIFTOTCNZ
 #> 48  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_BFCAFFFDICD_
 #> 49  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_GGBALPRIMCD_
-#> 50  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NVSRVTOTLKNZ
+#> 50  http://datacatalog.worldbank.org/data360/api/execute?tab=Data&id=1&DATABASE_ID=WB_MPO&INDICATOR=WB_MPO_NEGDIFTOTKNZ
 #>    series_description.authoring_entity
 #> 1                                 NULL
 #> 2                                 NULL
@@ -2306,8 +2306,8 @@ get_metadata360("WB_MPO")
 #> 25                                        2025-10-10
 #> 26                                        2025-10-10
 #> 27                                        2025-10-10
-#> 28                                              <NA>
-#> 29                                        2025-10-10
+#> 28                                        2025-10-10
+#> 29                                              <NA>
 #> 30                                        2025-10-10
 #> 31                                        2025-10-10
 #> 32                                        2025-10-10
@@ -2495,36 +2495,36 @@ get_metadata360("WB_MPO")
 #> 10   EFIDATA360_IND_ID, WB.MPO.GGBALOVRLCD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
 #> 11  EFIDATA360_IND_ID, WB.MPO.NEEXPGNFSCNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
 #> 12          EFIDATA360_IND_ID, WB.MPO.POV3, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 13   EFIDATA360_IND_ID, WB.MPO.NVAGRTOTLKD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 14  EFIDATA360_IND_ID, WB.MPO.NYGDPMKTPCNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 15   EFIDATA360_IND_ID, WB.MPO.BNCABFUNDCD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 16   EFIDATA360_IND_ID, WB.MPO.FPCPITOTLXN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 17   EFIDATA360_IND_ID, WB.MPO.NEIMPGNFSKD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 18          EFIDATA360_IND_ID, WB.MPO.POV2, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 19   EFIDATA360_IND_ID, WB.MPO.NYGDPMKTPKD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 13   EFIDATA360_IND_ID, WB.MPO.NYGDPMKTPKD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 14   EFIDATA360_IND_ID, WB.MPO.FPCPITOTLXN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 15   EFIDATA360_IND_ID, WB.MPO.NEIMPGNFSKD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 16   EFIDATA360_IND_ID, WB.MPO.NVAGRTOTLKD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 17  EFIDATA360_IND_ID, WB.MPO.NYGDPMKTPCNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 18   EFIDATA360_IND_ID, WB.MPO.BNCABFUNDCD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 19          EFIDATA360_IND_ID, WB.MPO.POV2, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
 #> 20  EFIDATA360_IND_ID, WB.MPO.NEGDIFTOTKN_, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 21  EFIDATA360_IND_ID, WB.MPO.NECONGOVTCNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 22  EFIDATA360_IND_ID, WB.MPO.FPCPITOTLXNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 23   EFIDATA360_IND_ID, WB.MPO.NEEXPGNFSCN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 24   EFIDATA360_IND_ID, WB.MPO.NEEXPGNFSKN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 25   EFIDATA360_IND_ID, WB.MPO.GGEXPTOTLCD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 26  EFIDATA360_IND_ID, WB.MPO.NEEXPGNFSKNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 27          EFIDATA360_IND_ID, WB.MPO.POV1, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 28                                                                                                            NULL
-#> 29  EFIDATA360_IND_ID, WB.MPO.BNCABFUNDCD_, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 30   EFIDATA360_IND_ID, WB.MPO.NVAGRTOTLCN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 31  EFIDATA360_IND_ID, WB.MPO.NYGDPMKTPKDZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 32   EFIDATA360_IND_ID, WB.MPO.NYGDPMKTPKN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 33   EFIDATA360_IND_ID, WB.MPO.NEEXPGNFSKD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 34  EFIDATA360_IND_ID, WB.MPO.NEIMPGNFSCNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 35   EFIDATA360_IND_ID, WB.MPO.GGDBTTOTLCD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 36   EFIDATA360_IND_ID, WB.MPO.NECONGOVTCN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 37  EFIDATA360_IND_ID, WB.MPO.NEGDIFTOTKDZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 38  EFIDATA360_IND_ID, WB.MPO.NVAGRTOTLCNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 39   EFIDATA360_IND_ID, WB.MPO.BFCAFTOTLCD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 40   EFIDATA360_IND_ID, WB.MPO.GGBALPRIMCN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 41   EFIDATA360_IND_ID, WB.MPO.GGREVTOTLCD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 42   EFIDATA360_IND_ID, WB.MPO.BFCAFFFDICD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 21          EFIDATA360_IND_ID, WB.MPO.POV1, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 22  EFIDATA360_IND_ID, WB.MPO.NECONGOVTCNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 23  EFIDATA360_IND_ID, WB.MPO.FPCPITOTLXNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 24   EFIDATA360_IND_ID, WB.MPO.NEEXPGNFSCN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 25   EFIDATA360_IND_ID, WB.MPO.NEEXPGNFSKN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 26  EFIDATA360_IND_ID, WB.MPO.BNCABFUNDCD_, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 27   EFIDATA360_IND_ID, WB.MPO.GGEXPTOTLCD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 28  EFIDATA360_IND_ID, WB.MPO.NEEXPGNFSKNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 29                                                                                                            NULL
+#> 30   EFIDATA360_IND_ID, WB.MPO.BFCAFTOTLCD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 31   EFIDATA360_IND_ID, WB.MPO.GGDBTTOTLCD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 32   EFIDATA360_IND_ID, WB.MPO.NECONGOVTCN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 33  EFIDATA360_IND_ID, WB.MPO.NEGDIFTOTKDZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 34  EFIDATA360_IND_ID, WB.MPO.NVAGRTOTLCNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 35   EFIDATA360_IND_ID, WB.MPO.NVAGRTOTLCN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 36  EFIDATA360_IND_ID, WB.MPO.NYGDPMKTPKDZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 37   EFIDATA360_IND_ID, WB.MPO.NYGDPMKTPKN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 38   EFIDATA360_IND_ID, WB.MPO.NEEXPGNFSKD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 39  EFIDATA360_IND_ID, WB.MPO.NEIMPGNFSCNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 40   EFIDATA360_IND_ID, WB.MPO.BFCAFFFDICD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 41   EFIDATA360_IND_ID, WB.MPO.GGBALPRIMCN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 42   EFIDATA360_IND_ID, WB.MPO.GGREVTOTLCD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
 #> 43   EFIDATA360_IND_ID, WB.MPO.NEIMPGNFSCN, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
 #> 44  EFIDATA360_IND_ID, WB.MPO.GGBALOVRLCD_, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
 #> 45   EFIDATA360_IND_ID, WB.MPO.NECONGOVTKD, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
@@ -2532,7 +2532,7 @@ get_metadata360("WB_MPO")
 #> 47  EFIDATA360_IND_ID, WB.MPO.NEGDIFTOTCNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
 #> 48  EFIDATA360_IND_ID, WB.MPO.BFCAFFFDICD_, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
 #> 49  EFIDATA360_IND_ID, WB.MPO.GGBALPRIMCD_, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
-#> 50  EFIDATA360_IND_ID, WB.MPO.NVSRVTOTLKNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
+#> 50  EFIDATA360_IND_ID, WB.MPO.NEGDIFTOTKNZ, ProsperityData360, https://prosperitydata360.worldbank.org/en/home, NA
 #>    series_description.languages
 #> 1                   English, EN
 #> 2                   English, EN
@@ -2561,8 +2561,8 @@ get_metadata360("WB_MPO")
 #> 25                  English, EN
 #> 26                  English, EN
 #> 27                  English, EN
-#> 28                         NULL
-#> 29                  English, EN
+#> 28                  English, EN
+#> 29                         NULL
 #> 30                  English, EN
 #> 31                  English, EN
 #> 32                  English, EN
@@ -2612,8 +2612,8 @@ get_metadata360("WB_MPO")
 #> 25 NA, NA, Geographic area, Vintage, Country/economy, Region, NA
 #> 26 NA, NA, Geographic area, Vintage, Country/economy, Region, NA
 #> 27 NA, NA, Geographic area, Vintage, Country/economy, Region, NA
-#> 28                                                          NULL
-#> 29 NA, NA, Geographic area, Vintage, Country/economy, Region, NA
+#> 28 NA, NA, Geographic area, Vintage, Country/economy, Region, NA
+#> 29                                                          NULL
 #> 30 NA, NA, Geographic area, Vintage, Country/economy, Region, NA
 #> 31 NA, NA, Geographic area, Vintage, Country/economy, Region, NA
 #> 32 NA, NA, Geographic area, Vintage, Country/economy, Region, NA
@@ -2765,8 +2765,8 @@ get_metadata360("WB_MPO")
 #> 25 Macro Poverty Outlook, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA
 #> 26 Macro Poverty Outlook, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA
 #> 27 Macro Poverty Outlook, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA
-#> 28                                                                                      NULL
-#> 29 Macro Poverty Outlook, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA
+#> 28 Macro Poverty Outlook, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA
+#> 29                                                                                      NULL
 #> 30 Macro Poverty Outlook, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA
 #> 31 Macro Poverty Outlook, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA
 #> 32 Macro Poverty Outlook, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA
@@ -2904,35 +2904,35 @@ get_metadata360("WB_MPO")
 #> 11                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
 #> 12                                                                                                                                                                                                                                                                                                                                                             P3, P3_000004, P3_000020, Prosperity, Poverty, Poverty, NA, P3, P3_000004, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
 #> 13                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 14                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 15                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 16                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 17                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 18                                                                                                                                                                                                                                                                                                                                                             P3, P3_000004, P3_000020, Prosperity, Poverty, Poverty, NA, P3, P3_000004, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 19                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 14                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 15                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 16                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 17                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 18                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 19                                                                                                                                                                                                                                                                                                                                                             P3, P3_000004, P3_000020, Prosperity, Poverty, Poverty, NA, P3, P3_000004, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
 #> 20                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 21                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 22                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 23                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 21                                                                                                                                                                                                                                                                              P3, P3_000004, P3_000020, GAFS_0008, Prosperity, Poverty, Poverty, Trends in the Determinants of Food Security Outcomes, NA, P3, P3_000004, NA, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, GAFS, NA, NA, NA, NA
+#> 22                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 23                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
 #> 24                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 25                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 26                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 27                                                                                                                                                                                                                                                                              P3, P3_000004, P3_000020, GAFS_0008, Prosperity, Poverty, Poverty, Trends in the Determinants of Food Security Outcomes, NA, P3, P3_000004, NA, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, GAFS, NA, NA, NA, NA
-#> 28 P3, P3_000001, P3_000006, P3_000004, P3_000007, P3_000008, P3_000009, P3_000020, P3_000028, Prosperity, Economic Policy, Trade, Poverty, Economic Growth, Fiscal Policy, Macro-financial Policies, Poverty, Trade Outcomes, NA, P3, P3, P3, P3_000001, P3_000001, P3_000001, P3_000004, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L1, Data360 Topic L1, Data360 Topic L2, Data360 Topic L2, Data360 Topic L2, Data360 Topic L2, Data360 Topic L2, NA, NA, NA, NA, NA, NA, NA, NA, NA
-#> 29                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 30                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 31                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 32                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 33                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 34                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 35                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 36                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 37                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 38                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 39                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 40                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 25                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 26                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 27                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 28                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 29 P3, P3_000001, P3_000006, P3_000004, P3_000007, P3_000008, P3_000009, P3_000020, P3_000028, Prosperity, Economic Policy, Trade, Poverty, Economic Growth, Fiscal Policy, Macro-financial Policies, Poverty, Trade Outcomes, NA, P3, P3, P3, P3_000001, P3_000001, P3_000001, P3_000004, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L1, Data360 Topic L1, Data360 Topic L2, Data360 Topic L2, Data360 Topic L2, Data360 Topic L2, Data360 Topic L2, NA, NA, NA, NA, NA, NA, NA, NA, NA
+#> 30                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 31                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 32                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 33                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 34                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 35                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 36                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 37                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 38                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 39                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 40                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
 #> 41                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 42                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 42                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
 #> 43                                                                                                                                                                                                                                                                                                                                                        P3, P3_000006, P3_000028, Prosperity, Trade, Trade Outcomes, NA, P3, P3_000006, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
 #> 44                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
 #> 45                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
@@ -2940,7 +2940,7 @@ get_metadata360("WB_MPO")
 #> 47                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
 #> 48                                                                                                                                                                                                                                                                                                                                    P3, P3_000001, P3_000009, Prosperity, Economic Policy, Macro-financial Policies, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
 #> 49                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
-#> 50                                                                                                                                                                                                                                                                                                                                             P3, P3_000001, P3_000007, Prosperity, Economic Policy, Economic Growth, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
+#> 50                                                                                                                                                                                                                                                                                                                                               P3, P3_000001, P3_000008, Prosperity, Economic Policy, Fiscal Policy, NA, P3, P3_000001, WB Practice Groups, Data360 Topic L1, Data360 Topic L2, NA, NA, NA
 #>    series_description.time_periods
 #> 1                   1980, 2027, NA
 #> 2                   1980, 2027, NA
@@ -3173,8 +3173,8 @@ get_metadata360("WB_MPO")
 #> 25                            CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, This work is provided under a Creative Commons 4.0 Attribution International License, with the following mandatory and binding addition:i. Any and all disputes arising under this License that cannot be settled amicably shall be submitted to mediation in accordance with the WIPO Mediation Rules in effect at the time the work was published. If the request for mediation is not resolved within forty-five (45) days of the request, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other party refer the dispute to final and binding arbitration to be conducted in accordance with UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable, or held at the World Bank headquarters in Washington DC.
 #> 26                            CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, This work is provided under a Creative Commons 4.0 Attribution International License, with the following mandatory and binding addition:i. Any and all disputes arising under this License that cannot be settled amicably shall be submitted to mediation in accordance with the WIPO Mediation Rules in effect at the time the work was published. If the request for mediation is not resolved within forty-five (45) days of the request, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other party refer the dispute to final and binding arbitration to be conducted in accordance with UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable, or held at the World Bank headquarters in Washington DC.
 #> 27                            CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, This work is provided under a Creative Commons 4.0 Attribution International License, with the following mandatory and binding addition:i. Any and all disputes arising under this License that cannot be settled amicably shall be submitted to mediation in accordance with the WIPO Mediation Rules in effect at the time the work was published. If the request for mediation is not resolved within forty-five (45) days of the request, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other party refer the dispute to final and binding arbitration to be conducted in accordance with UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable, or held at the World Bank headquarters in Washington DC.
-#> 28 CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, You are free to:\nShare — copy and redistribute the material in any medium or format for any purpose, even commercially.\nAdapt — remix, transform, and build upon the material for any purpose, even commercially.\nThe licensor cannot revoke these freedoms as long as you follow the license terms.\nUnder the following terms:\nAttribution — You must give appropriate credit , provide a link to the license, and indicate if changes were made . You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.\nNo additional restrictions — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.\nNotices:\nYou do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception or limitation .\n\nNo warranties are given. The license may not give you all of the permissions necessary for your intended use. For example, other rights such as publicity, privacy, or moral rights may limit how you use the material.
-#> 29                            CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, This work is provided under a Creative Commons 4.0 Attribution International License, with the following mandatory and binding addition:i. Any and all disputes arising under this License that cannot be settled amicably shall be submitted to mediation in accordance with the WIPO Mediation Rules in effect at the time the work was published. If the request for mediation is not resolved within forty-five (45) days of the request, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other party refer the dispute to final and binding arbitration to be conducted in accordance with UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable, or held at the World Bank headquarters in Washington DC.
+#> 28                            CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, This work is provided under a Creative Commons 4.0 Attribution International License, with the following mandatory and binding addition:i. Any and all disputes arising under this License that cannot be settled amicably shall be submitted to mediation in accordance with the WIPO Mediation Rules in effect at the time the work was published. If the request for mediation is not resolved within forty-five (45) days of the request, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other party refer the dispute to final and binding arbitration to be conducted in accordance with UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable, or held at the World Bank headquarters in Washington DC.
+#> 29 CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, You are free to:\nShare — copy and redistribute the material in any medium or format for any purpose, even commercially.\nAdapt — remix, transform, and build upon the material for any purpose, even commercially.\nThe licensor cannot revoke these freedoms as long as you follow the license terms.\nUnder the following terms:\nAttribution — You must give appropriate credit , provide a link to the license, and indicate if changes were made . You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.\nNo additional restrictions — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.\nNotices:\nYou do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception or limitation .\n\nNo warranties are given. The license may not give you all of the permissions necessary for your intended use. For example, other rights such as publicity, privacy, or moral rights may limit how you use the material.
 #> 30                            CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, This work is provided under a Creative Commons 4.0 Attribution International License, with the following mandatory and binding addition:i. Any and all disputes arising under this License that cannot be settled amicably shall be submitted to mediation in accordance with the WIPO Mediation Rules in effect at the time the work was published. If the request for mediation is not resolved within forty-five (45) days of the request, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other party refer the dispute to final and binding arbitration to be conducted in accordance with UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable, or held at the World Bank headquarters in Washington DC.
 #> 31                            CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, This work is provided under a Creative Commons 4.0 Attribution International License, with the following mandatory and binding addition:i. Any and all disputes arising under this License that cannot be settled amicably shall be submitted to mediation in accordance with the WIPO Mediation Rules in effect at the time the work was published. If the request for mediation is not resolved within forty-five (45) days of the request, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other party refer the dispute to final and binding arbitration to be conducted in accordance with UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable, or held at the World Bank headquarters in Washington DC.
 #> 32                            CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, This work is provided under a Creative Commons 4.0 Attribution International License, with the following mandatory and binding addition:i. Any and all disputes arising under this License that cannot be settled amicably shall be submitted to mediation in accordance with the WIPO Mediation Rules in effect at the time the work was published. If the request for mediation is not resolved within forty-five (45) days of the request, either You or the Licensor may, pursuant to a notice of arbitration communicated by reasonable means to the other party refer the dispute to final and binding arbitration to be conducted in accordance with UNCITRAL Arbitration Rules as then in force. The arbitral tribunal shall consist of a sole arbitrator and the language of the proceedings shall be English unless otherwise agreed. The place of arbitration shall be where the Licensor has its headquarters. The arbitral proceedings shall be conducted remotely (e.g., via telephone conference or written submissions) whenever practicable, or held at the World Bank headquarters in Washington DC.
@@ -3224,8 +3224,8 @@ get_metadata360("WB_MPO")
 #> 25 DDH, NA, https://datacatalog.worldbank.org/int/search/dataset/0038389/Macro-Poverty-Outlook, NA
 #> 26 DDH, NA, https://datacatalog.worldbank.org/int/search/dataset/0038389/Macro-Poverty-Outlook, NA
 #> 27 DDH, NA, https://datacatalog.worldbank.org/int/search/dataset/0038389/Macro-Poverty-Outlook, NA
-#> 28                      NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA
-#> 29 DDH, NA, https://datacatalog.worldbank.org/int/search/dataset/0038389/Macro-Poverty-Outlook, NA
+#> 28 DDH, NA, https://datacatalog.worldbank.org/int/search/dataset/0038389/Macro-Poverty-Outlook, NA
+#> 29                      NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA
 #> 30 DDH, NA, https://datacatalog.worldbank.org/int/search/dataset/0038389/Macro-Poverty-Outlook, NA
 #> 31 DDH, NA, https://datacatalog.worldbank.org/int/search/dataset/0038389/Macro-Poverty-Outlook, NA
 #> 32 DDH, NA, https://datacatalog.worldbank.org/int/search/dataset/0038389/Macro-Poverty-Outlook, NA
@@ -3326,8 +3326,8 @@ get_metadata360("WB_MPO")
 #> 25 NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
 #> 26 NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
 #> 27 NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
-#> 28                    NA, NA, NA, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
-#> 29 NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
+#> 28 NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
+#> 29                    NA, NA, NA, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
 #> 30 NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
 #> 31 NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
 #> 32 NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
@@ -3348,7 +3348,7 @@ get_metadata360("WB_MPO")
 #> 47                                      NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org, NA, NA
 #> 48 NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
 #> 49 NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
-#> 50 NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org/en/publication/macro-poverty-outlook, NA, NA
+#> 50                                      NA, NA, Macro Poverty Outlook, World Bank (WB), NA, NA, https://www.worldbank.org, NA, NA
 #>    series_description.notes series_description.related_indicators
 #> 1                      NULL                                  NULL
 #> 2                      NULL                                  NULL
@@ -3418,18 +3418,18 @@ get_metadata360("WB_MPO")
 #> 15 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
 #> 16 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
 #> 17 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
-#> 18                                           WB_MPO, feature-dataset-profile
-#> 19 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
+#> 18 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
+#> 19                                           WB_MPO, feature-dataset-profile
 #> 20 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
-#> 21 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
+#> 21         WB_MPO, GAFS_0008, feature-dataset-profile, feature-topic-profile
 #> 22 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
 #> 23 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
 #> 24 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
 #> 25 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
 #> 26 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
-#> 27         WB_MPO, GAFS_0008, feature-dataset-profile, feature-topic-profile
-#> 28                                                                      NULL
-#> 29 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
+#> 27 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
+#> 28 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
+#> 29                                                                      NULL
 #> 30 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
 #> 31 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
 #> 32 WB_MPO, Bar Chart, feature-dataset-profile, feature-dataset-profile-chart
@@ -3938,8 +3938,8 @@ get_metadata360("WB_MPO")
 #> 25 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
 #> 26 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
 #> 27 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
-#> 28                                                                                                         NULL
-#> 29 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
+#> 28 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
+#> 29                                                                                                         NULL
 #> 30 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
 #> 31 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
 #> 32 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
@@ -3950,9 +3950,9 @@ get_metadata360("WB_MPO")
 #> 37 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
 #> 38 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
 #> 39 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
-#> 40 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
+#> 40                                                                                                         NULL
 #> 41 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
-#> 42                                                                                                         NULL
+#> 42 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
 #> 43 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
 #> 44 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
 #> 45 COMP_BREAKDOWN_1, WB_MPO_VINTAGE_AM_2024, WB_MPO_VINTAGE_SM_2024, WB_MPO_VINTAGE_SM_2025, Custom Dimension 1
@@ -3982,13 +3982,13 @@ get_metadata360("WB_MPO")
 #> 18                                NA                        NULL
 #> 19                                NA                        NULL
 #> 20                                NA                        NULL
-#> 21                                NA                        NULL
+#> 21                                NA GAFS_0008, NA, GAFS, NA, NA
 #> 22                                NA                        NULL
 #> 23                                NA                        NULL
 #> 24                                NA                        NULL
 #> 25                                NA                        NULL
 #> 26                                NA                        NULL
-#> 27                                NA GAFS_0008, NA, GAFS, NA, NA
+#> 27                                NA                        NULL
 #> 28                                NA                        NULL
 #> 29                                NA                        NULL
 #> 30                                NA                        NULL
@@ -4033,13 +4033,13 @@ get_metadata360("WB_MPO")
 #> 18                             NULL
 #> 19                             NULL
 #> 20                             NULL
-#> 21                             NULL
+#> 21 GAFS_0008, feature-topic-profile
 #> 22                             NULL
 #> 23                             NULL
 #> 24                             NULL
 #> 25                             NULL
 #> 26                             NULL
-#> 27 GAFS_0008, feature-topic-profile
+#> 27                             NULL
 #> 28                             NULL
 #> 29                             NULL
 #> 30                             NULL
