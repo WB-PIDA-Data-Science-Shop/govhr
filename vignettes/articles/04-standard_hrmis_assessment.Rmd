@@ -20,7 +20,7 @@ library(govhr)
 
 theme_set(
   theme_few(
-    base_size = 24
+    base_size = 14
   )
 )
 
@@ -67,7 +67,9 @@ knitr::opts_chunk$set(
   echo = FALSE,
   warning = FALSE,
   message = FALSE,
-  dpi = 300
+  dpi = 300,
+  fig.width = 10,
+  fig.height = 6
 )
 ```
 
@@ -199,7 +201,7 @@ bra_wagebill |>
   ) |>
   # extract top fifth percentile
   slice_max(
-    prop = 0.05,
+    n = 10,
     order_by = value
   ) |> 
   ggplot() +
@@ -353,7 +355,7 @@ contract_df |>
     share = value / sum(value)
   ) |> 
   slice_max(
-    prop = 0.05,
+    n = 10,
     order_by = share
   ) |>
   filter(
@@ -406,7 +408,12 @@ personnel_df |>
     fill = "Education Level"
   ) +
   scale_fill_solarized() +
-  theme(legend.position = "bottom")
+  guides(
+    fill = guide_legend(nrow = 3)
+  ) +
+  theme(
+    legend.position = "bottom"
+  )
 ```
 
 3.3.4. Distribution of public sector workers by pay grade
