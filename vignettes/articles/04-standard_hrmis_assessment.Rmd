@@ -18,9 +18,10 @@ library(data.table)
 library(tidyr)
 library(govhr)
 
-# set default color palette with scale_color_brewer
 theme_set(
-  theme_few()
+  theme_few(
+    base_size = 24
+  )
 )
 
 set.seed(2025)
@@ -28,12 +29,14 @@ set.seed(2025)
 # read-in data ------------------------------------------------------------
 personnel_df <- govhr::bra_hrmis_personnel |>
   mutate(
-    year = lubridate::year(ref_date)
+    year = lubridate::year(ref_date) |> 
+      as.integer()
   )
 
 contract_df <- govhr::bra_hrmis_contract |>
   mutate(
-    year = lubridate::year(ref_date)
+    year = lubridate::year(ref_date) |> 
+      as.integer()
   )
 
 est_df <- govhr::bra_hrmis_est
@@ -158,13 +161,24 @@ wagebill_shares_dt |>
   scale_y_continuous(
     labels = scales::percent_format()
   ) +
+  scale_x_continuous(
+    breaks = scales::pretty_breaks()
+  ) +
   labs(
     x = "Year",
     y = "Share (percentage)",
     title = "Wage Bill as Share of GDP, expenditures and revenues"
   ) +
+  scale_color_few(
+    labels = c(
+      "Share of GDP",
+      "Share of Public Expenditure",
+      "Share of Public Revenue"
+    )
+  ) +
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    legend.title=element_blank()
   )
 ```
 
@@ -197,7 +211,7 @@ bra_wagebill |>
   ) +
   labs(
     x = "Total",
-    y = "Occupation (ISCO)"
+    y = "Occupation"
   )
 ```
 
@@ -218,7 +232,11 @@ personnel_hire_df |>
     aes(ref_date, n)
   ) +
   geom_point() +
-  geom_line()
+  geom_line() +
+  labs(
+    x = "Date",
+    y = "Number of hires"
+  )
 ```
 
 ### 3.2. Wage Bill Controls
@@ -261,6 +279,10 @@ macro_indicators |>
     geom_hline(
       yintercept = 1,
       linetype = "dashed"
+    ) +
+    labs(
+      x = "Year",
+      y = "Budget Execution Rate"
     )
 ```
 
@@ -301,16 +323,16 @@ govhr::wwbi |>
     value,
     group = name
   ) +
-    scale_color_discrete(
+  scale_color_few(
       labels = c("Formal Employment", "Paid Employment", "Total Employment"),
       name = "Type of Employment"
-    ) +
+  ) +
   scale_y_continuous(
     labels = scales::percent_format()
   ) +
   labs(
     x = "Year",
-    y = "Public Sector Employment as Share of Total Employment"
+    y = "Share"
   )
 ```
 
@@ -382,7 +404,9 @@ personnel_df |>
     x = "Year",
     y = "Share of Personnel",
     fill = "Education Level"
-  )
+  ) +
+  scale_fill_solarized() +
+  theme(legend.position = "bottom")
 ```
 
 3.3.4. Distribution of public sector workers by pay grade
@@ -411,7 +435,9 @@ contract_df |>
     x = "Year",
     y = "Share of Personnel",
     fill = "Paygrade"
-  )
+  ) +
+  scale_fill_solarized() +
+  theme(legend.position = "bottom")
 ```
 
 3.3.5. Share of women workers in the public sector
@@ -676,9 +702,9 @@ salary_dispersion_occupation |>
   ) +
   scale_x_continuous(labels = scales::label_comma()) +
   labs(
-    x = "Year",
-    y = "Median base salary (2021 constant international dollars)",
-    title = "Annual distribution of salaries by occupation"
+    x = "Median Salary by Year",
+    y = "",
+    title = "Dispersion of salaries by occupation"
   )
 ```
 
@@ -801,9 +827,8 @@ contract_df |>
     median_base_salary_ppp,
     group = paygrade
   ) +
-  scale_color_brewer(
-    name = "Paygrade",
-    palette = "Paired"
+  scale_color_few(
+    name = "Paygrade"
   ) +
   theme(
     legend.position = "bottom"
@@ -884,9 +909,8 @@ contract_df |>
   facet_wrap(
     vars(paygrade)
   ) +
-  scale_color_brewer(
-    name = "Paygrade",
-    palette = "Paired"
+  scale_color_few(
+    name = "Paygrade"
   ) +
   scale_y_continuous(
     labels = scales::percent_format()
@@ -981,6 +1005,10 @@ contract_growth |>
     year,
     value,
     group = Indicator
+  ) +
+  labs(
+    x = "Year",
+    y = "Index (Baseline = 100)"
   )
 ```
 
