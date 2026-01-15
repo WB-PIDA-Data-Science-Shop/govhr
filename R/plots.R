@@ -27,6 +27,7 @@
 #' @importFrom ggrepel geom_text_repel
 #' @importFrom ggthemes scale_color_few
 #' @importFrom rlang enquo
+#' @importFrom scales pretty_breaks
 #'
 #' @export
 ggplot_point_line <- function(data,

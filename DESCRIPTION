@@ -26,7 +26,8 @@ Imports:
     broom,
     rmarkdown,
     stringr,
-    tidyselect
+    tidyselect,
+    scales
 RoxygenNote: 7.3.3
 Suggests: 
     forcats,
