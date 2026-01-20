@@ -27,6 +27,7 @@
 #' @importFrom ggrepel geom_text_repel
 #' @importFrom ggthemes scale_color_few
 #' @importFrom rlang enquo
+#' @importFrom scales pretty_breaks
 #'
 #' @export
 ggplot_point_line <- function(data,
@@ -36,8 +37,11 @@ ggplot_point_line <- function(data,
                               label = NULL,
                               ...) {
   plot <- ggplot(data, aes(x = {{ x }}, y = {{ y }}, color = {{ group }}, ...)) +
-    geom_line(linewidth = 1.2) +
-    geom_point(size = 4)
+    geom_line(linewidth = 3) +
+    geom_point(size = 8) +
+    scale_x_continuous(
+      breaks = scales::pretty_breaks()
+    )
 
   # Add labels if provided
   if (!rlang::quo_is_null(rlang::enquo(label))) {

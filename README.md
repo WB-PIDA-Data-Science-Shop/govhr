@@ -31,7 +31,7 @@ You can install the development version of `govhr` from
 pak::pak("WB-PIDA-Data-Science-Shop/govhr")
 ```
 ## :link: Get started:
-1. [Standard dictionary for human resources (HR) data.](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html).
+1. [Standard dictionary for human resources (HR) data.](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html)
 2. [How to harmonize your HR data.](https://wb-pida-data-science-shop.github.io/govhr/articles/02-harmonization.html)
 3. [How to generate a data quality assessment.](https://wb-pida-data-science-shop.github.io/govhr/articles/03-quality_control.html)
 4. [How to generate a standard HR analytics report](https://wb-pida-data-science-shop.github.io/govhr/articles/04-standard_hrmis_assessment.html)
