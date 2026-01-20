@@ -234,9 +234,20 @@ contract_alagoas_tbl <-
 # )
 
 ### save the occupation classifications data
-qs::qsave(occup_df, file = "spielplatz/data/occupations_tbl.qs", preset = "high")
+# qs::qsave(occup_df, file = "spielplatz/data/occupations_tbl.qs", preset = "high")
 
-qs::qsave(contract_alagoas_tbl, 
-          file = "spielplatz/data/contract_alagoas_tbl.qs",
-          preset = "high")
+# qs::qsave(contract_alagoas_tbl, 
+#           file = "spielplatz/data/contract_alagoas_tbl.qs",
+#           preset = "high")
+
+arrow::write_parquet(occup_df, 
+                     "spielplatz/data/occupations_tbl.parquet",
+                     compression = "zstd",
+                     compression_level = 22)
+
+arrow::write_parquet(contract_alagoas_tbl, 
+                     "spielplatz/data/contract_alagoas_tbl.parquet", 
+                     compression = "zstd", 
+                     compression_level = 22)
+
 

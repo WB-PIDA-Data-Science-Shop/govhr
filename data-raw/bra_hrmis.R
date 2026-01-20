@@ -7,6 +7,7 @@ library(labourR)
 library(readr)
 library(here)
 library(purrr)
+library(arrow)
 
 devtools::load_all()
 
@@ -85,11 +86,9 @@ bra_hrmis <-
 # )
 
 ### lets select the data to be lazy loaded
-contract_tbl <- qs::qread("spielplatz/data/contract_alagoas_tbl.qs")
-personnel_tbl <- qs::qread("spielplatz/data/personnel_alagoas_tbl.qs")
-est_tbl <- qs::qread("spielplatz/data/est_alagoas_tbl.qs")
-
-
+contract_tbl <- arrow::read_parquet("spielplatz/data/contract_alagoas_tbl.parquet")
+personnel_tbl <- arrow::read_parquet("spielplatz/data/personnel_alagoas_tbl.parquet")
+est_tbl <- arrow::read_parquet("spielplatz/data/est_alagoas_tbl.parquet")
 
 
 bra_hrmis_personnel <- 

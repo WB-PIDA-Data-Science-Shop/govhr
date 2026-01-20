@@ -178,8 +178,13 @@ alagoas_est_tbl <-
 #     compress = "gz"
 #   )
 
-alagoas_est_tbl |>
-  qs::qsave("spielplatz/data/est_alagoas_tbl.qs")
+# alagoas_est_tbl |>
+#   qs::qsave("spielplatz/data/est_alagoas_tbl.qs")
+
+arrow::write_parquet(alagoas_est_tbl, 
+                     "spielplatz/data/est_alagoas_tbl.parquet", 
+                     compression = "zstd", 
+                     compression_level = 22)
 
 
 write_xlsx(check_list, "spielplatz/data/orgao_check.xlsx")

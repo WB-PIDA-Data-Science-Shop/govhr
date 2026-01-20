@@ -274,5 +274,10 @@ personnel_module_clean <- personnel_module |>
 #     compress = "gz"
 #   )
 
-personnel_module_clean |>
-  qs::qsave("spielplatz/data/personnel_alagoas_tbl.qs", preset = "high")
+# personnel_module_clean |>
+#   qs::qsave("spielplatz/data/personnel_alagoas_tbl.qs", preset = "high")
+
+arrow::write_parquet(personnel_module_clean, 
+                     "spielplatz/data/personnel_alagoas_tbl.parquet", 
+                     compression = "zstd", 
+                     compression_level = 22)
