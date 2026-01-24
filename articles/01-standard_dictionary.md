@@ -131,9 +131,10 @@ The three modules are related as follows:
     Establishment (1) ←→ (N) Contract
     Personnel (1) ←→ (N) Contract
 
-- One establishment can have many personnels
+- One establishment can have many workers
 - One establishment can have many contracts
-- One personnel can have multiple contracts (over time or concurrent)
+- One worker can have multiple contracts (over time or concurrent)
+- One worker can have multiple establishments
 
 ## Data Quality Considerations
 

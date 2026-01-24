@@ -24,7 +24,7 @@ pak::pak("WB-PIDA-Data-Science-Shop/govhr")
 ## 🔗 Get started:
 
 1.  [Standard dictionary for human resources (HR)
-    data.](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html).
+    data.](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html)
 2.  [How to harmonize your HR
     data.](https://wb-pida-data-science-shop.github.io/govhr/articles/02-harmonization.html)
 3.  [How to generate a data quality
@@ -146,7 +146,7 @@ pak::pak("WB-PIDA-Data-Science-Shop/govhr")
 
 # Articles
 
-### All vignettes
+### Data cleaning and quality assessment
 
 - [HR Standard Data
   Dictionary](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.md):
@@ -154,5 +154,10 @@ pak::pak("WB-PIDA-Data-Science-Shop/govhr")
   Harmonization](https://wb-pida-data-science-shop.github.io/govhr/articles/02-harmonization.md):
 - [Quality Control
   Report](https://wb-pida-data-science-shop.github.io/govhr/articles/03-quality_control.md):
-- [HR Analytics: Standard Report
-  Prototype](https://wb-pida-data-science-shop.github.io/govhr/articles/04-standard_hrmis_assessment.md):
+
+### Analytics
+
+- [Personnel Analytics: Standard Report
+  Prototype](https://wb-pida-data-science-shop.github.io/govhr/articles/articles/04-standard_hrmis_assessment.md):
+
+  A prototype for a standard Personnel Analytics Report.

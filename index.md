@@ -24,7 +24,7 @@ pak::pak("WB-PIDA-Data-Science-Shop/govhr")
 ## 🔗 Get started:
 
 1.  [Standard dictionary for human resources (HR)
-    data.](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html).
+    data.](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html)
 2.  [How to harmonize your HR
     data.](https://wb-pida-data-science-shop.github.io/govhr/articles/02-harmonization.html)
 3.  [How to generate a data quality
