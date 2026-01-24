@@ -269,14 +269,6 @@ personnel_module_clean <- personnel_module |>
   )
 
 # personnel_module_clean |>
-#   write_rds(
-#     here("spielplatz", "data", "bra_hrmis_personnel.rds"),
-#     compress = "gz"
-#   )
-
-# personnel_module_clean |>
-#   qs::qsave("spielplatz/data/personnel_alagoas_tbl.qs", preset = "high")
-
 arrow::write_parquet(personnel_module_clean, 
                      "spielplatz/data/personnel_alagoas_tbl.parquet", 
                      compression = "zstd", 

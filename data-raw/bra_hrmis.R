@@ -67,24 +67,6 @@ bra_hrmis <-
   )
 
 # import clean data -------------------------------------------------------
-# bra_hrmis_contract <- read_rds(
-#   here("spielplatz", "data", "bra_hrmis_contract.rds")
-# ) |>
-#   filter(
-#     lubridate::year(ref_date) >= 2014
-#   )
-
-# bra_hrmis_personnel <- read_rds(
-#   here("spielplatz", "data", "bra_hrmis_personnel.rds")
-# ) |>
-#   filter(
-#     lubridate::year(ref_date) >= 2014
-#   )
-
-# bra_hrmis_est <- read_rds(
-#   here("spielplatz", "data", "bra_hrmis_establishment.rds")
-# )
-
 ### lets select the data to be lazy loaded
 contract_tbl <- arrow::read_parquet("spielplatz/data/contract_alagoas_tbl.parquet")
 personnel_tbl <- arrow::read_parquet("spielplatz/data/personnel_alagoas_tbl.parquet")

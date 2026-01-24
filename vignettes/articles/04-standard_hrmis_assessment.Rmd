@@ -771,6 +771,7 @@ gender_df <- contract_df |>
     slice_sample(
       n = 10000
     ) |> 
+    filter(!is.na(gender)) |> 
     mutate(
       gender = factor(gender, levels = c("MASCULINO", "FEMININO"))
     )
