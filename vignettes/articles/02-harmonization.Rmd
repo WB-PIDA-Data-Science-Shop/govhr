@@ -16,7 +16,7 @@ library(labourR)
 library(DT)
 library(lubridate)
 library(here)
-library(qs)
+library(arrow)
 library(tibble)
 
 ```
@@ -180,7 +180,7 @@ occup_df <- bra_hrmis[, c("CARREIRA", "CARGO")] |> unique()
 
 occup_df[["CARREIRA"]] <- occup_df[["CARGO"]]
 
-fulloccup_tbl <- qs::qread(here::here("spielplatz/data/occupations_tbl.qs"))
+fulloccup_tbl <- arrow::read_parquet(here::here("spielplatz/data/occupations_tbl.parquet"))
 
 occup_df <- 
   fulloccup_tbl |>

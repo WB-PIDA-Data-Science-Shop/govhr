@@ -10,3 +10,19 @@ authors:
   "Galileu Kim":
     href: "https://github.com/galileukim"
     roles: [cre, aut]
+
+articles:
+  - title: "Data cleaning and quality assessment"
+    contents:
+      - articles/01-standard_dictionary
+      - articles/02-harmonization
+      - articles/03-quality_control
+  - title: "Analytics"
+    contents:
+      - 04-standard_hrmis_assessment
+
+external-articles:
+  - name: 04-standard_hrmis_assessment
+    title: "Personnel Analytics: Standard Report Prototype"
+    description: "A prototype for a standard Personnel Analytics Report."
+    href: articles/04-standard_hrmis_assessment.html

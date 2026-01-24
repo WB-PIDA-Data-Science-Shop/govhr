@@ -227,16 +227,14 @@ contract_alagoas_tbl <-
     ~ as.numeric(.)
   ))
 
-# qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
+arrow::write_parquet(occup_df, 
+                     "spielplatz/data/occupations_tbl.parquet",
+                     compression = "zstd",
+                     compression_level = 22)
 
-# saveRDS(
-#   contract_alagoas_tbl, "spielplatz/data/bra_hrmis_contract.rds"
-# )
+arrow::write_parquet(contract_alagoas_tbl, 
+                     "spielplatz/data/contract_alagoas_tbl.parquet", 
+                     compression = "zstd", 
+                     compression_level = 22)
 
-### save the occupation classifications data
-qs::qsave(occup_df, file = "spielplatz/data/occupations_tbl.qs", preset = "high")
-
-qs::qsave(contract_alagoas_tbl, 
-          file = "spielplatz/data/contract_alagoas_tbl.qs",
-          preset = "high")
 
