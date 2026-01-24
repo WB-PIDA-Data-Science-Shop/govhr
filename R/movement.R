@@ -28,8 +28,11 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
 
   # Calculate the interval using get() and shift()
   data_out <- data[,
-       .(interval_days = as.numeric(ref_date) - as.numeric(data.table::shift(ref_date, type = "lag"))),
-       by = group_vars
+    .(
+      interval_days = as.numeric(ref_date) -
+        as.numeric(data.table::shift(ref_date, type = "lag"))
+    ),
+    by = group_vars
   ]
 
   data_out <- data.table::copy(data)
@@ -70,12 +73,14 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
 #'                        end_date = "2018-01-01", event_type = "fire")
 #' }
 #' @export
-detect_personnel_event <- function(data,
-                                   id_col,
-                                   event_type,
-                                   start_date,
-                                   end_date,
-                                   freq = "year") {
+detect_personnel_event <- function(
+  data,
+  id_col,
+  event_type,
+  start_date,
+  end_date,
+  freq = "year"
+) {
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
@@ -93,32 +98,47 @@ detect_personnel_event <- function(data,
     data.table::copy()
 
   # Sort by personnel and date
-  data.table::setorderv(expanded_active_personnels_dt, cols = c(id_col, "ref_date"))
+  data.table::setorderv(
+    expanded_active_personnels_dt,
+    cols = c(id_col, "ref_date")
+  )
 
   # Add lag/lead and event detection
   if (event_type == "hire") {
-    expanded_active_personnels_dt[
-      ,
-      type_event := fifelse(
-        status == "active" & is.na(data.table::shift(status, type = "lag")),
-        "hire",
-        "no hire"
-    ), by = id_col]
+    expanded_active_personnels_dt <- expanded_active_personnels_dt[,
+      .(
+        personnel_id = get(id_col),
+        ref_date,
+        status,
+        type_event = fifelse(
+          status == "active" & is.na(data.table::shift(status, type = "lag")),
+          "hire",
+          "no hire"
+        )
+      ),
+      by = id_col
+    ]
 
     expanded_active_personnels_dt <- expanded_active_personnels_dt[
-      ref_date > lubridate::ymd(start_date),
+      ref_date > lubridate::ymd(start_date)
     ]
   } else {
-    expanded_active_personnels_dt[
-      ,
-      type_event := ifelse(
-        status == "active" & is.na(data.table::shift(status, type = "lead")),
-        "fire",
-        "no fire"
-    ), by = id_col]
+    expanded_active_personnels_dt <- expanded_active_personnels_dt[,
+      .(
+        personnel_id = get(id_col),
+        ref_date,
+        status,
+        type_event = fifelse(
+          status == "active" & is.na(data.table::shift(status, type = "lead")),
+          "fire",
+          "no fire"
+        )
+      ),
+      by = id_col
+    ]
 
     expanded_active_personnels_dt <- expanded_active_personnels_dt[
-      ref_date < lubridate::ymd(end_date),
+      ref_date < lubridate::ymd(end_date)
     ]
   }
 
@@ -156,11 +176,16 @@ detect_retirement <- function(data) {
   data.table::setorderv(dt, cols = c("personnel_id", "ref_date"))
 
   # Create lag_status within each personnel
-  dt[, lead_status := data.table::shift(status, type = "lead"), by = personnel_id]
+  dt[,
+    lead_status := data.table::shift(status, type = "lead"),
+    by = personnel_id
+  ]
 
   # Filter for retire events
-  retire_dt <- dt[lead_status == "inactive" & status == "active",
-                  .(personnel_id, ref_date)]
+  retire_dt <- dt[
+    lead_status == "inactive" & status == "active",
+    .(personnel_id, ref_date)
+  ]
 
   # Add event type
   retire_dt[, type_event := "retire"]
@@ -295,16 +320,15 @@ detect_reallocation <- function(data, personnel_hire) {
 #' @seealso [data.table::merge()], [data.table::unique()]
 #' @export
 
-add_contract_to_event <- function(event_dt,
-                                  contract_dt,
-                                  keep_vars){
-
-  contract_dt <- unique(contract_dt[, c("personnel_id", "ref_date", keep_vars), with = FALSE])
+add_contract_to_event <- function(event_dt, contract_dt, keep_vars) {
+  contract_dt <- unique(contract_dt[,
+    c("personnel_id", "ref_date", keep_vars),
+    with = FALSE
+  ])
 
   event_dt <- contract_dt[event_dt, on = c("personnel_id", "ref_date")]
 
   return(event_dt)
-
 }
 
 #' Detect Career Transitions Based on Contract Attributes
@@ -369,38 +393,53 @@ add_contract_to_event <- function(event_dt,
 #'
 #' @export
 
-detect_career_transitions <- function(contract_dt,
-                                      vars,
-                                      decision_var,
-                                      decision_fn = max) {
-
+detect_career_transitions <- function(
+  contract_dt,
+  vars,
+  decision_var,
+  decision_fn = max
+) {
   # Keep only needed columns
-  contract_dt <- contract_dt[, c("personnel_id", "ref_date", vars, decision_var), with = FALSE]
+  contract_dt <- contract_dt[,
+    c("personnel_id", "ref_date", vars, decision_var),
+    with = FALSE
+  ]
 
   # Sort by personnel, date, and decision variable
-  setorderv(contract_dt, c("personnel_id", "ref_date", decision_var), order = c(1, 1, -1))
+  setorderv(
+    contract_dt,
+    c("personnel_id", "ref_date", decision_var),
+    order = c(1, 1, -1)
+  )
 
   # Apply decision rule: pick the dominant job for each personnel-date
   # We assume decision_fn = max by default (i.e. highest of whatever decision_var)
-  contract_main <- contract_dt[
-    , .SD[get(decision_var) == decision_fn(get(decision_var))][1],
+  contract_main <- contract_dt[,
+    .SD[get(decision_var) == decision_fn(get(decision_var))][1],
     by = .(personnel_id, ref_date)
   ]
 
   # Now detect transitions for each variable
   detect_transitions <- function(attr) {
     # Add previous value by personnel
-    contract_main[, paste0(attr, "_prev") := shift(get(attr)), by = personnel_id]
+    contract_main[,
+      paste0(attr, "_prev") := shift(get(attr)),
+      by = personnel_id
+    ]
 
     # Keep rows where the attribute changed
-    transitions <- contract_main[get(attr) != get(paste0(attr, "_prev")),
-                                 .(personnel_id,
-                                   start_date = shift(ref_date, 1L, type = "lag"),
-                                   ref_date,
-                                   attribute = attr,
-                                   from = get(paste0(attr, "_prev")),
-                                   to = get(attr)),
-                                 by = personnel_id]
+    transitions <- contract_main[
+      get(attr) != get(paste0(attr, "_prev")),
+      .(
+        personnel_id,
+        start_date = shift(ref_date, 1L, type = "lag"),
+        ref_date,
+        attribute = attr,
+        from = get(paste0(attr, "_prev")),
+        to = get(attr)
+      ),
+      by = personnel_id
+    ]
 
     return(transitions[])
   }
@@ -455,17 +494,16 @@ detect_career_transitions <- function(contract_dt,
 #' }
 #' @export
 complete_dates <- function(
-    data,
-    id_col,
-    start_date,
-    end_date,
-    freq = "year"
+  data,
+  id_col,
+  start_date,
+  end_date,
+  freq = "year"
 ) {
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
-  dt[
-    ,
+  dt[,
     expanded := FALSE
   ]
 
@@ -546,9 +584,12 @@ complete_dates <- function(
 convert_data <- function(data, data_original) {
   if ("tbl_df" %in% class(data_original)) {
     data <- tibble::as_tibble(data)
-  } else if ("data.frame" %in% class(data_original) && !"data.table" %in% class(data_original)) {
+  } else if (
+    "data.frame" %in%
+      class(data_original) &&
+      !"data.table" %in% class(data_original)
+  ) {
     data <- as.data.frame(data)
   }
   return(data)
 }
-
