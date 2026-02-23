@@ -19,8 +19,8 @@ dict_df <-
  bind_rows() |> 
  janitor::clean_names()
 
-harmonization_dict <- dict_df
+dictionary <- dict_df
 
 rm(dict_df)
 
-usethis::use_data(harmonization_dict, overwrite = TRUE)
+usethis::use_data(dictionary, overwrite = TRUE)

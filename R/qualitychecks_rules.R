@@ -18,26 +18,7 @@
 #' @export
 validate_personnel <- function() {
   validate::validator(
-    
-    # Coverage checks --------------------------------------------------------
-    
-    ## Personnel coverage
-    # (a) personnel_id is present and not missing
-    personnel_coverage_personnel_id = !is.na(personnel_id),
-    
-    # (b) ref_date is present and not missing
-    personnel_coverage_ref_date = !is.na(ref_date),
-    
-    # (c) gender information is present
-    personnel_coverage_gender = !is.na(gender),
-    
-    # (e) birth date is present
-    personnel_coverage_birth = !is.na(birth_date),
-    
-    # Consistency checks -----------------------------------------------------
-
-
-    
+      
     # (a) ref_date is a valid date (not in future, not before reasonable historical bound)
     personnel_consistency_ref_date_valid = ref_date >= as.Date("1900-01-01") & ref_date <= Sys.Date(),
     

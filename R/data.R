@@ -169,14 +169,14 @@
 #' payroll systems to a consistent, analysis-ready schema. Each row represents
 #' one standardized variable name and specifies:
 #' 
-#' * **VariableName** — The human-readable name of the variable as it appears in the
+#' * **variable_name** — The human-readable name of the variable as it appears in the
 #'   final harmonized dataset.  
-#' * **VariableID** — The machine-readable variable name (snake_case) used in the
+#' * **variable_id** — The machine-readable variable name (snake_case) used in the
 #'   harmonized output.  
-#' * **Description** — A concise definition of the variable’s meaning and intended use.  
-#' * **VariableClass** — The R class the variable should be cast to (e.g., character,
+#' * **variable_description** — A concise definition of the variable’s meaning and intended use.  
+#' * **variable_class** — The R class the variable should be cast to (e.g., character,
 #'   Date, numeric, integer).  
-#' * **Module** — The module where the variable belongs (e.g., *Establishment*,
+#' * **module** — The module where the variable belongs (e.g., *Establishment*,
 #'   *Personnel*, *Contract*).
 #'
 #' This dictionary is designed so that automated harmonization scripts can:
@@ -187,22 +187,21 @@
 #'
 #' @format A tibble with 45 rows and 5 variables:
 #' \describe{
-#'   \item{VariableName}{Character. Human-readable variable name.}
-#'   \item{VariableID}{Character. Standardized snake_case variable identifier.}
-#'   \item{Description}{Character. Definition of the variable.}
-#'   \item{VariableClass}{Character. Target R class for the variable.}
-#'   \item{Module}{Character. Harmonization module using this variable.}
+#'   \item{variable_name}{Character. Human-readable variable name.}
+#'   \item{variable_id}{Character. Standardized snake_case variable identifier.}
+#'   \item{variable_description}{Character. Definition of the variable.}
+#'   \item{variable_class}{Character. Target R class for the variable.}
+#'   \item{module}{Character. Harmonization module using this variable.}
 #' }
 #'
 #' @usage
-#' harmonization_dict
+#' dictionary
 #'
-#' @source Created by the Public Institutions Data & Analytics Team as part of
+#' @source Created by the Institutional Capacity and EFfectiveness team as part of
 #' the payroll harmonization ETL framework.
 #'
 #' @keywords datasets harmonization payroll
-"harmonization_dict"
-
+"dictionary"
 
 #' Brazilian Public Employee Payroll Data
 #'
