@@ -39,25 +39,27 @@ validate_data <- function(data, input_rules) {
 
   # Confront the data with the rules
   results <- validate::confront(data, validation_results)
+
+  return(results)
   
-  # Extract rules metadata into a dataframe
-  rules_meta <- as.data.frame(input_rules)
+  # # Extract rules metadata into a dataframe
+  # rules_meta <- as.data.frame(input_rules)
   
-  # Extract the confrontation summary into a dataframe
-  results_summary <- as.data.frame(summary(results))
+  # # Extract the confrontation summary into a dataframe
+  # results_summary <- as.data.frame(summary(results))
   
-  # Join them together using the rule 'name'
-  audit_report <- results_summary %>%
-    dplyr::left_join(rules_meta, by = "name") %>%
-    # Select and rename the columns you want stakeholders to see
-    dplyr::select(
-      Rule = label,
-      Description = description,
-      `Total Records` = items,
-      Passes = passes,
-      Fails = fails,
-      Errors = error
-    )
+  # # Join them together using the rule 'name'
+  # audit_report <- results_summary %>%
+  #   dplyr::left_join(rules_meta, by = "name") %>%
+  #   # Select and rename the columns you want stakeholders to see
+  #   dplyr::select(
+  #     Rule = label,
+  #     Description = description,
+  #     `Total Records` = items,
+  #     Passes = passes,
+  #     Fails = fails,
+  #     Errors = error
+  #   )
   
-  return(audit_report)
+  # return(audit_report)
 }
