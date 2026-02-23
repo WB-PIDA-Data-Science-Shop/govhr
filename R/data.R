@@ -335,3 +335,89 @@
 #'
 "bra_hrmis_est"
 
+#' Personnel Validation Rules
+#'
+#' A dataset containing validation rules for personnel data quality checks.
+#' These rules are designed to be used with the \code{validate} package to
+#' assess the quality and consistency of personnel records in HRMIS data.
+#'
+#' @format A tibble with 9 rows and 5 variables:
+#' \describe{
+#'   \item{rule}{Character. The validation rule expression as a string that can be parsed by \code{validate::validator()}.}
+#'   \item{name}{Character. Unique identifier for the rule (e.g., "personnel_ref_date_valid").}
+#'   \item{description}{Character. Detailed explanation of what the rule checks. This description appears in validation summaries.}
+#'   \item{label}{Character. Short 2-3 word label for the rule, useful for plotting and quick reference.}
+#'   \item{required_vars}{Character. Comma-separated list of minimum required variables for the rule to be evaluated. At minimum: personnel_id and birth_date.}
+#' }
+#'
+#' @details
+#' The personnel validation rules check:
+#' \itemize{
+#'   \item Column existence (personnel_id, ref_date, birth_date, status)
+#'   \item ID uniqueness (personnel_id + ref_date combination is unique)
+#'   \item Reference date validity (within reasonable historical bounds)
+#'   \item Age range (18-70 years calculated from birth_date and ref_date)
+#'   \item Birth date reasonableness
+#'   \item Employment status validity (active, inactive, retired, terminated)
+#' }
+#'
+#' These rules can be programmatically converted to \code{validate::validator()} objects
+#' for use in data quality pipelines.
+#'
+#' @seealso \code{\link{contract_rules}}, \code{\link{validate_personnel}}
+#'
+#' @examples
+#' # View all personnel validation rules
+#' personnel_rules
+#'
+#' # Filter to specific rule
+#' personnel_rules[personnel_rules$name == "personnel_age_range", ]
+#'
+#' @source Created for the govhr package data quality framework
+"personnel_rules"
+
+#' Contract Validation Rules
+#'
+#' A dataset containing validation rules for contract and wage bill data quality checks.
+#' These rules are designed to be used with the \code{validate} package to
+#' assess the quality and consistency of contract records in HRMIS data.
+#'
+#' @format A tibble with 17 rows and 5 variables:
+#' \describe{
+#'   \item{rule}{Character. The validation rule expression as a string that can be parsed by \code{validate::validator()}.}
+#'   \item{name}{Character. Unique identifier for the rule (e.g., "contract_ref_date_valid").}
+#'   \item{description}{Character. Detailed explanation of what the rule checks. This description appears in validation summaries.}
+#'   \item{label}{Character. Short 2-3 word label for the rule, useful for plotting and quick reference.}
+#'   \item{required_vars}{Character. Comma-separated list of minimum required variables for the rule to be evaluated. At minimum: contract_id, personnel_id, gross_salary_lcu, base_salary_lcu, and allowance_lcu.}
+#' }
+#'
+#' @details
+#' The contract validation rules check:
+#' \itemize{
+#'   \item Column existence (contract_id, ref_date, gross_salary_lcu, base_salary_lcu, allowance_lcu)
+#'   \item Contract ID uniqueness (contract_id + ref_date combination is unique)
+#'   \item Personnel assignment uniqueness (contract_id + personnel_id + ref_date combination is unique)
+#'   \item Reference date validity
+#'   \item Working hours reasonableness (1-168 hours per week)
+#'   \item Contract status consistency (start_date <= ref_date)
+#'   \item Wage bill composition (gross = base + allowance)
+#'   \item Wage bill hierarchy (net <= gross, base <= gross)
+#'   \item Positive salary values (gross, base, net >= 1)
+#'   \item Allowance validity (non-negative or missing)
+#' }
+#'
+#' These rules can be programmatically converted to \code{validate::validator()} objects
+#' for use in data quality pipelines.
+#'
+#' @seealso \code{\link{personnel_rules}}, \code{\link{validate_contract}}
+#'
+#' @examples
+#' # View all contract validation rules
+#' contract_rules
+#'
+#' # Filter to wage bill rules
+#' contract_rules[grepl("wagebill", contract_rules$name), ]
+#'
+#' @source Created for the govhr package data quality framework
+"contract_rules"
+
