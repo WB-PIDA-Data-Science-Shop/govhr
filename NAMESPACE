@@ -2,7 +2,9 @@
 
 export(add_contract_to_event)
 export(calculate_date_intervals)
+export(check_orphan_id)
 export(compare_names_qc)
+export(compare_to_dictionary)
 export(complete_columns)
 export(complete_dates)
 export(compute_baseline_index)

@@ -83,8 +83,6 @@
 #' }
 #'
 #' @export
-
-
 compute_qualitycontrol <- function(contract_dt,
                                    personnel_dt,
                                    est_dt){
@@ -106,7 +104,7 @@ compute_qualitycontrol <- function(contract_dt,
       
       
       
-      structure_checks <- qc_compare_names(data = data,
+      structure_checks <- compare_to_dictionary(data = data,
                                            dict_names = dict_names$VariableID,
                                            output_format = "badges")
 
@@ -118,21 +116,21 @@ compute_qualitycontrol <- function(contract_dt,
 
 
 
-  key_checks <- qc_primary_key_uniqueness(dt = contract_dt,
+  key_checks <- check_key_uniqueness(dt = contract_dt,
                                           keys = c("contract_id", "personnel_id", "ref_date"))
 
 
   ### checking for orphan keys (i.e. personnel IDs in bra_hrmis_contract)
   orphan_checks <- list()
 
-  orphan_checks$personnel_vs_contract <- qc_merge_check(
+  orphan_checks$personnel_vs_contract <- check_orphan_id(
     parent_dt = personnel_dt,
     child_dt  = contract_dt,
     parent_id = "personnel_id",
     child_id  = "personnel_id"
   )
 
-  orphan_checks$establishment_vs_contract <- qc_merge_check(
+  orphan_checks$establishment_vs_contract <- check_orphan_id(
     parent_dt = est_dt,
     child_dt  = contract_dt,
     parent_id = "est_id",
@@ -146,7 +144,7 @@ compute_qualitycontrol <- function(contract_dt,
   salary_vars <- colnames(contract_dt)[grepl("_salary_",
                                              colnames(contract_dt))]
 
-  salary_checks <- qc_salary_checks(contract_dt, cols = salary_vars)
+  salary_checks <- check_salary(contract_dt, cols = salary_vars)
 
   # -----------------------------------
   # 5. DATE LOGIC

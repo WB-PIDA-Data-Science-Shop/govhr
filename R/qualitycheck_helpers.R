@@ -68,9 +68,6 @@ flag_outlier <- function(x) {
 #' compare_names_qc(x, y, output_format = "badges")
 #'
 #' @export
-
-
-
 compare_names_qc <- function(x, y,
                              output_format = c("simple", "bullet", "badges")) {
 
@@ -144,7 +141,6 @@ compare_names_qc <- function(x, y,
                         y_missing_x = y_missing_x)
 
   return(mismatch_list)
-
 }
 
 # #' @importFrom pointblank specially
@@ -240,9 +236,6 @@ compute_missingness <- function(data,
   }
 }
 
-
-## a few more helper functions to create quality control objects
-
 #' Compare Dataset Variable Names Against a Dictionary
 #'
 #' This internal function checks whether all required variable names defined in a
@@ -261,9 +254,8 @@ compute_missingness <- function(data,
 #'   \item \code{formatted}: A formatted character output according to \code{output_format}.
 #' }
 #'
-#' @keywords internal
-
-qc_compare_names <- function(data, dict_names, output_format = "simple") {
+#' @export
+compare_to_dictionary <- function(data, dict_names, output_format = "simple") {
   compare_names_qc(
     x = names(data),
     y = dict_names,
@@ -289,7 +281,7 @@ qc_compare_names <- function(data, dict_names, output_format = "simple") {
 #'
 #' @keywords internal
 
-qc_primary_key_uniqueness <- function(dt, keys) {
+check_key_uniqueness <- function(dt, keys) {
   dt <- as.data.table(dt)
 
   dupe_rows <- dt[, .N, by = keys][N > 1]
@@ -317,9 +309,8 @@ qc_primary_key_uniqueness <- function(dt, keys) {
 #'   \item{\code{orphan_ids}}{The vector of orphan IDs.}
 #' }
 #'
-#' @keywords internal
-
-qc_merge_check <- function(parent_dt,
+#' @export
+check_orphan_id <- function(parent_dt,
                            child_dt,
                            parent_id,
                            child_id) {
@@ -351,7 +342,7 @@ qc_merge_check <- function(parent_dt,
 #' }
 #'
 #' @keywords internal
-qc_salary_checks <- function(dt,
+check_salary <- function(dt,
                              cols) {
 
   dt <- as.data.table(dt)
@@ -392,5 +383,3 @@ qc_salary_checks <- function(dt,
 
   return(out)
 }
-
-
