@@ -16,7 +16,8 @@ dict_df <-
   read_excel(path_chr, sheet = sheet)
 
 }) |>
- bind_rows()
+ bind_rows() |> 
+ janitor::clean_names()
 
 harmonization_dict <- dict_df
 
