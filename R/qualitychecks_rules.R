@@ -1,126 +1,146 @@
-#' Validate personnel data
+#' Validate Personnel Data Quality
 #'
 #' @description
-#' Defines validation rules using the `validator` package for assessing
-#' personnel data quality. Rules cover coverage (minimum requirements) and 
-#' consistency (logical integrity) checks for workforce dimensions.
+#' Validates personnel data against a set of consistency rules covering
+#' date validity, age ranges, birth dates, and employment status. Returns
+#' a confrontation object with validation results.
 #'
-#' @return A validator object containing personnel validation rules.
+#' @param data A data.frame or data.table containing personnel data with
+#'   columns: `ref_date`, `age`, `birth_date`, `status`.
 #'
-#' @examples
-#' \dontrun{
-#' library(validate)
-#' rules <- validate_personnel()
-#' confront(personnel_dt, rules)
+#' @return A `confrontation` object (from the `validate` package) containing
+#'   validation results. Use `summary()` to view pass/fail counts.
+#'
+#' @details
+#' The function checks the following rules:
+#' \itemize{
+#'   \item \strong{personnel_ref_date_valid}: Reference date is between 
+#'     1900-01-01 and today
+#'   \item \strong{personnel_age_range}: Age is between 18 and 70
+#'   \item \strong{personnel_birth_date}: Birth date is between 1920-01-01 
+#'     and today
+#'   \item \strong{personnel_status}: Employment status is one of "active", 
+#'     "inactive", "retired", or "terminated"
 #' }
 #'
-#' @importFrom validate validator
+#' @examples
+#' library(validate)
+#' 
+#' validate_personnel(personnel_dt)
+#'
+#' @importFrom validate validator confront
 #' @export
-validate_personnel <- function() {
-  validate::validator(
+validate_personnel <- function(data) {
+  rules <- validate::validator(
       
     # (a) ref_date is a valid date (not in future, not before reasonable historical bound)
-    personnel_consistency_ref_date_valid = ref_date >= as.Date("1900-01-01") & ref_date <= Sys.Date(),
+    personnel_ref_date_valid = ref_date >= as.Date("1900-01-01") & ref_date <= Sys.Date(),
     
     # (b) age is within reasonable employment range (if age available)
-    personnel_consistency_age_range = if_available(age, age >= 18 & age <= 70),
+    personnel_age_range = age >= 18 & age <= 70,
     
     # (c) birth_date is reasonable if provided
-    personnel_consistency_birth_date = if_available(birth_date, 
-                                                     birth_date >= as.Date("1920-01-01") & 
-                                                     birth_date <= Sys.Date()),
+    personnel_birth_date = birth_date >= as.Date("1920-01-01") & birth_date <= Sys.Date(),
     
     # (d) employment status has valid values if provided
-    personnel_consistency_status = if_available(status,
-                                                status %in% c("active", "inactive", "retired", "terminated"))
+    personnel_status = status %in% c("active", "inactive", "retired", "terminated")
   )
+
+  validate::confront(data, rules)
 }
 
-#' Validate contract data
+#' Validate Contract Data Quality
 #'
 #' @description
-#' Defines validation rules using the `validator` package for assessing
-#' contract data quality. Rules cover coverage (completeness) and 
-#' consistency (logical integrity) checks for wage bill and contract dimensions.
+#' Validates contract data against a set of consistency rules covering
+#' date validity, working hours, employment status, and wage bill logic
+#' (salary component relationships). Returns a confrontation object with
+#' validation results.
 #'
-#' @return A validator object containing contract validation rules.
+#' @param data A data.frame or data.table containing contract data with
+#'   columns: `ref_date`, `whours`, `start_date`, `gross_salary_lcu`, 
+#'   `base_salary_lcu`, `net_salary_lcu`, `allowance_lcu`.
+#'
+#' @return A `confrontation` object (from the `validate` package) containing
+#'   validation results. Use `summary()` to view pass/fail counts.
+#'
+#' @details
+#' The function checks the following rules:
+#' 
+#' \strong{Contract consistency:}
+#' \itemize{
+#'   \item \strong{contract_ref_date_valid}: Reference date is between 
+#'     1900-01-01 and today
+#'   \item \strong{contract_whours}: Working hours are between 1 and 168 
+#'     per week
+#'   \item \strong{contract_status}: Start date is on or before reference date
+#' }
+#' 
+#' \strong{Wage bill consistency:}
+#' \itemize{
+#'   \item \strong{wagebill_gross_composition}: Gross salary ≥ base salary + 
+#'     allowance
+#'   \item \strong{wagebill_net_le_gross}: Net salary ≤ gross salary
+#'   \item \strong{wagebill_gross_positive}: Gross salary ≥ 1
+#'   \item \strong{wagebill_base_positive}: Base salary ≥ 1
+#'   \item \strong{wagebill_net_positive}: Net salary ≥ 1
+#'   \item \strong{wagebill_base_le_gross}: Base salary ≤ gross salary
+#'   \item \strong{wagebill_allowance}: Allowance ≥ 1
+#' }
 #'
 #' @examples
 #' \dontrun{
 #' library(validate)
-#' rules <- validate_contract()
-#' confront(contract_dt, rules)
+#' 
+#' # Run validation
+#' results <- validate_contract(contract_dt)
+#' 
+#' # View summary
+#' summary(results)
+#' 
+#' # Extract violations
+#' violations <- violating(contract_dt, results)
+#' 
+#' # Check specific rule
+#' failing_gross <- contract_dt[!values(results)$wagebill_gross_positive, ]
 #' }
 #'
-#' @importFrom validate validator
+#' @importFrom validate validator confront
 #' @export
-validate_contract <- function() {
-  validate::validator(
-    
-    # Coverage checks --------------------------------------------------------
-    
-    # (a) contract_id is present and not missing
-    contract_coverage_contract_id = !is.na(contract_id),
-    
-    # (b) ref_date is present and not missing
-    contract_coverage_ref_date = !is.na(ref_date),
-    
-    # (c) occupation information is present
-    contract_coverage_occupation = !is.na(occupation_native) | !is.na(occupation_iscocode),
-    
-    # (d) gross salary is present and not missing
-    wagebill_coverage_gross_salary = !is.na(gross_salary_lcu),
-    
-    # (e) base salary is present and not missing
-    wagebill_coverage_base_salary = !is.na(base_salary_lcu),
-    
-    # (f) net salary is present and not missing
-    wagebill_coverage_net_salary = !is.na(net_salary_lcu),
-    
-    # Consistency checks -----------------------------------------------------
-    
-    ## Contract consistency
+validate_contract <- function(data) {
+  rules <- validate::validator(
     # (a) ref_date is a valid date (not in future, not before reasonable historical bound)
-    contract_consistency_ref_date_valid = ref_date >= as.Date("1900-01-01") & ref_date <= Sys.Date(),
+    contract_ref_date_valid = ref_date >= as.Date("1900-01-01") & ref_date <= Sys.Date(),
     
-    # (b) seniority is non-negative
-    contract_consistency_seniority = if_available(seniority, seniority >= 0),
+    # (b) working hours are positive and reasonable
+    contract_whours = whours >= 1 & whours <= 168,
     
-    # (c) working hours are positive and reasonable
-    contract_consistency_whours = if_available(whours, whours > 0 & whours <= 168),
-    
-    # (d) employment status is valid (active contracts have start_date <= ref_date)
-    contract_consistency_status = if_available(start_date, 
-                                                is.na(start_date) | start_date <= ref_date),
-    
-    # (e) paygrade is positive if provided
-    contract_consistency_paygrade = if_available(paygrade, paygrade > 0),
+    # (c) employment status is valid (active contracts have start_date <= ref_date)
+    contract_status = start_date <= ref_date,
     
     ## Wage bill consistency
     # (a) gross salary is consistent with base salary + allowance
-    wagebill_consistency_gross_composition = if_available(allowance_lcu,
-      gross_salary_lcu >= base_salary_lcu + allowance_lcu
-    ),
+    wagebill_gross_composition = 
+      gross_salary_lcu >= base_salary_lcu + allowance_lcu,
     
     # (b) net salary is less than or equal to gross salary
-    wagebill_consistency_net_le_gross = net_salary_lcu <= gross_salary_lcu,
+    wagebill_net_le_gross = net_salary_lcu <= gross_salary_lcu,
     
     # (c) gross salary is positive
-    wagebill_consistency_gross_positive = gross_salary_lcu >= 1,
+    wagebill_gross_positive = gross_salary_lcu >= 1,
     
     # (d) base salary is positive
-    wagebill_consistency_base_positive = base_salary_lcu >= 1,
+    wagebill_base_positive = base_salary_lcu >= 1,
     
     # (e) net salary is positive
-    wagebill_consistency_net_positive = net_salary_lcu >= 1,
+    wagebill_net_positive = net_salary_lcu >= 1,
     
     # (f) base salary does not exceed gross salary
-    wagebill_consistency_base_le_gross = base_salary_lcu <= gross_salary_lcu,
+    wagebill_base_le_gross = base_salary_lcu <= gross_salary_lcu,
     
-    # (g) base salary does not exceed net salary
-    wagebill_consistency_base_le_net = base_salary_lcu <= net_salary_lcu,
-    
-    # (h) allowance is non-negative if provided
-    wagebill_consistency_allowance = if_available(allowance_lcu, allowance_lcu >= 0)
+    # (g) allowance is non-negative if provided
+    wagebill_allowance = allowance_lcu >= 1
   )
+
+  validate::confront(data, rules)
 }

@@ -2,23 +2,39 @@
 % Please edit documentation in R/qualitychecks_rules.R
 \name{validate_personnel}
 \alias{validate_personnel}
-\title{Validate personnel data}
+\title{Validate Personnel Data Quality}
 \usage{
-validate_personnel()
+validate_personnel(data)
+}
+\arguments{
+\item{data}{A data.frame or data.table containing personnel data with
+columns: `ref_date`, `age` (optional), `birth_date` (optional), 
+`status` (optional).}
 }
 \value{
-A validator object containing personnel validation rules.
+A `confrontation` object (from the `validate` package) containing
+  validation results. Use `summary()` to view pass/fail counts.
 }
 \description{
-Defines validation rules using the `validator` package for assessing
-personnel data quality. Rules cover coverage (minimum requirements) and 
-consistency (logical integrity) checks for workforce dimensions.
+Validates personnel data against a set of consistency rules covering
+date validity, age ranges, birth dates, and employment status. Returns
+a confrontation object with validation results.
+}
+\details{
+The function checks the following rules:
+\itemize{
+  \item \strong{personnel_ref_date_valid}: Reference date is between 
+    1900-01-01 and today
+  \item \strong{personnel_age_range}: Age is between 18 and 70 (if available)
+  \item \strong{personnel_birth_date}: Birth date is between 1920-01-01 
+    and today (if available)
+  \item \strong{personnel_status}: Employment status is one of "active", 
+    "inactive", "retired", or "terminated" (if available)
+}
 }
 \examples{
-\dontrun{
 library(validate)
-rules <- validate_personnel()
-confront(personnel_dt, rules)
-}
+
+validate_personnel(personnel_dt)
 
 }

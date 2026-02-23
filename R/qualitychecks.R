@@ -94,8 +94,10 @@ compute_qualitycontrol <- function(contract_dt,
 
   ### structure and dictionary checks
 
-  dict_list <- split(harmonization_dict,
-                     harmonization_dict$Module)
+  dict_list <- split(
+    govhr::dictionary,
+    govhr::dictionary$module
+  )
   
 
   structure_checks <-
@@ -136,7 +138,6 @@ compute_qualitycontrol <- function(contract_dt,
     parent_id = "est_id",
     child_id  = "est_id"
   )
-
 
   # -----------------------------------
   # 4. SALARY CHECKS
@@ -228,8 +229,6 @@ compute_qualitycontrol <- function(contract_dt,
                     volatility = contract_volatility)
 
   return(qc_object)
-
-
 }
 
 

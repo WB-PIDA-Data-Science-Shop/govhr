@@ -27,7 +27,8 @@ Imports:
     rmarkdown,
     stringr,
     tidyselect,
-    scales
+    scales,
+    validate
 RoxygenNote: 7.3.3
 Suggests: 
     forcats,
