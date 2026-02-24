@@ -52,6 +52,6 @@ contract_rules[grepl("wagebill", contract_rules$name), ]
 
 }
 \seealso{
-\code{\link{personnel_rules}}, \code{\link{validate_contract}}
+\code{\link{personnel_rules}}, \code{\link{validate_data}}
 }
 \keyword{datasets}

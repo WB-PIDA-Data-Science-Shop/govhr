@@ -14,7 +14,7 @@ generate_hr_report(
 }
 \arguments{
 \item{contract_dt}{A data.table containing the Contract module data with
-harmonized column names according to \code{\link{harmonization_dict}}.
+harmonized column names according to \code{\link{dictionary}}.
 Should include columns such as contract_id, personnel_id, est_id,
 ref_date, salary fields, and occupation information.}
 
@@ -56,5 +56,5 @@ generate_hr_report(
 }
 \seealso{
 \code{\link{generate_qc_report}} for the data quality assessment report.
-\code{\link{harmonization_dict}} for the harmonization dictionary.
+\code{\link{dictionary}} for the harmonization dictionary.
 }

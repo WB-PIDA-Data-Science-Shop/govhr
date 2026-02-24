@@ -48,6 +48,6 @@ personnel_rules[personnel_rules$name == "personnel_age_range", ]
 
 }
 \seealso{
-\code{\link{contract_rules}}, \code{\link{validate_personnel}}
+\code{\link{contract_rules}}, \code{\link{validate_data}}
 }
 \keyword{datasets}

@@ -364,7 +364,7 @@
 #' These rules can be programmatically converted to \code{validate::validator()} objects
 #' for use in data quality pipelines.
 #'
-#' @seealso \code{\link{contract_rules}}, \code{\link{validate_personnel}}
+#' @seealso \code{\link{contract_rules}}, \code{\link{validate_data}}
 #'
 #' @examples
 #' # View all personnel validation rules
@@ -409,7 +409,7 @@
 #' These rules can be programmatically converted to \code{validate::validator()} objects
 #' for use in data quality pipelines.
 #'
-#' @seealso \code{\link{personnel_rules}}, \code{\link{validate_contract}}
+#' @seealso \code{\link{personnel_rules}}, \code{\link{validate_data}}
 #'
 #' @examples
 #' # View all contract validation rules

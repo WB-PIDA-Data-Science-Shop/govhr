@@ -1,4 +1,4 @@
-## code to prepare `harmonization_dictionary` dataset goes here
+## code to prepare `dictionaryionary` dataset goes here
 
 library(readxl)
 
