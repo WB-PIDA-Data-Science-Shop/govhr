@@ -2,39 +2,77 @@
 % Please edit documentation in R/qualitychecks_rules.R
 \name{validate_data}
 \alias{validate_data}
-\title{Validate Data}
+\title{Validate Data Quality Using Rule-Based Framework}
 \usage{
 validate_data(data, input_rules)
 }
 \arguments{
-\item{data}{A data.frame or data.table.}
+\item{data}{A data.frame or data.table containing the HR data to validate.
+Must include columns referenced in the validation rules.}
 
-\item{input_rules}{A set of rules, defined in a dataframe.}
+\item{input_rules}{A data.frame containing validation rules with columns:
+\itemize{
+  \item \code{rule}: R expression as a character string (e.g., "age >= 18")
+  \item \code{name}: Unique identifier for the rule
+  \item \code{description}: Human-readable explanation
+  \item \code{label}: Short label for reports/plots
+}}
 }
 \value{
 A data.frame containing the audit report with columns:
-  \item{Rule}{Short label for the rule}
+  \item{Rule}{Short label for the rule (from input_rules$label)}
   \item{Description}{Detailed explanation of what the rule checks}
   \item{Total Records}{Number of records evaluated}
   \item{Passes}{Number of records that passed the rule}
+  \item{Pass Rate}{Percentage of records passing (0-100)}
   \item{Fails}{Number of records that failed the rule}
-  \item{Errors}{Whether the rule threw an error during evaluation}
+  \item{Errors}{Logical indicating whether the rule threw an error}
 }
 \description{
-Validates conract data against a set of consistency rules.
-Returns an audit report data frame
-with validation results.
+Validates HR data (personnel or contract records) against a set of 
+predefined consistency rules using the \code{validate} package. Returns
+a stakeholder-friendly audit report showing pass/fail rates for each rule.
+
+This function is designed to work with rule sets defined as data frames
+(e.g., \code{govhr::personnel_rules} or \code{govhr::contract_rules})
+containing rule expressions, names, descriptions, and labels.
 }
 \details{
-The function checks the data according to user-inputed rules.
+Validate Data Against Quality Rules
+
+
+The function follows this workflow:
+\enumerate{
+  \item Parse rule expressions from input_rules$rule into validator object
+  \item Confront the data with rules using validate::confront()
+  \item Extract summary statistics (passes, fails, errors)
+  \item Join summary with rule metadata (descriptions, labels)
+  \item Format output as stakeholder-friendly report
+}
+
+Design rationale:
+\itemize{
+  \item Uses validate package for robust rule evaluation
+  \item Separates rule definitions (data) from validation logic (function)
+  \item Returns tidy data frame suitable for reporting/visualization
+  \item Uses .data[[]] pronoun to avoid R CMD check NOTEs
+}
 }
 \examples{
-# run validation
+# Validate contract data
 audit_report <- validate_data(
-    govhr::bra_hrmis_contract, govhr::contract_rules
+  data = govhr::bra_hrmis_contract,
+  input_rules = govhr::contract_rules
 )
 
-# view the audit report
+# View the audit report
 print(audit_report)
 
+# Check rules with failures
+audit_report[audit_report$Fails > 0, ]
+
+}
+\seealso{
+\code{\link{personnel_rules}} for personnel validation rules
+\code{\link{contract_rules}} for contract validation rules
 }
