@@ -204,71 +204,85 @@ remove_duplicate_contracts <- function(data,
 #'   are considered invalid.
 #' @param max_date Maximum valid date (default: today via \code{Sys.Date()}).
 #'   Future dates are considered invalid.
-#' @param action Character, correction strategy:
+#' @param treatment Character, correction strategy:
 #'   \itemize{
 #'     \item `"na"`: Set invalid dates to NA (preserves record, flags missing data)
 #'     \item `"clamp"`: Set dates below min to min_date, dates above max to max_date
 #'       (assumes typos in year entry)
+#'     \item `"filter"`: Remove records with invalid dates entirely
 #'   }
 #'
-#' @return A data.frame with corrected `ref_date` values.
+#' @return A data.frame with corrected `ref_date` values. If `treatment = "filter"`,
+#'   records with invalid dates are removed.
 #'
 #' @details
 #' **Why dates are invalid:** Data entry errors (typos in year), system date bugs,
 #' or date parsing issues during data imports.
 #' 
-#' **Action guidance:**
-#' - Use `action = "na"` when you want to preserve records but flag date issues
+#' **Treatment guidance:**
+#' - Use `treatment = "na"` when you want to preserve records but flag date issues
 #'   for manual review
-#' - Use `action = "clamp"` when you believe most invalid dates are typos
+#' - Use `treatment = "clamp"` when you believe most invalid dates are typos
 #'   (e.g., 2203 instead of 2023) and the min/max bounds represent the true intent
+#' - Use `treatment = "filter"` when records with invalid dates should be excluded
+#'   from analysis entirely
 #'
 #' @examples
 #' \dontrun{
 #' # Set invalid dates to NA
 #' clean_data <- fix_invalid_dates(
 #'   personnel_df,
-#'   action = "na"
+#'   treatment = "na"
 #' )
 #' 
 #' # Clamp dates to valid range
 #' clean_data <- fix_invalid_dates(
 #'   contract_df,
 #'   min_date = as.Date("2000-01-01"),
-#'   action = "clamp"
+#'   treatment = "clamp"
 #' )
 #' }
 #'
 #' @seealso 
 #' \code{\link{fix_invalid_birthdates}} for birth date correction
 #'
-#' @importFrom dplyr mutate case_when
+#' @importFrom dplyr mutate case_when filter
 #' @export
 fix_invalid_dates <- function(data, 
                               min_date = as.Date("1900-01-01"),
                               max_date = Sys.Date(),
-                              action = c("na", "clamp")) {
-  action <- match.arg(action)
+                              treatment = c("na", "clamp", "filter")) {
+  treatment <- match.arg(treatment)
   
-  data |>
-    dplyr::mutate(
-      ref_date = dplyr::case_when(
-        # Already NA: keep as NA
-        is.na(.data[["ref_date"]]) ~ .data[["ref_date"]],
-        
-        # Action: set invalid to NA
-        action == "na" & (.data[["ref_date"]] < min_date | .data[["ref_date"]] > max_date) ~ as.Date(NA),
-        
-        # Action: clamp to minimum
-        action == "clamp" & .data[["ref_date"]] < min_date ~ min_date,
-        
-        # Action: clamp to maximum
-        action == "clamp" & .data[["ref_date"]] > max_date ~ max_date,
-        
-        # Valid dates: keep as-is
-        TRUE ~ .data[["ref_date"]]
+  if (treatment == "filter") {
+    # Remove records with invalid dates
+    data |>
+      dplyr::filter(
+        !is.na(.data[["ref_date"]]) &
+        .data[["ref_date"]] >= min_date &
+        .data[["ref_date"]] <= max_date
       )
-    )
+  } else {
+    data |>
+      dplyr::mutate(
+        ref_date = dplyr::case_when(
+          # Already NA: keep as NA
+          is.na(.data[["ref_date"]]) ~ .data[["ref_date"]],
+          
+          # Treatment: set invalid to NA
+          treatment == "na" & (.data[["ref_date"]] < min_date | .data[["ref_date"]] > max_date) ~ as.Date(NA),
+          
+          # Treatment: clamp to minimum
+          treatment == "clamp" & .data[["ref_date"]] < min_date ~ min_date,
+          
+          # Treatment: clamp to maximum
+          treatment == "clamp" & .data[["ref_date"]] > max_date ~ max_date,
+          
+          # Valid dates: keep as-is
+          TRUE ~ .data[["ref_date"]]
+        )
+      )
+  }
 }
 
 #' Fix Invalid Birth Dates
@@ -284,10 +298,11 @@ fix_invalid_dates <- function(data,
 #'   active workers born before this date.
 #' @param max_date Maximum valid birth date (default: today). Future birth dates
 #'   are impossible.
-#' @param action Character, correction strategy: `"na"` or `"clamp"` (see
-#'   \code{\link{fix_invalid_dates}} for details).
+#' @param treatment Character, correction strategy: `"na"`, `"clamp"`, or `"filter"`
+#'   (see \code{\link{fix_invalid_dates}} for details).
 #'
-#' @return A data.frame with corrected `birth_date` values.
+#' @return A data.frame with corrected `birth_date` values. If `treatment = "filter"`,
+#'   records with invalid birth dates are removed.
 #'
 #' @details
 #' The default `min_date` of 1920-01-01 assumes no workers over ~105 years old
@@ -298,31 +313,41 @@ fix_invalid_dates <- function(data,
 #' \dontrun{
 #' clean_personnel <- fix_invalid_birthdates(
 #'   personnel_df,
-#'   action = "na"
+#'   treatment = "na"
 #' )
 #' }
 #'
 #' @seealso 
 #' \code{\link{personnel_rules}} for the validation rule definition
 #'
-#' @importFrom dplyr mutate case_when
+#' @importFrom dplyr mutate case_when filter
 #' @export
 fix_invalid_birthdates <- function(data,
                                    min_date = as.Date("1920-01-01"),
                                    max_date = Sys.Date(),
-                                   action = c("na", "clamp")) {
-  action <- match.arg(action)
+                                   treatment = c("na", "clamp", "filter")) {
+  treatment <- match.arg(treatment)
   
-  data |>
-    dplyr::mutate(
-      birth_date = dplyr::case_when(
-        is.na(.data[["birth_date"]]) ~ .data[["birth_date"]],
-        action == "na" & (.data[["birth_date"]] < min_date | .data[["birth_date"]] > max_date) ~ as.Date(NA),
-        action == "clamp" & .data[["birth_date"]] < min_date ~ min_date,
-        action == "clamp" & .data[["birth_date"]] > max_date ~ max_date,
-        TRUE ~ .data[["birth_date"]]
+  if (treatment == "filter") {
+    # Remove records with invalid birth dates
+    data |>
+      dplyr::filter(
+        !is.na(.data[["birth_date"]]) &
+        .data[["birth_date"]] >= min_date &
+        .data[["birth_date"]] <= max_date
       )
-    )
+  } else {
+    data |>
+      dplyr::mutate(
+        birth_date = dplyr::case_when(
+          is.na(.data[["birth_date"]]) ~ .data[["birth_date"]],
+          treatment == "na" & (.data[["birth_date"]] < min_date | .data[["birth_date"]] > max_date) ~ as.Date(NA),
+          treatment == "clamp" & .data[["birth_date"]] < min_date ~ min_date,
+          treatment == "clamp" & .data[["birth_date"]] > max_date ~ max_date,
+          TRUE ~ .data[["birth_date"]]
+        )
+      )
+  }
 }
 
 # 3. FIX AGE-RELATED ISSUES ==================================================
@@ -339,40 +364,37 @@ fix_invalid_birthdates <- function(data,
 #' @param data A data.frame with `birth_date` and `ref_date` columns (Date class).
 #' @param min_age Minimum working age in years (default: 18). Adjust based on
 #'   local labor laws.
-#' @param action Character, handling strategy:
+#' @param treatment Character, handling strategy:
 #'   \itemize{
 #'     \item `"flag"`: Add `underage_flag` column (TRUE for underage workers)
 #'     \item `"filter"`: Remove underage worker records entirely
-#'     \item `"adjust_status"`: Set status to "inactive" for underage active workers
 #'   }
 #'
-#' @return A data.frame with underage workers handled according to `action`.
-#'   If `action = "flag"`, adds an `underage_flag` column.
+#' @return A data.frame with underage workers handled according to `treatment`.
+#'   If `treatment = "flag"`, adds an `underage_flag` column.
 #'
 #' @details
 #' **Age calculation:** Uses the formula 
 #' `age = difftime(ref_date, birth_date, units = "days") / 365.25` to account
 #' for leap years.
 #' 
-#' **Action guidance:**
+#' **Treatment guidance:**
 #' - Use `"flag"` for initial data quality assessment (non-destructive)
 #' - Use `"filter"` if underage records are definitively errors to be removed
-#' - Use `"adjust_status"` if records are valid but status needs correction
-#'   (e.g., interns misclassified as active employees)
 #'
 #' @examples
 #' \dontrun{
 #' # Flag underage workers for review
 #' flagged_data <- fix_underage_workers(
 #'   personnel_df,
-#'   action = "flag"
+#'   treatment = "flag"
 #' )
 #' 
-#' # Adjust status to inactive
+#' # Filter out underage workers
 #' clean_data <- fix_underage_workers(
 #'   personnel_df,
 #'   min_age = 16,  # Adjust for jurisdiction
-#'   action = "adjust_status"
+#'   treatment = "filter"
 #' )
 #' }
 #'
@@ -384,8 +406,8 @@ fix_invalid_birthdates <- function(data,
 #' @export
 fix_underage_workers <- function(data, 
                                  min_age = 18,
-                                 action = c("flag", "filter", "adjust_status")) {
-  action <- match.arg(action)
+                                 treatment = c("flag", "filter")) {
+  treatment <- match.arg(treatment)
   
   # Calculate age and identify underage workers
   # Use temporary columns (prefixed with .) to avoid namespace conflicts
@@ -398,28 +420,18 @@ fix_underage_workers <- function(data,
     )
   
   # Apply correction strategy
-  if (action == "flag") {
+  if (treatment == "flag") {
     # Add flag column, remove temporary columns
     data |>
       dplyr::mutate(underage_flag = .data[[".underage"]]) |>
       dplyr::select(-dplyr::starts_with("."))
       
-  } else if (action == "filter") {
+  } else if (treatment == "filter") {
     # Remove underage records
     data |>
       dplyr::filter(!.data[[".underage"]]) |>
       dplyr::select(-dplyr::starts_with("."))
       
-  } else {
-    # Adjust status: set active underage to inactive
-    data |>
-      dplyr::mutate(
-        status = dplyr::case_when(
-          .data[[".underage"]] & .data[["status"]] == "active" ~ "inactive",
-          TRUE ~ .data[["status"]]
-        )
-      ) |>
-      dplyr::select(-dplyr::starts_with("."))
   }
 }
 
@@ -434,7 +446,7 @@ fix_underage_workers <- function(data,
 #' @param data A data.frame with `birth_date`, `ref_date`, and `status` columns.
 #' @param max_age Maximum retirement age in years (default: 65). Adjust based on
 #'   organizational or national retirement policies.
-#' @param action Character, handling strategy:
+#' @param treatment Character, handling strategy:
 #'   \itemize{
 #'     \item `"flag"`: Add `over_retirement_flag` column (TRUE for active workers
 #'       over retirement age)
@@ -443,7 +455,7 @@ fix_underage_workers <- function(data,
 #'   }
 #'
 #' @return A data.frame with over-retirement-age workers handled according to
-#'   `action`. If `action = "flag"`, adds an `over_retirement_flag` column.
+#'   `treatment`. If `treatment = "flag"`, adds an `over_retirement_flag` column.
 #'
 #' @details
 #' This function only targets workers with `status == "active"`. Workers already
@@ -454,14 +466,14 @@ fix_underage_workers <- function(data,
 #' # Flag active workers over retirement age
 #' flagged_data <- fix_retirement_age(
 #'   personnel_df,
-#'   action = "flag"
+#'   treatment = "flag"
 #' )
 #' 
 #' # Auto-adjust status to retired
 #' clean_data <- fix_retirement_age(
 #'   personnel_df,
 #'   max_age = 70,  # Custom retirement age
-#'   action = "adjust_status"
+#'   treatment = "adjust_status"
 #' )
 #' }
 #'
@@ -472,8 +484,8 @@ fix_underage_workers <- function(data,
 #' @export
 fix_retirement_age <- function(data,
                                max_age = 65,
-                               action = c("flag", "adjust_status")) {
-  action <- match.arg(action)
+                               treatment = c("flag", "adjust_status")) {
+  treatment <- match.arg(treatment)
   
   # Calculate age and identify over-retirement-age active workers
   data <- data |>
@@ -486,7 +498,7 @@ fix_retirement_age <- function(data,
                           !is.na(.data[[".age"]])
     )
   
-  if (action == "flag") {
+  if (treatment == "flag") {
     data |>
       dplyr::mutate(over_retirement_flag = .data[[".over_retirement"]]) |>
       dplyr::select(-dplyr::starts_with("."))
@@ -514,21 +526,21 @@ fix_retirement_age <- function(data,
 #' outside the valid range (0-168 hours per week).
 #'
 #' @param data A data.frame with a `whours` column (numeric).
-#' @param action Character, correction strategy:
+#' @param treatment Character, correction strategy:
 #'   \itemize{
 #'     \item `"na"`: Set invalid hours to NA
 #'     \item `"clamp"`: Set negative hours to 0, hours >168 to 168
 #'     \item `"flag"`: Add `invalid_hours_flag` column
 #'   }
 #'
-#' @return A data.frame with corrected working hours. If `action = "flag"`,
+#' @return A data.frame with corrected working hours. If `treatment = "flag"`,
 #'   adds an `invalid_hours_flag` column.
 #'
 #' @details
 #' **Valid range rationale:** Maximum of 168 hours per week (7 days × 24 hours).
 #' Negative hours or hours exceeding this are impossible.
 #' 
-#' **Action guidance:**
+#' **Treatment guidance:**
 #' - Use `"na"` when invalid hours indicate missing/corrupted data
 #' - Use `"clamp"` when values slightly outside range are likely data entry errors
 #' - Use `"flag"` for initial assessment or when manual review is needed
@@ -538,7 +550,7 @@ fix_retirement_age <- function(data,
 #' # Clamp working hours to valid range
 #' clean_contracts <- fix_working_hours(
 #'   contract_df,
-#'   action = "clamp"
+#'   treatment = "clamp"
 #' )
 #' }
 #'
@@ -547,10 +559,10 @@ fix_retirement_age <- function(data,
 #'
 #' @importFrom dplyr mutate case_when
 #' @export
-fix_working_hours <- function(data, action = c("na", "clamp", "flag")) {
-  action <- match.arg(action)
+fix_working_hours <- function(data, treatment = c("na", "clamp", "flag")) {
+  treatment <- match.arg(treatment)
   
-  if (action == "flag") {
+  if (treatment == "flag") {
     # Flag invalid hours (outside 0-168 or NA)
     data |>
       dplyr::mutate(
@@ -559,7 +571,7 @@ fix_working_hours <- function(data, action = c("na", "clamp", "flag")) {
                              is.na(.data[["whours"]])
       )
       
-  } else if (action == "na") {
+  } else if (treatment == "na") {
     # Set invalid hours to NA
     data |>
       dplyr::mutate(
@@ -707,7 +719,7 @@ fix_salary_components <- function(data,
 #' @param data A data.frame with salary columns.
 #' @param columns Character vector of salary column names to fix. Default checks
 #'   gross, base, and net salary.
-#' @param action Character, correction strategy:
+#' @param treatment Character, correction strategy:
 #'   \itemize{
 #'     \item `"na"`: Set negative values to NA (treat as missing data)
 #'     \item `"abs"`: Take absolute value (assumes sign error in data entry)
@@ -720,7 +732,7 @@ fix_salary_components <- function(data,
 #' **Why negative salaries occur:** Data entry errors (wrong sign), system bugs
 #' during calculations, or incorrect handling of deductions/refunds.
 #' 
-#' **Action guidance:**
+#' **Treatment guidance:**
 #' - Use `"na"` when negative values indicate corrupted/missing data
 #' - Use `"abs"` when you believe the magnitude is correct but sign is wrong
 #'   (e.g., -5000 should be 5000)
@@ -733,7 +745,7 @@ fix_salary_components <- function(data,
 #' clean_contracts <- fix_negative_salaries(
 #'   contract_df,
 #'   columns = c("gross_salary_lcu", "base_salary_lcu"),
-#'   action = "abs"
+#'   treatment = "abs"
 #' )
 #' }
 #'
@@ -746,8 +758,8 @@ fix_negative_salaries <- function(data,
                                   columns = c("gross_salary_lcu", 
                                             "base_salary_lcu", 
                                             "net_salary_lcu"),
-                                  action = c("na", "abs", "zero")) {
-  action <- match.arg(action)
+                                  treatment = c("na", "abs", "zero")) {
+  treatment <- match.arg(treatment)
   
   # Apply correction across all specified salary columns
   data |>
@@ -755,9 +767,9 @@ fix_negative_salaries <- function(data,
       dplyr::across(
         dplyr::all_of(columns),
         ~ dplyr::case_when(
-          action == "na" & . < 0 ~ NA_real_,
-          action == "abs" & . < 0 ~ abs(.),
-          action == "zero" & . < 0 ~ 0,
+          treatment == "na" & . < 0 ~ NA_real_,
+          treatment == "abs" & . < 0 ~ abs(.),
+          treatment == "zero" & . < 0 ~ 0,
           TRUE ~ .
         )
       )
@@ -797,8 +809,8 @@ fix_negative_salaries <- function(data,
 #' **Default strategies:**
 #' - Duplicates: Keep first occurrence
 #' - Invalid dates: Set to NA
-#' - Underage workers: Adjust status to inactive
-#' - Over-retirement workers: Adjust status to retired
+#' - Underage workers: Flag for review
+#' - Over-retirement workers: Flag for review
 #' - Working hours: Clamp to [0, 168]
 #' - Negative salaries: Take absolute value
 #' - Gross salary: Recalculate from base + allowance
@@ -832,8 +844,8 @@ fix_negative_salaries <- function(data,
 #' # Custom pipeline using individual functions
 #' custom_clean <- contract_df |>
 #'   remove_duplicate_contracts(level = "assignment", keep = "last") |>
-#'   fix_invalid_dates(action = "clamp") |>
-#'   fix_working_hours(action = "na") |>
+#'   fix_invalid_dates(treatment = "clamp") |>
+#'   fix_working_hours(treatment = "na") |>
 #'   fix_salary_components(strategy = "cap_net")
 #' }
 #'
@@ -874,24 +886,24 @@ clean_hr_data <- function(data,
   
   # Step 2: Fix dates --------------------------------------------------------
   if (fix_dates) {
-    data <- fix_invalid_dates(data, action = "na")
+    data <- fix_invalid_dates(data, treatment = "na")
     if (data_type == "personnel") {
-      data <- fix_invalid_birthdates(data, action = "na")
+      data <- fix_invalid_birthdates(data, treatment = "na")
     }
     if (verbose) message("  - Fixed invalid dates (set out-of-bounds to NA)")
   }
   
   # Step 3: Fix age issues (personnel only) ----------------------------------
   if (fix_ages && data_type == "personnel") {
-    data <- fix_underage_workers(data, action = "adjust_status")
-    data <- fix_retirement_age(data, action = "adjust_status")
-    if (verbose) message("  - Adjusted age-related statuses (underage → inactive, over-retirement → retired)")
+    data <- fix_underage_workers(data, treatment = "flag")
+    data <- fix_retirement_age(data, treatment = "flag")
+    if (verbose) message("  - Handled age issues (flagged underage and over-retirement)")
   }
   
   # Step 4: Fix salary issues (contract only) --------------------------------
   if (fix_salaries && data_type == "contract") {
-    data <- fix_working_hours(data, action = "clamp")
-    data <- fix_negative_salaries(data, action = "abs")
+    data <- fix_working_hours(data, treatment = "clamp")
+    data <- fix_negative_salaries(data, treatment = "abs")
     data <- fix_salary_components(data, strategy = "recalculate_gross")
     if (verbose) message("  - Fixed salary inconsistencies (clamped hours, abs(negatives), recalculated gross)")
   }
