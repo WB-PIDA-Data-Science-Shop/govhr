@@ -4,12 +4,14 @@
 \alias{validate_data}
 \title{Validate Data}
 \usage{
-validate_data(data, input_rules)
+validate_data(data, input_rules, output_format = c("report", "object"))
 }
 \arguments{
 \item{data}{A data.frame or data.table.}
 
 \item{input_rules}{A set of rules, defined in a dataframe.}
+
+\item{output_format}{A string specifying the output format: "report" for a summary report or "object" for the raw validation results.}
 }
 \value{
 A data.frame containing the audit report with columns:
@@ -22,8 +24,7 @@ A data.frame containing the audit report with columns:
 }
 \description{
 Validates conract data against a set of consistency rules.
-Returns an audit report data frame
-with validation results.
+Returns an audit report data frame or the object with validation results.
 }
 \details{
 The function checks the data according to user-inputed rules.

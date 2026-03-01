@@ -2,11 +2,11 @@
 #'
 #' @description
 #' Validates conract data against a set of consistency rules.
-#' Returns an audit report data frame
-#' with validation results.
+#' Returns an audit report data frame or the object with validation results.
 #'
 #' @param data A data.frame or data.table.
 #' @param input_rules A set of rules, defined in a dataframe.
+#' @param output_format A string specifying the output format: "report" for a summary report or "object" for the raw validation results.
 #'
 #' @return A data.frame containing the audit report with columns:
 #'   \item{Rule}{Short label for the rule}
@@ -29,13 +29,13 @@
 #' print(audit_report)
 #'
 #' @importFrom validate validator confront description label summary
-#' @importFrom dplyr left_join select %>%
+#' @importFrom dplyr left_join transmute %>%
 #' @importFrom tibble tibble
 #' @export
-validate_data <- function(data, input_rules) {
+validate_data <- function(data, input_rules, output_format = c("report", "object")) {
   # Set rules
   validation_results <- validate::validator(
-    data, .data = input_rules
+    .data = input_rules
   )
 
   # Confront the data with the rules
@@ -53,15 +53,23 @@ validate_data <- function(data, input_rules) {
   audit_report <- results_summary %>%
     dplyr::left_join(rules_meta, by = "name") %>%
     # Select and rename the columns you want stakeholders to see
-    dplyr::select(
+    dplyr::transmute(
       Rule = .data[['label']],
       Description = .data[['description']],
       `Total Records` = .data[['items']],
       Passes = .data[['passes']],
-      `Pass Rate` = .data[['passes']] / .data[['items']],
+      `Pass Rate` = round(Passes / `Total Records` * 100, 2),
       Fails = .data[['fails']],
       Errors = .data[['error']]
     )
   
-  return(audit_report)
+  type <- match.arg(output_format)
+  
+  output <- switch(
+    type,
+    "object" = results,
+    "report" = audit_report
+  )
+
+  return(output)
 }
