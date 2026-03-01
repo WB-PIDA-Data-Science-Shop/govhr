@@ -58,7 +58,7 @@ validate_data <- function(data, input_rules, output_format = c("report", "object
       Description = .data[['description']],
       `Total Records` = .data[['items']],
       Passes = .data[['passes']],
-      `Pass Rate` = round(Passes / `Total Records` * 100, 2),
+      `Pass Rate` = round(.data[['passes']] / .data[['items']] * 100, 2),
       Fails = .data[['fails']],
       Errors = .data[['error']]
     )
