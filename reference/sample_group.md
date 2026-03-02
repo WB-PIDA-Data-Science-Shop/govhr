@@ -40,6 +40,6 @@ sample_group(df, grp, 2)
 #>   <int> <chr>
 #> 1     1 a    
 #> 2     2 a    
-#> 3     5 c    
-#> 4     6 c    
+#> 3     3 b    
+#> 4     4 b    
 ```

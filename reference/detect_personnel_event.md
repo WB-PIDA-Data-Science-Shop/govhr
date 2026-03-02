@@ -1,6 +1,6 @@
 # Detect Personnel Events
 
-Expands a dataset of personnels and reference dates to include all
+Expands a dataset of personnel and reference dates to include all
 possible personnel–date combinations, fills missing periods, and
 identifies "hire" or "fire" events based on changes in status over time.
 
@@ -22,7 +22,7 @@ detect_personnel_event(
 - data:
 
   A data.table or data.frame containing at least the columns: -
-  \`personnel_id\`: Unique identifier for personnels. - \`ref_date\`:
+  \`personnel_id\`: Unique identifier for personnel. - \`ref_date\`:
   Reference date (must be coercible to Date). - \`status\`: Personnel
   status (e.g., "active", "inactive").
 

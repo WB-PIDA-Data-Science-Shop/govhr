@@ -126,7 +126,7 @@ percent of the original data. See the data below:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># bra_hrmis &lt;- govhr::bra_hrmis |&gt; </span></span>
 <span><span class="co">#   sample_n(1e3)</span></span>
-<span><span class="va">bra_hrmis_display</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span></span>
+<span><span class="va">bra_hrmis_display</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span></span>
 <span><span class="va">char_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">bra_hrmis_display</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">bra_hrmis_display</span>, <span class="va">is.character</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">bra_hrmis_display</span><span class="op">[</span>, <span class="op">(</span><span class="va">char_cols</span><span class="op">)</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">.SD</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/iconv.html" class="external-link">iconv</a></span><span class="op">(</span><span class="va">x</span>, from <span class="op">=</span> <span class="st">"latin1"</span>, to <span class="op">=</span> <span class="st">"UTF-8"</span>, sub <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
@@ -432,15 +432,15 @@ for this as follows:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">### first let us convert the data to a data.table object to speed up our computations</span></span>
 <span></span>
-<span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span></span>
+<span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Unique CPF per year</span></span>
-<span><span class="va">cpf_summary</span> <span class="op">&lt;-</span> <span class="va">bra_hrmis</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>unique_cpf <span class="op">=</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/duplicated.html" class="external-link">uniqueN</a></span><span class="op">(</span><span class="va">CPF</span><span class="op">)</span>,</span>
+<span><span class="va">cpf_summary</span> <span class="op">&lt;-</span> <span class="va">bra_hrmis</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>unique_cpf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/duplicated.html" class="external-link">uniqueN</a></span><span class="op">(</span><span class="va">CPF</span><span class="op">)</span>,</span>
 <span>                             nobs       <span class="op">=</span> <span class="va">.N</span><span class="op">)</span>,</span>
 <span>                         by <span class="op">=</span> <span class="va">ANO_PAGAMENTO</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># Unique Matricula per year</span></span>
-<span><span class="va">mtr_summary</span> <span class="op">&lt;-</span> <span class="va">bra_hrmis</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>unique_mtr <span class="op">=</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/duplicated.html" class="external-link">uniqueN</a></span><span class="op">(</span><span class="va">MATRICULA</span><span class="op">)</span>,</span>
+<span><span class="va">mtr_summary</span> <span class="op">&lt;-</span> <span class="va">bra_hrmis</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>unique_mtr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/duplicated.html" class="external-link">uniqueN</a></span><span class="op">(</span><span class="va">MATRICULA</span><span class="op">)</span>,</span>
 <span>                             nobs       <span class="op">=</span> <span class="va">.N</span><span class="op">)</span>, </span>
 <span>                         by <span class="op">=</span> <span class="va">ANO_PAGAMENTO</span><span class="op">]</span></span>
 <span></span>
@@ -553,7 +553,7 @@ occupations to the level-4 isco names.</li>
 <span>                                                                     source_language <span class="op">=</span> <span class="st">"pt"</span>,</span>
 <span>                                                                     target_language <span class="op">=</span> <span class="st">"en"</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">class_occup_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/copy.html" class="external-link">copy</a></span><span class="op">(</span><span class="va">occup_df</span><span class="op">)</span><span class="op">[</span>,</span>
+<code class="sourceCode R"><span><span class="va">class_occup_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/copy.html" class="external-link">copy</a></span><span class="op">(</span><span class="va">occup_df</span><span class="op">)</span><span class="op">[</span>,</span>
 <span>  <span class="fu">.</span><span class="op">(</span>id <span class="op">=</span> <span class="va">.I</span>, text <span class="op">=</span> <span class="va">occupation_english</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>
 <span></span>
@@ -578,16 +578,16 @@ occupations to the level-4 isco names.</li>
 <span>  all.x <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">occup_df</span>, <span class="st">"iscoGroup"</span>, <span class="st">"occupation_iscocode"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">occup_df</span>, <span class="st">"iscoGroup"</span>, <span class="st">"occupation_iscocode"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># merge ISCO descriptions</span></span>
 <span><span class="va">occup_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">occup_df</span>,</span>
-<span>                  <span class="va">isco</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"unit"</span>, <span class="st">"description"</span><span class="op">)</span><span class="op">]</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>                  <span class="va">isco</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"unit"</span>, <span class="st">"description"</span><span class="op">)</span><span class="op">]</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>                  by.x <span class="op">=</span> <span class="st">"occupation_iscocode"</span>,</span>
 <span>                  by.y <span class="op">=</span> <span class="st">"unit"</span>,</span>
 <span>                  all.x <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">occup_df</span>, <span class="st">"description"</span>, <span class="st">"occupation_isconame"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">occup_df</span>, <span class="st">"description"</span>, <span class="st">"occupation_isconame"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">#-----------------------------</span></span>
 <span><span class="co"># 5. Bring classified occupations back to bra_hrmis (active only)</span></span>
@@ -613,7 +613,7 @@ variables:</li>
 <code class="sourceCode R"><span><span class="co">### lets include the dates</span></span>
 <span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">ref_date</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">ANO_PAGAMENTO</span>, <span class="va">MES_REFERENCIA</span>, <span class="st">"01"</span>, sep <span class="op">=</span> <span class="st">"-"</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">bra_hrmis</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DATA_ADMISSAO"</span>, <span class="st">"DATA_APOSENTADORIA"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"start_date"</span>, <span class="st">"end_date"</span><span class="op">)</span>, skip_absent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">bra_hrmis</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DATA_ADMISSAO"</span>, <span class="st">"DATA_APOSENTADORIA"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"start_date"</span>, <span class="st">"end_date"</span><span class="op">)</span>, skip_absent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">start_date</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">start_date</span><span class="op">)</span>, origin <span class="op">=</span> <span class="st">"1899-12-30"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">end_date</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">end_date</span><span class="op">)</span>, origin <span class="op">=</span> <span class="st">"1899-12-30"</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
@@ -642,7 +642,7 @@ equivalents (_ppp).</li>
 <span><span class="co"># Step 1: Create the _lcu salary variables (in-place, no copy)</span></span>
 <span></span>
 <span><span class="co">### lets rename the raw variables here to their actual names</span></span>
-<span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">bra_hrmis</span>, </span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">bra_hrmis</span>, </span>
 <span>         old <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SALARIO_BASE"</span>, <span class="st">"SALARIO_BRUTO"</span>, <span class="st">"SALARIO_LIQUIDO"</span>, <span class="st">"ABONO_PERMANENCIA"</span><span class="op">)</span>,</span>
 <span>         new <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"base_salary_lcu"</span>, <span class="st">"gross_salary_lcu"</span>, <span class="st">"net_salary_lcu"</span>, <span class="st">"allowance_lcu"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -678,7 +678,7 @@ do so as follows:</li>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">### create a little dictionary mapping all the raw classes into a contract type in a data.table</span></span>
 <span><span class="va">contract_dict</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a></span><span class="op">(</span>TIPO_CONTRATO <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">$</span><span class="va">TIPO_CONTRATO</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table</a></span><span class="op">(</span>TIPO_CONTRATO <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">$</span><span class="va">TIPO_CONTRATO</span><span class="op">)</span>,</span>
 <span>             contract_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"short-term"</span>, <span class="st">"permanent"</span>, <span class="st">"permanent"</span>, <span class="st">"open-term"</span>,</span>
 <span>                               <span class="st">"short-term"</span>, <span class="st">"inactive"</span>, <span class="st">"retired"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -727,7 +727,7 @@ do so as follows:</li>
 created, we are ready to create the rest of the variables all at once to
 finalize the module.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">bra_hrmis</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">bra_hrmis</span>,</span>
 <span>         old <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MATRICULA"</span>, <span class="st">"CPF"</span>, <span class="st">"ORGAO"</span>, <span class="st">"CLASSE"</span>, <span class="st">"NIVEL"</span><span class="op">)</span>,</span>
 <span>         new <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contract_id"</span>, <span class="st">"personnel_id"</span>, <span class="st">"est_id"</span>, <span class="st">"paygrade"</span>, <span class="st">"seniority"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -767,7 +767,7 @@ data:</p>
 <span><span class="va">personnel_count</span> <span class="op">&lt;-</span> </span>
 <span><span class="va">bra_hrmis</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">personnel_id</span>, <span class="va">est_id</span>, <span class="va">ref_date</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/duplicated.html" class="external-link">uniqueN</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/duplicated.html" class="external-link">uniqueN</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>This tells us that we have 4176 unique personnel_id-est_id-refdate
 combinations in the entire dataset. The goal is to ensure that once all
 the other variables of the personnel module are added. The size of the
@@ -778,7 +778,7 @@ now add all the derived variables:</p>
 <span></span>
 <span></span>
 <span><span class="co"># Create the education harmonization dictionary for educat7</span></span>
-<span><span class="va">education_dictionary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a></span><span class="op">(</span></span>
+<span><span class="va">education_dictionary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table</a></span><span class="op">(</span></span>
 <span>  ESCOLARIDADE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"ANALFABETO"</span>,</span>
 <span>    <span class="st">"1 A 4 SERIE DO PRIM. GRAU INCOMPLETO"</span>,</span>
@@ -821,7 +821,7 @@ now add all the derived variables:</p>
 <span></span>
 <span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> </span>
 <span><span class="va">bra_hrmis</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span>old <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DATA_NASCIMENTO"</span>, <span class="st">"GENERO"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span>old <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DATA_NASCIMENTO"</span>, <span class="st">"GENERO"</span><span class="op">)</span>,</span>
 <span>           new <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"birth_date"</span>, <span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">### lets prepare the birth date variables</span></span>

@@ -1,4 +1,4 @@
-# A function to identify inconsistent column names across data frames
+# Identify inconsistent column names across data frames
 
 This function checks for consistency in column names across a list of
 data frames. It returns the symmetric difference between the shared

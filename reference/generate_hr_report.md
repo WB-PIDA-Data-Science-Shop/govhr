@@ -23,7 +23,7 @@ generate_hr_report(
 
   A data.table containing the Contract module data with harmonized
   column names according to
-  [`harmonization_dict`](https://wb-pida-data-science-shop.github.io/govhr/reference/harmonization_dict.md).
+  [`dictionary`](https://wb-pida-data-science-shop.github.io/govhr/reference/dictionary.md).
   Should include columns such as contract_id, personnel_id, est_id,
   ref_date, salary fields, and occupation information.
 
@@ -56,7 +56,7 @@ An HR report, in HTML.
 
 [`generate_qc_report`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_qc_report.md)
 for the data quality assessment report.
-[`harmonization_dict`](https://wb-pida-data-science-shop.github.io/govhr/reference/harmonization_dict.md)
+[`dictionary`](https://wb-pida-data-science-shop.github.io/govhr/reference/dictionary.md)
 for the harmonization dictionary.
 
 ## Examples

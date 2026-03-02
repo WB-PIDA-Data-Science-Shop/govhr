@@ -1,6 +1,6 @@
 # Detect Personnel Retirement Events
 
-Identifies personnels who retired, i.e., whose status changed from
+Identifies personnel who retired, i.e., whose status changed from
 "active" to "inactive".
 
 ## Usage

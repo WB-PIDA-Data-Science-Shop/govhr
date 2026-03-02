@@ -14,8 +14,12 @@
   : Personnel Dataset
 - [`calculate_date_intervals()`](https://wb-pida-data-science-shop.github.io/govhr/reference/calculate_date_intervals.md)
   : Calculate time intervals between reference dates
+- [`check_orphan_id()`](https://wb-pida-data-science-shop.github.io/govhr/reference/check_orphan_id.md)
+  : Detect Orphan Records Between Parent and Child Modules
 - [`compare_names_qc()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compare_names_qc.md)
   : Compare the contents of two character vectors
+- [`compare_to_dictionary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compare_to_dictionary.md)
+  : Compare Dataset Variable Names Against a Dictionary
 - [`complete_columns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/complete_columns.md)
   : Complete columns in a dataframe
 - [`complete_dates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/complete_dates.md)
@@ -40,6 +44,8 @@
   : Compute Volatility Measures Over Time
 - [`compute_wagebill()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wagebill.md)
   : Compute wage bill aggregates with optional macro-fiscal shares
+- [`contract_rules`](https://wb-pida-data-science-shop.github.io/govhr/reference/contract_rules.md)
+  : Contract Validation Rules
 - [`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.md)
   : Convert nominal wages to real PPP-adjusted wages (2021 base year)
 - [`convert_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_data.md)
@@ -67,6 +73,8 @@
   : Detect Personnel Reallocation Events
 - [`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md)
   : Detect Personnel Retirement Events
+- [`dictionary`](https://wb-pida-data-science-shop.github.io/govhr/reference/dictionary.md)
+  : Harmonization Dictionary for Payroll Data
 - [`enterprise_surveys`](https://wb-pida-data-science-shop.github.io/govhr/reference/enterprise_surveys.md)
   : World Bank Enterprise Surveys
 - [`fastcount()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fastcount.md)
@@ -76,7 +84,7 @@
 - [`find_duplicate_ids()`](https://wb-pida-data-science-shop.github.io/govhr/reference/find_duplicate_ids.md)
   : Find Duplicate Identifiers in a Data Frame
 - [`find_inconsistent_colnames()`](https://wb-pida-data-science-shop.github.io/govhr/reference/find_inconsistent_colnames.md)
-  : A function to identify inconsistent column names across data frames
+  : Identify inconsistent column names across data frames
 - [`flag_outlier()`](https://wb-pida-data-science-shop.github.io/govhr/reference/flag_outlier.md)
   : Flag outliers based on the IQR rule
 - [`generate_hr_report()`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_hr_report.md)
@@ -93,19 +101,21 @@
   : Plot grouped line chart with labeled points
 - [`ggplot_segment()`](https://wb-pida-data-science-shop.github.io/govhr/reference/ggplot_segment.md)
   : Plot segments overlaid with points, ordered by median
-- [`harmonization_dict`](https://wb-pida-data-science-shop.github.io/govhr/reference/harmonization_dict.md)
-  : Harmonization Dictionary for Payroll Data
 - [`harmonize_columns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/harmonize_columns.md)
   : Harmonize column names based on a dictionary
 - [`isco`](https://wb-pida-data-science-shop.github.io/govhr/reference/isco.md)
   : International Standard Classification of Occupations (ISCO-08)
 - [`macro_indicators`](https://wb-pida-data-science-shop.github.io/govhr/reference/macro_indicators.md)
   : Macro-level World Bank WDI indicators
+- [`personnel_rules`](https://wb-pida-data-science-shop.github.io/govhr/reference/personnel_rules.md)
+  : Personnel Validation Rules
 - [`pivot_data360()`](https://wb-pida-data-science-shop.github.io/govhr/reference/pivot_data360.md)
   : Pivot Data360 dataset to wide format
 - [`sample_group()`](https://wb-pida-data-science-shop.github.io/govhr/reference/sample_group.md)
   : Sample groups and return all rows for those groups
 - [`social_sustainability`](https://wb-pida-data-science-shop.github.io/govhr/reference/social_sustainability.md)
   : Social Sustainability Global Database
+- [`validate_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/validate_data.md)
+  : Validate Data
 - [`wwbi`](https://wb-pida-data-science-shop.github.io/govhr/reference/wwbi.md)
   : Worldwide Bureaucracy Indicators

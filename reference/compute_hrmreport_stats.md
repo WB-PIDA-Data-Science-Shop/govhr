@@ -83,12 +83,12 @@ A named list of \`data.table\` objects containing:
 
 - education_profile:
 
-  Distribution of public sector personnels by education, gender, and
+  Distribution of public sector personnel by education, gender, and
   occupation.
 
 - mobilityprofile:
 
-  Distribution of public sector personnels by pay grade, seniority,
+  Distribution of public sector personnel by pay grade, seniority,
   gender, and occupation.
 
 ## Details
