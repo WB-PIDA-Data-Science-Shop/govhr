@@ -377,8 +377,8 @@ compute_fastchange <- function(data, col, date_col) {
 #'   \item{personnelevent}{Personnel-level hiring, firing, and retirement events over time.}
 #'   \item{employment_decomp}{Employment decomposition by occupation and ISCO group.}
 #'   \item{est_decomp}{Employment decomposition by establishment.}
-#'   \item{education_profile}{Distribution of public sector personnels by education, gender, and occupation.}
-#'   \item{mobilityprofile}{Distribution of public sector personnels by pay grade, seniority, gender, and occupation.}
+#'   \item{education_profile}{Distribution of public sector personnel by education, gender, and occupation.}
+#'   \item{mobilityprofile}{Distribution of public sector personnel by pay grade, seniority, gender, and occupation.}
 #' }
 #'
 #' @details
@@ -568,8 +568,7 @@ compute_hrmreport_stats <- function(contract_dt,
     .[, prop := count / sum(count, na.rm = TRUE), by = "year"]
 
 
-  ## educational profile of public sector personnels by gender and perhaps occupation (find out about which
-  ## rates we need to compute)
+  ## Educational profile of public sector personnel by gender and occupation
 
   combine_dt <- personnel_dt[contract_dt, on = c("personnel_id", "ref_date", "year")]
 

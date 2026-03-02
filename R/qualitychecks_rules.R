@@ -1,8 +1,8 @@
 #' Validate Data
 #'
 #' @description
-#' Validates conract data against a set of consistency rules.
-#' Returns an audit report data frame or the object with validation results.
+#' Validates data against a set of predefined rules.
+#' Returns either a summary report or the full validation object.
 #'
 #' @param data A data.frame or data.table.
 #' @param input_rules A set of rules, defined in a dataframe.
@@ -17,7 +17,7 @@
 #'   \item{Errors}{Whether the rule threw an error during evaluation}
 #'
 #' @details
-#' The function checks the data according to user-inputed rules.
+#' The function validates data against user-defined rules using the validate package.
 #'
 #' @examples
 #' # run validation

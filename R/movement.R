@@ -42,12 +42,12 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
 
 #' Detect Personnel Events
 #'
-#' Expands a dataset of personnels and reference dates to include all possible
+#' Expands a dataset of personnel and reference dates to include all possible
 #' personnel–date combinations, fills missing periods, and identifies "hire" or
 #' "fire" events based on changes in status over time.
 #'
 #' @param data A data.table or data.frame containing at least the columns:
-#'   - `personnel_id`: Unique identifier for personnels.
+#'   - `personnel_id`: Unique identifier for personnel.
 #'   - `ref_date`: Reference date (must be coercible to Date).
 #'   - `status`: Personnel status (e.g., "active", "inactive").
 #' @param id_col Character. Name of the identifier column (e.g., `"personnel_id"`).
@@ -84,11 +84,11 @@ detect_personnel_event <- function(
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
-  # Filter for active personnels
-  active_personnels_dt <- dt[status == "active"]
+  # Filter for active personnel
+  active_personnel_dt <- dt[status == "active"]
 
   # Build full date range and unique personnel IDs
-  expanded_active_personnels_dt <- active_personnels_dt |>
+  expanded_active_personnel_dt <- active_personnel_dt |>
     complete_dates(
       id_col,
       start_date,
@@ -99,13 +99,13 @@ detect_personnel_event <- function(
 
   # Sort by personnel and date
   data.table::setorderv(
-    expanded_active_personnels_dt,
+    expanded_active_personnel_dt,
     cols = c(id_col, "ref_date")
   )
 
   # Add lag/lead and event detection
   if (event_type == "hire") {
-    expanded_active_personnels_dt <- expanded_active_personnels_dt[,
+    expanded_active_personnel_dt <- expanded_active_personnel_dt[,
       .(
         personnel_id = get(id_col),
         ref_date,
@@ -119,11 +119,11 @@ detect_personnel_event <- function(
       by = id_col
     ]
 
-    expanded_active_personnels_dt <- expanded_active_personnels_dt[
+    expanded_active_personnel_dt <- expanded_active_personnel_dt[
       ref_date > lubridate::ymd(start_date)
     ]
   } else {
-    expanded_active_personnels_dt <- expanded_active_personnels_dt[,
+    expanded_active_personnel_dt <- expanded_active_personnel_dt[,
       .(
         personnel_id = get(id_col),
         ref_date,
@@ -137,25 +137,25 @@ detect_personnel_event <- function(
       by = id_col
     ]
 
-    expanded_active_personnels_dt <- expanded_active_personnels_dt[
+    expanded_active_personnel_dt <- expanded_active_personnel_dt[
       ref_date < lubridate::ymd(end_date)
     ]
   }
 
-  expanded_active_personnels_dt <- expanded_active_personnels_dt[
+  expanded_active_personnel_dt <- expanded_active_personnel_dt[
     type_event %in% c("hire", "fire"),
     c(id_col, "ref_date", "type_event"),
     with = FALSE
   ]
 
-  data_out <- convert_data(expanded_active_personnels_dt, data)
+  data_out <- convert_data(expanded_active_personnel_dt, data)
 
   return(data_out)
 }
 
 #' Detect Personnel Retirement Events
 #'
-#' Identifies personnels who retired, i.e., whose status changed from "active" to "inactive".
+#' Identifies personnel who retired, i.e., whose status changed from "active" to "inactive".
 #'
 #' @param data A data.frame or data.table with columns `personnel_id`, `ref_date`, and `status`.
 #'

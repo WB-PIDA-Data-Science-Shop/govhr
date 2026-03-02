@@ -1,4 +1,4 @@
-## code to prepare `rules` dataset goes here
+## Code to prepare validation rules datasets
 library(dplyr)
 devtools::load_all()
 
@@ -85,10 +85,10 @@ contract_rules <- tibble::tibble(
     "net salary is positive",
     "base salary does not exceed gross salary",
     "allowance is non-negative if provided",
-    "gross salary is not a statistical outlier (beyond 3 standard deviations from mean)",
-    "net salary is not a statistical outlier (beyond 3 standard deviations from mean)",
-    "base salary is not a statistical outlier (beyond 3 standard deviations from mean)",
-    "allowance is not a statistical outlier (beyond 3 standard deviations from mean)"
+    "gross salary is not a statistical outlier (within IQR-based thresholds)",
+    "net salary is not a statistical outlier (within IQR-based thresholds)",
+    "base salary is not a statistical outlier (within IQR-based thresholds)",
+    "allowance is not a statistical outlier (within IQR-based thresholds)"
   ),
   label = c(
     "Unique contract ID",

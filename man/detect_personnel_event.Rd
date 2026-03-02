@@ -15,7 +15,7 @@ detect_personnel_event(
 }
 \arguments{
 \item{data}{A data.table or data.frame containing at least the columns:
-- `personnel_id`: Unique identifier for personnels.
+- `personnel_id`: Unique identifier for personnel.
 - `ref_date`: Reference date (must be coercible to Date).
 - `status`: Personnel status (e.g., "active", "inactive").}
 
@@ -36,7 +36,7 @@ Can be any valid value for \code{seq.Date(by = ...)}.}
 A dataset with event types detected (e.g., hire or fire).
 }
 \description{
-Expands a dataset of personnels and reference dates to include all possible
+Expands a dataset of personnel and reference dates to include all possible
 personnel–date combinations, fills missing periods, and identifies "hire" or
 "fire" events based on changes in status over time.
 }

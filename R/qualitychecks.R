@@ -87,12 +87,12 @@ compute_qualitycontrol <- function(contract_dt,
                                    personnel_dt,
                                    est_dt){
 
-  ### ensure all modules are data.tables
+  # Ensure all modules are data.tables
   contract_dt <- as.data.table(contract_dt)
   personnel_dt <- as.data.table(personnel_dt)
   est_dt <- as.data.table(est_dt)
 
-  ### structure and dictionary checks
+  # Structure and dictionary checks
 
   dict_list <- split(
     govhr::dictionary,
@@ -122,7 +122,7 @@ compute_qualitycontrol <- function(contract_dt,
                                           keys = c("contract_id", "personnel_id", "ref_date"))
 
 
-  ### checking for orphan keys (i.e. personnel IDs in bra_hrmis_contract)
+  # Check for orphan keys (personnel IDs in contract without matching personnel records)
   orphan_checks <- list()
 
   orphan_checks$personnel_vs_contract <- check_orphan_id(
@@ -217,7 +217,7 @@ compute_qualitycontrol <- function(contract_dt,
                                              groups = "contract_id",
                                              window_size = window_size))
   
- ### put together all the objects
+ # Put together all the objects
   qc_object <- list(n_obs = nrow(contract_dt),
                     n_vars = ncol(contract_dt),
                     structure = structure_checks,

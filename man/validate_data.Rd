@@ -23,11 +23,11 @@ A data.frame containing the audit report with columns:
   \item{Errors}{Whether the rule threw an error during evaluation}
 }
 \description{
-Validates conract data against a set of consistency rules.
-Returns an audit report data frame or the object with validation results.
+Validates data against a set of predefined rules.
+Returns either a summary report or the full validation object.
 }
 \details{
-The function checks the data according to user-inputed rules.
+The function validates data against user-defined rules using the validate package.
 }
 \examples{
 # run validation
