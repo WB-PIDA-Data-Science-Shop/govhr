@@ -39,7 +39,7 @@ safe_dt <- function(dt) {
 
 ## Overview
 
-This report presents a comprehensive quality control assessment of the harmonized payroll data comprising the **Contract**, **Personnel**, and **Establishment** modules according to the standard harmonization dictionary (`govhr::harmonization_dict()`). All diagnostic tables are generated automatically using the `compute_qualitycontrol()` function, which evaluates the aforementioned harmonized modules.
+This report presents a comprehensive quality control assessment of the harmonized payroll data comprising the **Contract**, **Personnel**, and **Establishment** modules according to the standard harmonization dictionary (`govhr::dictionary()`). All diagnostic tables are generated automatically using the `compute_qualitycontrol()` function, which evaluates the aforementioned harmonized modules.
 
 The quality control report is organized into four main sections:
 

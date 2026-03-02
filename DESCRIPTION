@@ -9,31 +9,32 @@ LazyData: true
 LazyDataCompression: xz
 Imports: 
     dplyr,
-    purrr,
     tibble,
     rlang,
     tidyr,
-    glue,
-    httr,
-    janitor,
-    jsonlite,
     lubridate,
     ggplot2,
     ggrepel,
     ggthemes,
     data.table,
-    dtplyr,
-    broom,
-    rmarkdown,
     stringr,
-    tidyselect,
-    scales
-RoxygenNote: 7.3.3
+    scales,
+    validate,
+    broom,
+    dtplyr,
+    glue,
+    httr,
+    janitor,
+    jsonlite,
+    purrr,
+    rmarkdown,
+    tidyselect
 Suggests: 
     forcats,
     readr,
     testthat (>= 3.0.0),
-    reactable    
+    reactable
+RoxygenNote: 7.3.3
 Config/testthat/edition: 3
 Depends: 
     R (>= 3.5)

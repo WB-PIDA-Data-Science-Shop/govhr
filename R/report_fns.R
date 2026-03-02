@@ -7,7 +7,7 @@
 #' across Contract, Personnel, and Establishment modules.
 #'
 #' @param contract_dt A data.table containing the Contract module data with
-#'   harmonized column names according to \code{\link{harmonization_dict}}.
+#'   harmonized column names according to \code{\link{dictionary}}.
 #'   Should include columns such as contract_id, personnel_id, est_id,
 #'   ref_date, salary fields, and occupation information.
 #' @param personnel_dt A data.table containing the Personnel module data with
@@ -44,7 +44,7 @@
 #'
 #' @seealso
 #' \code{\link{compute_qualitycontrol}} for the underlying diagnostic functions
-#' \code{\link{harmonization_dict}} for the harmonization dictionary
+#' \code{\link{dictionary}} for the harmonization dictionary
 #'
 #' @importFrom rmarkdown render
 #' @export
@@ -89,7 +89,7 @@ generate_qc_report <- function(
 #' Establishment modules.
 #'
 #' @param contract_dt A data.table containing the Contract module data with
-#'   harmonized column names according to \code{\link{harmonization_dict}}.
+#'   harmonized column names according to \code{\link{dictionary}}.
 #'   Should include columns such as contract_id, personnel_id, est_id,
 #'   ref_date, salary fields, and occupation information.
 #' @param personnel_dt A data.table containing the Personnel module data with
@@ -119,7 +119,7 @@ generate_qc_report <- function(
 #'
 #' @seealso
 #' \code{\link{generate_qc_report}} for the data quality assessment report.
-#' \code{\link{harmonization_dict}} for the harmonization dictionary.
+#' \code{\link{dictionary}} for the harmonization dictionary.
 #'
 #' @importFrom rmarkdown render
 #' @export

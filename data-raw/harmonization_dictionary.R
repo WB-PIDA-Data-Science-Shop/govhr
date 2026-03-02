@@ -1,4 +1,4 @@
-## code to prepare `harmonization_dictionary` dataset goes here
+## code to prepare `dictionaryionary` dataset goes here
 
 library(readxl)
 
@@ -16,10 +16,11 @@ dict_df <-
   read_excel(path_chr, sheet = sheet)
 
 }) |>
- bind_rows()
+ bind_rows() |> 
+ janitor::clean_names()
 
-harmonization_dict <- dict_df
+dictionary <- dict_df
 
 rm(dict_df)
 
-usethis::use_data(harmonization_dict, overwrite = TRUE)
+usethis::use_data(dictionary, overwrite = TRUE)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/harmonization_fns.R
 \name{find_inconsistent_colnames}
 \alias{find_inconsistent_colnames}
-\title{A function to identify inconsistent column names across data frames}
+\title{Identify inconsistent column names across data frames}
 \usage{
 find_inconsistent_colnames(data_list)
 }

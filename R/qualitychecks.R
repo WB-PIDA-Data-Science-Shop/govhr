@@ -83,21 +83,21 @@
 #' }
 #'
 #' @export
-
-
 compute_qualitycontrol <- function(contract_dt,
                                    personnel_dt,
                                    est_dt){
 
-  ### ensure all modules are data.tables
+  # Ensure all modules are data.tables
   contract_dt <- as.data.table(contract_dt)
   personnel_dt <- as.data.table(personnel_dt)
   est_dt <- as.data.table(est_dt)
 
-  ### structure and dictionary checks
+  # Structure and dictionary checks
 
-  dict_list <- split(harmonization_dict,
-                     harmonization_dict$Module)
+  dict_list <- split(
+    govhr::dictionary,
+    govhr::dictionary$module
+  )
   
 
   structure_checks <-
@@ -106,7 +106,7 @@ compute_qualitycontrol <- function(contract_dt,
       
       
       
-      structure_checks <- qc_compare_names(data = data,
+      structure_checks <- compare_to_dictionary(data = data,
                                            dict_names = dict_names$VariableID,
                                            output_format = "badges")
 
@@ -118,27 +118,26 @@ compute_qualitycontrol <- function(contract_dt,
 
 
 
-  key_checks <- qc_primary_key_uniqueness(dt = contract_dt,
+  key_checks <- check_key_uniqueness(dt = contract_dt,
                                           keys = c("contract_id", "personnel_id", "ref_date"))
 
 
-  ### checking for orphan keys (i.e. personnel IDs in bra_hrmis_contract)
+  # Check for orphan keys (personnel IDs in contract without matching personnel records)
   orphan_checks <- list()
 
-  orphan_checks$personnel_vs_contract <- qc_merge_check(
+  orphan_checks$personnel_vs_contract <- check_orphan_id(
     parent_dt = personnel_dt,
     child_dt  = contract_dt,
     parent_id = "personnel_id",
     child_id  = "personnel_id"
   )
 
-  orphan_checks$establishment_vs_contract <- qc_merge_check(
+  orphan_checks$establishment_vs_contract <- check_orphan_id(
     parent_dt = est_dt,
     child_dt  = contract_dt,
     parent_id = "est_id",
     child_id  = "est_id"
   )
-
 
   # -----------------------------------
   # 4. SALARY CHECKS
@@ -146,7 +145,7 @@ compute_qualitycontrol <- function(contract_dt,
   salary_vars <- colnames(contract_dt)[grepl("_salary_",
                                              colnames(contract_dt))]
 
-  salary_checks <- qc_salary_checks(contract_dt, cols = salary_vars)
+  salary_checks <- check_salary(contract_dt, cols = salary_vars)
 
   # -----------------------------------
   # 5. DATE LOGIC
@@ -218,7 +217,7 @@ compute_qualitycontrol <- function(contract_dt,
                                              groups = "contract_id",
                                              window_size = window_size))
   
- ### put together all the objects
+ # Put together all the objects
   qc_object <- list(n_obs = nrow(contract_dt),
                     n_vars = ncol(contract_dt),
                     structure = structure_checks,
@@ -230,8 +229,6 @@ compute_qualitycontrol <- function(contract_dt,
                     volatility = contract_volatility)
 
   return(qc_object)
-
-
 }
 
 

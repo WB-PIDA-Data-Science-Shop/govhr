@@ -1,7 +1,7 @@
 ################################################################################
-######### SOME FUNCTIONS TO SUPPORT HARMONIZATION OF HRMIS DATA ################
+## Functions to support harmonization of HRMIS data
 ################################################################################
-#' A function to identify inconsistent column names across data frames
+#' Identify inconsistent column names across data frames
 #'
 #' This function checks for consistency in column names across a list of data frames.
 #' It returns the symmetric difference between the shared columns (those present in all data frames)

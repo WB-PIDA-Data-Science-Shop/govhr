@@ -29,8 +29,8 @@ A named list of `data.table` objects containing:
   \item{personnelevent}{Personnel-level hiring, firing, and retirement events over time.}
   \item{employment_decomp}{Employment decomposition by occupation and ISCO group.}
   \item{est_decomp}{Employment decomposition by establishment.}
-  \item{education_profile}{Distribution of public sector personnels by education, gender, and occupation.}
-  \item{mobilityprofile}{Distribution of public sector personnels by pay grade, seniority, gender, and occupation.}
+  \item{education_profile}{Distribution of public sector personnel by education, gender, and occupation.}
+  \item{mobilityprofile}{Distribution of public sector personnel by pay grade, seniority, gender, and occupation.}
 }
 }
 \description{
