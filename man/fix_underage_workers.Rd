@@ -2,61 +2,36 @@
 % Please edit documentation in R/qualitychecks_treatment.R
 \name{fix_underage_workers}
 \alias{fix_underage_workers}
-\title{Address Violations of Minimum Working Age Rule}
+\title{Flag or Remove Underage Workers}
 \usage{
 fix_underage_workers(data, min_age = 18, treatment = c("flag", "filter"))
 }
 \arguments{
 \item{data}{A data.frame with `birth_date` and `ref_date` columns (Date class).}
 
-\item{min_age}{Minimum working age in years (default: 18). Adjust based on
-local labor laws.}
+\item{min_age}{Minimum working age in years (default: 18).}
 
-\item{treatment}{Character, handling strategy:
+\item{treatment}{Handling strategy:
 \itemize{
   \item `"flag"`: Add `underage_flag` column (TRUE for underage workers)
-  \item `"filter"`: Remove underage worker records entirely
+  \item `"filter"`: Remove underage worker records
 }}
 }
 \value{
 A data.frame with underage workers handled according to `treatment`.
-  If `treatment = "flag"`, adds an `underage_flag` column.
 }
 \description{
-Addresses violations of `personnel_minimum_age` rule by identifying workers
-below the minimum working age (default: 18 years) based on birth_date and
-ref_date. This is critical for child labor compliance.
-}
-\details{
-Flag or Remove Underage Workers
-
-
-**Age calculation:** Uses the formula 
-`age = difftime(ref_date, birth_date, units = "days") / 365.25` to account
-for leap years.
-
-**Treatment guidance:**
-- Use `"flag"` for initial data quality assessment (non-destructive)
-- Use `"filter"` if underage records are definitively errors to be removed
+Addresses violations of the `personnel_minimum_age` rule. Workers below
+`min_age` (default: 18) are identified using `birth_date` and `ref_date`.
+Age is calculated as `difftime(ref_date, birth_date, units = "days") / 365.25`.
 }
 \examples{
 \dontrun{
-# Flag underage workers for review
-flagged_data <- fix_underage_workers(
-  personnel_df,
-  treatment = "flag"
-)
-
-# Filter out underage workers
-clean_data <- fix_underage_workers(
-  personnel_df,
-  min_age = 16,  # Adjust for jurisdiction
-  treatment = "filter"
-)
+fix_underage_workers(personnel_df, treatment = "flag")
+fix_underage_workers(personnel_df, min_age = 16, treatment = "filter")
 }
 
 }
 \seealso{
-\code{\link{personnel_rules}} for the validation rule definition
-\code{\link{fix_retirement_age}} for maximum age handling
+\code{\link{personnel_rules}}, \code{\link{fix_retirement_age}}
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/qualitychecks_treatment.R
 \name{fix_invalid_birthdates}
 \alias{fix_invalid_birthdates}
-\title{Address Violations of Birth Date Validity Rule}
+\title{Fix Invalid Birth Dates}
 \usage{
 fix_invalid_birthdates(
   data,
@@ -14,40 +14,27 @@ fix_invalid_birthdates(
 \arguments{
 \item{data}{A data.frame with a `birth_date` column (Date class).}
 
-\item{min_date}{Minimum valid birth date (default: 1920-01-01). Assumes no
-active workers born before this date.}
+\item{min_date}{Minimum valid birth date (default: `1920-01-01`).}
 
-\item{max_date}{Maximum valid birth date (default: today). Future birth dates
-are impossible.}
+\item{max_date}{Maximum valid birth date (default: `Sys.Date()`).}
 
-\item{treatment}{Character, correction strategy: `"na"`, `"clamp"`, or `"filter"`
-(see \code{\link{fix_invalid_dates}} for details).}
+\item{treatment}{Correction strategy: `"na"`, `"clamp"`, or `"filter"`.
+See \code{\link{fix_invalid_dates}}.}
 }
 \value{
-A data.frame with corrected `birth_date` values. If `treatment = "filter"`,
-  records with invalid birth dates are removed.
+A data.frame with corrected `birth_date` values.
 }
 \description{
-Addresses violations of `personnel_birth_date` rule by correcting or removing
-impossible birth dates (before 1920 or in the future).
-}
-\details{
-Fix Invalid Birth Dates
-
-
-The default `min_date` of 1920-01-01 assumes no workers over ~105 years old
-are actively employed. Adjust this parameter if your data includes very long
-tenure or historical records.
+Corrects `birth_date` values outside the valid range, addressing violations
+of the `personnel_birth_date` rule. Defaults assume no active worker was born
+before 1920 or in the future.
 }
 \examples{
 \dontrun{
-clean_personnel <- fix_invalid_birthdates(
-  personnel_df,
-  treatment = "na"
-)
+fix_invalid_birthdates(personnel_df, treatment = "na")
 }
 
 }
 \seealso{
-\code{\link{personnel_rules}} for the validation rule definition
+\code{\link{personnel_rules}}, \code{\link{fix_invalid_dates}}
 }

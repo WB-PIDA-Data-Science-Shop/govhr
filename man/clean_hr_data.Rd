@@ -2,7 +2,7 @@
 % Please edit documentation in R/qualitychecks_treatment.R
 \name{clean_hr_data}
 \alias{clean_hr_data}
-\title{Master Function for HR Data Quality Treatment}
+\title{Apply Standard HR Data Cleaning Pipeline}
 \usage{
 clean_hr_data(
   data,
@@ -17,75 +17,40 @@ clean_hr_data(
 \arguments{
 \item{data}{A data.frame containing personnel or contract records.}
 
-\item{data_type}{Character, type of data: `"personnel"` or `"contract"`.
-Determines which cleaning functions are applied.}
+\item{data_type}{`"personnel"` or `"contract"`.}
 
-\item{remove_duplicates}{Logical, remove duplicate records? (default: TRUE)}
+\item{remove_duplicates}{Logical (default: `TRUE`).}
 
-\item{fix_dates}{Logical, fix invalid dates? (default: TRUE)}
+\item{fix_dates}{Logical (default: `TRUE`).}
 
-\item{fix_ages}{Logical, fix age-related issues? (default: TRUE, personnel only)}
+\item{fix_ages}{Logical, personnel only (default: `TRUE`).}
 
-\item{fix_salaries}{Logical, fix salary inconsistencies? (default: TRUE, contract only)}
+\item{fix_salaries}{Logical, contract only (default: `TRUE`).}
 
-\item{verbose}{Logical, print cleaning summary messages? (default: FALSE)}
+\item{verbose}{Logical, print step-level messages (default: `FALSE`).}
 }
 \value{
-A cleaned data.frame with violations addressed according to enabled
-  options and default correction strategies.
+A cleaned data.frame.
 }
 \description{
-Applies a comprehensive suite of cleaning functions to address common validation
-violations in HR data. This convenience function chains multiple cleaning steps
-in a recommended order, with options to enable/disable specific treatments.
+Chains the treatment functions in a recommended order. Steps applied per
+`data_type`:
+\enumerate{
+  \item **Both**: Remove duplicates (keep first); fix `ref_date` → `NA`
+  \item **Personnel**: Fix `birth_date` → `NA`; flag underage and
+    over-retirement-age workers
+  \item **Contract**: Clamp `whours`; abs(negative salaries);
+    recalculate gross = base + allowance
 }
-\details{
-Apply Standard Data Cleaning Pipeline
-
-
-**Cleaning pipeline order:**
-1. Remove duplicates (personnel: by personnel_id+ref_date, contract: by contract_id+ref_date)
-2. Fix invalid dates (ref_date, birth_date)
-3. Fix age issues (personnel: underage → inactive, over-retirement → retired)
-4. Fix salary issues (contract: clamp hours, abs(negative salaries), recalculate gross)
-
-**Default strategies:**
-- Duplicates: Keep first occurrence
-- Invalid dates: Set to NA
-- Underage workers: Flag for review
-- Over-retirement workers: Flag for review
-- Working hours: Clamp to [0, 168]
-- Negative salaries: Take absolute value
-- Gross salary: Recalculate from base + allowance
-
-**When to use this function:**
-- Initial data cleaning before analysis
-- Automated ETL pipelines with standard quality rules
-- Batch processing of multiple datasets
-
-**When NOT to use this function:**
-- When you need custom correction strategies (use individual functions instead)
-- When you want to flag issues without automatic correction
-- When manual review of violations is required before correction
+Use individual functions directly when you need custom strategies.
 }
 \examples{
 \dontrun{
-# Clean personnel data with verbose output
-clean_personnel <- clean_hr_data(
-  personnel_df,
-  data_type = "personnel",
-  verbose = TRUE
-)
+clean_hr_data(personnel_df, data_type = "personnel", verbose = TRUE)
+clean_hr_data(contract_df, data_type = "contract", fix_salaries = FALSE)
 
-# Clean contract data, skip salary fixes
-clean_contracts <- clean_hr_data(
-  contract_df,
-  data_type = "contract",
-  fix_salaries = FALSE
-)
-
-# Custom pipeline using individual functions
-custom_clean <- contract_df |>
+# Custom pipeline
+contract_df |>
   remove_duplicate_contracts(level = "assignment", keep = "last") |>
   fix_invalid_dates(treatment = "clamp") |>
   fix_working_hours(treatment = "na") |>
@@ -94,13 +59,8 @@ custom_clean <- contract_df |>
 
 }
 \seealso{
-Individual treatment functions:
-\code{\link{remove_duplicate_personnel}},
-\code{\link{remove_duplicate_contracts}},
-\code{\link{fix_invalid_dates}},
-\code{\link{fix_underage_workers}},
-\code{\link{fix_retirement_age}},
-\code{\link{fix_working_hours}},
-\code{\link{fix_salary_components}},
-\code{\link{fix_negative_salaries}}
+\code{\link{remove_duplicate_personnel}}, \code{\link{remove_duplicate_contracts}},
+\code{\link{fix_invalid_dates}}, \code{\link{fix_underage_workers}},
+\code{\link{fix_retirement_age}}, \code{\link{fix_working_hours}},
+\code{\link{fix_salary_components}}, \code{\link{fix_negative_salaries}}
 }

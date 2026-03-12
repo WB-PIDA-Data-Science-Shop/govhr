@@ -2,50 +2,34 @@
 % Please edit documentation in R/qualitychecks_treatment.R
 \name{fix_working_hours}
 \alias{fix_working_hours}
-\title{Address Violations of Working Hours Range Rule}
+\title{Fix Invalid Working Hours}
 \usage{
 fix_working_hours(data, treatment = c("na", "clamp", "flag"))
 }
 \arguments{
 \item{data}{A data.frame with a `whours` column (numeric).}
 
-\item{treatment}{Character, correction strategy:
+\item{treatment}{Correction strategy:
 \itemize{
-  \item `"na"`: Set invalid hours to NA
-  \item `"clamp"`: Set negative hours to 0, hours >168 to 168
-  \item `"flag"`: Add `invalid_hours_flag` column
+  \item `"na"`: Set invalid hours to `NA`
+  \item `"clamp"`: Clamp to `[0, 40]`
+  \item `"flag"`: Add `invalid_hours_flag` column (also flags `NA`)
 }}
 }
 \value{
-A data.frame with corrected working hours. If `treatment = "flag"`,
-  adds an `invalid_hours_flag` column.
+A data.frame with corrected working hours.
 }
 \description{
-Addresses violations of `contract_whours` rule by correcting working hours
-outside the valid range (0-168 hours per week).
-}
-\details{
-Fix Invalid Working Hours
-
-
-**Valid range rationale:** Maximum of 168 hours per week (7 days × 24 hours).
-Negative hours or hours exceeding this are impossible.
-
-**Treatment guidance:**
-- Use `"na"` when invalid hours indicate missing/corrupted data
-- Use `"clamp"` when values slightly outside range are likely data entry errors
-- Use `"flag"` for initial assessment or when manual review is needed
+Corrects `whours` values outside the valid range [0, 168], addressing
+violations of the `contract_whours` rule. The maximum of 168 reflects
+5 days × 8 hours per week.
 }
 \examples{
 \dontrun{
-# Clamp working hours to valid range
-clean_contracts <- fix_working_hours(
-  contract_df,
-  treatment = "clamp"
-)
+fix_working_hours(contract_df, treatment = "clamp")
 }
 
 }
 \seealso{
-\code{\link{contract_rules}} for the validation rule definition
+\code{\link{contract_rules}}
 }

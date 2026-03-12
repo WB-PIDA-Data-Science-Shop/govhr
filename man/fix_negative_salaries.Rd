@@ -2,7 +2,7 @@
 % Please edit documentation in R/qualitychecks_treatment.R
 \name{fix_negative_salaries}
 \alias{fix_negative_salaries}
-\title{Address Violations of Positive Salary Rules}
+\title{Fix Negative Salary Values}
 \usage{
 fix_negative_salaries(
   data,
@@ -13,48 +13,30 @@ fix_negative_salaries(
 \arguments{
 \item{data}{A data.frame with salary columns.}
 
-\item{columns}{Character vector of salary column names to fix. Default checks
-gross, base, and net salary.}
+\item{columns}{Salary columns to fix (default: `gross_salary_lcu`,
+`base_salary_lcu`, `net_salary_lcu`).}
 
-\item{treatment}{Character, correction strategy:
+\item{treatment}{Correction strategy:
 \itemize{
-  \item `"na"`: Set negative values to NA (treat as missing data)
-  \item `"abs"`: Take absolute value (assumes sign error in data entry)
-  \item `"zero"`: Set negative values to 0 (conservative, treats as unpaid)
+  \item `"na"`: Set negative values to `NA`
+  \item `"abs"`: Take absolute value
+  \item `"zero"`: Set negative values to `0`
 }}
 }
 \value{
-A data.frame with corrected salary values in specified columns.
+A data.frame with corrected salary values in the specified columns.
 }
 \description{
 Addresses violations of positive salary rules (`wagebill_*_positive`) by
-handling negative salary values, which are mathematically impossible.
-}
-\details{
-Fix Negative Salary Values
-
-
-**Why negative salaries occur:** Data entry errors (wrong sign), system bugs
-during calculations, or incorrect handling of deductions/refunds.
-
-**Treatment guidance:**
-- Use `"na"` when negative values indicate corrupted/missing data
-- Use `"abs"` when you believe the magnitude is correct but sign is wrong
-  (e.g., -5000 should be 5000)
-- Use `"zero"` for conservative approach in official reporting (avoids
-  overestimating wage bill)
+handling negative values across salary columns.
 }
 \examples{
 \dontrun{
-# Take absolute value of negative salaries
-clean_contracts <- fix_negative_salaries(
-  contract_df,
-  columns = c("gross_salary_lcu", "base_salary_lcu"),
-  treatment = "abs"
-)
+fix_negative_salaries(contract_df, treatment = "abs")
+fix_negative_salaries(contract_df, columns = "gross_salary_lcu", treatment = "na")
 }
 
 }
 \seealso{
-\code{\link{contract_rules}} for wage bill validation rules
+\code{\link{contract_rules}}, \code{\link{fix_salary_components}}
 }

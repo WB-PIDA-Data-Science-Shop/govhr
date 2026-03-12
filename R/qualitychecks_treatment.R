@@ -9,7 +9,7 @@
 # strategies for handling violations (flagging, filtering, correcting).
 # 
 # Design philosophy:
-# - Explicit over implicit: Functions require user to choose correction strategy
+# - Explicit over implicit: Functions require user to choose type of treatment.
 # - Non-destructive by default: Prefer flagging over automatic deletion
 # - Composable: Functions can be chained in a cleaning pipeline
 # - Auditable: Master function (clean_hr_data) provides verbose logging
@@ -19,55 +19,23 @@
 
 #' Remove Duplicate Personnel Records
 #'
-#' @title Address Violations of Personnel ID Uniqueness Rule
-#'
 #' @description
-#' Addresses violations of the `personnel_unique_id` rule by removing duplicate
-#' personnel_id + ref_date combinations. This function provides three strategies
-#' for handling duplicates: keep first occurrence, keep last occurrence, or
-#' remove all duplicated records.
+#' Removes duplicate `personnel_id` + `ref_date` combinations, addressing
+#' violations of the `personnel_unique_id` rule.
 #'
-#' @param data A data.frame or data.table containing personnel records with
-#'   columns `personnel_id` and `ref_date`.
-#' @param keep Character, which duplicate to keep:
-#'   \itemize{
-#'     \item `"first"` (default): Keep the first occurrence of each duplicate group
-#'     \item `"last"`: Keep the last occurrence of each duplicate group
-#'     \item `"none"`: Remove all records involved in duplication (conservative approach)
-#'   }
+#' @param data A data.frame with columns `personnel_id` and `ref_date`.
+#' @param keep Which record to keep per duplicate group: `"first"` (default),
+#'   `"last"`, or `"none"` (drops all records in a duplicate group).
 #'
-#' @return A data.frame with duplicates handled according to the `keep` parameter.
-#'   Row count will be reduced if duplicates were present.
-#'
-#' @details
-#' **Why duplicates occur:** Data entry errors, system glitches during uploads,
-#' or merging multiple data sources without proper reconciliation.
-#' 
-#' **Strategy guidance:**
-#' - Use `keep = "first"` when earlier records are more reliable (e.g., original entry)
-#' - Use `keep = "last"` when later records contain corrections/updates
-#' - Use `keep = "none"` when you cannot determine which record is correct and
-#'   need to manually review all duplicates
+#' @return A data.frame with duplicates removed.
 #'
 #' @examples
 #' \dontrun{
-#' # Keep first occurrence (default)
-#' clean_personnel <- remove_duplicate_personnel(
-#'   personnel_df, 
-#'   keep = "first"
-#' )
-#' 
-#' # Remove all duplicates for manual review
-#' flagged_duplicates <- remove_duplicate_personnel(
-#'   personnel_df,
-#'   keep = "none"
-#' )
+#' remove_duplicate_personnel(personnel_df, keep = "first")
+#' remove_duplicate_personnel(personnel_df, keep = "none")
 #' }
 #'
-#' @seealso 
-#' \code{\link{personnel_rules}} for the validation rule definition
-#' \code{\link{remove_duplicate_contracts}} for handling contract duplicates
-#'
+#' @seealso \code{\link{personnel_rules}}, \code{\link{remove_duplicate_contracts}}
 #' @importFrom dplyr group_by slice_head slice_tail ungroup filter n
 #' @export
 remove_duplicate_personnel <- function(data, keep = c("first", "last", "none")) {
@@ -101,56 +69,28 @@ remove_duplicate_personnel <- function(data, keep = c("first", "last", "none")) 
 
 #' Remove Duplicate Contract Records
 #'
-#' @title Address Violations of Contract Uniqueness Rules
-#'
 #' @description
-#' Addresses violations of `contract_unique_id` and `contract_unique_personnel`
-#' rules by removing duplicate contract records. Offers two deduplication levels:
-#' contract-level (contract_id + ref_date) or assignment-level (contract_id +
-#' personnel_id + ref_date).
+#' Removes duplicate contract records, addressing violations of `contract_unique_id`
+#' (contract-level) and `contract_unique_personnel` (assignment-level) rules.
 #'
-#' @param data A data.frame or data.table containing contract records with
-#'   columns `contract_id`, `personnel_id`, and `ref_date`.
-#' @param level Character, deduplication level:
+#' @param data A data.frame with columns `contract_id`, `personnel_id`, and `ref_date`.
+#' @param level Deduplication scope:
 #'   \itemize{
-#'     \item `"contract"`: Remove duplicates based on contract_id + ref_date
-#'       (addresses `contract_unique_id` rule)
-#'     \item `"assignment"`: Remove duplicates based on contract_id + personnel_id +
-#'       ref_date (addresses `contract_unique_personnel` rule)
+#'     \item `"contract"`: Deduplicate on `contract_id` + `ref_date`
+#'     \item `"assignment"`: Deduplicate on `contract_id` + `personnel_id` + `ref_date`
 #'   }
-#' @param keep Character, which duplicate to keep: `"first"`, `"last"`, or `"none"`
-#'   (see \code{\link{remove_duplicate_personnel}} for details)
+#' @param keep Which record to keep: `"first"`, `"last"`, or `"none"`.
+#'   See \code{\link{remove_duplicate_personnel}}.
 #'
-#' @return A data.frame with duplicates removed according to specified level and
-#'   keep strategy.
-#'
-#' @details
-#' **Deduplication level guidance:**
-#' - Use `level = "contract"` when each contract should appear once per period
-#'   (most common for payroll records)
-#' - Use `level = "assignment"` when multiple personnel can be assigned to the
-#'   same contract, but each person-contract pair should be unique per period
+#' @return A data.frame with duplicates removed.
 #'
 #' @examples
 #' \dontrun{
-#' # Remove duplicate contracts (contract-level)
-#' clean_contracts <- remove_duplicate_contracts(
-#'   contract_df,
-#'   level = "contract",
-#'   keep = "first"
-#' )
-#' 
-#' # Remove duplicate assignments (assignment-level)
-#' clean_assignments <- remove_duplicate_contracts(
-#'   contract_df,
-#'   level = "assignment",
-#'   keep = "last"
-#' )
+#' remove_duplicate_contracts(contract_df, level = "contract", keep = "first")
+#' remove_duplicate_contracts(contract_df, level = "assignment", keep = "last")
 #' }
 #'
-#' @seealso 
-#' \code{\link{contract_rules}} for the validation rule definitions
-#'
+#' @seealso \code{\link{contract_rules}}, \code{\link{remove_duplicate_personnel}}
 #' @importFrom dplyr group_by slice_head slice_tail ungroup filter n
 #' @export
 remove_duplicate_contracts <- function(data, 
@@ -192,60 +132,29 @@ remove_duplicate_contracts <- function(data,
 
 #' Fix Invalid Reference Dates
 #'
-#' @title Address Violations of Reference Date Validity Rules
-#'
 #' @description
-#' Addresses violations of `personnel_ref_date_valid` and `contract_ref_date_valid`
-#' rules by correcting reference dates that fall outside the acceptable range
-#' (default: 1900-01-01 to today).
+#' Corrects `ref_date` values outside the valid range, addressing violations of
+#' `personnel_ref_date_valid` and `contract_ref_date_valid` rules.
 #'
 #' @param data A data.frame with a `ref_date` column (Date class).
-#' @param min_date Minimum valid date (default: 1900-01-01). Dates before this
-#'   are considered invalid.
-#' @param max_date Maximum valid date (default: today via \code{Sys.Date()}).
-#'   Future dates are considered invalid.
-#' @param treatment Character, correction strategy:
+#' @param min_date Minimum valid date (default: `1900-01-01`).
+#' @param max_date Maximum valid date (default: `Sys.Date()`).
+#' @param treatment Correction strategy:
 #'   \itemize{
-#'     \item `"na"`: Set invalid dates to NA (preserves record, flags missing data)
-#'     \item `"clamp"`: Set dates below min to min_date, dates above max to max_date
-#'       (assumes typos in year entry)
-#'     \item `"filter"`: Remove records with invalid dates entirely
+#'     \item `"na"`: Set invalid dates to `NA`
+#'     \item `"clamp"`: Replace out-of-range dates with `min_date` or `max_date`
+#'     \item `"filter"`: Remove records with invalid dates
 #'   }
 #'
-#' @return A data.frame with corrected `ref_date` values. If `treatment = "filter"`,
-#'   records with invalid dates are removed.
-#'
-#' @details
-#' **Why dates are invalid:** Data entry errors (typos in year), system date bugs,
-#' or date parsing issues during data imports.
-#' 
-#' **Treatment guidance:**
-#' - Use `treatment = "na"` when you want to preserve records but flag date issues
-#'   for manual review
-#' - Use `treatment = "clamp"` when you believe most invalid dates are typos
-#'   (e.g., 2203 instead of 2023) and the min/max bounds represent the true intent
-#' - Use `treatment = "filter"` when records with invalid dates should be excluded
-#'   from analysis entirely
+#' @return A data.frame with corrected `ref_date` values.
 #'
 #' @examples
 #' \dontrun{
-#' # Set invalid dates to NA
-#' clean_data <- fix_invalid_dates(
-#'   personnel_df,
-#'   treatment = "na"
-#' )
-#' 
-#' # Clamp dates to valid range
-#' clean_data <- fix_invalid_dates(
-#'   contract_df,
-#'   min_date = as.Date("2000-01-01"),
-#'   treatment = "clamp"
-#' )
+#' fix_invalid_dates(personnel_df, treatment = "na")
+#' fix_invalid_dates(contract_df, min_date = as.Date("2000-01-01"), treatment = "clamp")
 #' }
 #'
-#' @seealso 
-#' \code{\link{fix_invalid_birthdates}} for birth date correction
-#'
+#' @seealso \code{\link{fix_invalid_birthdates}}
 #' @importFrom dplyr mutate case_when filter
 #' @export
 fix_invalid_dates <- function(data, 
@@ -287,40 +196,27 @@ fix_invalid_dates <- function(data,
 
 #' Fix Invalid Birth Dates
 #'
-#' @title Address Violations of Birth Date Validity Rule
-#'
 #' @description
-#' Addresses violations of `personnel_birth_date` rule by correcting or removing
-#' impossible birth dates (before 1920 or in the future).
+#' Corrects `birth_date` values outside the valid range, addressing violations
+#' of the `personnel_birth_date` rule. Defaults assume no active worker was born
+#' before 1920 or in the future.
 #'
 #' @param data A data.frame with a `birth_date` column (Date class).
-#' @param min_date Minimum valid birth date (default: 1920-01-01). Assumes no
-#'   active workers born before this date.
-#' @param max_date Maximum valid birth date (default: today). Future birth dates
-#'   are impossible.
-#' @param treatment Character, correction strategy: `"na"`, `"clamp"`, or `"filter"`
-#'   (see \code{\link{fix_invalid_dates}} for details).
+#' @param min_date Minimum valid birth date (default: `1920-01-01`).
+#' @param max_date Maximum valid birth date (default: `Sys.Date()`).
+#' @param treatment Correction strategy: `"na"`, `"clamp"`, or `"filter"`.
+#'   See \code{\link{fix_invalid_dates}}.
 #'
-#' @return A data.frame with corrected `birth_date` values. If `treatment = "filter"`,
-#'   records with invalid birth dates are removed.
-#'
-#' @details
-#' The default `min_date` of 1920-01-01 assumes no workers over ~105 years old
-#' are actively employed. Adjust this parameter if your data includes very long
-#' tenure or historical records.
+#' @return A data.frame with corrected `birth_date` values.
 #'
 #' @examples
 #' \dontrun{
-#' clean_personnel <- fix_invalid_birthdates(
-#'   personnel_df,
-#'   treatment = "na"
-#' )
+#' fix_invalid_birthdates(personnel_df, treatment = "na")
 #' }
 #'
-#' @seealso 
-#' \code{\link{personnel_rules}} for the validation rule definition
-#'
+#' @seealso \code{\link{personnel_rules}}, \code{\link{fix_invalid_dates}}
 #' @importFrom dplyr mutate case_when filter
+#' @importFrom lubridate years
 #' @export
 fix_invalid_birthdates <- function(data,
                                    min_date = as.Date("1920-01-01"),
@@ -354,54 +250,28 @@ fix_invalid_birthdates <- function(data,
 
 #' Flag or Remove Underage Workers
 #'
-#' @title Address Violations of Minimum Working Age Rule
-#'
 #' @description
-#' Addresses violations of `personnel_minimum_age` rule by identifying workers
-#' below the minimum working age (default: 18 years) based on birth_date and
-#' ref_date. This is critical for child labor compliance.
+#' Addresses violations of the `personnel_minimum_age` rule. Workers below
+#' `min_age` (default: 18) are identified using `birth_date` and `ref_date`.
+#' Age is calculated as `difftime(ref_date, birth_date, units = "days") / 365.25`.
 #'
 #' @param data A data.frame with `birth_date` and `ref_date` columns (Date class).
-#' @param min_age Minimum working age in years (default: 18). Adjust based on
-#'   local labor laws.
-#' @param treatment Character, handling strategy:
+#' @param min_age Minimum working age in years (default: 18).
+#' @param treatment Handling strategy:
 #'   \itemize{
 #'     \item `"flag"`: Add `underage_flag` column (TRUE for underage workers)
-#'     \item `"filter"`: Remove underage worker records entirely
+#'     \item `"filter"`: Remove underage worker records
 #'   }
 #'
 #' @return A data.frame with underage workers handled according to `treatment`.
-#'   If `treatment = "flag"`, adds an `underage_flag` column.
-#'
-#' @details
-#' **Age calculation:** Uses the formula 
-#' `age = difftime(ref_date, birth_date, units = "days") / 365.25` to account
-#' for leap years.
-#' 
-#' **Treatment guidance:**
-#' - Use `"flag"` for initial data quality assessment (non-destructive)
-#' - Use `"filter"` if underage records are definitively errors to be removed
 #'
 #' @examples
 #' \dontrun{
-#' # Flag underage workers for review
-#' flagged_data <- fix_underage_workers(
-#'   personnel_df,
-#'   treatment = "flag"
-#' )
-#' 
-#' # Filter out underage workers
-#' clean_data <- fix_underage_workers(
-#'   personnel_df,
-#'   min_age = 16,  # Adjust for jurisdiction
-#'   treatment = "filter"
-#' )
+#' fix_underage_workers(personnel_df, treatment = "flag")
+#' fix_underage_workers(personnel_df, min_age = 16, treatment = "filter")
 #' }
 #'
-#' @seealso 
-#' \code{\link{personnel_rules}} for the validation rule definition
-#' \code{\link{fix_retirement_age}} for maximum age handling
-#'
+#' @seealso \code{\link{personnel_rules}}, \code{\link{fix_retirement_age}}
 #' @importFrom dplyr mutate filter case_when select starts_with
 #' @export
 fix_underage_workers <- function(data, 
@@ -424,62 +294,44 @@ fix_underage_workers <- function(data,
     # Add flag column, remove temporary columns
     data |>
       dplyr::mutate(underage_flag = .data[[".underage"]]) |>
-      dplyr::select(-dplyr::starts_with("."))
+      dplyr::select(
+        -all_of(c(".age", ".underage"))
+      )
       
   } else if (treatment == "filter") {
     # Remove underage records
     data |>
       dplyr::filter(!.data[[".underage"]]) |>
-      dplyr::select(-dplyr::starts_with("."))
-      
+      dplyr::select(
+        -all_of(c(".age", ".underage"))
+      )
   }
 }
 
 #' Flag or Adjust Over-Retirement-Age Workers
 #'
-#' @title Address Violations of Maximum Working Age Rule
-#'
 #' @description
-#' Addresses violations of `personnel_maximum_age` rule by handling active
-#' workers over the retirement age (default: 65 years).
+#' Addresses violations of the `personnel_maximum_age` rule. Only targets
+#' workers with `status == "active"`; retired or inactive workers are ignored.
 #'
 #' @param data A data.frame with `birth_date`, `ref_date`, and `status` columns.
-#' @param max_age Maximum retirement age in years (default: 65). Adjust based on
-#'   organizational or national retirement policies.
-#' @param treatment Character, handling strategy:
+#' @param max_age Retirement age threshold in years (default: 65).
+#' @param treatment Handling strategy:
 #'   \itemize{
-#'     \item `"flag"`: Add `over_retirement_flag` column (TRUE for active workers
-#'       over retirement age)
-#'     \item `"adjust_status"`: Set status to "retired" for active workers over
-#'       retirement age
+#'     \item `"flag"`: Add `over_retirement_flag` column
+#'     \item `"adjust_status"`: Set `status` to `"retired"` for affected workers
 #'   }
 #'
 #' @return A data.frame with over-retirement-age workers handled according to
-#'   `treatment`. If `treatment = "flag"`, adds an `over_retirement_flag` column.
-#'
-#' @details
-#' This function only targets workers with `status == "active"`. Workers already
-#' marked as "retired" or "inactive" are not flagged/adjusted.
+#'   `treatment`.
 #'
 #' @examples
 #' \dontrun{
-#' # Flag active workers over retirement age
-#' flagged_data <- fix_retirement_age(
-#'   personnel_df,
-#'   treatment = "flag"
-#' )
-#' 
-#' # Auto-adjust status to retired
-#' clean_data <- fix_retirement_age(
-#'   personnel_df,
-#'   max_age = 70,  # Custom retirement age
-#'   treatment = "adjust_status"
-#' )
+#' fix_retirement_age(personnel_df, treatment = "flag")
+#' fix_retirement_age(personnel_df, max_age = 70, treatment = "adjust_status")
 #' }
 #'
-#' @seealso 
-#' \code{\link{personnel_rules}} for the validation rule definition
-#'
+#' @seealso \code{\link{personnel_rules}}, \code{\link{fix_underage_workers}}
 #' @importFrom dplyr mutate case_when select starts_with
 #' @export
 fix_retirement_age <- function(data,
@@ -519,55 +371,38 @@ fix_retirement_age <- function(data,
 
 #' Fix Invalid Working Hours
 #'
-#' @title Address Violations of Working Hours Range Rule
-#'
 #' @description
-#' Addresses violations of `contract_whours` rule by correcting working hours
-#' outside the valid range (0-168 hours per week).
+#' Corrects `whours` values outside the valid range [0, 168], addressing
+#' violations of the `contract_whours` rule. The maximum of 168 reflects
+#' 5 days × 8 hours per week.
 #'
 #' @param data A data.frame with a `whours` column (numeric).
-#' @param treatment Character, correction strategy:
+#' @param treatment Correction strategy:
 #'   \itemize{
-#'     \item `"na"`: Set invalid hours to NA
-#'     \item `"clamp"`: Set negative hours to 0, hours >168 to 168
-#'     \item `"flag"`: Add `invalid_hours_flag` column
+#'     \item `"na"`: Set invalid hours to `NA`
+#'     \item `"clamp"`: Clamp to `[0, 40]`
+#'     \item `"flag"`: Add `invalid_hours_flag` column (also flags `NA`)
 #'   }
 #'
-#' @return A data.frame with corrected working hours. If `treatment = "flag"`,
-#'   adds an `invalid_hours_flag` column.
-#'
-#' @details
-#' **Valid range rationale:** Maximum of 168 hours per week (7 days × 24 hours).
-#' Negative hours or hours exceeding this are impossible.
-#' 
-#' **Treatment guidance:**
-#' - Use `"na"` when invalid hours indicate missing/corrupted data
-#' - Use `"clamp"` when values slightly outside range are likely data entry errors
-#' - Use `"flag"` for initial assessment or when manual review is needed
+#' @return A data.frame with corrected working hours.
 #'
 #' @examples
 #' \dontrun{
-#' # Clamp working hours to valid range
-#' clean_contracts <- fix_working_hours(
-#'   contract_df,
-#'   treatment = "clamp"
-#' )
+#' fix_working_hours(contract_df, treatment = "clamp")
 #' }
 #'
-#' @seealso 
-#' \code{\link{contract_rules}} for the validation rule definition
-#'
+#' @seealso \code{\link{contract_rules}}
 #' @importFrom dplyr mutate case_when
 #' @export
 fix_working_hours <- function(data, treatment = c("na", "clamp", "flag")) {
   treatment <- match.arg(treatment)
   
   if (treatment == "flag") {
-    # Flag invalid hours (outside 0-168 or NA)
+    # Flag invalid hours (outside 0-40 or NA)
     data |>
       dplyr::mutate(
         invalid_hours_flag = .data[["whours"]] < 0 | 
-                             .data[["whours"]] > 168 | 
+                             .data[["whours"]] > 40 | 
                              is.na(.data[["whours"]])
       )
       
@@ -576,18 +411,18 @@ fix_working_hours <- function(data, treatment = c("na", "clamp", "flag")) {
     data |>
       dplyr::mutate(
         whours = dplyr::case_when(
-          .data[["whours"]] < 0 | .data[["whours"]] > 168 ~ NA_real_,
+          .data[["whours"]] < 0 | .data[["whours"]] > 40 ~ NA_real_,
           TRUE ~ .data[["whours"]]
         )
       )
       
   } else {
-    # Clamp to valid range [0, 168]
+    # Clamp to valid range [0, 40]
     data |>
       dplyr::mutate(
         whours = dplyr::case_when(
           .data[["whours"]] < 0 ~ 0,
-          .data[["whours"]] > 168 ~ 168,
+          .data[["whours"]] > 40 ~ 40,
           TRUE ~ .data[["whours"]]
         )
       )
@@ -598,63 +433,30 @@ fix_working_hours <- function(data, treatment = c("na", "clamp", "flag")) {
 
 #' Fix Salary Component Inconsistencies
 #'
-#' @title Address Violations of Wage Bill Composition Rules
-#'
 #' @description
-#' Addresses violations of wage bill consistency rules by correcting relationships
-#' between salary components (gross, base, net, allowance). Common issues include
-#' net exceeding gross, base exceeding gross, or incorrect gross calculation.
+#' Corrects violations of wage bill consistency rules: gross ≥ base + allowance,
+#' gross ≥ net, gross ≥ base.
 #'
-#' @param data A data.frame with salary columns: `gross_salary_lcu`, 
-#'   `base_salary_lcu`, `net_salary_lcu`, `allowance_lcu`.
-#' @param strategy Character, correction strategy:
+#' @param data A data.frame with columns `gross_salary_lcu`, `base_salary_lcu`,
+#'   `net_salary_lcu`, `allowance_lcu`.
+#' @param strategy Correction strategy:
 #'   \itemize{
-#'     \item `"recalculate_gross"`: Set gross = base + allowance (assumes base
-#'       and allowance are correct)
-#'     \item `"cap_net"`: Set net = min(net, gross) (assumes gross is correct,
-#'       net has data entry error)
-#'     \item `"cap_base"`: Set base = min(base, gross) (assumes gross is correct,
-#'       base has data entry error)
-#'     \item `"flag"`: Add violation flag columns without correction
+#'     \item `"recalculate_gross"`: Set `gross = base + allowance`
+#'     \item `"cap_net"`: Cap net at gross
+#'     \item `"cap_base"`: Cap base at gross
+#'     \item `"flag"`: Add flag columns `gross_composition_flag`,
+#'       `net_exceeds_gross_flag`, `base_exceeds_gross_flag`
 #'   }
 #'
-#' @return A data.frame with corrected salary components. If `strategy = "flag"`,
-#'   adds columns: `gross_composition_flag`, `net_exceeds_gross_flag`,
-#'   `base_exceeds_gross_flag`.
-#'
-#' @details
-#' **Salary component relationships (expected):**
-#' - Gross = Base + Allowance
-#' - Net ≤ Gross (after deductions)
-#' - Base ≤ Gross (base cannot exceed total compensation)
-#' 
-#' **Strategy guidance:**
-#' - Use `"recalculate_gross"` when base and allowance are from reliable source
-#'   (e.g., payroll system) and gross is calculated field prone to errors
-#' - Use `"cap_net"` when deductions are processed correctly but net has typos
-#' - Use `"cap_base"` when organizational pay structure ensures base should not
-#'   exceed gross
-#' - Use `"flag"` for initial assessment before deciding on correction approach
+#' @return A data.frame with corrected salary components.
 #'
 #' @examples
 #' \dontrun{
-#' # Recalculate gross from components
-#' clean_contracts <- fix_salary_components(
-#'   contract_df,
-#'   strategy = "recalculate_gross"
-#' )
-#' 
-#' # Flag inconsistencies for review
-#' flagged_contracts <- fix_salary_components(
-#'   contract_df,
-#'   strategy = "flag"
-#' )
+#' fix_salary_components(contract_df, strategy = "recalculate_gross")
+#' fix_salary_components(contract_df, strategy = "flag")
 #' }
 #'
-#' @seealso 
-#' \code{\link{contract_rules}} for wage bill validation rules
-#' \code{\link{fix_negative_salaries}} for handling negative values
-#'
+#' @seealso \code{\link{contract_rules}}, \code{\link{fix_negative_salaries}}
 #' @importFrom dplyr mutate case_when if_else
 #' @export
 fix_salary_components <- function(data, 
@@ -710,48 +512,29 @@ fix_salary_components <- function(data,
 
 #' Fix Negative Salary Values
 #'
-#' @title Address Violations of Positive Salary Rules
-#'
 #' @description
 #' Addresses violations of positive salary rules (`wagebill_*_positive`) by
-#' handling negative salary values, which are mathematically impossible.
+#' handling negative values across salary columns.
 #'
 #' @param data A data.frame with salary columns.
-#' @param columns Character vector of salary column names to fix. Default checks
-#'   gross, base, and net salary.
-#' @param treatment Character, correction strategy:
+#' @param columns Salary columns to fix (default: `gross_salary_lcu`,
+#'   `base_salary_lcu`, `net_salary_lcu`).
+#' @param treatment Correction strategy:
 #'   \itemize{
-#'     \item `"na"`: Set negative values to NA (treat as missing data)
-#'     \item `"abs"`: Take absolute value (assumes sign error in data entry)
-#'     \item `"zero"`: Set negative values to 0 (conservative, treats as unpaid)
+#'     \item `"na"`: Set negative values to `NA`
+#'     \item `"abs"`: Take absolute value
+#'     \item `"zero"`: Set negative values to `0`
 #'   }
 #'
-#' @return A data.frame with corrected salary values in specified columns.
-#'
-#' @details
-#' **Why negative salaries occur:** Data entry errors (wrong sign), system bugs
-#' during calculations, or incorrect handling of deductions/refunds.
-#' 
-#' **Treatment guidance:**
-#' - Use `"na"` when negative values indicate corrupted/missing data
-#' - Use `"abs"` when you believe the magnitude is correct but sign is wrong
-#'   (e.g., -5000 should be 5000)
-#' - Use `"zero"` for conservative approach in official reporting (avoids
-#'   overestimating wage bill)
+#' @return A data.frame with corrected salary values in the specified columns.
 #'
 #' @examples
 #' \dontrun{
-#' # Take absolute value of negative salaries
-#' clean_contracts <- fix_negative_salaries(
-#'   contract_df,
-#'   columns = c("gross_salary_lcu", "base_salary_lcu"),
-#'   treatment = "abs"
-#' )
+#' fix_negative_salaries(contract_df, treatment = "abs")
+#' fix_negative_salaries(contract_df, columns = "gross_salary_lcu", treatment = "na")
 #' }
 #'
-#' @seealso 
-#' \code{\link{contract_rules}} for wage bill validation rules
-#'
+#' @seealso \code{\link{contract_rules}}, \code{\link{fix_salary_components}}
 #' @importFrom dplyr mutate across all_of case_when
 #' @export
 fix_negative_salaries <- function(data,
@@ -778,88 +561,48 @@ fix_negative_salaries <- function(data,
 
 # 6. MASTER CLEANING FUNCTION ================================================
 
-#' Apply Standard Data Cleaning Pipeline
-#'
-#' @title Master Function for HR Data Quality Treatment
+#' Apply Standard HR Data Cleaning Pipeline
 #'
 #' @description
-#' Applies a comprehensive suite of cleaning functions to address common validation
-#' violations in HR data. This convenience function chains multiple cleaning steps
-#' in a recommended order, with options to enable/disable specific treatments.
+#' Chains the treatment functions in a recommended order. Steps applied per
+#' `data_type`:
+#' \enumerate{
+#'   \item **Both**: Remove duplicates (keep first); fix `ref_date` → `NA`
+#'   \item **Personnel**: Fix `birth_date` → `NA`; flag underage and
+#'     over-retirement-age workers
+#'   \item **Contract**: Clamp `whours`; abs(negative salaries);
+#'     recalculate gross = base + allowance
+#' }
+#' Use individual functions directly when you need custom strategies.
 #'
 #' @param data A data.frame containing personnel or contract records.
-#' @param data_type Character, type of data: `"personnel"` or `"contract"`.
-#'   Determines which cleaning functions are applied.
-#' @param remove_duplicates Logical, remove duplicate records? (default: TRUE)
-#' @param fix_dates Logical, fix invalid dates? (default: TRUE)
-#' @param fix_ages Logical, fix age-related issues? (default: TRUE, personnel only)
-#' @param fix_salaries Logical, fix salary inconsistencies? (default: TRUE, contract only)
-#' @param verbose Logical, print cleaning summary messages? (default: FALSE)
+#' @param data_type `"personnel"` or `"contract"`.
+#' @param remove_duplicates Logical (default: `TRUE`).
+#' @param fix_dates Logical (default: `TRUE`).
+#' @param fix_ages Logical, personnel only (default: `TRUE`).
+#' @param fix_salaries Logical, contract only (default: `TRUE`).
+#' @param verbose Logical, print step-level messages (default: `FALSE`).
 #'
-#' @return A cleaned data.frame with violations addressed according to enabled
-#'   options and default correction strategies.
-#'
-#' @details
-#' **Cleaning pipeline order:**
-#' 1. Remove duplicates (personnel: by personnel_id+ref_date, contract: by contract_id+ref_date)
-#' 2. Fix invalid dates (ref_date, birth_date)
-#' 3. Fix age issues (personnel: underage → inactive, over-retirement → retired)
-#' 4. Fix salary issues (contract: clamp hours, abs(negative salaries), recalculate gross)
-#' 
-#' **Default strategies:**
-#' - Duplicates: Keep first occurrence
-#' - Invalid dates: Set to NA
-#' - Underage workers: Flag for review
-#' - Over-retirement workers: Flag for review
-#' - Working hours: Clamp to [0, 168]
-#' - Negative salaries: Take absolute value
-#' - Gross salary: Recalculate from base + allowance
-#' 
-#' **When to use this function:**
-#' - Initial data cleaning before analysis
-#' - Automated ETL pipelines with standard quality rules
-#' - Batch processing of multiple datasets
-#' 
-#' **When NOT to use this function:**
-#' - When you need custom correction strategies (use individual functions instead)
-#' - When you want to flag issues without automatic correction
-#' - When manual review of violations is required before correction
+#' @return A cleaned data.frame.
 #'
 #' @examples
 #' \dontrun{
-#' # Clean personnel data with verbose output
-#' clean_personnel <- clean_hr_data(
-#'   personnel_df,
-#'   data_type = "personnel",
-#'   verbose = TRUE
-#' )
-#' 
-#' # Clean contract data, skip salary fixes
-#' clean_contracts <- clean_hr_data(
-#'   contract_df,
-#'   data_type = "contract",
-#'   fix_salaries = FALSE
-#' )
-#' 
-#' # Custom pipeline using individual functions
-#' custom_clean <- contract_df |>
+#' clean_hr_data(personnel_df, data_type = "personnel", verbose = TRUE)
+#' clean_hr_data(contract_df, data_type = "contract", fix_salaries = FALSE)
+#'
+#' # Custom pipeline
+#' contract_df |>
 #'   remove_duplicate_contracts(level = "assignment", keep = "last") |>
 #'   fix_invalid_dates(treatment = "clamp") |>
 #'   fix_working_hours(treatment = "na") |>
 #'   fix_salary_components(strategy = "cap_net")
 #' }
 #'
-#' @seealso 
-#' Individual treatment functions:
-#' \code{\link{remove_duplicate_personnel}},
-#' \code{\link{remove_duplicate_contracts}},
-#' \code{\link{fix_invalid_dates}},
-#' \code{\link{fix_underage_workers}},
-#' \code{\link{fix_retirement_age}},
-#' \code{\link{fix_working_hours}},
-#' \code{\link{fix_salary_components}},
-#' \code{\link{fix_negative_salaries}}
-#'
+#' @seealso
+#' \code{\link{remove_duplicate_personnel}}, \code{\link{remove_duplicate_contracts}},
+#' \code{\link{fix_invalid_dates}}, \code{\link{fix_underage_workers}},
+#' \code{\link{fix_retirement_age}}, \code{\link{fix_working_hours}},
+#' \code{\link{fix_salary_components}}, \code{\link{fix_negative_salaries}}
 #' @export
 clean_hr_data <- function(data,
                          data_type = c("personnel", "contract"),

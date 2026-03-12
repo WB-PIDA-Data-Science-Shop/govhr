@@ -2,7 +2,7 @@
 % Please edit documentation in R/qualitychecks_treatment.R
 \name{fix_invalid_dates}
 \alias{fix_invalid_dates}
-\title{Address Violations of Reference Date Validity Rules}
+\title{Fix Invalid Reference Dates}
 \usage{
 fix_invalid_dates(
   data,
@@ -14,61 +14,31 @@ fix_invalid_dates(
 \arguments{
 \item{data}{A data.frame with a `ref_date` column (Date class).}
 
-\item{min_date}{Minimum valid date (default: 1900-01-01). Dates before this
-are considered invalid.}
+\item{min_date}{Minimum valid date (default: `1900-01-01`).}
 
-\item{max_date}{Maximum valid date (default: today via \code{Sys.Date()}).
-Future dates are considered invalid.}
+\item{max_date}{Maximum valid date (default: `Sys.Date()`).}
 
-\item{treatment}{Character, correction strategy:
+\item{treatment}{Correction strategy:
 \itemize{
-  \item `"na"`: Set invalid dates to NA (preserves record, flags missing data)
-  \item `"clamp"`: Set dates below min to min_date, dates above max to max_date
-    (assumes typos in year entry)
-  \item `"filter"`: Remove records with invalid dates entirely
+  \item `"na"`: Set invalid dates to `NA`
+  \item `"clamp"`: Replace out-of-range dates with `min_date` or `max_date`
+  \item `"filter"`: Remove records with invalid dates
 }}
 }
 \value{
-A data.frame with corrected `ref_date` values. If `treatment = "filter"`,
-  records with invalid dates are removed.
+A data.frame with corrected `ref_date` values.
 }
 \description{
-Addresses violations of `personnel_ref_date_valid` and `contract_ref_date_valid`
-rules by correcting reference dates that fall outside the acceptable range
-(default: 1900-01-01 to today).
-}
-\details{
-Fix Invalid Reference Dates
-
-
-**Why dates are invalid:** Data entry errors (typos in year), system date bugs,
-or date parsing issues during data imports.
-
-**Treatment guidance:**
-- Use `treatment = "na"` when you want to preserve records but flag date issues
-  for manual review
-- Use `treatment = "clamp"` when you believe most invalid dates are typos
-  (e.g., 2203 instead of 2023) and the min/max bounds represent the true intent
-- Use `treatment = "filter"` when records with invalid dates should be excluded
-  from analysis entirely
+Corrects `ref_date` values outside the valid range, addressing violations of
+`personnel_ref_date_valid` and `contract_ref_date_valid` rules.
 }
 \examples{
 \dontrun{
-# Set invalid dates to NA
-clean_data <- fix_invalid_dates(
-  personnel_df,
-  treatment = "na"
-)
-
-# Clamp dates to valid range
-clean_data <- fix_invalid_dates(
-  contract_df,
-  min_date = as.Date("2000-01-01"),
-  treatment = "clamp"
-)
+fix_invalid_dates(personnel_df, treatment = "na")
+fix_invalid_dates(contract_df, min_date = as.Date("2000-01-01"), treatment = "clamp")
 }
 
 }
 \seealso{
-\code{\link{fix_invalid_birthdates}} for birth date correction
+\code{\link{fix_invalid_birthdates}}
 }

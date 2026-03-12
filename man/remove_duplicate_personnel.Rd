@@ -2,61 +2,30 @@
 % Please edit documentation in R/qualitychecks_treatment.R
 \name{remove_duplicate_personnel}
 \alias{remove_duplicate_personnel}
-\title{Address Violations of Personnel ID Uniqueness Rule}
+\title{Remove Duplicate Personnel Records}
 \usage{
 remove_duplicate_personnel(data, keep = c("first", "last", "none"))
 }
 \arguments{
-\item{data}{A data.frame or data.table containing personnel records with
-columns `personnel_id` and `ref_date`.}
+\item{data}{A data.frame with columns `personnel_id` and `ref_date`.}
 
-\item{keep}{Character, which duplicate to keep:
-\itemize{
-  \item `"first"` (default): Keep the first occurrence of each duplicate group
-  \item `"last"`: Keep the last occurrence of each duplicate group
-  \item `"none"`: Remove all records involved in duplication (conservative approach)
-}}
+\item{keep}{Which record to keep per duplicate group: `"first"` (default),
+`"last"`, or `"none"` (drops all records in a duplicate group).}
 }
 \value{
-A data.frame with duplicates handled according to the `keep` parameter.
-  Row count will be reduced if duplicates were present.
+A data.frame with duplicates removed.
 }
 \description{
-Addresses violations of the `personnel_unique_id` rule by removing duplicate
-personnel_id + ref_date combinations. This function provides three strategies
-for handling duplicates: keep first occurrence, keep last occurrence, or
-remove all duplicated records.
-}
-\details{
-Remove Duplicate Personnel Records
-
-
-**Why duplicates occur:** Data entry errors, system glitches during uploads,
-or merging multiple data sources without proper reconciliation.
-
-**Strategy guidance:**
-- Use `keep = "first"` when earlier records are more reliable (e.g., original entry)
-- Use `keep = "last"` when later records contain corrections/updates
-- Use `keep = "none"` when you cannot determine which record is correct and
-  need to manually review all duplicates
+Removes duplicate `personnel_id` + `ref_date` combinations, addressing
+violations of the `personnel_unique_id` rule.
 }
 \examples{
 \dontrun{
-# Keep first occurrence (default)
-clean_personnel <- remove_duplicate_personnel(
-  personnel_df, 
-  keep = "first"
-)
-
-# Remove all duplicates for manual review
-flagged_duplicates <- remove_duplicate_personnel(
-  personnel_df,
-  keep = "none"
-)
+remove_duplicate_personnel(personnel_df, keep = "first")
+remove_duplicate_personnel(personnel_df, keep = "none")
 }
 
 }
 \seealso{
-\code{\link{personnel_rules}} for the validation rule definition
-\code{\link{remove_duplicate_contracts}} for handling contract duplicates
+\code{\link{personnel_rules}}, \code{\link{remove_duplicate_contracts}}
 }

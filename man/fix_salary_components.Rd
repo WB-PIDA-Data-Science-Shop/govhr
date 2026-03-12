@@ -2,7 +2,7 @@
 % Please edit documentation in R/qualitychecks_treatment.R
 \name{fix_salary_components}
 \alias{fix_salary_components}
-\title{Address Violations of Wage Bill Composition Rules}
+\title{Fix Salary Component Inconsistencies}
 \usage{
 fix_salary_components(
   data,
@@ -10,64 +10,32 @@ fix_salary_components(
 )
 }
 \arguments{
-\item{data}{A data.frame with salary columns: `gross_salary_lcu`, 
-`base_salary_lcu`, `net_salary_lcu`, `allowance_lcu`.}
+\item{data}{A data.frame with columns `gross_salary_lcu`, `base_salary_lcu`,
+`net_salary_lcu`, `allowance_lcu`.}
 
-\item{strategy}{Character, correction strategy:
+\item{strategy}{Correction strategy:
 \itemize{
-  \item `"recalculate_gross"`: Set gross = base + allowance (assumes base
-    and allowance are correct)
-  \item `"cap_net"`: Set net = min(net, gross) (assumes gross is correct,
-    net has data entry error)
-  \item `"cap_base"`: Set base = min(base, gross) (assumes gross is correct,
-    base has data entry error)
-  \item `"flag"`: Add violation flag columns without correction
+  \item `"recalculate_gross"`: Set `gross = base + allowance`
+  \item `"cap_net"`: Cap net at gross
+  \item `"cap_base"`: Cap base at gross
+  \item `"flag"`: Add flag columns `gross_composition_flag`,
+    `net_exceeds_gross_flag`, `base_exceeds_gross_flag`
 }}
 }
 \value{
-A data.frame with corrected salary components. If `strategy = "flag"`,
-  adds columns: `gross_composition_flag`, `net_exceeds_gross_flag`,
-  `base_exceeds_gross_flag`.
+A data.frame with corrected salary components.
 }
 \description{
-Addresses violations of wage bill consistency rules by correcting relationships
-between salary components (gross, base, net, allowance). Common issues include
-net exceeding gross, base exceeding gross, or incorrect gross calculation.
-}
-\details{
-Fix Salary Component Inconsistencies
-
-
-**Salary component relationships (expected):**
-- Gross = Base + Allowance
-- Net ≤ Gross (after deductions)
-- Base ≤ Gross (base cannot exceed total compensation)
-
-**Strategy guidance:**
-- Use `"recalculate_gross"` when base and allowance are from reliable source
-  (e.g., payroll system) and gross is calculated field prone to errors
-- Use `"cap_net"` when deductions are processed correctly but net has typos
-- Use `"cap_base"` when organizational pay structure ensures base should not
-  exceed gross
-- Use `"flag"` for initial assessment before deciding on correction approach
+Corrects violations of wage bill consistency rules: gross ≥ base + allowance,
+gross ≥ net, gross ≥ base.
 }
 \examples{
 \dontrun{
-# Recalculate gross from components
-clean_contracts <- fix_salary_components(
-  contract_df,
-  strategy = "recalculate_gross"
-)
-
-# Flag inconsistencies for review
-flagged_contracts <- fix_salary_components(
-  contract_df,
-  strategy = "flag"
-)
+fix_salary_components(contract_df, strategy = "recalculate_gross")
+fix_salary_components(contract_df, strategy = "flag")
 }
 
 }
 \seealso{
-\code{\link{contract_rules}} for wage bill validation rules
-\code{\link{fix_negative_salaries}} for handling negative values
+\code{\link{contract_rules}}, \code{\link{fix_negative_salaries}}
 }

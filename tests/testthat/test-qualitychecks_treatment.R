@@ -165,7 +165,7 @@ test_that("fix_working_hours handles all treatments", {
   # Clamp treatment
   result <- fix_working_hours(data, treatment = "clamp")
   expect_equal(result$whours[1], 0)
-  expect_equal(result$whours[3], 168)
+  expect_equal(result$whours[3], 40)
   
   # Flag treatment
   result <- fix_working_hours(data, treatment = "flag")
@@ -174,12 +174,12 @@ test_that("fix_working_hours handles all treatments", {
   expect_true(result$invalid_hours_flag[4])  # NA is flagged
   
   # Boundaries
-  boundary <- data.frame(whours = c(0, 168, -0.1, 168.1))
+  boundary <- data.frame(whours = c(0, 40, -0.1, 40.1))
   result <- fix_working_hours(boundary, treatment = "flag")
   expect_false(result$invalid_hours_flag[1])  # 0 is valid
-  expect_false(result$invalid_hours_flag[2])  # 168 is valid
+  expect_false(result$invalid_hours_flag[2])  # 40 is valid
   expect_true(result$invalid_hours_flag[3])   # < 0 is invalid
-  expect_true(result$invalid_hours_flag[4])   # > 168 is invalid
+  expect_true(result$invalid_hours_flag[4])   # > 40 is invalid
 })
 
 # ==============================================================================

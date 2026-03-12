@@ -2,7 +2,7 @@
 % Please edit documentation in R/qualitychecks_treatment.R
 \name{remove_duplicate_contracts}
 \alias{remove_duplicate_contracts}
-\title{Address Violations of Contract Uniqueness Rules}
+\title{Remove Duplicate Contract Records}
 \usage{
 remove_duplicate_contracts(
   data,
@@ -11,58 +11,31 @@ remove_duplicate_contracts(
 )
 }
 \arguments{
-\item{data}{A data.frame or data.table containing contract records with
-columns `contract_id`, `personnel_id`, and `ref_date`.}
+\item{data}{A data.frame with columns `contract_id`, `personnel_id`, and `ref_date`.}
 
-\item{level}{Character, deduplication level:
+\item{level}{Deduplication scope:
 \itemize{
-  \item `"contract"`: Remove duplicates based on contract_id + ref_date
-    (addresses `contract_unique_id` rule)
-  \item `"assignment"`: Remove duplicates based on contract_id + personnel_id +
-    ref_date (addresses `contract_unique_personnel` rule)
+  \item `"contract"`: Deduplicate on `contract_id` + `ref_date`
+  \item `"assignment"`: Deduplicate on `contract_id` + `personnel_id` + `ref_date`
 }}
 
-\item{keep}{Character, which duplicate to keep: `"first"`, `"last"`, or `"none"`
-(see \code{\link{remove_duplicate_personnel}} for details)}
+\item{keep}{Which record to keep: `"first"`, `"last"`, or `"none"`.
+See \code{\link{remove_duplicate_personnel}}.}
 }
 \value{
-A data.frame with duplicates removed according to specified level and
-  keep strategy.
+A data.frame with duplicates removed.
 }
 \description{
-Addresses violations of `contract_unique_id` and `contract_unique_personnel`
-rules by removing duplicate contract records. Offers two deduplication levels:
-contract-level (contract_id + ref_date) or assignment-level (contract_id +
-personnel_id + ref_date).
-}
-\details{
-Remove Duplicate Contract Records
-
-
-**Deduplication level guidance:**
-- Use `level = "contract"` when each contract should appear once per period
-  (most common for payroll records)
-- Use `level = "assignment"` when multiple personnel can be assigned to the
-  same contract, but each person-contract pair should be unique per period
+Removes duplicate contract records, addressing violations of `contract_unique_id`
+(contract-level) and `contract_unique_personnel` (assignment-level) rules.
 }
 \examples{
 \dontrun{
-# Remove duplicate contracts (contract-level)
-clean_contracts <- remove_duplicate_contracts(
-  contract_df,
-  level = "contract",
-  keep = "first"
-)
-
-# Remove duplicate assignments (assignment-level)
-clean_assignments <- remove_duplicate_contracts(
-  contract_df,
-  level = "assignment",
-  keep = "last"
-)
+remove_duplicate_contracts(contract_df, level = "contract", keep = "first")
+remove_duplicate_contracts(contract_df, level = "assignment", keep = "last")
 }
 
 }
 \seealso{
-\code{\link{contract_rules}} for the validation rule definitions
+\code{\link{contract_rules}}, \code{\link{remove_duplicate_personnel}}
 }
