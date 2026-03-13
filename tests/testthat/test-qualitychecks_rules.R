@@ -84,7 +84,7 @@ test_that("personnel rules detect age and date violations", {
   expect_equal(date_fails, 1)
   
   # Row 3: age ~3 years (< 18) should fail
-  age_fails <- result$Fails[result$Rule == "Reasonable age"]
+  age_fails <- result$Fails[result$Rule == "Minimum age"]
   expect_equal(age_fails, 1)
 })
 

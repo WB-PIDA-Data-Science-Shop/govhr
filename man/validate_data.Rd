@@ -7,8 +7,7 @@
 validate_data(data, input_rules, output_format = c("report", "object"))
 }
 \arguments{
-\item{data}{A data.frame or data.table containing the HR data to validate.
-Must include columns referenced in the validation rules.}
+\item{data}{A data.frame or data.table.}
 
 \item{input_rules}{A set of rules, defined in a dataframe.}
 
@@ -29,6 +28,9 @@ Validates data against a set of predefined rules.
 Returns either a summary report or the full validation object.
 }
 \details{
+Validate Data Against Quality Rules
+
+
 The function validates data against user-defined rules using the validate package.
 }
 \examples{
