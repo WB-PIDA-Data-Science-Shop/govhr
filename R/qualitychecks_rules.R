@@ -3,23 +3,12 @@
 #' @title Validate Data Quality Using Rule-Based Framework
 #'
 #' @description
-#' Validates HR data (personnel or contract records) against a set of 
-#' predefined consistency rules using the \code{validate} package. Returns
-#' a stakeholder-friendly audit report showing pass/fail rates for each rule.
-#' 
-#' This function is designed to work with rule sets defined as data frames
-#' (e.g., \code{govhr::personnel_rules} or \code{govhr::contract_rules})
-#' containing rule expressions, names, descriptions, and labels.
+#' Validates data against a set of predefined rules.
+#' Returns either a summary report or the full validation object.
 #'
-#' @param data A data.frame or data.table containing the HR data to validate.
-#'   Must include columns referenced in the validation rules.
-#' @param input_rules A data.frame containing validation rules with columns:
-#'   \itemize{
-#'     \item \code{rule}: R expression as a character string (e.g., "age >= 18")
-#'     \item \code{name}: Unique identifier for the rule
-#'     \item \code{description}: Human-readable explanation
-#'     \item \code{label}: Short label for reports/plots
-#'   }
+#' @param data A data.frame or data.table.
+#' @param input_rules A set of rules, defined in a dataframe.
+#' @param output_format A string specifying the output format: "report" for a summary report or "object" for the raw validation results.
 #'
 #' @return A data.frame containing the audit report with columns:
 #'   \item{Rule}{Short label for the rule (from input_rules$label)}
@@ -31,22 +20,7 @@
 #'   \item{Errors}{Logical indicating whether the rule threw an error}
 #'
 #' @details
-#' The function follows this workflow:
-#' \enumerate{
-#'   \item Parse rule expressions from input_rules$rule into validator object
-#'   \item Confront the data with rules using validate::confront()
-#'   \item Extract summary statistics (passes, fails, errors)
-#'   \item Join summary with rule metadata (descriptions, labels)
-#'   \item Format output as stakeholder-friendly report
-#' }
-#' 
-#' Design rationale:
-#' \itemize{
-#'   \item Uses validate package for robust rule evaluation
-#'   \item Separates rule definitions (data) from validation logic (function)
-#'   \item Returns tidy data frame suitable for reporting/visualization
-#'   \item Uses .data[[]] pronoun to avoid R CMD check NOTEs
-#' }
+#' The function validates data against user-defined rules using the validate package.
 #'
 #' @examples
 #' # Validate contract data
@@ -67,14 +41,12 @@
 #'
 #' @importFrom validate validator confront description label summary
 #' @importFrom dplyr left_join transmute %>%
+#' @importFrom tibble tibble
 #' @export
-validate_data <- function(data, input_rules) {
-  
-  # Step 1: Create validator object from rule expressions
-  # The validate package requires rules as a validator object, not a data frame.
-  # We pass input_rules directly, and validator() will parse the 'rule' column.
+validate_data <- function(data, input_rules, output_format = c("report", "object")) {
+  # Set rules
   validation_results <- validate::validator(
-    data, .data = input_rules
+    .data = input_rules
   )
 
   # Step 2: Confront data with rules
@@ -97,15 +69,24 @@ validate_data <- function(data, input_rules) {
   # Step 5: Join results with metadata and format for stakeholders
   audit_report <- results_summary %>%
     dplyr::left_join(rules_meta, by = "name") %>%
+    # Select and rename the columns you want stakeholders to see
     dplyr::transmute(
-      Rule = .data[['label']],                                    # Short label
-      Description = .data[['description']],                       # Full explanation
-      `Total Records` = .data[['items']],                        # N evaluated
-      Passes = .data[['passes']],                                # N passed
-      `Pass Rate` = .data[['passes']] / .data[['items']] * 100, # Percentage
-      Fails = .data[['fails']],                                  # N failed
-      Errors = .data[['error']]                                  # Error flag
+      Rule = .data[['label']],
+      Description = .data[['description']],
+      `Total Records` = .data[['items']],
+      Passes = .data[['passes']],
+      `Pass Rate` = round(.data[['passes']] / .data[['items']] * 100, 2),
+      Fails = .data[['fails']],
+      Errors = .data[['error']]
     )
   
-  return(audit_report)
+  type <- match.arg(output_format)
+  
+  output <- switch(
+    type,
+    "object" = results,
+    "report" = audit_report
+  )
+
+  return(output)
 }

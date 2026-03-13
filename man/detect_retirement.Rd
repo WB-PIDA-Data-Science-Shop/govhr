@@ -13,7 +13,7 @@ detect_retirement(data)
 A data.table with `personnel_id`, `ref_date`, and `type_event = "retire"`.
 }
 \description{
-Identifies personnels who retired, i.e., whose status changed from "active" to "inactive".
+Identifies personnel who retired, i.e., whose status changed from "active" to "inactive".
 }
 \examples{
 \dontrun{

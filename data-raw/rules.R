@@ -11,6 +11,7 @@
 ## by validate_data() function for runtime data quality assessment.
 
 library(dplyr)
+devtools::load_all()
 
 # ============================================================================
 # Personnel Validation Rules
@@ -50,7 +51,7 @@ personnel_rules <- tibble::tibble(
     "employment status has valid values if provided"
   ),
   label = c(
-    "Unique ID",
+    "Unique personnel ID",
     "Valid date",
     "Minimum age",
     "Maximum age",
@@ -87,7 +88,11 @@ contract_rules <- tibble::tibble(
     "base_salary_lcu >= 0",
     "net_salary_lcu >= 0",
     "base_salary_lcu <= gross_salary_lcu",
-    "allowance_lcu >= 0 | is.na(allowance_lcu)"
+    "allowance_lcu >= 1 | is.na(allowance_lcu)",
+    "in_range(gross_salary_lcu, min = quantile(gross_salary_lcu, 0.25, na.rm = TRUE) - 1.5 * IQR(gross_salary_lcu, na.rm = TRUE), max = quantile(gross_salary_lcu, 0.75, na.rm = TRUE) + 1.5 * IQR(gross_salary_lcu, na.rm = TRUE))",
+    "in_range(net_salary_lcu, min = quantile(net_salary_lcu, 0.25, na.rm = TRUE) - 1.5 * IQR(net_salary_lcu, na.rm = TRUE), max = quantile(net_salary_lcu, 0.75, na.rm = TRUE) + 1.5 * IQR(net_salary_lcu, na.rm = TRUE))",
+    "in_range(base_salary_lcu, min = quantile(base_salary_lcu, 0.25, na.rm = TRUE) - 1.5 * IQR(base_salary_lcu, na.rm = TRUE), max = quantile(base_salary_lcu, 0.75, na.rm = TRUE) + 1.5 * IQR(base_salary_lcu, na.rm = TRUE))",
+    "in_range(allowance_lcu, min = quantile(allowance_lcu, 0.25, na.rm = TRUE) - 1.5 * IQR(allowance_lcu, na.rm = TRUE), max = quantile(allowance_lcu, 0.75, na.rm = TRUE) + 1.5 * IQR(allowance_lcu, na.rm = TRUE)) | is.na(allowance_lcu)"
   ),
   name = c(
     "contract_unique_id",
@@ -101,7 +106,11 @@ contract_rules <- tibble::tibble(
     "wagebill_base_positive",
     "wagebill_net_positive",
     "wagebill_base_le_gross",
-    "wagebill_allowance"
+    "wagebill_allowance",
+    "wagebill_gross_outlier",
+    "wagebill_net_outlier",
+    "wagebill_base_outlier",
+    "wagebill_allowance_outlier"
   ),
   description = c(
     "combination of contract_id and ref_date is unique (no duplicate contract records)",
@@ -115,10 +124,14 @@ contract_rules <- tibble::tibble(
     "base salary is positive",
     "net salary is positive",
     "base salary does not exceed gross salary",
-    "allowance is non-negative if provided"
+    "allowance is non-negative if provided",
+    "gross salary is not a statistical outlier (within IQR-based thresholds)",
+    "net salary is not a statistical outlier (within IQR-based thresholds)",
+    "base salary is not a statistical outlier (within IQR-based thresholds)",
+    "allowance is not a statistical outlier (within IQR-based thresholds)"
   ),
   label = c(
-    "Unique contract",
+    "Unique contract ID",
     "Unique assignment",
     "Valid date",
     "Reasonable hours",
@@ -129,7 +142,11 @@ contract_rules <- tibble::tibble(
     "Positive base",
     "Positive net",
     "Base vs gross",
-    "Valid allowance"
+    "Valid allowance",
+    "Gross outlier",
+    "Net outlier",
+    "Base outlier",
+    "Allowance outlier"
   )
 )
 

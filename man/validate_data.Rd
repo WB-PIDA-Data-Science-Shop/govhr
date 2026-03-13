@@ -4,19 +4,15 @@
 \alias{validate_data}
 \title{Validate Data Quality Using Rule-Based Framework}
 \usage{
-validate_data(data, input_rules)
+validate_data(data, input_rules, output_format = c("report", "object"))
 }
 \arguments{
 \item{data}{A data.frame or data.table containing the HR data to validate.
 Must include columns referenced in the validation rules.}
 
-\item{input_rules}{A data.frame containing validation rules with columns:
-\itemize{
-  \item \code{rule}: R expression as a character string (e.g., "age >= 18")
-  \item \code{name}: Unique identifier for the rule
-  \item \code{description}: Human-readable explanation
-  \item \code{label}: Short label for reports/plots
-}}
+\item{input_rules}{A set of rules, defined in a dataframe.}
+
+\item{output_format}{A string specifying the output format: "report" for a summary report or "object" for the raw validation results.}
 }
 \value{
 A data.frame containing the audit report with columns:
@@ -29,34 +25,11 @@ A data.frame containing the audit report with columns:
   \item{Errors}{Logical indicating whether the rule threw an error}
 }
 \description{
-Validates HR data (personnel or contract records) against a set of 
-predefined consistency rules using the \code{validate} package. Returns
-a stakeholder-friendly audit report showing pass/fail rates for each rule.
-
-This function is designed to work with rule sets defined as data frames
-(e.g., \code{govhr::personnel_rules} or \code{govhr::contract_rules})
-containing rule expressions, names, descriptions, and labels.
+Validates data against a set of predefined rules.
+Returns either a summary report or the full validation object.
 }
 \details{
-Validate Data Against Quality Rules
-
-
-The function follows this workflow:
-\enumerate{
-  \item Parse rule expressions from input_rules$rule into validator object
-  \item Confront the data with rules using validate::confront()
-  \item Extract summary statistics (passes, fails, errors)
-  \item Join summary with rule metadata (descriptions, labels)
-  \item Format output as stakeholder-friendly report
-}
-
-Design rationale:
-\itemize{
-  \item Uses validate package for robust rule evaluation
-  \item Separates rule definitions (data) from validation logic (function)
-  \item Returns tidy data frame suitable for reporting/visualization
-  \item Uses .data[[]] pronoun to avoid R CMD check NOTEs
-}
+The function validates data against user-defined rules using the validate package.
 }
 \examples{
 # Validate contract data
