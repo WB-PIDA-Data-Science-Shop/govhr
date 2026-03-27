@@ -50,6 +50,8 @@ pak::pak("WB-PIDA-Data-Science-Shop/govhr")
   : Calculate time intervals between reference dates
 - [`check_orphan_id()`](https://wb-pida-data-science-shop.github.io/govhr/reference/check_orphan_id.md)
   : Detect Orphan Records Between Parent and Child Modules
+- [`clean_hr_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/clean_hr_data.md)
+  : Apply Standard HR Data Cleaning Pipeline
 - [`compare_names_qc()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compare_names_qc.md)
   : Compare the contents of two character vectors
 - [`compare_to_dictionary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compare_to_dictionary.md)
@@ -119,6 +121,20 @@ pak::pak("WB-PIDA-Data-Science-Shop/govhr")
   : Find Duplicate Identifiers in a Data Frame
 - [`find_inconsistent_colnames()`](https://wb-pida-data-science-shop.github.io/govhr/reference/find_inconsistent_colnames.md)
   : Identify inconsistent column names across data frames
+- [`fix_invalid_birthdates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fix_invalid_birthdates.md)
+  : Fix Invalid Birth Dates
+- [`fix_invalid_dates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fix_invalid_dates.md)
+  : Fix Invalid Reference Dates
+- [`fix_negative_salaries()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fix_negative_salaries.md)
+  : Fix Negative Salary Values
+- [`fix_retirement_age()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fix_retirement_age.md)
+  : Flag or Adjust Over-Retirement-Age Workers
+- [`fix_salary_components()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fix_salary_components.md)
+  : Fix Salary Component Inconsistencies
+- [`fix_underage_workers()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fix_underage_workers.md)
+  : Flag or Remove Underage Workers
+- [`fix_working_hours()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fix_working_hours.md)
+  : Fix Invalid Working Hours
 - [`flag_outlier()`](https://wb-pida-data-science-shop.github.io/govhr/reference/flag_outlier.md)
   : Flag outliers based on the IQR rule
 - [`generate_hr_report()`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_hr_report.md)
@@ -145,12 +161,16 @@ pak::pak("WB-PIDA-Data-Science-Shop/govhr")
   : Personnel Validation Rules
 - [`pivot_data360()`](https://wb-pida-data-science-shop.github.io/govhr/reference/pivot_data360.md)
   : Pivot Data360 dataset to wide format
+- [`remove_duplicate_contracts()`](https://wb-pida-data-science-shop.github.io/govhr/reference/remove_duplicate_contracts.md)
+  : Remove Duplicate Contract Records
+- [`remove_duplicate_personnel()`](https://wb-pida-data-science-shop.github.io/govhr/reference/remove_duplicate_personnel.md)
+  : Remove Duplicate Personnel Records
 - [`sample_group()`](https://wb-pida-data-science-shop.github.io/govhr/reference/sample_group.md)
   : Sample groups and return all rows for those groups
 - [`social_sustainability`](https://wb-pida-data-science-shop.github.io/govhr/reference/social_sustainability.md)
   : Social Sustainability Global Database
 - [`validate_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/validate_data.md)
-  : Validate Data
+  : Validate Data Quality Using Rule-Based Framework
 - [`wwbi`](https://wb-pida-data-science-shop.github.io/govhr/reference/wwbi.md)
   : Worldwide Bureaucracy Indicators
 

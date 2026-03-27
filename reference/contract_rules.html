@@ -100,13 +100,13 @@ for use in data quality pipelines.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> is_unique(contract_id, ref_date)                      cont… combinatio… Uniq…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> is_unique(contract_id, personnel_id, ref_date)        cont… combinatio… Uniq…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> ref_date &gt;= as.Date('1900-01-01') &amp; ref_date &lt;= Sys.… cont… ref_date i… Vali…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> whours &gt;= 1 &amp; whours &lt;= 168                           cont… working ho… Reas…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> whours &gt;= 0 &amp; whours &lt;= 168                           cont… working ho… Reas…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> start_date &lt;= ref_date                                cont… employment… Vali…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> gross_salary_lcu &gt;= base_salary_lcu + allowance_lcu   wage… gross sala… Gros…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> net_salary_lcu &lt;= gross_salary_lcu                    wage… net salary… Net …</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> gross_salary_lcu &gt;= 1                                 wage… gross sala… Posi…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> base_salary_lcu &gt;= 1                                  wage… base salar… Posi…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> net_salary_lcu &gt;= 1                                   wage… net salary… Posi…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> gross_salary_lcu &gt;= 0                                 wage… gross sala… Posi…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> base_salary_lcu &gt;= 0                                  wage… base salar… Posi…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> net_salary_lcu &gt;= 0                                   wage… net salary… Posi…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> base_salary_lcu &lt;= gross_salary_lcu                   wage… base salar… Base…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> allowance_lcu &gt;= 1 | is.na(allowance_lcu)             wage… allowance … Vali…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> in_range(gross_salary_lcu, min = quantile(gross_sala… wage… gross sala… Gros…</span>
@@ -121,9 +121,9 @@ for use in data quality pipelines.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> gross_salary_lcu &gt;= base_salary_lcu + allowance_lcu   wage… gross sala… Gros…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> net_salary_lcu &lt;= gross_salary_lcu                    wage… net salary… Net …</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> gross_salary_lcu &gt;= 1                                 wage… gross sala… Posi…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> base_salary_lcu &gt;= 1                                  wage… base salar… Posi…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> net_salary_lcu &gt;= 1                                   wage… net salary… Posi…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> gross_salary_lcu &gt;= 0                                 wage… gross sala… Posi…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> base_salary_lcu &gt;= 0                                  wage… base salar… Posi…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> net_salary_lcu &gt;= 0                                   wage… net salary… Posi…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> base_salary_lcu &lt;= gross_salary_lcu                   wage… base salar… Base…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> allowance_lcu &gt;= 1 | is.na(allowance_lcu)             wage… allowance … Vali…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> in_range(gross_salary_lcu, min = quantile(gross_sala… wage… gross sala… Gros…</span>
