@@ -1,4 +1,6 @@
-#' Validate Data
+#' Validate Data Against Quality Rules
+#'
+#' @title Validate Data Quality Using Rule-Based Framework
 #'
 #' @description
 #' Validates data against a set of predefined rules.
@@ -9,24 +11,33 @@
 #' @param output_format A string specifying the output format: "report" for a summary report or "object" for the raw validation results.
 #'
 #' @return A data.frame containing the audit report with columns:
-#'   \item{Rule}{Short label for the rule}
+#'   \item{Rule}{Short label for the rule (from input_rules$label)}
 #'   \item{Description}{Detailed explanation of what the rule checks}
 #'   \item{Total Records}{Number of records evaluated}
 #'   \item{Passes}{Number of records that passed the rule}
+#'   \item{Pass Rate}{Percentage of records passing (0-100)}
 #'   \item{Fails}{Number of records that failed the rule}
-#'   \item{Errors}{Whether the rule threw an error during evaluation}
+#'   \item{Errors}{Logical indicating whether the rule threw an error}
 #'
 #' @details
 #' The function validates data against user-defined rules using the validate package.
 #'
 #' @examples
-#' # run validation
+#' # Validate contract data
 #' audit_report <- validate_data(
-#'     govhr::bra_hrmis_contract, govhr::contract_rules
+#'   data = govhr::bra_hrmis_contract,
+#'   input_rules = govhr::contract_rules
 #' )
 #' 
-#' # view the audit report
+#' # View the audit report
 #' print(audit_report)
+#' 
+#' # Check rules with failures
+#' audit_report[audit_report$Fails > 0, ]
+#'
+#' @seealso
+#' \code{\link{personnel_rules}} for personnel validation rules
+#' \code{\link{contract_rules}} for contract validation rules
 #'
 #' @importFrom validate validator confront description label summary
 #' @importFrom dplyr left_join transmute %>%
@@ -38,18 +49,24 @@ validate_data <- function(data, input_rules, output_format = c("report", "object
     .data = input_rules
   )
 
-  # Confront the data with the rules
+  # Step 2: Confront data with rules
+  # This evaluates each rule against the data and tracks pass/fail/error status
+  # for each record. The confrontation object stores detailed results.
   results <- validate::confront(data, validation_results)
   
-  # Extract rules metadata into a dataframe
+  # Step 3: Extract rule metadata
+  # Convert input_rules tibble to base data.frame for compatibility with
+  # validate package output format.
   rules_meta <- as.data.frame(input_rules)
   
-  # Extract the confrontation summary into a dataframe
+  # Step 4: Extract summary statistics
+  # summary() returns a table with columns: name, items, passes, fails, nNA, error
+  # We convert to data.frame for dplyr operations.
   results_summary <- results |> 
     validate::summary() |> 
-    tibble::tibble()
+    as.data.frame()
   
-  # Join them together using the rule 'name'
+  # Step 5: Join results with metadata and format for stakeholders
   audit_report <- results_summary %>%
     dplyr::left_join(rules_meta, by = "name") %>%
     # Select and rename the columns you want stakeholders to see

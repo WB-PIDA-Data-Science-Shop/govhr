@@ -2,7 +2,7 @@
 % Please edit documentation in R/qualitychecks_rules.R
 \name{validate_data}
 \alias{validate_data}
-\title{Validate Data}
+\title{Validate Data Quality Using Rule-Based Framework}
 \usage{
 validate_data(data, input_rules, output_format = c("report", "object"))
 }
@@ -15,27 +15,39 @@ validate_data(data, input_rules, output_format = c("report", "object"))
 }
 \value{
 A data.frame containing the audit report with columns:
-  \item{Rule}{Short label for the rule}
+  \item{Rule}{Short label for the rule (from input_rules$label)}
   \item{Description}{Detailed explanation of what the rule checks}
   \item{Total Records}{Number of records evaluated}
   \item{Passes}{Number of records that passed the rule}
+  \item{Pass Rate}{Percentage of records passing (0-100)}
   \item{Fails}{Number of records that failed the rule}
-  \item{Errors}{Whether the rule threw an error during evaluation}
+  \item{Errors}{Logical indicating whether the rule threw an error}
 }
 \description{
 Validates data against a set of predefined rules.
 Returns either a summary report or the full validation object.
 }
 \details{
+Validate Data Against Quality Rules
+
+
 The function validates data against user-defined rules using the validate package.
 }
 \examples{
-# run validation
+# Validate contract data
 audit_report <- validate_data(
-    govhr::bra_hrmis_contract, govhr::contract_rules
+  data = govhr::bra_hrmis_contract,
+  input_rules = govhr::contract_rules
 )
 
-# view the audit report
+# View the audit report
 print(audit_report)
 
+# Check rules with failures
+audit_report[audit_report$Fails > 0, ]
+
+}
+\seealso{
+\code{\link{personnel_rules}} for personnel validation rules
+\code{\link{contract_rules}} for contract validation rules
 }
