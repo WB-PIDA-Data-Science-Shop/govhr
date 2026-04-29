@@ -1,3 +1,18 @@
+# Suppress R CMD CHECK notes for data.table column names used in j-expressions.
+# These are not actual global variables; they are created/referenced inside
+# data.table's non-standard evaluation environment.
+utils::globalVariables(c(
+  # compute_tenure
+  ".eff_end", ".s", ".e", ".lag_max_e", ".contrib",
+  "tenure_days", "tenure_years",
+  # .compute_transition_pair
+  ".pid", "from_group", "to_group", "n_moves", "period_prob", "n_pop",
+  # estimate_movement_baseline (formerly estimate_movement_rates)
+  "period_key", "t0_date", "movement_rate", "from_period", "to_period",
+  # estimate_exit_rates
+  "n_exits", "exit_rate", "current_stock"
+))
+
 #' Calculate Tenure from Contract History
 #'
 #' @description
@@ -221,13 +236,13 @@ compute_tenure <- function(contract_dt,
 #'     \item{n_moves}{Integer. Number of persons who moved from from_group to to_group}
 #'   }
 #' @keywords internal
-estimate_movement_baseline <- function(contract_dt,
-                                       group_cols,
-                                       personnel_id_col = "personnel_id",
-                                       ref_date_col = "ref_date",
-                                       start_date_col = "start_date",
-                                       end_date_col = "end_date",
-                                       contract_type_col = "contract_type_code") {
+estimate_movement_rates <- function(contract_dt,
+                                    group_cols,
+                                    personnel_id_col = "personnel_id",
+                                    ref_date_col = "ref_date",
+                                    start_date_col = "start_date",
+                                    end_date_col = "end_date",
+                                    contract_type_col = "contract_type_code") {
 
   # Validate inputs
   if (!data.table::is.data.table(contract_dt)) {
@@ -396,3 +411,124 @@ roll_snapshot_pairs <- function(panel_dt, date_col, f, ...) {
 
   data.table::rbindlist(non_null, fill = TRUE, use.names = TRUE)
 }
+
+
+#' Estimate Historical Non-Retirement Exit Rates from Panel Data
+#'
+#' @description
+#' Uses \code{govhr::detect_personnel_event(event_type = "fire")} to identify
+#' non-retirement attrition events (voluntary resignation, dismissal, contract
+#' non-renewal) across the full historical panel.  Computes
+#' \code{exit_rate = n_exits / n_active} per group per panel snapshot, then
+#' returns the mean rate per group.
+#'
+#' @param contract_dt data.table.  Full panel of contract data (all
+#'   \code{ref_date} snapshots).
+#' @param personnel_dt data.table.  Full panel of personnel data.
+#' @param group_cols Character vector or \code{NULL}.  Columns to group by
+#'   (e.g. \code{"est_id"}).  Pass \code{NULL} for an overall (ungrouped) rate.
+#' @param freq Character.  Frequency passed to
+#'   \code{govhr::detect_personnel_event()}.  Default \code{"year"}.
+#' @param personnel_id_col Character.  Default \code{"personnel_id"}.
+#' @param ref_date Date or character. Optional reference date (currently unused;
+#'   included to prevent partial argument matching against \code{ref_date_col}).
+#' @param ref_date_col Character.  Default \code{"ref_date"}.
+#' @param start_date_col Character.  Default \code{"start_date"}.
+#' @param end_date_col Character.  Default \code{"end_date"}.
+#' @param contract_type_col Character.  Default \code{"contract_type_code"}.
+#' @param status_col Character.  Default \code{"status"}.
+#'
+#' @return data.table with \code{group_cols} (if specified) and
+#'   \code{exit_rate} column.
+#' @export
+estimate_exit_rates <- function(contract_dt,
+                                personnel_dt,
+                                group_cols        = NULL,
+                                freq              = "year",
+                                ref_date          = NULL,
+                                personnel_id_col  = "personnel_id",
+                                ref_date_col      = "ref_date",
+                                start_date_col    = "start_date",
+                                contract_type_col = "contract_type_code",
+                                end_date_col      = "end_date",
+                                status_col        = "status") {
+
+  panel_contract_dt  <- data.table::as.data.table(contract_dt)
+  panel_personnel_dt <- data.table::as.data.table(personnel_dt)
+
+  # Coerce ref_date to Date in both panels (may be stored as integer after
+  # as.data.table() if the original was a Date column in a data.frame).
+  # as.Date() on an integer requires origin = "1970-01-01"; on a Date it is a no-op.
+  .rdc <- ref_date_col
+  safe_as_date <- function(x) {
+    if (inherits(x, "Date")) x else as.Date(x, origin = "1970-01-01")
+  }
+  panel_personnel_dt[, (.rdc) := safe_as_date(get(.rdc))]
+  panel_contract_dt[,  (.rdc) := safe_as_date(get(.rdc))]
+
+  panel_dates <- sort(unique(panel_personnel_dt[[ref_date_col]]))
+  panel_dates <- panel_dates[!is.na(panel_dates)]
+
+  if (length(panel_dates) < 2L) {
+    stop("personnel_dt must contain at least 2 distinct ref_date snapshots. ",
+         "Found ", length(panel_dates), ".", call. = FALSE)
+  }
+
+  start_str <- format(min(panel_dates))
+  end_str   <- format(max(panel_dates))
+
+  # Detect non-retirement exit events across the full panel
+  fire_events <- govhr::detect_personnel_event(
+    data       = panel_personnel_dt,
+    id_col     = personnel_id_col,
+    event_type = "fire",
+    start_date = start_str,
+    end_date   = end_str,
+    freq       = freq
+  )
+  # fire_events columns: personnel_id_col, ref_date, type_event
+
+  # Join to contract panel to retrieve group_cols per exit
+  if (!is.null(group_cols) && length(group_cols) > 0) {
+    contract_groups <- unique(
+      panel_contract_dt[, c(personnel_id_col, ref_date_col, group_cols), with = FALSE]
+    )
+    fire_events <- contract_groups[fire_events, on = c(personnel_id_col, ref_date_col)]
+
+    exit_counts <- fire_events[
+      !is.na(get(group_cols[[1]])),
+      .(n_exits = .N),
+      by = c(ref_date_col, group_cols)
+    ]
+  } else {
+    exit_counts <- fire_events[, .(n_exits = .N), by = ref_date_col]
+  }
+
+  stock_dt <- 
+    panel_contract_dt[
+      get(contract_type_col) %in% c("fterm", "perm", "temp"),
+      .(current_stock = data.table::uniqueN(get(personnel_id_col))),
+        by = c(group_cols, ref_date_col)]
+
+  join_keys <- if (!is.null(group_cols) && length(group_cols) > 0)
+    c(ref_date_col, group_cols) else ref_date_col
+
+  rate_dt <- exit_counts[stock_dt, on = join_keys]
+  rate_dt[is.na(n_exits), n_exits := 0L]
+  rate_dt[, exit_rate := data.table::fifelse(
+    current_stock > 0,
+    n_exits / current_stock,
+    0
+  )]
+
+  if (!is.null(group_cols) && length(group_cols) > 0) {
+    result <- rate_dt[, .(exit_rate = mean(exit_rate, na.rm = TRUE)), by = group_cols]
+    result[is.nan(exit_rate), exit_rate := 0]
+  } else {
+    avg <- mean(rate_dt$exit_rate, na.rm = TRUE)
+    result <- data.table::data.table(exit_rate = if (is.nan(avg)) 0 else avg)
+  }
+
+  result
+}
+
