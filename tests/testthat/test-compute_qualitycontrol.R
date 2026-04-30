@@ -66,7 +66,8 @@ test_that("output is a named list with expected top-level elements", {
   qc <- run_qc()
   expect_type(qc, "list")
   expect_named(qc, c("n_obs", "n_vars", "structure", "orphans",
-                      "validation", "missingness", "volatility"))
+                      "validation", "missingness", "volatility",
+                      "temporal_coverage", "metadata"))
 })
 
 test_that("n_obs and n_vars are correct", {
@@ -296,4 +297,139 @@ test_that("single time period runs without error", {
   pt <- make_personnel(ct)
   et <- make_est()
   expect_no_error(compute_qualitycontrol(ct, pt, et))
+})
+
+# -----------------------------------------------------------------------
+# TEMPORAL COVERAGE
+# -----------------------------------------------------------------------
+test_that("temporal_coverage is present in output", {
+  qc <- run_qc()
+  expect_true("temporal_coverage" %in% names(qc))
+})
+
+test_that("temporal_coverage$contract is a data.table with ref_date and n_obs", {
+  qc <- run_qc()
+  expect_s3_class(qc$temporal_coverage$contract, "data.table")
+  expect_true(all(c("ref_date", "n_obs") %in% names(qc$temporal_coverage$contract)))
+})
+
+test_that("temporal_coverage$contract has one row per ref_date", {
+  qc <- run_qc(n_dates = 3)
+  expect_equal(nrow(qc$temporal_coverage$contract), 3L)
+})
+
+test_that("temporal_coverage$contract n_obs sums to total contract rows", {
+  ct <- make_contract(n_contracts = 4, n_dates = 2)
+  pt <- make_personnel(ct)
+  et <- make_est()
+  qc <- compute_qualitycontrol(ct, pt, et)
+  expect_equal(sum(qc$temporal_coverage$contract$n_obs), nrow(ct))
+})
+
+test_that("temporal_coverage$contract is ordered by ref_date ascending", {
+  qc <- run_qc(n_dates = 3)
+  dates <- qc$temporal_coverage$contract$ref_date
+  expect_equal(dates, sort(dates))
+})
+
+test_that("temporal_coverage$personnel is present and correct", {
+  qc <- run_qc(n_dates = 2)
+  expect_true("personnel" %in% names(qc$temporal_coverage))
+  expect_s3_class(qc$temporal_coverage$personnel, "data.table")
+  expect_true(all(c("ref_date", "n_obs") %in% names(qc$temporal_coverage$personnel)))
+})
+
+test_that("temporal_coverage$establishment is present when est_dt has ref_date", {
+  qc <- run_qc()
+  # make_est() includes ref_date
+  expect_true("establishment" %in% names(qc$temporal_coverage))
+})
+
+test_that("temporal_coverage$establishment absent when est_dt has no ref_date col", {
+  ct <- make_contract()
+  pt <- make_personnel(ct)
+  et <- make_est()
+  et[, ref_date := NULL]
+  qc <- compute_qualitycontrol(ct, pt, et)
+  expect_false("establishment" %in% names(qc$temporal_coverage))
+})
+
+# -----------------------------------------------------------------------
+# METADATA
+# -----------------------------------------------------------------------
+test_that("metadata is present in output", {
+  qc <- run_qc()
+  expect_true("metadata" %in% names(qc))
+})
+
+test_that("metadata has date_range, n_obs, n_vars elements", {
+  qc <- run_qc()
+  expect_named(qc$metadata, c("date_range", "n_obs", "n_vars"))
+})
+
+test_that("metadata$date_range is a length-2 Date vector", {
+  qc <- run_qc()
+  expect_s3_class(qc$metadata$date_range, "Date")
+  expect_length(qc$metadata$date_range, 2L)
+  expect_lte(qc$metadata$date_range[[1]], qc$metadata$date_range[[2]])
+})
+
+test_that("metadata$n_obs has contract, personnel, establishment entries", {
+  qc <- run_qc()
+  expect_named(qc$metadata$n_obs, c("contract", "personnel", "establishment"))
+})
+
+test_that("metadata$n_vars has contract, personnel, establishment entries", {
+  qc <- run_qc()
+  expect_named(qc$metadata$n_vars, c("contract", "personnel", "establishment"))
+})
+
+test_that("metadata$n_obs$contract equals nrow(contract_dt)", {
+  ct <- make_contract(n_contracts = 5, n_dates = 2)
+  pt <- make_personnel(ct)
+  et <- make_est()
+  qc <- compute_qualitycontrol(ct, pt, et)
+  expect_equal(qc$metadata$n_obs$contract, nrow(ct))
+})
+
+test_that("metadata$n_obs$personnel equals nrow(personnel_dt)", {
+  ct <- make_contract()
+  pt <- make_personnel(ct)
+  et <- make_est()
+  qc <- compute_qualitycontrol(ct, pt, et)
+  expect_equal(qc$metadata$n_obs$personnel, nrow(pt))
+})
+
+test_that("metadata$n_obs$establishment equals nrow(est_dt)", {
+  ct <- make_contract()
+  pt <- make_personnel(ct)
+  et <- make_est()
+  qc <- compute_qualitycontrol(ct, pt, et)
+  expect_equal(qc$metadata$n_obs$establishment, nrow(et))
+})
+
+test_that("metadata$n_vars$contract equals ncol(contract_dt)", {
+  ct <- make_contract()
+  pt <- make_personnel(ct)
+  et <- make_est()
+  qc <- compute_qualitycontrol(ct, pt, et)
+  expect_equal(qc$metadata$n_vars$contract, ncol(ct))
+})
+
+test_that("metadata$date_range min equals min ref_date across all modules", {
+  ct <- make_contract(n_dates = 2)
+  pt <- make_personnel(ct)
+  et <- make_est()
+  qc <- compute_qualitycontrol(ct, pt, et)
+  expected_min <- min(ct$ref_date, pt$ref_date, na.rm = TRUE)
+  expect_equal(qc$metadata$date_range[[1]], expected_min)
+})
+
+test_that("metadata$date_range max equals max ref_date across all modules", {
+  ct <- make_contract(n_dates = 3)
+  pt <- make_personnel(ct)
+  et <- make_est()
+  qc <- compute_qualitycontrol(ct, pt, et)
+  expected_max <- max(ct$ref_date, pt$ref_date, na.rm = TRUE)
+  expect_equal(qc$metadata$date_range[[2]], expected_max)
 })

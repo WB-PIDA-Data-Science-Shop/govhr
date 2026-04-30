@@ -49,6 +49,13 @@
 #'   \item{\code{missingness}}{Long-format data.table of missingness by group.}
 #'   \item{\code{volatility}}{Named list: \code{contract} and \code{personnel}
 #'     flat data.tables from \code{flatten_volatility()}.}
+#'   \item{\code{temporal_coverage}}{Named list: \code{contract},
+#'     \code{personnel} (if supplied), and \code{establishment} (if supplied),
+#'     each a data.table with columns \code{ref_date} and \code{n_obs} showing
+#'     the observation count per snapshot.}
+#'   \item{\code{metadata}}{Named list with \code{date_range} (min/max
+#'     ref_date across all modules), \code{n_obs} (row counts per module),
+#'     and \code{n_vars} (column counts per module).}
 #' }
 #'
 #' @importFrom data.table as.data.table rbindlist melt setnames :=
@@ -350,19 +357,59 @@ compute_qualitycontrol <- function(contract_dt,
   personnel_volatility <- flatten_volatility(Filter(Negate(is.null), personnel_volatility))
 
   # -----------------------------------
-  # 6. ASSEMBLE QC OBJECT
+  # 6. TEMPORAL COVERAGE
+  # Row counts per ref_date snapshot for each module
+  # -----------------------------------
+  temporal_coverage <- list(
+    contract = contract_dt[, .(n_obs = .N), by = ref_date][order(ref_date)]
+  )
+
+  if ("ref_date" %in% names(personnel_dt)) {
+    temporal_coverage$personnel <- personnel_dt[, .(n_obs = .N), by = ref_date][order(ref_date)]
+  }
+
+  if ("ref_date" %in% names(est_dt)) {
+    temporal_coverage$establishment <- est_dt[, .(n_obs = .N), by = ref_date][order(ref_date)]
+  }
+
+  # -----------------------------------
+  # 7. METADATA
+  # Lightweight summary: date range, row counts, column counts per module
+  # -----------------------------------
+  all_dates <- contract_dt$ref_date
+  if ("ref_date" %in% names(personnel_dt)) all_dates <- c(all_dates, personnel_dt$ref_date)
+  if ("ref_date" %in% names(est_dt))       all_dates <- c(all_dates, est_dt$ref_date)
+
+  metadata <- list(
+    date_range = range(all_dates, na.rm = TRUE),
+    n_obs = list(
+      contract      = nrow(contract_dt),
+      personnel     = nrow(personnel_dt),
+      establishment = nrow(est_dt)
+    ),
+    n_vars = list(
+      contract      = ncol(contract_dt),
+      personnel     = ncol(personnel_dt),
+      establishment = ncol(est_dt)
+    )
+  )
+
+  # -----------------------------------
+  # 8. ASSEMBLE QC OBJECT
   # -----------------------------------
   qc_object <- list(
-    n_obs      = nrow(contract_dt),
-    n_vars     = ncol(contract_dt),
-    structure  = structure_checks,
-    orphans    = orphan_checks,
-    validation = validate_obj,
-    missingness = missingness,
-    volatility = list(
+    n_obs             = nrow(contract_dt),
+    n_vars            = ncol(contract_dt),
+    structure         = structure_checks,
+    orphans           = orphan_checks,
+    validation        = validate_obj,
+    missingness       = missingness,
+    volatility        = list(
       contract  = contract_volatility,
       personnel = personnel_volatility
-    )
+    ),
+    temporal_coverage = temporal_coverage,
+    metadata          = metadata
   )
 
   return(qc_object)

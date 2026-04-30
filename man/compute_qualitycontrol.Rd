@@ -37,6 +37,13 @@ A named list:
   \item{\code{missingness}}{Long-format data.table of missingness by group.}
   \item{\code{volatility}}{Named list: \code{contract} and \code{personnel}
     flat data.tables from \code{flatten_volatility()}.}
+  \item{\code{temporal_coverage}}{Named list: \code{contract},
+    \code{personnel} (if supplied), and \code{establishment} (if supplied),
+    each a data.table with columns \code{ref_date} and \code{n_obs} showing
+    the observation count per snapshot.}
+  \item{\code{metadata}}{Named list with \code{date_range} (min/max
+    ref_date across all modules), \code{n_obs} (row counts per module),
+    and \code{n_vars} (column counts per module).}
 }
 }
 \description{
