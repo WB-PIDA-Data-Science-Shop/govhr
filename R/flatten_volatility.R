@@ -60,7 +60,8 @@ flatten_volatility <- function(vol_list, dict = govhr::dictionary) {
       grp_col <- setdiff(names(x), c(.fixed_cols, vfn))      # group column(s)
 
       out <- data.table::copy(x)
-
+      
+      ## if group columns are specified, lets 
       if (length(grp_col) > 0) {
         out[, group_val := do.call(paste, c(.SD, list(sep = " | "))),
             .SDcols = grp_col]
@@ -92,6 +93,23 @@ flatten_volatility <- function(vol_list, dict = govhr::dictionary) {
   }
 
   flat_list <- .flatten(vol_list)
+
+  if (length(flat_list) == 0L) {
+    return(data.table::data.table(
+      stat_type       = character(0),
+      vol_fn          = character(0),
+      vol_fn_label    = character(0),
+      group_var       = character(0),
+      group_var_label = character(0),
+      group_val       = character(0),
+      ref_date        = as.Date(character(0)),
+      indicator       = factor(),
+      indicator_label = character(0),
+      value           = numeric(0),
+      vol_stat        = numeric(0)
+    ))
+  }
+
   out <- data.table::rbindlist(flat_list, fill = TRUE)
 
   ## ------------------------------------------------------------------

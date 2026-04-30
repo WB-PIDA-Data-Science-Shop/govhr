@@ -456,6 +456,17 @@ estimate_exit_rates <- function(contract_dt,
   panel_contract_dt  <- data.table::as.data.table(contract_dt)
   panel_personnel_dt <- data.table::as.data.table(personnel_dt)
 
+  # Validate required columns exist before any downstream operations
+  required_contract  <- unique(c(ref_date_col, personnel_id_col, contract_type_col,
+                                  if (!is.null(group_cols)) group_cols))
+  required_personnel <- c(ref_date_col, personnel_id_col)
+  missing_c <- setdiff(required_contract,  names(panel_contract_dt))
+  missing_p <- setdiff(required_personnel, names(panel_personnel_dt))
+  if (length(missing_c) > 0)
+    stop("Columns not found in contract_dt: ",  paste(missing_c, collapse = ", "), call. = FALSE)
+  if (length(missing_p) > 0)
+    stop("Columns not found in personnel_dt: ", paste(missing_p, collapse = ", "), call. = FALSE)
+
   # Coerce ref_date to Date in both panels (may be stored as integer after
   # as.data.table() if the original was a Date column in a data.frame).
   # as.Date() on an integer requires origin = "1970-01-01"; on a Date it is a no-op.
@@ -495,8 +506,9 @@ estimate_exit_rates <- function(contract_dt,
     )
     fire_events <- contract_groups[fire_events, on = c(personnel_id_col, ref_date_col)]
 
+    complete_rows <- Reduce(`&`, lapply(group_cols, function(g) !is.na(fire_events[[g]])))
     exit_counts <- fire_events[
-      !is.na(get(group_cols[[1]])),
+      complete_rows,
       .(n_exits = .N),
       by = c(ref_date_col, group_cols)
     ]
@@ -504,11 +516,15 @@ estimate_exit_rates <- function(contract_dt,
     exit_counts <- fire_events[, .(n_exits = .N), by = ref_date_col]
   }
 
-  stock_dt <- 
+  active_types <- c("fterm", "perm", "temp")
+  stock_dt <-
     panel_contract_dt[
-      get(contract_type_col) %in% c("fterm", "perm", "temp"),
-      .(current_stock = data.table::uniqueN(get(personnel_id_col))),
-        by = c(group_cols, ref_date_col)]
+      ,
+      .(current_stock = data.table::uniqueN(
+          get(personnel_id_col)[get(contract_type_col) %in% active_types]
+        )),
+      by = c(group_cols, ref_date_col)
+    ]
 
   join_keys <- if (!is.null(group_cols) && length(group_cols) > 0)
     c(ref_date_col, group_cols) else ref_date_col

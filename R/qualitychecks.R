@@ -91,8 +91,8 @@ compute_qualitycontrol <- function(contract_dt,
       
       
       structure_checks <- compare_to_dictionary(data = data,
-                                           dict_names = dict_names$variable_id,
-                                           output_format = "badges")
+                                                dict_names = dict_names$variable_id,
+                                                output_format = "badges")
 
       return(structure_checks)
 
