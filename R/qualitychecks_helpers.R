@@ -203,6 +203,9 @@ compute_missingness <- function(data,
     ## add percent missing
     missing_dt[, pct_missing := n_missing / nrow(dt)]
 
+    ## just add the size of the dataset
+    missing_dt[, N := nrow(dt)]
+
     return(missing_dt[])
 
   } else {
@@ -229,8 +232,8 @@ compute_missingness <- function(data,
     ## compute group-wise percent missing
     missing_dt[, pct_missing := n_missing / N]
 
-    ## drop the total count column
-    missing_dt[, N := NULL]
+    # ## drop the total count column
+    # missing_dt[, N := NULL]
 
     return(missing_dt[])
   }

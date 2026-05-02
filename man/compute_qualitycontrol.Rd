@@ -4,90 +4,85 @@
 \alias{compute_qualitycontrol}
 \title{Compute Comprehensive Quality Control Checks for Harmonized HRMIS Data}
 \usage{
-compute_qualitycontrol(contract_dt, personnel_dt, est_dt)
+compute_qualitycontrol(
+  contract_dt,
+  personnel_dt,
+  est_dt,
+  custom_rules = list(contract = NULL, personnel = NULL)
+)
 }
 \arguments{
-\item{contract_dt}{A data.frame or data.table containing the harmonized
-Contract module.}
+\item{contract_dt}{A data.frame or data.table — harmonized Contract module.}
 
-\item{personnel_dt}{A data.frame or data.table containing the harmonized
-Personnel module.}
+\item{personnel_dt}{A data.frame or data.table — harmonized Personnel module.}
 
-\item{est_dt}{A data.frame or data.table containing the harmonized
-Establishment module.}
+\item{est_dt}{A data.frame or data.table — harmonized Establishment module.}
+
+\item{custom_rules}{A named list with optional elements \code{contract} and
+\code{personnel}, each a data.frame with the same four-column schema as
+\code{govhr::contract_rules} (\code{rule}, \code{name},
+\code{description}, \code{label}).  These rows are appended to the
+package-level rules before validation.  Use \code{NULL} (the default) to
+run only the built-in rules.}
 }
 \value{
-A named list containing:
-
+A named list:
 \describe{
-  \item{\code{n_obs}}{Number of observations in the Contract module.}
-  \item{\code{n_vars}}{Number of variables in the Contract module.}
-  \item{\code{structure}}{Results of structure/dictionary checks for each module.}
-  \item{\code{keys}}{Primary key uniqueness diagnostics.}
-  \item{\code{orphans}}{Orphan record diagnostics across modules.}
-  \item{\code{salaries}}{Salary consistency and validation results.}
-  \item{\code{date_logic}}{Results of date-related logical checks.}
-  \item{\code{missingness}}{Missingness summaries overall and by grouping.}
-  \item{\code{volatility}}{Volatility diagnostics for selected indicators.}
+  \item{\code{n_obs}}{Row count of the Contract module.}
+  \item{\code{n_vars}}{Column count of the Contract module.}
+  \item{\code{structure}}{Dictionary-comparison results for each module.}
+  \item{\code{orphans}}{Orphan ID diagnostics.}
+  \item{\code{validation}}{Named list: \code{contract} and \code{personnel}
+    audit reports from \code{validate_data()}.}
+  \item{\code{missingness}}{Long-format data.table of missingness by group.}
+  \item{\code{volatility}}{Named list: \code{contract} and \code{personnel}
+    flat data.tables from \code{flatten_volatility()}.}
+  \item{\code{temporal_coverage}}{Named list: \code{contract},
+    \code{personnel} (if supplied), and \code{establishment} (if supplied),
+    each a data.table with columns \code{ref_date} and \code{n_obs} showing
+    the observation count per snapshot.}
+  \item{\code{metadata}}{Named list with \code{date_range} (min/max
+    ref_date across all modules), \code{n_obs} (row counts per module),
+    and \code{n_vars} (column counts per module).}
 }
 }
 \description{
-This function runs a full suite of quality control (QC) diagnostics across
-three harmonized HRMIS modules—contract, personnel, and establishment.
-It performs structure checks against a harmonization dictionary,
-primary key uniqueness checks, orphan detection across modules, salary
-validation, date logic checks, missingness profiling, and volatility
-analysis for selected indicators.
+Runs a full suite of QC diagnostics across the three harmonized HRMIS
+modules—contract, personnel, and establishment.  Rule-based validation
+uses the \pkg{validate} framework and the built-in
+\code{govhr::contract_rules} / \code{govhr::personnel_rules} datasets,
+optionally extended with country-specific rules supplied via
+\code{custom_rules}.
 }
 \details{
-The function executes the following QC components:
-
 \describe{
-  \item{\strong{Structure checks}}{
-    Verifies that variable names in each module match those expected in the
-    harmonization dictionary.
-  }
-
-  \item{\strong{Primary key uniqueness}}{
-    Tests whether \code{contract_id}, \code{personnel_id}, and
-    \code{ref_date} uniquely identify observations in the Contract module.
-  }
-
-  \item{\strong{Orphan checks}}{
-    Detects cases where contract data reference personnel or establishment
-    IDs not present in the respective parent modules.
-  }
-
-  \item{\strong{Salary checks}}{
-    Validates salary fields for numeric type, non-negativity, and logical
-    consistency (e.g., base salary ≤ gross salary ≥ net salary).
-  }
-
-  \item{\strong{Date logic}}{
-    Identifies contracts with \code{end_date < start_date}.
-  }
-
-  \item{\strong{Missingness profiling}}{
-    Computes missingness overall and by occupation, ISCO category,
-    reference date, and establishment.
-  }
-
-  \item{\strong{Volatility analysis}}{
-    Calculates period-over-period volatility in wage bill, salaries, staffing
-    counts, and contract counts using the \code{compute_volatility()} function.
-  }
+  \item{\strong{Structure checks}}{Variable names checked against the
+    harmonization dictionary for each module.}
+  \item{\strong{Orphan checks}}{Cross-module referential integrity:
+    personnel and establishment IDs in the Contract module are checked
+    against their parent modules.}
+  \item{\strong{Rule-based validation}}{\code{govhr::contract_rules} and
+    \code{govhr::personnel_rules} (plus any \code{custom_rules}) are
+    evaluated via \code{validate_data()}, covering uniqueness, date logic,
+    salary consistency, working hours, age ranges, and more.}
+  \item{\strong{Missingness profiling}}{Missingness by key grouping
+    variables (contract type, occupation, reference date).  Groups are
+    silently skipped if the column is absent from the data.}
+  \item{\strong{Volatility analysis}}{Period-over-period percent change for
+    salaries, contract counts, working hours, occupation diversity, and
+    contract-type diversity, each by multiple groupings.  Groupings are
+    silently skipped if the required columns are absent.}
 }
 }
 \examples{
 \dontrun{
 qc <- compute_qualitycontrol(
-  contract_dt = bra_hrmis_contract,
+  contract_dt  = bra_hrmis_contract,
   personnel_dt = bra_hrmis_personnel,
-  est_dt = bra_hrmis_est
+  est_dt       = bra_hrmis_est
 )
-
-qc$structure
-qc$salaries
+qc$validation$contract
+qc$volatility$contract
 }
 
 }

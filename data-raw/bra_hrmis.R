@@ -73,17 +73,36 @@ personnel_tbl <- arrow::read_parquet("spielplatz/data/personnel_alagoas_tbl.parq
 est_tbl <- arrow::read_parquet("spielplatz/data/est_alagoas_tbl.parquet")
 
 
-bra_hrmis_personnel <- 
+edu_levels <- c(
+  "No education",
+  "Primary incomplete",
+  "Primary complete",
+  "Secondary incomplete",
+  "Secondary complete",
+  "Higher than secondary but not university",
+  "University incomplete or complete"
+)
+
+bra_hrmis_personnel <-
 personnel_tbl |>
-  dplyr::filter(personnel_id %in% personnel_list)
+  dplyr::filter(personnel_id %in% personnel_list) |>
+  dplyr::collect() |>
+  # tibble::as_tibble() |>
+  dplyr::mutate(
+    educat7 = factor(educat7, levels = edu_levels, ordered = TRUE)
+  )
 
-bra_hrmis_contract <- 
-contract_tbl |> 
-  dplyr::filter(personnel_id %in% bra_hrmis_personnel$personnel_id)
+bra_hrmis_contract <-
+contract_tbl |>
+  dplyr::filter(personnel_id %in% bra_hrmis_personnel$personnel_id) |>
+  dplyr::collect()
+  # tibble::as_tibble()
 
-bra_hrmis_est <- 
+bra_hrmis_est <-
   est_tbl |>
-  dplyr::filter(est_id %in% unique(bra_hrmis_contract$est_id))
+  dplyr::filter(est_id %in% unique(bra_hrmis_contract$est_id)) |>
+  dplyr::collect() 
+  # tibble::as_tibble()
 
 
 # write-out ---------------------------------------------------------------

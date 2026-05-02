@@ -349,6 +349,7 @@ compute_fastchange <- function(data, col, date_col) {
   return(dt_full)
 }
 
+
 ################################################################################
 ##################### PUBLIC SECTOR REPORTING FUNCTIONS ########################
 ################################################################################
@@ -714,30 +715,41 @@ compute_volatility <- function(data,
   data.table::setorderv(agg_dt, c(groups, time))
   
   ## fill in the implicit missing values
+  ## Grid must include the indicator dimension so that imputed NA rows
+  ## are correctly associated with their indicator, not left as indicator = NA.
 
-  time_list <- sort(unique(agg_dt[[time]]))
+  time_list      <- sort(unique(agg_dt[[time]]))
+  indicator_list <- as.character(unique(agg_dt[["indicator"]]))
 
   if (is.null(groups)){
 
-    grid_dt <- data.table(ref = time_list)
-    setnames(grid_dt, "ref", time)
+    grid_dt <- data.table::CJ(indicator = indicator_list, ref = time_list)
+    data.table::setnames(grid_dt, "ref", time)
 
   } else {
 
     group_values <- unique(agg_dt[, ..groups])
 
     ## construct the inputs for data.table::CJ function and wrap in a do.call
-    cj_inputs <- c(as.list(group_values), list(ref = time_list))
+    cj_inputs <- c(as.list(group_values),
+                   list(indicator = indicator_list, ref = time_list))
 
     grid_dt <- do.call(data.table::CJ, c(cj_inputs, list(unique = TRUE)))
 
-    setnames(grid_dt, "ref", time)
+    data.table::setnames(grid_dt, "ref", time)
 
   }
-  
+
+  ## coerce indicator back to factor to match agg_dt
+  agg_dt[, indicator := as.character(indicator)]
 
   ### compute volatility based on selected method
-  agg_dt <- data.table::merge.data.table(grid_dt, agg_dt, by = c(groups, time), all.x = TRUE)
+  agg_dt <- data.table::merge.data.table(
+    grid_dt, agg_dt,
+    by = c(groups, "indicator", time),
+    all.x = TRUE
+  )
+  agg_dt[, indicator := factor(indicator)]
 
   ### compare registry of volatility functions to selected functions
   vol_fns <- define_vol_fns(window_size = window_size)
@@ -750,7 +762,7 @@ compute_volatility <- function(data,
   if (vol_fn %in% c("pct_change", "rolling_sd", 
                     "rolling_cv", "rolling_pct_change")) {
     
-    agg_dt[, (vol_fn) := fn(value), by = groups]
+    agg_dt[, (vol_fn) := fn(value), by = c(groups, "indicator")]
 
   } else if (vol_fn %in% c("sd", "cv")) {
 

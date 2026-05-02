@@ -21,7 +21,12 @@ if (getRversion() >= "2.15.1"){
     "allowance_ind", "allowance_lcu", "allowshare", "gender", "educat7",
     "paygrade", "seniority", "from", "est_to", "paygrade", "seniority",
     "Module", "VariableID", "dictionary", "..groups", "n_missing",
-    "pct_missing"
+    "pct_missing", ".contrib", ".e", ".eff_end", ".lag_max_e", ".pid",
+    ".s", "current_stock", "exit_rate", "from_group", "from_period", 
+    "movement_rate", "n_exits", "n_moves", "n_pop", "period_key",
+    "period_prob", "t0_date", "tenure_days", "tenure_years", "to_group", 
+    "to_period", ".grp_base", ".ind_base", "group_val", "group_var",
+    "stat_type", "variable_id", "variable_name", "vol_fn"
   ))
 
 }
