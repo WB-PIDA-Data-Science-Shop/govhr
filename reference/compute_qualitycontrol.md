@@ -1,124 +1,139 @@
 # Compute Comprehensive Quality Control Checks for Harmonized HRMIS Data
 
-This function runs a full suite of quality control (QC) diagnostics
-across three harmonized HRMIS modules—contract, personnel, and
-establishment. It performs structure checks against a harmonization
-dictionary, primary key uniqueness checks, orphan detection across
-modules, salary validation, date logic checks, missingness profiling,
-and volatility analysis for selected indicators.
+Runs a full suite of QC diagnostics across the three harmonized HRMIS
+modules—contract, personnel, and establishment. Rule-based validation
+uses the validate framework and the built-in
+[`govhr::contract_rules`](https://wb-pida-data-science-shop.github.io/govhr/reference/contract_rules.md)
+/
+[`govhr::personnel_rules`](https://wb-pida-data-science-shop.github.io/govhr/reference/personnel_rules.md)
+datasets, optionally extended with country-specific rules supplied via
+`custom_rules`.
 
 ## Usage
 
 ``` r
-compute_qualitycontrol(contract_dt, personnel_dt, est_dt)
+compute_qualitycontrol(
+  contract_dt,
+  personnel_dt,
+  est_dt,
+  custom_rules = list(contract = NULL, personnel = NULL)
+)
 ```
 
 ## Arguments
 
 - contract_dt:
 
-  A data.frame or data.table containing the harmonized Contract module.
+  A data.frame or data.table — harmonized Contract module.
 
 - personnel_dt:
 
-  A data.frame or data.table containing the harmonized Personnel module.
+  A data.frame or data.table — harmonized Personnel module.
 
 - est_dt:
 
-  A data.frame or data.table containing the harmonized Establishment
-  module.
+  A data.frame or data.table — harmonized Establishment module.
+
+- custom_rules:
+
+  A named list with optional elements `contract` and `personnel`, each a
+  data.frame with the same four-column schema as
+  [`govhr::contract_rules`](https://wb-pida-data-science-shop.github.io/govhr/reference/contract_rules.md)
+  (`rule`, `name`, `description`, `label`). These rows are appended to
+  the package-level rules before validation. Use `NULL` (the default) to
+  run only the built-in rules.
 
 ## Value
 
-A named list containing:
+A named list:
 
 - `n_obs`:
 
-  Number of observations in the Contract module.
+  Row count of the Contract module.
 
 - `n_vars`:
 
-  Number of variables in the Contract module.
+  Column count of the Contract module.
 
 - `structure`:
 
-  Results of structure/dictionary checks for each module.
-
-- `keys`:
-
-  Primary key uniqueness diagnostics.
+  Dictionary-comparison results for each module.
 
 - `orphans`:
 
-  Orphan record diagnostics across modules.
+  Orphan ID diagnostics.
 
-- `salaries`:
+- `validation`:
 
-  Salary consistency and validation results.
-
-- `date_logic`:
-
-  Results of date-related logical checks.
+  Named list: `contract` and `personnel` audit reports from
+  [`validate_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/validate_data.md).
 
 - `missingness`:
 
-  Missingness summaries overall and by grouping.
+  Long-format data.table of missingness by group.
 
 - `volatility`:
 
-  Volatility diagnostics for selected indicators.
+  Named list: `contract` and `personnel` flat data.tables from
+  [`flatten_volatility()`](https://wb-pida-data-science-shop.github.io/govhr/reference/flatten_volatility.md).
+
+- `temporal_coverage`:
+
+  Named list: `contract`, `personnel` (if supplied), and `establishment`
+  (if supplied), each a data.table with columns `ref_date` and `n_obs`
+  showing the observation count per snapshot.
+
+- `metadata`:
+
+  Named list with `date_range` (min/max ref_date across all modules),
+  `n_obs` (row counts per module), and `n_vars` (column counts per
+  module).
 
 ## Details
 
-The function executes the following QC components:
-
 - **Structure checks**:
 
-  Verifies that variable names in each module match those expected in
-  the harmonization dictionary.
-
-- **Primary key uniqueness**:
-
-  Tests whether `contract_id`, `personnel_id`, and `ref_date` uniquely
-  identify observations in the Contract module.
+  Variable names checked against the harmonization dictionary for each
+  module.
 
 - **Orphan checks**:
 
-  Detects cases where contract data reference personnel or establishment
-  IDs not present in the respective parent modules.
+  Cross-module referential integrity: personnel and establishment IDs in
+  the Contract module are checked against their parent modules.
 
-- **Salary checks**:
+- **Rule-based validation**:
 
-  Validates salary fields for numeric type, non-negativity, and logical
-  consistency (e.g., base salary ≤ gross salary ≥ net salary).
-
-- **Date logic**:
-
-  Identifies contracts with `end_date < start_date`.
+  [`govhr::contract_rules`](https://wb-pida-data-science-shop.github.io/govhr/reference/contract_rules.md)
+  and
+  [`govhr::personnel_rules`](https://wb-pida-data-science-shop.github.io/govhr/reference/personnel_rules.md)
+  (plus any `custom_rules`) are evaluated via
+  [`validate_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/validate_data.md),
+  covering uniqueness, date logic, salary consistency, working hours,
+  age ranges, and more.
 
 - **Missingness profiling**:
 
-  Computes missingness overall and by occupation, ISCO category,
-  reference date, and establishment.
+  Missingness by key grouping variables (contract type, occupation,
+  reference date). Groups are silently skipped if the column is absent
+  from the data.
 
 - **Volatility analysis**:
 
-  Calculates period-over-period volatility in wage bill, salaries,
-  staffing counts, and contract counts using the
-  [`compute_volatility()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_volatility.md)
-  function.
+  Period-over-period percent change for salaries, contract counts,
+  working hours, occupation diversity, and contract-type diversity, each
+  by multiple groupings. Groupings are silently skipped if the required
+  columns are absent.
 
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
 qc <- compute_qualitycontrol(
-  contract_dt = bra_hrmis_contract,
+  contract_dt  = bra_hrmis_contract,
   personnel_dt = bra_hrmis_personnel,
-  est_dt = bra_hrmis_est
+  est_dt       = bra_hrmis_est
 )
-
-qc$structure
-qc$salaries
+qc$validation$contract
+qc$volatility$contract
 } # }
 ```

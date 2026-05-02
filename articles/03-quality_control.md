@@ -1,6 +1,7 @@
 # Quality Control Report
 
 ``` r
+
 library(govhr)
 ```
 
@@ -10,6 +11,7 @@ into the
 function as follows:
 
 ``` r
+
 # Generate the quality control report
 generate_qc_report(
   contract_dt = bra_hrmis_contract,

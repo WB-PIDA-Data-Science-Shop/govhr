@@ -51,6 +51,11 @@ strings. - To compute growth rates by group (e.g., country), use
 
 ``` r
 library(data.table)
+#> 
+#> Attaching package: ‘data.table’
+#> The following object is masked from ‘package:base’:
+#> 
+#>     %notin%
 
 dt <- data.table::data.table(
   year = c(2020, 2021, 2023),

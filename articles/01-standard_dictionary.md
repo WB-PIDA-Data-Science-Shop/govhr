@@ -15,19 +15,19 @@ institutions, including ministries, departments, and agencies.
 
 ### Fields
 
-| Field Name                   | Variable Name     | Description                                        |
-|------------------------------|-------------------|----------------------------------------------------|
-| Establishment ID             | `est_id`          | Unique identifier for the establishment            |
-| Establishment Name (Native)  | `est_name_native` | Official establishment name in local language      |
-| Establishment Name (English) | `est_name_en`     | Establishment name translated to English           |
-| Reference Date               | `ref_date`        | Latest date when the establishment had that name   |
-| Establishment Type           | `est_type`        | Type of establishment (Ministry/Department/Agency) |
-| Parent Establishment         | `est_parent`      | Identifier for parent establishment in hierarchy   |
-| Child Establishment          | `est_child`       | Identifier for child establishments in hierarchy   |
-| Country Code                 | `country_code`    | Official World Bank ISO-3 country code             |
-| Country Name                 | `country_name`    | Official World Bank country name                   |
-| Administration 1 Name        | `adm1_name`       | First-level administrative division name           |
-| Administration 1 Code        | `adm1_code`       | First-level administrative division code           |
+| Field Name | Variable Name | Description |
+|----|----|----|
+| Establishment ID | `est_id` | Unique identifier for the establishment |
+| Establishment Name (Native) | `est_name_native` | Official establishment name in local language |
+| Establishment Name (English) | `est_name_en` | Establishment name translated to English |
+| Reference Date | `ref_date` | Latest date when the establishment had that name |
+| Establishment Type | `est_type` | Type of establishment (Ministry/Department/Agency) |
+| Parent Establishment | `est_parent` | Identifier for parent establishment in hierarchy |
+| Child Establishment | `est_child` | Identifier for child establishments in hierarchy |
+| Country Code | `country_code` | Official World Bank ISO-3 country code |
+| Country Name | `country_name` | Official World Bank country name |
+| Administration 1 Name | `adm1_name` | First-level administrative division name |
+| Administration 1 Code | `adm1_code` | First-level administrative division code |
 
 ### Notes
 
@@ -47,21 +47,21 @@ about individual public sector employees.
 
 ### Fields
 
-| Field Name                          | Variable Name     | Description                                      |
-|-------------------------------------|-------------------|--------------------------------------------------|
-| Personnel ID                        | `personnel_id`    | Unique identifier for the personnel              |
-| Establishment ID                    | `est_id`          | Foreign key linking to Establishment module      |
-| Establishment Name                  | `est_name_native` | Foreign key linking to the Establishment module  |
-| Reference Date                      | `ref_date`        | Timestamp for the personnel record               |
-| Date of Birth                       | `birth_date`      | Personnel’s date of birth                        |
-| Gender                              | `gender`          | Personnel’s gender                               |
-| Education Attainment (7 categories) | `educat7`         | Education level using 10-category classification |
-| Tribe                               | `tribe`           | Tribal affiliation                               |
-| Race                                | `race`            | Racial/ethnic classification                     |
-| Country Code                        | `country_code`    | Official World Bank ISO-3 country code           |
-| Country Name                        | `country_name`    | Official World Bank country name                 |
-| Administration 1 Name               | `adm1_name`       | First-level administrative division name         |
-| Administration 1 Code               | `adm1_code`       | First-level administrative division code         |
+| Field Name | Variable Name | Description |
+|----|----|----|
+| Personnel ID | `personnel_id` | Unique identifier for the personnel |
+| Establishment ID | `est_id` | Foreign key linking to Establishment module |
+| Establishment Name | `est_name_native` | Foreign key linking to the Establishment module |
+| Reference Date | `ref_date` | Timestamp for the personnel record |
+| Date of Birth | `birth_date` | Personnel’s date of birth |
+| Gender | `gender` | Personnel’s gender |
+| Education Attainment (7 categories) | `educat7` | Education level using 10-category classification |
+| Tribe | `tribe` | Tribal affiliation |
+| Race | `race` | Racial/ethnic classification |
+| Country Code | `country_code` | Official World Bank ISO-3 country code |
+| Country Name | `country_name` | Official World Bank country name |
+| Administration 1 Name | `adm1_name` | First-level administrative division name |
+| Administration 1 Code | `adm1_code` | First-level administrative division code |
 
 ### Notes
 
@@ -82,35 +82,35 @@ compensation, and job characteristics.
 
 ### Fields
 
-| Field Name             | Variable Name                                                     | Description                                                                 |
-|------------------------|-------------------------------------------------------------------|-----------------------------------------------------------------------------|
-| Contract ID            | `contract_id`                                                     | Unique identifier for the contract                                          |
-| Personnel ID           | `personnel_id`                                                    | Foreign key linking to Personnel module                                     |
-| Establishment ID       | `est_id`                                                          | Foreign key linking to Establishment module                                 |
-| Establishment Name     | `est_name_native`                                                 | Foreign key linking to Establishment module                                 |
-| Reference Date         | `ref_date`                                                        | Timestamp for the contract record                                           |
-| Base Salary (LCU)      | `base_salary_lcu`                                                 | Base compensation in local currency units                                   |
-| Base Salary (PPP)      | `base_salary_ppp`                                                 | Base compensation in constant 2021 international dollars                    |
-| Gross Salary (LCU)     | `gross_salary_lcu`                                                | Total compensation before deductions in local currency units                |
-| Gross Salary (PPP)     | `gross_salary_ppp`                                                | Total compensation before deductions in constant 2021 international dollars |
-| Net Salary (LCU)       | `net_salary_lcu`                                                  | Compensation after deductions in local currency units                       |
-| Net Salary (PPP)       | `net_salary_ppp`                                                  | Compensation after deductions in constant 2021 international dollars        |
-| Allowances (LCU)       | `allowance_lcu`                                                   | Allowances in local currency units                                          |
-| Allowances (PPP)       | `allowance_ppp` Allowances in constant 2021 international dollars |                                                                             |
-| Contract Type          | `contract_type`                                                   | Contract modality (short-term/open-term/permanent/inactive/retired)         |
-| Occupation (Native)    | `occupation_native`                                               | Job title in local language                                                 |
-| Occupation (English)   | `occupation_english`                                              | Job title translated to English                                             |
-| Occupation (ISCO Name) | `occupation_isconame`                                             | ISCO standard occupation name                                               |
-| Occupation (ISCO Code) | `occupation_iscocode`                                             | ISCO standard occupation code                                               |
-| Start Date             | `start_date`                                                      | Contract start date                                                         |
-| End Date               | `end_date`                                                        | Contract end date (if applicable)                                           |
-| Country Code           | `country_code`                                                    | Official World Bank ISO-3 country code                                      |
-| Country Name           | `country_name`                                                    | Official World Bank country name                                            |
-| Administration 1 Name  | `adm1_name`                                                       | First-level administrative division name                                    |
-| Administration 1 Code  | `adm1_code`                                                       | First-level administrative division code                                    |
-| Hours Worked           | `whours`                                                          | Standard or actual hours worked                                             |
-| Pay Grade              | `paygrade`                                                        | Salary scale or grade level                                                 |
-| Seniority              | `seniority`                                                       | Years of service or seniority level                                         |
+| Field Name | Variable Name | Description |
+|----|----|----|
+| Contract ID | `contract_id` | Unique identifier for the contract |
+| Personnel ID | `personnel_id` | Foreign key linking to Personnel module |
+| Establishment ID | `est_id` | Foreign key linking to Establishment module |
+| Establishment Name | `est_name_native` | Foreign key linking to Establishment module |
+| Reference Date | `ref_date` | Timestamp for the contract record |
+| Base Salary (LCU) | `base_salary_lcu` | Base compensation in local currency units |
+| Base Salary (PPP) | `base_salary_ppp` | Base compensation in constant 2021 international dollars |
+| Gross Salary (LCU) | `gross_salary_lcu` | Total compensation before deductions in local currency units |
+| Gross Salary (PPP) | `gross_salary_ppp` | Total compensation before deductions in constant 2021 international dollars |
+| Net Salary (LCU) | `net_salary_lcu` | Compensation after deductions in local currency units |
+| Net Salary (PPP) | `net_salary_ppp` | Compensation after deductions in constant 2021 international dollars |
+| Allowances (LCU) | `allowance_lcu` | Allowances in local currency units |
+| Allowances (PPP) | `allowance_ppp` Allowances in constant 2021 international dollars |  |
+| Contract Type | `contract_type` | Contract modality (short-term/open-term/permanent/inactive/retired) |
+| Occupation (Native) | `occupation_native` | Job title in local language |
+| Occupation (English) | `occupation_english` | Job title translated to English |
+| Occupation (ISCO Name) | `occupation_isconame` | ISCO standard occupation name |
+| Occupation (ISCO Code) | `occupation_iscocode` | ISCO standard occupation code |
+| Start Date | `start_date` | Contract start date |
+| End Date | `end_date` | Contract end date (if applicable) |
+| Country Code | `country_code` | Official World Bank ISO-3 country code |
+| Country Name | `country_name` | Official World Bank country name |
+| Administration 1 Name | `adm1_name` | First-level administrative division name |
+| Administration 1 Code | `adm1_code` | First-level administrative division code |
+| Hours Worked | `whours` | Standard or actual hours worked |
+| Pay Grade | `paygrade` | Salary scale or grade level |
+| Seniority | `seniority` | Years of service or seniority level |
 
 ### Notes
 

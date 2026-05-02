@@ -17,6 +17,7 @@ You can install the development version of `govhr` from
 [GitHub](https://github.com/WB-PIDA-Data-Science-Shop/govhr) with:
 
 ``` r
+
 # install.packages("pak")
 pak::pak("WB-PIDA-Data-Science-Shop/govhr")
 ```

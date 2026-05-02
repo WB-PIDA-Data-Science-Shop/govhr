@@ -66,6 +66,7 @@ system provided at the contract level. We randomly sample 5 percent of
 the original data. See the data below:
 
 ``` r
+
 # bra_hrmis <- govhr::bra_hrmis |> 
 #   sample_n(1e3)
 bra_hrmis_display <- data.table::as.data.table(bra_hrmis)
@@ -85,6 +86,7 @@ personnels.
 A quick glimpse of the dataset:
 
 ``` r
+
 glimpse(bra_hrmis)
 ```
 
@@ -209,6 +211,7 @@ Alternatively the `polyglotr` R package provides a suite functions that
 support translation. This can be applied as follows:
 
 ``` r
+
 raw_dictionary <- 
   tibble(raw_colnames_pt = colnames(govhr::bra_hrmis),
          raw_colnames_eng = polyglotr::google_translate(colnames(bra_hrmis), 
@@ -243,7 +246,7 @@ kable(raw_dictionary)
 | CONTRIBUICAO_PREVIDENCIA          | CONTRIBUICAO_PREVIDENCIA      |
 | ADICIONAL_TEMPO_SERVICO           | ADDITIONAL_TIME_SERVICE       |
 | COMISSAO                          | COMMISSION                    |
-| ABONO_PERMANENCIA                 | ABONO_PERMANENCIA             |
+| ABONO_PERMANENCIA                 | ALLOWANCE_PERMANENCE          |
 | DECISAO_JUDICIAL                  | JUDICIAL_DECISION             |
 | DEMAIS_GRATIFICACOES_TRANSITORIAS | OTHER_TRANSIT_GRATIFICATIONS  |
 | DEMAIS_GRATIFICACOES_CARREIRA     | OTHER_GRATIFICATIONS_CARREIRA |
@@ -263,6 +266,7 @@ table and the previous glimpse(), we can see that the `CPF` and
 contracts uniquely. We do a quick check for this as follows:
 
 ``` r
+
 ### first let us convert the data to a data.table object to speed up our computations
 
 bra_hrmis <- as.data.table(bra_hrmis)
@@ -289,6 +293,7 @@ kable(cpf_summary)
 | 2018          |        887 |  930 |
 
 ``` r
+
 kable(mtr_summary)
 ```
 
@@ -319,6 +324,7 @@ the dictionary:
       classify these occupations to the level-4 isco names.
 
 ``` r
+
 #-----------------------------
 # 2. Build occupation table (active + inactive)
 #-----------------------------
@@ -337,6 +343,7 @@ occup_df[, occupation_english := tolower(polyglotr::google_translate(text = occu
 ```
 
 ``` r
+
 class_occup_df <- copy(occup_df)[,
   .(id = .I, text = occupation_english)
 ]
@@ -350,6 +357,7 @@ class_occup_df <- classify_occupation(
 ```
 
 ``` r
+
 #-----------------------------
 # 4. Merge classification back into occup_df
 #-----------------------------
@@ -393,6 +401,7 @@ bra_hrmis <- occup_df[bra_hrmis, on = c("CARREIRA", "CARGO")]
       are time-variant. Below, we create the date variables:
 
 ``` r
+
 ### lets include the dates
 bra_hrmis[, ref_date := as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-"))]
 
@@ -419,6 +428,7 @@ bra_hrmis[, adm1_code := "AL"]
       (i.e. \_lcu) and their real equivalents (\_ppp).
 
 ``` r
+
 ### lets convert the nominal compensation variables to real (_ppp) values
 # Step 1: Create the _lcu salary variables (in-place, no copy)
 
@@ -456,6 +466,7 @@ bra_hrmis[, whours := as.numeric(JORNADA)]
       so as follows:
 
 ``` r
+
 ### create a little dictionary mapping all the raw classes into a contract type in a data.table
 contract_dict <- 
   data.table(TIPO_CONTRATO = unique(bra_hrmis$TIPO_CONTRATO),
@@ -478,6 +489,7 @@ kable(contract_dict)
 Let’s do a data.table join of the `contract_dict` into the `bra_hrmis`
 
 ``` r
+
 bra_hrmis <- contract_dict[bra_hrmis, on = "TIPO_CONTRATO"]
 ```
 
@@ -486,6 +498,7 @@ created, we are ready to create the rest of the variables all at once to
 finalize the module.
 
 ``` r
+
 setnames(bra_hrmis,
          old = c("MATRICULA", "CPF", "ORGAO", "CLASSE", "NIVEL"),
          new = c("contract_id", "personnel_id", "est_id", "paygrade", "seniority"))
@@ -522,6 +535,7 @@ Let’s start with a little exploration. We need to understand how many
 unique personnel-establishment-refdate combinations are within the data:
 
 ``` r
+
 ## how many observations should we expect to have
 personnel_count <- 
 bra_hrmis |>
@@ -536,6 +550,7 @@ personnel module remains the same. As we did, in the contract module, we
 now add all the derived variables:
 
 ``` r
+
 ## lets relabel some more variables
 
 
@@ -594,6 +609,7 @@ The remainder of the variables (`tribe`,
 ``` race``) appear to be missing from the ```bra_hrmis`raw data. Therefore, we create them as missing variables (`NA\`).
 
 ``` r
+
 bra_hrmis[, c("tribe", "race") := .(NA, NA)] ## lets quickly create the variables that are missing from the raw data
 ```
 
@@ -602,6 +618,7 @@ values across the set of personnel modules we have now created within
 `bra_hrmis`. See the implementation below:
 
 ``` r
+
 bra_hrmis_personnel <- 
   bra_hrmis |>
   dplyr::select(personnel_id, est_id, ref_date, birth_date, gender, educat7,
@@ -620,6 +637,7 @@ into a canonical, well-structured establishment register according the
 harmonization dictionary. See below:
 
 ``` r
+
 ### get the set of variables according to the dictionary
 bra_hrmis_est <- 
   bra_hrmis |>

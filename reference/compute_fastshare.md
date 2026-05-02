@@ -81,6 +81,7 @@ format with one column per indicator.
 ## Examples
 
 ``` r
+
 if (FALSE) { # \dontrun{
 
 dt <- contract_harmonized |> mutate(year = year(est_date)) |> as.data.table()

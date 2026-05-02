@@ -79,6 +79,8 @@
   : Harmonization Dictionary for Payroll Data
 - [`enterprise_surveys`](https://wb-pida-data-science-shop.github.io/govhr/reference/enterprise_surveys.md)
   : World Bank Enterprise Surveys
+- [`estimate_exit_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_exit_rates.md)
+  : Estimate Historical Non-Retirement Exit Rates from Panel Data
 - [`fastcount()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fastcount.md)
   : Fast counting via dtplyr
 - [`fastprop()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fastprop.md)
@@ -103,6 +105,8 @@
   : Fix Invalid Working Hours
 - [`flag_outlier()`](https://wb-pida-data-science-shop.github.io/govhr/reference/flag_outlier.md)
   : Flag outliers based on the IQR rule
+- [`flatten_volatility()`](https://wb-pida-data-science-shop.github.io/govhr/reference/flatten_volatility.md)
+  : Flatten a nested volatility list into a single labelled data.table
 - [`generate_hr_report()`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_hr_report.md)
   : Generate Standard HR Analytics Report
 - [`generate_qc_report()`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_qc_report.md)
