@@ -2,41 +2,33 @@
 % Please edit documentation in R/qualitychecks_helpers.R
 \name{compute_missingness}
 \alias{compute_missingness}
-\title{Compute Missingness Counts and Percentages}
+\title{Compute Missingness for All Variables by All Non-Numeric Group Variables}
 \usage{
-compute_missingness(data, by = NULL)
+compute_missingness(dt, module = NULL, group_cols = NULL)
 }
 \arguments{
-\item{data}{A data.frame or data.table containing the dataset to analyze.}
+\item{dt}{A data.frame or data.table.}
 
-\item{by}{Optional. A character vector of column names specifying grouping
-variables. If \code{NULL}, missingness is computed for the full dataset.}
+\item{module}{Optional character scalar (e.g. \code{"contract"}) added as a
+\code{module} column to the result for downstream \code{rbindlist}.}
+
+\item{group_cols}{Character vector of column names to use as grouping
+variables. Glob patterns (e.g. \code{"country_*"}) are resolved against
+the actual column names in \code{dt}. When \code{NULL} (the default),
+missingness is computed for each variable across the whole dataset with no
+grouping, returning one row per variable.}
 }
 \value{
-A data.table in long format with columns:
-  \describe{
-    \item{\code{by}}{(if provided) Grouping variables.}
-    \item{\code{variable}}{The variable name.}
-    \item{\code{n_missing}}{Number of missing values.}
-    \item{\code{pct_missing}}{Percentage of missingness within group or overall.}
-  }
+When \code{group_cols = NULL}: a data.table with columns
+  \code{target_var}, \code{n_missing}, \code{N}, \code{pct_missing}.
+  Otherwise: a data.table with columns \code{group_var}, \code{group_val},
+  \code{target_var}, \code{n_missing}, \code{N}, \code{pct_missing}, and
+  (if \code{module} is supplied) \code{module}.
 }
 \description{
-Computes the number and percentage of missing values for each variable
-in a dataset. The function supports both overall missingness (when
-\code{by = NULL}) and grouped missingness (when grouping variables are
-supplied through the \code{by} argument).
+For a given data.table, identifies non-numeric columns as group variables
+and numeric columns as target variables, then computes \code{n_missing},
+\code{N}, and \code{pct_missing} for every target × group-value combination
+using a fast double-melt + join approach.
 }
-\details{
-When \code{by = NULL}, the function returns one row per variable with the
-total number of missing values and the percent missing out of all rows.
-When \code{by} is provided, missingness is computed within each group,
-and the percent missing is calculated relative to the group size.
-}
-\examples{
-\dontrun{
-compute_missingness(df)                # overall missingness
-compute_missingness(df, by = "contract_type_code") # missingness by contract type
-}
-
-}
+\keyword{internal}

@@ -192,7 +192,8 @@ test_that("validation detects failures (negative salary)", {
 test_that("missingness is a data.table with expected columns", {
   qc <- run_qc()
   expect_s3_class(qc$missingness, "data.table")
-  expect_true(all(c("group_var", "group_val", "target_var",
+  expect_true(all(c("group_var", "group_label", "group_val",
+                    "target_var", "target_label",
                     "n_missing", "N", "pct_missing") %in%
                     names(qc$missingness)))
 })
@@ -206,15 +207,14 @@ test_that("missingness handles missing optional grouping columns gracefully", {
   expect_no_error(compute_qualitycontrol(ct, pt, et))
 })
 
-test_that("missingness returns empty data.table when no grouping cols present", {
-  ct <- make_contract()[, .(contract_id, personnel_id, est_id, ref_date,
-                             base_salary_lcu, gross_salary_lcu,
-                             net_salary_lcu, allowance_lcu, whours,
-                             start_date, end_date, country_code)]
-  pt <- make_personnel(ct)[, .(personnel_id, ref_date, status, country_code)]
-  et <- make_est()
-  qc <- compute_qualitycontrol(ct, pt, et)
-  expect_equal(nrow(qc$missingness), 0L)
+test_that("missingness covers all three modules and uses non-numeric cols as groups", {
+  qc <- run_qc()
+  # contract and personnel have numeric cols so both modules must appear
+  expect_true(all(c("contract", "personnel") %in% qc$missingness$module))
+  # establishment fixture has no numeric cols → skipped (empty), that is fine
+  expect_true("n_missing"   %in% names(qc$missingness))
+  expect_true("pct_missing" %in% names(qc$missingness))
+  expect_true("module"      %in% names(qc$missingness))
 })
 
 # -----------------------------------------------------------------------
