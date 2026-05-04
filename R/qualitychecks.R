@@ -154,14 +154,19 @@ compute_qualitycontrol <- function(contract_dt,
 
   # -----------------------------------
   # 4. MISSINGNESS
-  # Delegate to wrap_compute_missingness() for each module, then join labels.
+  # compute_missingness() for each module, then join labels.
   # -----------------------------------
+
+  ### compute overall missingness first
+  overall_dt <- 
+    list(compute_missingness(contract_dt, module = "contract"),
+         compute_missingness(personnel_dt, module = "personnel")) |>
+    rbindlist()
 
   contract_grps <- c("est_id", "ref_date", "adm1_name", "paygrade", "seniority", 
                      "occupation_native", "occupation_english", "occupation_isconame",
                      "contract_type_native", "contract_type_code")
   personnel_grps <- c("ref_date", "gender", "educat7", "tribe", "race", "status")
-
 
 
 
@@ -197,7 +202,16 @@ compute_qualitycontrol <- function(contract_dt,
     missingness <- data.table::data.table()
   }
 
-  
+  ## join target labels onto overall_dt (tgt_lookup built above; ensure it exists)
+  if (!exists("tgt_lookup")) {
+    tgt_lookup <- data.table::setnames(
+      unique(dict_dt[, .(variable_id, variable_name)]), c("target_var", "target_label")
+    )
+  }
+  overall_dt <- tgt_lookup[overall_dt, on = "target_var"]
+  missingness <- list(overall = overall_dt,
+                      group   = missingness)
+
   # -----------------------------------
   # 5. VOLATILITY
   # Groups whose column is absent are silently dropped (Shiny-safe)

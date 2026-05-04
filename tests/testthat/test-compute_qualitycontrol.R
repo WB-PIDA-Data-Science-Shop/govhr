@@ -189,13 +189,20 @@ test_that("validation detects failures (negative salary)", {
 # -----------------------------------------------------------------------
 # MISSINGNESS
 # -----------------------------------------------------------------------
-test_that("missingness is a data.table with expected columns", {
+test_that("missingness is a list with $overall and $group data.tables", {
   qc <- run_qc()
-  expect_s3_class(qc$missingness, "data.table")
+  expect_type(qc$missingness, "list")
+  expect_true(all(c("overall", "group") %in% names(qc$missingness)))
+  ## $overall: one row per target_var, no grouping
+  expect_s3_class(qc$missingness$overall, "data.table")
+  expect_true(all(c("target_var", "n_missing", "N", "pct_missing") %in%
+                    names(qc$missingness$overall)))
+  ## $group: grouped long-format with labels
+  expect_s3_class(qc$missingness$group, "data.table")
   expect_true(all(c("group_var", "group_label", "group_val",
                     "target_var", "target_label",
                     "n_missing", "N", "pct_missing") %in%
-                    names(qc$missingness)))
+                    names(qc$missingness$group)))
 })
 
 test_that("missingness handles missing optional grouping columns gracefully", {
@@ -209,12 +216,14 @@ test_that("missingness handles missing optional grouping columns gracefully", {
 
 test_that("missingness covers all three modules and uses non-numeric cols as groups", {
   qc <- run_qc()
-  # contract and personnel have numeric cols so both modules must appear
-  expect_true(all(c("contract", "personnel") %in% qc$missingness$module))
+  # contract and personnel have numeric cols so both modules must appear in $group
+  expect_true(all(c("contract", "personnel") %in% qc$missingness$group$module))
   # establishment fixture has no numeric cols → skipped (empty), that is fine
-  expect_true("n_missing"   %in% names(qc$missingness))
-  expect_true("pct_missing" %in% names(qc$missingness))
-  expect_true("module"      %in% names(qc$missingness))
+  expect_true("n_missing"   %in% names(qc$missingness$group))
+  expect_true("pct_missing" %in% names(qc$missingness$group))
+  expect_true("module"      %in% names(qc$missingness$group))
+  # $overall covers both modules too
+  expect_true(all(c("contract", "personnel") %in% qc$missingness$overall$module))
 })
 
 # -----------------------------------------------------------------------
