@@ -98,10 +98,12 @@ compute_qualitycontrol <- function(contract_dt,
   # 1. STRUCTURE CHECKS
   # -----------------------------------
   module_data <- list(
-    contract      = contract_dt,
-    establishment = est_dt,
-    personnel     = personnel_dt
+    Contract      = contract_dt,
+    Establishment = est_dt,
+    Personnel     = personnel_dt
   )
+
+
   structure_checks <- lapply(names(module_data), function(m) {
     compare_to_dictionary(
       data         = module_data[[m]],
