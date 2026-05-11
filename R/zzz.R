@@ -27,7 +27,8 @@ if (getRversion() >= "2.15.1"){
     "period_prob", "t0_date", "tenure_days", "tenure_years", "to_group", 
     "to_period", ".grp_base", ".ind_base", "group_val", "group_var",
     "stat_type", "variable_id", "variable_name", "vol_fn", ".row_id",
-    "group_label", "target_label", "target_var", "module", "variable"
+    "group_label", "target_label", "target_var", "module", "variable",
+    "name", "items", "passes", "fails", "error"
   ))
 
 }

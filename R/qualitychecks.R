@@ -150,8 +150,8 @@ compute_qualitycontrol <- function(contract_dt,
   }
 
   validate_obj <- list(
-    contract  = validate_data(contract_dt,  input_rules = contract_rules_merged,  output_format = "report"),
-    personnel = validate_data(personnel_dt, input_rules = personnel_rules_merged, output_format = "report")
+    contract  = validate_data(contract_dt,  input_rules = contract_rules_merged),
+    personnel = validate_data(personnel_dt, input_rules = personnel_rules_merged)
   )
 
   # -----------------------------------

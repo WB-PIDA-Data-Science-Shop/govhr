@@ -125,21 +125,34 @@ test_that("validation output has contract and personnel elements", {
   expect_named(qc$validation, c("contract", "personnel"))
 })
 
+test_that("each validation element has report and violations", {
+  qc <- run_qc()
+  expect_named(qc$validation$contract, c("report", "violations"))
+  expect_named(qc$validation$personnel, c("report", "violations"))
+})
+
+test_that("violations is a named list keyed by rule label", {
+  qc <- run_qc()
+  viol <- qc$validation$contract$violations
+  expect_type(viol, "list")
+  expect_true(all(names(viol) %in% qc$validation$contract$report$Rule))
+})
+
 test_that("validation contract report has expected columns", {
   qc <- run_qc()
   expect_true(all(c("Rule", "Description", "Total Records",
                     "Passes", "Pass Rate", "Fails", "Errors") %in%
-                    names(qc$validation$contract)))
+                    names(qc$validation$contract$report)))
 })
 
 test_that("all built-in contract rules appear in the validation report", {
   qc <- run_qc()
-  expect_equal(nrow(qc$validation$contract), nrow(govhr::contract_rules))
+  expect_equal(nrow(qc$validation$contract$report), nrow(govhr::contract_rules))
 })
 
 test_that("all built-in personnel rules appear in the validation report", {
   qc <- run_qc()
-  expect_equal(nrow(qc$validation$personnel), nrow(govhr::personnel_rules))
+  expect_equal(nrow(qc$validation$personnel$report), nrow(govhr::personnel_rules))
 })
 
 test_that("custom_rules$contract are appended and appear in the report", {
@@ -154,9 +167,9 @@ test_that("custom_rules$contract are appended and appear in the report", {
   et <- make_est()
   qc <- compute_qualitycontrol(ct, pt, et,
                                custom_rules = list(contract = extra))
-  expect_equal(nrow(qc$validation$contract),
+  expect_equal(nrow(qc$validation$contract$report),
                nrow(govhr::contract_rules) + 1L)
-  expect_true("Positive gross salary" %in% qc$validation$contract$Rule)
+  expect_true("Positive gross salary" %in% qc$validation$contract$report$Rule)
 })
 
 test_that("custom_rules$personnel are appended and appear in the report", {
@@ -171,7 +184,7 @@ test_that("custom_rules$personnel are appended and appear in the report", {
   et <- make_est()
   qc <- compute_qualitycontrol(ct, pt, et,
                                custom_rules = list(personnel = extra))
-  expect_equal(nrow(qc$validation$personnel),
+  expect_equal(nrow(qc$validation$personnel$report),
                nrow(govhr::personnel_rules) + 1L)
 })
 
@@ -183,7 +196,7 @@ test_that("validation detects failures (negative salary)", {
   et <- make_est()
   qc <- compute_qualitycontrol(ct, pt, et)
   # at least one rule should report Fails > 0
-  expect_true(any(qc$validation$contract$Fails > 0))
+  expect_true(any(qc$validation$contract$report$Fails > 0))
 })
 
 # -----------------------------------------------------------------------
