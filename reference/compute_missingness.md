@@ -1,59 +1,38 @@
-# Compute Missingness Counts and Percentages
+# Compute Missingness for All Variables by All Non-Numeric Group Variables
 
-Computes the number and percentage of missing values for each variable
-in a dataset. The function supports both overall missingness (when
-`by = NULL`) and grouped missingness (when grouping variables are
-supplied through the `by` argument).
+For a given data.table, identifies non-numeric columns as group
+variables and numeric columns as target variables, then computes
+`n_missing`, `N`, and `pct_missing` for every target × group-value
+combination using a fast double-melt + join approach.
 
 ## Usage
 
 ``` r
-compute_missingness(data, by = NULL)
+compute_missingness(dt, module = NULL, group_cols = NULL)
 ```
 
 ## Arguments
 
-- data:
+- dt:
 
-  A data.frame or data.table containing the dataset to analyze.
+  A data.frame or data.table.
 
-- by:
+- module:
 
-  Optional. A character vector of column names specifying grouping
-  variables. If `NULL`, missingness is computed for the full dataset.
+  Optional character scalar (e.g. `"contract"`) added as a `module`
+  column to the result for downstream `rbindlist`.
+
+- group_cols:
+
+  Character vector of column names to use as grouping variables. Glob
+  patterns (e.g. `"country_*"`) are resolved against the actual column
+  names in `dt`. When `NULL` (the default), missingness is computed for
+  each variable across the whole dataset with no grouping, returning one
+  row per variable.
 
 ## Value
 
-A data.table in long format with columns:
-
-- `by`:
-
-  (if provided) Grouping variables.
-
-- `variable`:
-
-  The variable name.
-
-- `n_missing`:
-
-  Number of missing values.
-
-- `pct_missing`:
-
-  Percentage of missingness within group or overall.
-
-## Details
-
-When `by = NULL`, the function returns one row per variable with the
-total number of missing values and the percent missing out of all rows.
-When `by` is provided, missingness is computed within each group, and
-the percent missing is calculated relative to the group size.
-
-## Examples
-
-``` r
-if (FALSE) { # \dontrun{
-compute_missingness(df)                # overall missingness
-compute_missingness(df, by = "contract_type_code") # missingness by contract type
-} # }
-```
+When `group_cols = NULL`: a data.table with columns `target_var`,
+`n_missing`, `N`, `pct_missing`. Otherwise: a data.table with columns
+`group_var`, `group_val`, `target_var`, `n_missing`, `N`, `pct_missing`,
+and (if `module` is supplied) `module`.

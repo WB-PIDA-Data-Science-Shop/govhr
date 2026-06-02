@@ -37,8 +37,6 @@
   : Compute Fast Summary Statistics by Group
 - [`compute_hrmreport_stats()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_hrmreport_stats.md)
   : Compute Core HRMIS Analytical Tables
-- [`compute_missingness()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_missingness.md)
-  : Compute Missingness Counts and Percentages
 - [`compute_qualitycontrol()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_qualitycontrol.md)
   : Compute Comprehensive Quality Control Checks for Harmonized HRMIS
   Data

@@ -70,7 +70,9 @@ A named list:
 
 - `missingness`:
 
-  Long-format data.table of missingness by group.
+  Long-format data.table of missingness by group, with columns
+  `group_var`, `group_label`, `group_val`, `target_var`, `target_label`,
+  `n_missing`, `N`, and `pct_missing`.
 
 - `volatility`:
 
