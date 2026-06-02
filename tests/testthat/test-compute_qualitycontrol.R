@@ -125,21 +125,34 @@ test_that("validation output has contract and personnel elements", {
   expect_named(qc$validation, c("contract", "personnel"))
 })
 
+test_that("each validation element has report and violations", {
+  qc <- run_qc()
+  expect_named(qc$validation$contract, c("report", "violations"))
+  expect_named(qc$validation$personnel, c("report", "violations"))
+})
+
+test_that("violations is a named list keyed by rule label", {
+  qc <- run_qc()
+  viol <- qc$validation$contract$violations
+  expect_type(viol, "list")
+  expect_true(all(names(viol) %in% qc$validation$contract$report$Rule))
+})
+
 test_that("validation contract report has expected columns", {
   qc <- run_qc()
   expect_true(all(c("Rule", "Description", "Total Records",
                     "Passes", "Pass Rate", "Fails", "Errors") %in%
-                    names(qc$validation$contract)))
+                    names(qc$validation$contract$report)))
 })
 
 test_that("all built-in contract rules appear in the validation report", {
   qc <- run_qc()
-  expect_equal(nrow(qc$validation$contract), nrow(govhr::contract_rules))
+  expect_equal(nrow(qc$validation$contract$report), nrow(govhr::contract_rules))
 })
 
 test_that("all built-in personnel rules appear in the validation report", {
   qc <- run_qc()
-  expect_equal(nrow(qc$validation$personnel), nrow(govhr::personnel_rules))
+  expect_equal(nrow(qc$validation$personnel$report), nrow(govhr::personnel_rules))
 })
 
 test_that("custom_rules$contract are appended and appear in the report", {
@@ -154,9 +167,9 @@ test_that("custom_rules$contract are appended and appear in the report", {
   et <- make_est()
   qc <- compute_qualitycontrol(ct, pt, et,
                                custom_rules = list(contract = extra))
-  expect_equal(nrow(qc$validation$contract),
+  expect_equal(nrow(qc$validation$contract$report),
                nrow(govhr::contract_rules) + 1L)
-  expect_true("Positive gross salary" %in% qc$validation$contract$Rule)
+  expect_true("Positive gross salary" %in% qc$validation$contract$report$Rule)
 })
 
 test_that("custom_rules$personnel are appended and appear in the report", {
@@ -171,7 +184,7 @@ test_that("custom_rules$personnel are appended and appear in the report", {
   et <- make_est()
   qc <- compute_qualitycontrol(ct, pt, et,
                                custom_rules = list(personnel = extra))
-  expect_equal(nrow(qc$validation$personnel),
+  expect_equal(nrow(qc$validation$personnel$report),
                nrow(govhr::personnel_rules) + 1L)
 })
 
@@ -183,18 +196,26 @@ test_that("validation detects failures (negative salary)", {
   et <- make_est()
   qc <- compute_qualitycontrol(ct, pt, et)
   # at least one rule should report Fails > 0
-  expect_true(any(qc$validation$contract$Fails > 0))
+  expect_true(any(qc$validation$contract$report$Fails > 0))
 })
 
 # -----------------------------------------------------------------------
 # MISSINGNESS
 # -----------------------------------------------------------------------
-test_that("missingness is a data.table with expected columns", {
+test_that("missingness is a list with $overall and $group data.tables", {
   qc <- run_qc()
-  expect_s3_class(qc$missingness, "data.table")
-  expect_true(all(c("group_var", "group_val", "target_var",
+  expect_type(qc$missingness, "list")
+  expect_true(all(c("overall", "group") %in% names(qc$missingness)))
+  ## $overall: one row per target_var, no grouping
+  expect_s3_class(qc$missingness$overall, "data.table")
+  expect_true(all(c("target_var", "n_missing", "N", "pct_missing") %in%
+                    names(qc$missingness$overall)))
+  ## $group: grouped long-format with labels
+  expect_s3_class(qc$missingness$group, "data.table")
+  expect_true(all(c("group_var", "group_label", "group_val",
+                    "target_var", "target_label",
                     "n_missing", "N", "pct_missing") %in%
-                    names(qc$missingness)))
+                    names(qc$missingness$group)))
 })
 
 test_that("missingness handles missing optional grouping columns gracefully", {
@@ -206,15 +227,16 @@ test_that("missingness handles missing optional grouping columns gracefully", {
   expect_no_error(compute_qualitycontrol(ct, pt, et))
 })
 
-test_that("missingness returns empty data.table when no grouping cols present", {
-  ct <- make_contract()[, .(contract_id, personnel_id, est_id, ref_date,
-                             base_salary_lcu, gross_salary_lcu,
-                             net_salary_lcu, allowance_lcu, whours,
-                             start_date, end_date, country_code)]
-  pt <- make_personnel(ct)[, .(personnel_id, ref_date, status, country_code)]
-  et <- make_est()
-  qc <- compute_qualitycontrol(ct, pt, et)
-  expect_equal(nrow(qc$missingness), 0L)
+test_that("missingness covers all three modules and uses non-numeric cols as groups", {
+  qc <- run_qc()
+  # contract and personnel have numeric cols so both modules must appear in $group
+  expect_true(all(c("contract", "personnel") %in% qc$missingness$group$module))
+  # establishment fixture has no numeric cols → skipped (empty), that is fine
+  expect_true("n_missing"   %in% names(qc$missingness$group))
+  expect_true("pct_missing" %in% names(qc$missingness$group))
+  expect_true("module"      %in% names(qc$missingness$group))
+  # $overall covers both modules too
+  expect_true(all(c("contract", "personnel") %in% qc$missingness$overall$module))
 })
 
 # -----------------------------------------------------------------------

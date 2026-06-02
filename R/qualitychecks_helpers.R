@@ -148,96 +148,128 @@ compare_names_qc <- function(x, y,
 #   pointblank::specially(agent, fn = ~ TRUE, label = label)
 # }
 
-#' Compute Missingness Counts and Percentages
-#'
-#' Computes the number and percentage of missing values for each variable
-#' in a dataset. The function supports both overall missingness (when
-#' \code{by = NULL}) and grouped missingness (when grouping variables are
-#' supplied through the \code{by} argument).
-#'
-#' When \code{by = NULL}, the function returns one row per variable with the
-#' total number of missing values and the percent missing out of all rows.
-#' When \code{by} is provided, missingness is computed within each group,
-#' and the percent missing is calculated relative to the group size.
-#'
-#' @param data A data.frame or data.table containing the dataset to analyze.
-#' @param by Optional. A character vector of column names specifying grouping
-#'   variables. If \code{NULL}, missingness is computed for the full dataset.
-#'
-#' @return A data.table in long format with columns:
-#'   \describe{
-#'     \item{\code{by}}{(if provided) Grouping variables.}
-#'     \item{\code{variable}}{The variable name.}
-#'     \item{\code{n_missing}}{Number of missing values.}
-#'     \item{\code{pct_missing}}{Percentage of missingness within group or overall.}
-#'   }
-#'
-#' @examples
-#' \dontrun{
-#' compute_missingness(df)                # overall missingness
-#' compute_missingness(df, by = "contract_type_code") # missingness by contract type
-#' }
-#'
-#' @importFrom data.table as.data.table melt merge.data.table
-#' @export
-compute_missingness <- function(data,
-                                by = NULL) {
+# #' A simple function to compute missingness indicators
+# #' 
+# #' @param x a vector of numeric values
+# #' 
+# #' @return a list with three elements, the number of observations,
+# #' the number of missing observations and the missing rate
 
-  ## convert to data.table
-  dt <- as.data.table(data)
+# compute_missingness <- function(x) {
+#   ## Standalone worker: N, n_missing, pct_missing for a single vector.
+#   ## Compute is.na once for efficiency.
+#   na   <- is.na(x)
+#   N    <- length(x)
+#   list(N = N, n_missing = sum(na), pct_missing = sum(na) / N)
+# }
 
-  ## if by = NULL, we treat it as having no groups
-  if (is.null(by)) {
+#' Compute Missingness for All Variables by All Non-Numeric Group Variables
+#'
+#' For a given data.table, identifies non-numeric columns as group variables
+#' and numeric columns as target variables, then computes \code{n_missing},
+#' \code{N}, and \code{pct_missing} for every target × group-value combination
+#' using a fast double-melt + join approach.
+#'
+#' @param dt A data.frame or data.table.
+#' @param module Optional character scalar (e.g. \code{"contract"}) added as a
+#'   \code{module} column to the result for downstream \code{rbindlist}.
+#' @param group_cols Character vector of column names to use as grouping
+#'   variables. Glob patterns (e.g. \code{"country_*"}) are resolved against
+#'   the actual column names in \code{dt}. When \code{NULL} (the default),
+#'   missingness is computed for each variable across the whole dataset with no
+#'   grouping, returning one row per variable.
+#'
+#' @return When \code{group_cols = NULL}: a data.table with columns
+#'   \code{target_var}, \code{n_missing}, \code{N}, \code{pct_missing}.
+#'   Otherwise: a data.table with columns \code{group_var}, \code{group_val},
+#'   \code{target_var}, \code{n_missing}, \code{N}, \code{pct_missing}, and
+#'   (if \code{module} is supplied) \code{module}.
+#'
+#' @keywords internal
+compute_missingness <- function(dt, 
+                                module = NULL,
+                                group_cols = NULL) {
 
-    ## overall missingness
-    missing_dt <- dt[, lapply(.SD, function(x) sum(is.na(x)))]
+  dt <- data.table::as.data.table(dt)
 
-    ## reshape to long
-    missing_dt <- melt(
-      missing_dt,
-      measure.vars = names(missing_dt),
-      variable.name = "variable",
-      value.name = "n_missing"
+  ## NULL group_cols → overall (whole-dataset) missingness per variable
+  if (is.null(group_cols)) {
+    all_cols <- names(dt)
+    result <- data.table::data.table(
+      target_var  = all_cols,
+      n_missing   = vapply(dt, function(x) sum(is.na(x)), integer(1)),
+      N           = nrow(dt),
+      pct_missing = vapply(dt, function(x) mean(is.na(x)), numeric(1))
     )
-
-    ## add percent missing
-    missing_dt[, pct_missing := n_missing / nrow(dt)]
-
-    ## just add the size of the dataset
-    missing_dt[, N := nrow(dt)]
-
-    return(missing_dt[])
-
-  } else {
-
-    ## grouped missingness
-    missing_dt <- dt[, lapply(.SD, function(x) sum(is.na(x))),
-                     .SDcols = setdiff(names(dt), by),
-                     by = by]
-
-    ## melt long
-    missing_dt <- melt(
-      missing_dt,
-      id.vars = by,
-      variable.name = "variable",
-      value.name = "n_missing"
-    )
-
-    ## group-specific denominator
-    totals_dt <- dt[, .N, by = by]
-
-    ## merge totals
-    missing_dt <- data.table::merge.data.table(missing_dt, totals_dt, by = by, all.x = TRUE)
-
-    ## compute group-wise percent missing
-    missing_dt[, pct_missing := n_missing / N]
-
-    # ## drop the total count column
-    # missing_dt[, N := NULL]
-
-    return(missing_dt[])
+    if (!is.null(module)) result[, module := module]
+    return(result[])
   }
+
+  ## row index for joining — added before capturing column names so we can
+  ## explicitly exclude it from both group and target measure.vars
+  dt[, .row_id := .I]
+
+  ## resolve group_cols to those actually present; exclude .row_id
+  group_cols <- intersect(group_cols, setdiff(names(dt), ".row_id"))
+  all_cols   <- setdiff(names(dt), ".row_id")
+
+  if (length(group_cols) == 0) {
+    dt[, .row_id := NULL]
+    return(data.table::data.table())
+  }
+
+  ## pre-convert Date/POSIXt group columns to character so melt doesn't
+  ## fall back to their integer representation when coercing to a common type
+  date_group_cols <- group_cols[vapply(dt[, group_cols, with = FALSE],
+                                       function(x) inherits(x, c("Date", "POSIXct", "POSIXlt")),
+                                       logical(1))]
+  if (length(date_group_cols) > 0) {
+    tmp <- data.table::copy(dt)
+    tmp[, (date_group_cols) := lapply(.SD, as.character), .SDcols = date_group_cols]
+  } else {
+    tmp <- dt
+  }
+
+  ## melt group cols → long: one row per (row_id, group_var, group_val)
+  grp_long <- suppressWarnings(
+    data.table::melt(
+      tmp, id.vars = ".row_id", measure.vars = group_cols,
+      variable.name = "group_var", value.name = "group_val",
+      variable.factor = FALSE
+    )
+  )
+  grp_long[, group_val := as.character(group_val)]
+
+  ## melt ALL non-.row_id columns as targets
+  ## suppressWarnings: mixed-type coercion to character is intentional;
+  ## val is only ever passed to is.na()
+  target_long <- suppressWarnings(
+    data.table::melt(
+      dt, id.vars = ".row_id", measure.vars = all_cols,
+      variable.name = "target_var", value.name = "val",
+      variable.factor = FALSE
+    )
+  )
+
+  ## cross-join on row_id, exclude self-pairs (group_var == target_var),
+  ## then aggregate
+  result <- grp_long[
+    target_long, on = ".row_id", allow.cartesian = TRUE
+  ][group_var != target_var,
+    .(n_missing = sum(is.na(val)), N = .N, pct_missing = mean(is.na(val))),
+    by = .(group_var, group_val, target_var)]
+
+  ## clean up row index from the original table
+  dt[, .row_id := NULL]
+
+  if (nrow(result) == 0) return(data.table::data.table())
+  if (!is.null(module)) result[, module := module]
+
+  result
 }
+
+
+
 
 #' Compare Dataset Variable Names Against a Dictionary
 #'
@@ -386,3 +418,4 @@ check_salary <- function(dt,
 
   return(out)
 }
+  

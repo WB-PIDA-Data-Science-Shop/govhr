@@ -9,45 +9,42 @@ validate_data(data, input_rules, output_format = c("report", "object"))
 \arguments{
 \item{data}{A data.frame or data.table.}
 
-\item{input_rules}{A set of rules, defined in a dataframe.}
+\item{input_rules}{A data.frame of rules with columns \code{rule},
+\code{name}, \code{description}, \code{label}.}
 
-\item{output_format}{A string specifying the output format: "report" for a summary report or "object" for the raw validation results.}
+\item{output_format}{Deprecated — kept for backward compatibility but
+ignored. The function now always returns \code{list(report, violations)}.}
 }
 \value{
-A data.frame containing the audit report with columns:
-  \item{Rule}{Short label for the rule (from input_rules$label)}
-  \item{Description}{Detailed explanation of what the rule checks}
-  \item{Total Records}{Number of records evaluated}
-  \item{Passes}{Number of records that passed the rule}
-  \item{Pass Rate}{Percentage of records passing (0-100)}
-  \item{Fails}{Number of records that failed the rule}
-  \item{Errors}{Logical indicating whether the rule threw an error}
+A named list:
+\describe{
+  \item{\code{report}}{data.table with columns \code{Rule},
+    \code{Description}, \code{Total Records}, \code{Passes},
+    \code{Pass Rate}, \code{Fails}, \code{Errors}.}
+  \item{\code{violations}}{Named list of data.tables, one per rule label.
+    Each element contains the rows of \code{data} that failed that rule.
+    Rules with zero failures return a zero-row data.table.}
+}
 }
 \description{
 Validates data against a set of predefined rules.
-Returns either a summary report or the full validation object.
+Always returns a named list with two elements: \code{report} (an audit
+summary data.table) and \code{violations} (a named list of data.tables,
+one per rule, containing only the rows that failed that rule). This
+structure supports both tabular display and row-level drill-down in Shiny.
 }
 \details{
 Validate Data Against Quality Rules
-
-
-The function validates data against user-defined rules using the validate package.
 }
 \examples{
-# Validate contract data
-audit_report <- validate_data(
-  data = govhr::bra_hrmis_contract,
+result <- validate_data(
+  data       = govhr::bra_hrmis_contract,
   input_rules = govhr::contract_rules
 )
-
-# View the audit report
-print(audit_report)
-
-# Check rules with failures
-audit_report[audit_report$Fails > 0, ]
+result$report
+result$violations[["salary_non_negative"]]
 
 }
 \seealso{
-\code{\link{personnel_rules}} for personnel validation rules
-\code{\link{contract_rules}} for contract validation rules
+\code{\link{personnel_rules}}, \code{\link{contract_rules}}
 }

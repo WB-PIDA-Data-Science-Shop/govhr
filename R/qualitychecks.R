@@ -46,7 +46,10 @@
 #'   \item{\code{orphans}}{Orphan ID diagnostics.}
 #'   \item{\code{validation}}{Named list: \code{contract} and \code{personnel}
 #'     audit reports from \code{validate_data()}.}
-#'   \item{\code{missingness}}{Long-format data.table of missingness by group.}
+#'   \item{\code{missingness}}{Long-format data.table of missingness by group,
+#'     with columns \code{group_var}, \code{group_label}, \code{group_val},
+#'     \code{target_var}, \code{target_label}, \code{n_missing}, \code{N},
+#'     and \code{pct_missing}.}
 #'   \item{\code{volatility}}{Named list: \code{contract} and \code{personnel}
 #'     flat data.tables from \code{flatten_volatility()}.}
 #'   \item{\code{temporal_coverage}}{Named list: \code{contract},
@@ -79,33 +82,35 @@ compute_qualitycontrol <- function(contract_dt,
                                                        personnel = NULL)) {
 
   # Ensure all modules are data.tables
-  contract_dt <- as.data.table(contract_dt)
+  contract_dt  <- as.data.table(contract_dt)
   personnel_dt <- as.data.table(personnel_dt)
-  est_dt <- as.data.table(est_dt)
+  est_dt       <- as.data.table(est_dt)
 
-  # Structure and dictionary checks
+  ## Hoist dictionary once — reused by structure checks, missingness labels, etc.
+  dict_dt <- unique(data.table::as.data.table(govhr::dictionary)[
+    , .(variable_id, variable_name, module)
+  ])
 
-  dict_list <- split(
-    govhr::dictionary,
-    govhr::dictionary$module
+  ## Unified column-presence helper (replaces .has() and .has_p() closures)
+  has_cols <- function(data, cols) all(cols %in% names(data))
+
+  # -----------------------------------
+  # 1. STRUCTURE CHECKS
+  # -----------------------------------
+  module_data <- list(
+    Contract      = contract_dt,
+    Establishment = est_dt,
+    Personnel     = personnel_dt
   )
-  
 
-  structure_checks <-
-    mapply(FUN = function(data,
-                          dict_names){
-      
-      
-      
-      structure_checks <- compare_to_dictionary(data = data,
-                                                dict_names = dict_names$variable_id,
-                                                output_format = "badges")
 
-      return(structure_checks)
-
-    }, data = list(contract_dt, est_dt, personnel_dt),
-       dict_names = dict_list,
-       SIMPLIFY = FALSE)
+  structure_checks <- lapply(names(module_data), function(m) {
+    compare_to_dictionary(
+      data         = module_data[[m]],
+      dict_names   = dict_dt[module == m, variable_id],
+      output_format = "badges"
+    )
+  })
 
 
 
@@ -145,53 +150,77 @@ compute_qualitycontrol <- function(contract_dt,
   }
 
   validate_obj <- list(
-    contract  = validate_data(contract_dt,  input_rules = contract_rules_merged,  output_format = "report"),
-    personnel = validate_data(personnel_dt, input_rules = personnel_rules_merged, output_format = "report")
+    contract  = validate_data(contract_dt,  input_rules = contract_rules_merged),
+    personnel = validate_data(personnel_dt, input_rules = personnel_rules_merged)
   )
 
   # -----------------------------------
   # 4. MISSINGNESS
-  # Skip grouping columns that are absent from the data (Shiny-safe)
+  # compute_missingness() for each module, then join labels.
   # -----------------------------------
-  miss_candidates <- c("contract_type_code", "contract_type_native",
-                       "occupation_isconame", "occupation_native")
-  cols <- intersect(miss_candidates, names(contract_dt))
 
-  if (length(cols) > 0) {
-    missingness <-
-      rbindlist(lapply(cols, \(group_col) {
-        num_cols <- names(contract_dt)[vapply(contract_dt, is.numeric, logical(1))]
-        mv <- setdiff(num_cols, group_col)
-        melt(
-          contract_dt,
-          id.vars       = group_col,
-          measure.vars  = mv,
-          variable.name = "target_var",
-          value.name    = "val",
-          variable.factor = FALSE
-        )[
-          , .(n_missing = sum(is.na(val)), N = .N, pct_missing = mean(is.na(val))),
-          by = c(group_col, "target_var")
-        ][, group_var := group_col
-        ][, setnames(.SD, group_col, "group_val")
-        ][, group_val := as.character(group_val)]
-      }))
+  ### compute overall missingness first
+  overall_dt <- 
+    list(compute_missingness(contract_dt, module = "contract"),
+         compute_missingness(personnel_dt, module = "personnel")) |>
+    rbindlist()
+
+  contract_grps <- c("est_id", "ref_date", "adm1_name", "paygrade", "seniority", 
+                     "occupation_native", "occupation_english", "occupation_isconame",
+                     "contract_type_native", "contract_type_code")
+  personnel_grps <- c("ref_date", "gender", "educat7", "tribe", "race", "status")
+
+
+
+  miss_list <- list(
+    compute_missingness(contract_dt,  
+                        module = "contract",
+                        group_cols = contract_grps),
+    compute_missingness(personnel_dt, 
+                        module = "personnel",
+                        group_cols = personnel_grps)
+  )
+  miss_list <- Filter(function(x) nrow(x) > 0, miss_list)
+
+  if (length(miss_list) > 0) {
+    missingness <- data.table::rbindlist(miss_list, fill = TRUE)
+
+    ## join dictionary labels for group_var and target_var (reuse hoisted dict_dt)
+    grp_lookup <- data.table::setnames(
+      unique(dict_dt[, .(variable_id, variable_name)]), c("group_var",  "group_label")
+    )
+    tgt_lookup <- data.table::setnames(
+      unique(dict_dt[, .(variable_id, variable_name)]), c("target_var", "target_label")
+    )
+
+    missingness <- grp_lookup[missingness, on = "group_var"]
+    missingness <- tgt_lookup[missingness, on = "target_var"]
+
+    keep_cols <- c("module", "group_var", "group_label", "group_val",
+                   "target_var", "target_label", "n_missing", "N", "pct_missing")
+    data.table::setcolorder(missingness, intersect(keep_cols, names(missingness)))
+
   } else {
     missingness <- data.table::data.table()
   }
 
-  
+  ## join target labels onto overall_dt (tgt_lookup built above; ensure it exists)
+  if (!exists("tgt_lookup")) {
+    tgt_lookup <- data.table::setnames(
+      unique(dict_dt[, .(variable_id, variable_name)]), c("target_var", "target_label")
+    )
+  }
+  overall_dt <- tgt_lookup[overall_dt, on = "target_var"]
+  missingness <- list(overall = overall_dt,
+                      group   = missingness)
+
   # -----------------------------------
   # 5. VOLATILITY
   # Groups whose column is absent are silently dropped (Shiny-safe)
   # -----------------------------------
-  .has <- function(cols_needed) all(cols_needed %in% names(contract_dt))
   .filter_groups <- function(grp_list, data) {
     Filter(\(g) all(g %in% names(data)), grp_list)
   }
-
-  gaps <- length(unique(contract_dt$ref_date))
-  window_size <- max(2, floor(gaps / 2))
 
   ## contract level
   whours_groups <- .filter_groups(list(
@@ -223,10 +252,23 @@ compute_qualitycontrol <- function(contract_dt,
     names(contract_dt)
   )
 
+  ## hoist column lookups out of nested lapply iterations
+  occ_cols_present <- Filter(
+    \(x) x %in% names(contract_dt),
+    c(occ_native   = "occupation_native",
+      occ_isconame = "occupation_isconame",
+      occ_iscocode = "occupation_iscocode")
+  )
+  ctype_cols_present <- Filter(
+    \(x) x %in% names(contract_dt),
+    c(ctype_native = "contract_type_native",
+      ctype_code   = "contract_type_code")
+  )
+
   contract_volatility <- list(
 
     ## --- salary volatility by contract ---
-    salary_vol = if (length(salary_cols) > 0 && .has("contract_id")) {
+    salary_vol = if (length(salary_cols) > 0 && has_cols(contract_dt, "contract_id")) {
       compute_volatility(
         data = contract_dt, col = salary_cols,
         agg_fn = "sum", vol_fn = "pct_change",
@@ -235,7 +277,7 @@ compute_qualitycontrol <- function(contract_dt,
     } else NULL,
 
     ## --- contract count volatility by establishment ---
-    ctrcount_vol = if (.has(c("contract_id", "est_id"))) {
+    ctrcount_vol = if (has_cols(contract_dt, c("contract_id", "est_id"))) {
       compute_volatility(
         data = contract_dt,
         col  = "contract_id", agg_fn = "count_unique", vol_fn = "pct_change",
@@ -244,7 +286,7 @@ compute_qualitycontrol <- function(contract_dt,
     } else NULL,
 
     ## --- hours worked volatility by various groups ---
-    workhours_vol = if (.has("whours")) lapply(whours_groups, \(grp) {
+    workhours_vol = if (has_cols(contract_dt, "whours")) lapply(whours_groups, \(grp) {
       compute_volatility(
         data = contract_dt, col = "whours",
         agg_fn = "sum", vol_fn = "pct_change",
@@ -254,53 +296,36 @@ compute_qualitycontrol <- function(contract_dt,
 
     ## --- occupation diversity (count of unique occupations) by group ---
     occ_diversity_vol = lapply(occ_count_groups, \(grp) {
-      occ_cols_present <- Filter(
-        \(x) x %in% names(contract_dt),
-        c(occ_native   = "occupation_native",
-          occ_isconame = "occupation_isconame",
-          occ_iscocode = "occupation_iscocode")
-      )
-      lapply(
-        occ_cols_present,
-        \(occ_col) {
-          compute_volatility(
-            data = contract_dt, col = occ_col,
-            agg_fn = "count_unique", vol_fn = "pct_change",
-            time = "ref_date", groups = grp, window_size = NULL
-          )
-        }
-      )
+      lapply(occ_cols_present, \(occ_col) {
+        compute_volatility(
+          data = contract_dt, col = occ_col,
+          agg_fn = "count_unique", vol_fn = "pct_change",
+          time = "ref_date", groups = grp, window_size = NULL
+        )
+      })
     }),
 
     ## --- contract type diversity (count of unique types) by group ---
     ctype_diversity_vol = lapply(ctype_count_groups, \(grp) {
-      ctype_cols_present <- Filter(
-        \(x) x %in% names(contract_dt),
-        c(ctype_native = "contract_type_native",
-          ctype_code   = "contract_type_code")
-      )
-      lapply(
-        ctype_cols_present,
-        \(ct_col) {
-          compute_volatility(
-            data = contract_dt, col = ct_col,
-            agg_fn = "count_unique", vol_fn = "pct_change",
-            time = "ref_date", groups = grp, window_size = NULL
-          )
-        }
-      )
+      lapply(ctype_cols_present, \(ct_col) {
+        compute_volatility(
+          data = contract_dt, col = ct_col,
+          agg_fn = "count_unique", vol_fn = "pct_change",
+          time = "ref_date", groups = grp, window_size = NULL
+        )
+      })
     })
   )
 
   ## --- personnel volatility ---
   ## Bring est_id from contract_dt into personnel_dt via (personnel_id, ref_date)
-  .has_p <- function(cols_needed) all(cols_needed %in% names(personnel_dt))
-
-  if (.has(c("personnel_id", "ref_date", "est_id"))) {
+  ## Use merge() to avoid mutating personnel_dt in place via setkeyv
+  if (has_cols(contract_dt, c("personnel_id", "ref_date", "est_id"))) {
     contract_keys <- unique(contract_dt[, .(personnel_id, ref_date, est_id)])
-    data.table::setkeyv(contract_keys, c("personnel_id", "ref_date"))
-    data.table::setkeyv(personnel_dt,  c("personnel_id", "ref_date"))
-    personnel_contract_dt <- contract_keys[personnel_dt]
+    personnel_contract_dt <- merge(
+      personnel_dt, contract_keys,
+      by = c("personnel_id", "ref_date"), all.x = TRUE
+    )
   } else {
     personnel_contract_dt <- data.table::copy(personnel_dt)
   }
@@ -308,7 +333,7 @@ compute_qualitycontrol <- function(contract_dt,
   personnel_volatility <- list(
 
     ## headcount (unique personnel) by establishment
-    headcount_vol = if ("est_id" %in% names(personnel_contract_dt)) {
+    headcount_vol = if (has_cols(personnel_contract_dt, "est_id")) {
       compute_volatility(
         data = personnel_contract_dt,
         col  = "personnel_id", agg_fn = "count_unique", vol_fn = "pct_change",
@@ -317,7 +342,7 @@ compute_qualitycontrol <- function(contract_dt,
     } else NULL,
 
     ## headcount by gender (compositional drift over time)
-    headcount_by_gender = if (.has_p("gender")) {
+    headcount_by_gender = if (has_cols(personnel_dt, "gender")) {
       compute_volatility(
         data = personnel_contract_dt,
         col  = "personnel_id", agg_fn = "count_unique", vol_fn = "pct_change",
@@ -326,7 +351,7 @@ compute_qualitycontrol <- function(contract_dt,
     } else NULL,
 
     ## headcount by education level (compositional drift over time)
-    headcount_by_educat = if (.has_p("educat7")) {
+    headcount_by_educat = if (has_cols(personnel_dt, "educat7")) {
       compute_volatility(
         data = personnel_contract_dt,
         col  = "personnel_id", agg_fn = "count_unique", vol_fn = "pct_change",
@@ -335,7 +360,7 @@ compute_qualitycontrol <- function(contract_dt,
     } else NULL,
 
     ## gender composition within each establishment over time
-    gender_by_est = if ("est_id" %in% names(personnel_contract_dt) && .has_p("gender")) {
+    gender_by_est = if (has_cols(personnel_contract_dt, "est_id") && has_cols(personnel_dt, "gender")) {
       compute_volatility(
         data = personnel_contract_dt,
         col  = "personnel_id", agg_fn = "count_unique", vol_fn = "pct_change",
@@ -344,7 +369,7 @@ compute_qualitycontrol <- function(contract_dt,
     } else NULL,
 
     ## education composition within each establishment over time
-    educat_by_est = if ("est_id" %in% names(personnel_contract_dt) && .has_p("educat7")) {
+    educat_by_est = if (has_cols(personnel_contract_dt, "est_id") && has_cols(personnel_dt, "educat7")) {
       compute_volatility(
         data = personnel_contract_dt,
         col  = "personnel_id", agg_fn = "count_unique", vol_fn = "pct_change",
@@ -360,15 +385,15 @@ compute_qualitycontrol <- function(contract_dt,
   # 6. TEMPORAL COVERAGE
   # Row counts per ref_date snapshot for each module
   # -----------------------------------
-  temporal_coverage <- list(
-    contract = contract_dt[, .(n_obs = .N), by = ref_date][order(ref_date)]
-  )
+  temporal_coverage <- list()
 
-  if ("ref_date" %in% names(personnel_dt)) {
+  if (has_cols(contract_dt, "ref_date")) {
+    temporal_coverage$contract <- contract_dt[, .(n_obs = .N), by = ref_date][order(ref_date)]
+  }
+  if (has_cols(personnel_dt, "ref_date")) {
     temporal_coverage$personnel <- personnel_dt[, .(n_obs = .N), by = ref_date][order(ref_date)]
   }
-
-  if ("ref_date" %in% names(est_dt)) {
+  if (has_cols(est_dt, "ref_date")) {
     temporal_coverage$establishment <- est_dt[, .(n_obs = .N), by = ref_date][order(ref_date)]
   }
 
@@ -376,12 +401,16 @@ compute_qualitycontrol <- function(contract_dt,
   # 7. METADATA
   # Lightweight summary: date range, row counts, column counts per module
   # -----------------------------------
-  all_dates <- contract_dt$ref_date
-  if ("ref_date" %in% names(personnel_dt)) all_dates <- c(all_dates, personnel_dt$ref_date)
-  if ("ref_date" %in% names(est_dt))       all_dates <- c(all_dates, est_dt$ref_date)
+  ## compute range per module then take the overall range — avoids copying full vectors
+  date_ranges <- Filter(Negate(is.null), list(
+    if (has_cols(contract_dt,  "ref_date")) range(contract_dt$ref_date,  na.rm = TRUE),
+    if (has_cols(personnel_dt, "ref_date")) range(personnel_dt$ref_date, na.rm = TRUE),
+    if (has_cols(est_dt,       "ref_date")) range(est_dt$ref_date,       na.rm = TRUE)
+  ))
 
   metadata <- list(
-    date_range = range(all_dates, na.rm = TRUE),
+    date_range = if (length(date_ranges) > 0) range(do.call(c, date_ranges), na.rm = TRUE) else as.Date(NA),
+
     n_obs = list(
       contract      = nrow(contract_dt),
       personnel     = nrow(personnel_dt),
