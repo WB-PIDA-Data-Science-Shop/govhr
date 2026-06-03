@@ -1,7 +1,7 @@
 # Changelog
 
-## govhr 0.1.4
+## govhr 0.2.0
 
-## govhr 0.1.2
-
-- Initial CRAN submission.
+This release: - Updates the dictionary, creating a novel convention for
+the establishment module. For example, modules are now classified
+according to their level, such as `adm1` for ministries.
