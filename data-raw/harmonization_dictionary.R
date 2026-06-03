@@ -1,6 +1,7 @@
 ## code to prepare `dictionaryionary` dataset goes here
 
 library(readxl)
+library(dplyr)
 
 # read in the sheet from file
 path_chr <- "data-raw/hrmis_data_dictionary.xlsx"
