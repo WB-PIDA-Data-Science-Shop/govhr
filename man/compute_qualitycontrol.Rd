@@ -34,7 +34,10 @@ A named list:
   \item{\code{orphans}}{Orphan ID diagnostics.}
   \item{\code{validation}}{Named list: \code{contract} and \code{personnel}
     audit reports from \code{validate_data()}.}
-  \item{\code{missingness}}{Long-format data.table of missingness by group.}
+  \item{\code{missingness}}{Long-format data.table of missingness by group,
+    with columns \code{group_var}, \code{group_label}, \code{group_val},
+    \code{target_var}, \code{target_label}, \code{n_missing}, \code{N},
+    and \code{pct_missing}.}
   \item{\code{volatility}}{Named list: \code{contract} and \code{personnel}
     flat data.tables from \code{flatten_volatility()}.}
   \item{\code{temporal_coverage}}{Named list: \code{contract},

@@ -4,89 +4,84 @@
 #'
 #' @description
 #' Validates data against a set of predefined rules.
-#' Returns either a summary report or the full validation object.
+#' Always returns a named list with two elements: \code{report} (an audit
+#' summary data.table) and \code{violations} (a named list of data.tables,
+#' one per rule, containing only the rows that failed that rule). This
+#' structure supports both tabular display and row-level drill-down in Shiny.
 #'
 #' @param data A data.frame or data.table.
-#' @param input_rules A set of rules, defined in a dataframe.
-#' @param output_format A string specifying the output format: "report" for a summary report or "object" for the raw validation results.
+#' @param input_rules A data.frame of rules with columns \code{rule},
+#'   \code{name}, \code{description}, \code{label}.
+#' @param output_format Deprecated — kept for backward compatibility but
+#'   ignored. The function now always returns \code{list(report, violations)}.
 #'
-#' @return A data.frame containing the audit report with columns:
-#'   \item{Rule}{Short label for the rule (from input_rules$label)}
-#'   \item{Description}{Detailed explanation of what the rule checks}
-#'   \item{Total Records}{Number of records evaluated}
-#'   \item{Passes}{Number of records that passed the rule}
-#'   \item{Pass Rate}{Percentage of records passing (0-100)}
-#'   \item{Fails}{Number of records that failed the rule}
-#'   \item{Errors}{Logical indicating whether the rule threw an error}
-#'
-#' @details
-#' The function validates data against user-defined rules using the validate package.
+#' @return A named list:
+#' \describe{
+#'   \item{\code{report}}{data.table with columns \code{Rule},
+#'     \code{Description}, \code{Total Records}, \code{Passes},
+#'     \code{Pass Rate}, \code{Fails}, \code{Errors}.}
+#'   \item{\code{violations}}{Named list of data.tables, one per rule label.
+#'     Each element contains the rows of \code{data} that failed that rule.
+#'     Rules with zero failures return a zero-row data.table.}
+#' }
 #'
 #' @examples
-#' # Validate contract data
-#' audit_report <- validate_data(
-#'   data = govhr::bra_hrmis_contract,
+#' result <- validate_data(
+#'   data       = govhr::bra_hrmis_contract,
 #'   input_rules = govhr::contract_rules
 #' )
-#' 
-#' # View the audit report
-#' print(audit_report)
-#' 
-#' # Check rules with failures
-#' audit_report[audit_report$Fails > 0, ]
+#' result$report
+#' result$violations[["salary_non_negative"]]
 #'
 #' @seealso
-#' \code{\link{personnel_rules}} for personnel validation rules
-#' \code{\link{contract_rules}} for contract validation rules
+#' \code{\link{personnel_rules}}, \code{\link{contract_rules}}
 #'
-#' @importFrom validate validator confront description label summary
-#' @importFrom dplyr left_join transmute %>%
-#' @importFrom tibble tibble
+#' @importFrom validate validator confront description label summary values
+#' @importFrom data.table as.data.table
 #' @export
 validate_data <- function(data, input_rules, output_format = c("report", "object")) {
-  # Set rules
-  validation_results <- validate::validator(
-    .data = input_rules
-  )
 
-  # Step 2: Confront data with rules
-  # This evaluates each rule against the data and tracks pass/fail/error status
-  # for each record. The confrontation object stores detailed results.
-  results <- validate::confront(data, validation_results)
-  
-  # Step 3: Extract rule metadata
-  # Convert input_rules tibble to base data.frame for compatibility with
-  # validate package output format.
-  rules_meta <- as.data.frame(input_rules)
-  
-  # Step 4: Extract summary statistics
-  # summary() returns a table with columns: name, items, passes, fails, nNA, error
-  # We convert to data.frame for dplyr operations.
-  results_summary <- results |> 
-    validate::summary() |> 
-    as.data.frame()
-  
-  # Step 5: Join results with metadata and format for stakeholders
-  audit_report <- results_summary %>%
-    dplyr::left_join(rules_meta, by = "name") %>%
-    # Select and rename the columns you want stakeholders to see
-    dplyr::transmute(
-      Rule = .data[['label']],
-      Description = .data[['description']],
-      `Total Records` = .data[['items']],
-      Passes = .data[['passes']],
-      `Pass Rate` = round(.data[['passes']] / .data[['items']] * 100, 2),
-      Fails = .data[['fails']],
-      Errors = .data[['error']]
-    )
-  
-  type <- match.arg(output_format)
-  
-  output <- switch(
-    type,
-    "object" = results,
-    "report" = audit_report
-  )
+  data <- data.table::as.data.table(data)
 
-  return(output)
+  ## build validator and confront
+  validation_results <- validate::validator(.data = input_rules)
+  results            <- validate::confront(data, validation_results)
+
+  ## --- audit report -------------------------------------------------------
+  rules_meta     <- as.data.frame(input_rules)
+  results_summary <- as.data.frame(validate::summary(results))
+
+  audit_report <- data.table::as.data.table(
+    merge(results_summary, rules_meta, by = "name", all.x = TRUE)
+  )[, .(
+    name,
+    Rule           = label,
+    Description    = description,
+    `Total Records` = items,
+    Passes         = passes,
+    `Pass Rate`    = round(passes / items * 100, 2),
+    Fails          = fails,
+    Errors         = error
+  )]
+
+  ## --- per-rule violating rows --------------------------------------------
+  ## validate::values() → logical array: rows = observations, cols = rules
+  ## FALSE  = rule failed for that row
+  ## NA     = rule could not be evaluated (treated as a violation)
+  pass_matrix <- as.data.frame(validate::values(results))  ## nrow(data) × n_rules logical matrix
+
+  ## map rule internal names → user-facing labels for the list names
+  name_to_label <- stats::setNames(rules_meta$label, rules_meta$name)
+
+  violations <- lapply(names(pass_matrix), function(rule_name) {
+    lgl        <- pass_matrix[[rule_name]]
+    fail_rows  <- which(!lgl | is.na(lgl))
+    data[fail_rows]
+  })
+  names(violations) <- name_to_label[names(pass_matrix)]
+
+  ## drop internal 'name' column before returning
+  audit_report[, name := NULL]
+
+  list(report = audit_report, violations = violations)
 }

@@ -1,23 +1,35 @@
 # Test validate_data function
-test_that("validate_data returns report format by default", {
+test_that("validate_data returns a list with report and violations", {
   result <- validate_data(
     govhr::bra_hrmis_contract,
     govhr::contract_rules
   )
-  
-  expect_s3_class(result, "data.frame")
-  expect_named(result, c("Rule", "Description", "Total Records", "Passes", "Pass Rate", "Fails", "Errors"))
-  expect_equal(nrow(result), nrow(govhr::contract_rules))
+
+  expect_type(result, "list")
+  expect_named(result, c("report", "violations"))
+  expect_s3_class(result$report, "data.frame")
+  expect_named(result$report, c("Rule", "Description", "Total Records", "Passes", "Pass Rate", "Fails", "Errors"))
+  expect_equal(nrow(result$report), nrow(govhr::contract_rules))
 })
 
-test_that("validate_data returns object format when requested", {
+test_that("validate_data violations is a named list of data.tables", {
+  result <- validate_data(
+    govhr::bra_hrmis_contract,
+    govhr::contract_rules
+  )
+
+  expect_type(result$violations, "list")
+  expect_true(all(names(result$violations) %in% result$report$Rule))
+})
+
+test_that("validate_data output_format argument is silently ignored (backward compat)", {
   result <- validate_data(
     govhr::bra_hrmis_contract,
     govhr::contract_rules,
     output_format = "object"
   )
-  
-  expect_s4_class(result, "validation")
+  # output_format is deprecated but should not error
+  expect_named(result, c("report", "violations"))
 })
 
 # Test validation rules with dummy data
@@ -35,13 +47,13 @@ test_that("contract rules detect unique violations", {
   )
   
   result <- validate_data(dummy_contract, govhr::contract_rules)
-  
+
   # Should fail unique contract_id + ref_date (rows 1 and 2 are duplicates)
-  unique_id_fails <- result$Fails[result$Rule == "Unique contract ID"]
+  unique_id_fails <- result$report$Fails[result$report$Rule == "Unique contract ID"]
   expect_equal(unique_id_fails, 2)
-  
-  # Should fail unique contract_id + personnel_id + ref_date  
-  unique_personnel_fails <- result$Fails[result$Rule == "Unique assignment"]
+
+  # Should fail unique contract_id + personnel_id + ref_date
+  unique_personnel_fails <- result$report$Fails[result$report$Rule == "Unique assignment"]
   expect_equal(unique_personnel_fails, 2)
 })
 
@@ -59,13 +71,13 @@ test_that("contract rules detect salary logic violations", {
   )
   
   result <- validate_data(dummy_contract, govhr::contract_rules)
-  
+
   # Row 2: net (1100) > gross (1000) should fail
-  net_fails <- result$Fails[result$Rule == "Net vs gross"]
+  net_fails <- result$report$Fails[result$report$Rule == "Net vs gross"]
   expect_equal(net_fails, 1)
-  
+
   # Row 3: gross (900) < base + allowance (800 + 200) should fail
-  composition_fails <- result$Fails[result$Rule == "Gross composition"]
+  composition_fails <- result$report$Fails[result$report$Rule == "Gross composition"]
   expect_equal(composition_fails, 1)
 })
 
@@ -78,23 +90,23 @@ test_that("personnel rules detect age and date violations", {
   )
   
   result <- validate_data(dummy_personnel, govhr::personnel_rules)
-  
+
   # Row 2: ref_date in 2030 (future) should fail
-  date_fails <- result$Fails[result$Rule == "Valid date"]
+  date_fails <- result$report$Fails[result$report$Rule == "Valid date"]
   expect_equal(date_fails, 1)
-  
+
   # Row 3: age ~3 years (< 18) should fail
-  age_fails <- result$Fails[result$Rule == "Minimum age"]
+  age_fails <- result$report$Fails[result$report$Rule == "Minimum age"]
   expect_equal(age_fails, 1)
 })
 
-test_that("validate_data output_format argument matches correctly", {
-  expect_error(
+test_that("validate_data errors on invalid output_format", {
+  # output_format is deprecated and silently ignored; no error expected
+  expect_no_error(
     validate_data(
       govhr::bra_hrmis_contract,
       govhr::contract_rules,
       output_format = "invalid"
-    ),
-    "'arg' should be one of"
+    )
   )
 })
