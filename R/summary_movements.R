@@ -548,3 +548,93 @@ estimate_exit_rates <- function(contract_dt,
   result
 }
 
+#' Compute Tenure from a Stacked Contract Panel (Panel Version)
+#'
+#' @description
+#' Vectorised equivalent of \code{\link{compute_tenure}} for a panel dataset
+#' where \code{ref_date_col} is a column rather than a scalar.  Computes
+#' cumulative years of service per \emph{person × snapshot} in a single pass
+#' over the full stacked panel — no per-snapshot loop required.
+#'
+#' The union-of-intervals algorithm is identical to \code{compute_tenure}:
+#' contracts are sorted by start date, a \code{cummax} propagates the furthest
+#' end seen so far, and each interval's contribution is classified as a new
+#' span, partial extension, or nested (zero-contribution) segment.  The key
+#' difference is that \code{ref_date_col} participates in every row-wise
+#' comparison and in the \code{cummax} grouping key, so each
+#' \code{(personnel_id, ref_date)} pair is handled independently.
+#'
+#' @param contract_dt data.table.  Full stacked contract panel.  Must contain
+#'   \code{personnel_id_col}, \code{ref_date_col}, \code{contract_id_col},
+#'   \code{start_date_col}, \code{end_date_col}, and \code{contract_type_col}.
+#' @param personnel_id_col Character.  Default: \code{"personnel_id"}.
+#' @param ref_date_col Character.  Name of the snapshot date column.
+#'   Default: \code{"ref_date"}.
+#' @param contract_id_col Character.  Default: \code{"contract_id"}.
+#' @param start_date_col Character.  Default: \code{"start_date"}.
+#' @param end_date_col Character.  Default: \code{"end_date"}.
+#' @param contract_type_col Character.  Default: \code{"contract_type_code"}.
+#'
+#' @return data.table with columns \code{personnel_id_col},
+#'   \code{ref_date_col}, and \code{tenure_years}.  One row per unique
+#'   \code{(personnel_id, ref_date)} combination present in
+#'   \code{contract_dt}.
+#' @keywords internal
+compute_tenure_panel <- function(contract_dt,
+                                 personnel_id_col  = "personnel_id",
+                                 ref_date_col      = "ref_date",
+                                 contract_id_col   = "contract_id",
+                                 start_date_col    = "start_date",
+                                 end_date_col      = "end_date",
+                                 contract_type_col = "contract_type_code") {
+  # 0. ensure dataset is data.table
+  contract_dt <- as.data.table(contract_dt)
+
+  # 1. Filter: active types only, started on or before each row's ref_date
+  dt <- contract_dt[
+    get(start_date_col) <= get(ref_date_col) &
+      !get(contract_type_col) %in% c("inactive", "pensioner")
+  ]
+
+  # 2. Cap open-ended / future contracts at each row's ref_date
+  dt[, .eff_end := data.table::fifelse(
+    is.na(get(end_date_col)) | get(end_date_col) > get(ref_date_col),
+    get(ref_date_col),
+    get(end_date_col)
+  )]
+
+  # 3. Dedup panel snapshots: one row per (contract_id, start_date, ref_date)
+  dt <- dt[dt[, .I[1L], by = c(contract_id_col, start_date_col, ref_date_col)]$V1]
+
+  # 4. Numeric days for arithmetic; drop zero-length contracts
+  dt[, .s := as.numeric(get(start_date_col))]
+  dt[, .e := as.numeric(.eff_end)]
+  dt <- dt[.e > .s]
+
+  if (nrow(dt) == 0L) {
+    empty <- data.table::data.table(
+      .pid = character(0), .refdt = as.Date(character(0)), tenure_years = numeric(0)
+    )
+    data.table::setnames(empty, c(".pid", ".refdt"), c(personnel_id_col, ref_date_col))
+    return(empty)
+  }
+
+  # 5. Sort by (person, snapshot, start) then apply cummax within each group
+  data.table::setorderv(dt, c(personnel_id_col, ref_date_col, ".s"))
+  dt[, .lag_max_e := data.table::shift(cummax(.e), fill = -1e15),
+     by = c(personnel_id_col, ref_date_col)]
+
+  # 6. Classify and sum contributions
+  dt[, .contrib := data.table::fcase(
+    .s >= .lag_max_e,  .e - .s,
+    .e >  .lag_max_e,  .e - .lag_max_e,
+    default = 0
+  )]
+
+  result <- dt[,
+    .(tenure_years = sum(.contrib, na.rm = TRUE) / 365.25),
+    by = c(personnel_id_col, ref_date_col)
+  ]
+
+  result
+}
