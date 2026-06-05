@@ -587,6 +587,8 @@ compute_tenure_panel <- function(contract_dt,
                                  start_date_col    = "start_date",
                                  end_date_col      = "end_date",
                                  contract_type_col = "contract_type_code") {
+  # 0. ensure dataset is data.table
+  contract_dt <- as.data.table(contract_dt)
 
   # 1. Filter: active types only, started on or before each row's ref_date
   dt <- contract_dt[
