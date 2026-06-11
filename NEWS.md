@@ -1,3 +1,10 @@
+# govhr 0.2.2
+
+This release: 
+
+- Adds a new function to compute deflated wages.
+- Updates the `macro_indicators` dataset.
+
 # govhr 0.2.1
 
 This release:
