@@ -370,6 +370,79 @@ convert_constant_ppp <- function(data, cols, macro_indicators) {
   return(data_out)
 }
 
+#' Convert nominal wages to real local currency units (2021 base year)
+#'
+#' Convert nominal wages (LCU at survey-year prices) into real wages expressed
+#' in constant 2021 LCU using:
+#' \deqn{Real_{h}^{LCU} = Nominal_{h,t} * (CPI_{2021} / CPI_t)}
+#'
+#' Assumes
+#' - `data` has columns: country_code, year, and any columns in `cols`
+#' - `macro_indicators` has columns: country_code, year, cpi
+#'
+#' @param data Data frame with columns (country_code, year, ...).
+#' @param cols A character vector of column names to convert to constant 2021 LCU.
+#' @param macro_indicators Macroeconomic indicators with CPI data, can be lazy loaded.
+#' @return `data` augmented with deflated columns renamed from `*_lcu` to `*_real`.
+#' @examples
+#' library(tibble)
+#' hh <- tibble(
+#'   country_code = c("A", "A"),
+#'   year         = c(2010, 2021),
+#'   wage_lcu     = c(20000, 25000)
+#' )
+#'
+#' macro_indicators <- tibble(
+#'   country_code = c("A", "A"),
+#'   year         = c(2010, 2021),
+#'   cpi          = c(85, 100)
+#' )
+#'
+#' convert_constant_lcu(hh, "wage_lcu", macro_indicators)
+#' # wage_lcu for 2010: 20000 * (100 / 85) ≈ 23529
+#' # wage_lcu for 2021: 25000 * (100 / 100) = 25000
+#'
+#' @importFrom dplyr filter select rename left_join mutate across all_of
+#' @export
+convert_constant_lcu <- function(data, cols, macro_indicators) {
+
+  ## Basic input checks
+  required_cols <- c("country_code", "year")
+
+  if (!all(required_cols %in% names(data))) {
+    stop("`data` must contain columns: country_code, year")
+  }
+
+  if (!all(cols %in% names(data))) {
+    missing <- setdiff(cols, names(data))
+    stop(glue::glue("Column(s) not found in `data`: {paste(missing, collapse = ', ')}"))
+  }
+
+  # Extract CPI in base year (2021) by country
+  base_cpi <- macro_indicators |>
+    filter(year == 2021) |>
+    select(country_code, cpi) |>
+    rename(base_cpi = cpi)
+
+  # Join CPI for the survey year, then deflate
+  data_out <- data |>
+    left_join(
+      macro_indicators |> select(country_code, year, cpi),
+      by = c("country_code", "year")
+    ) |>
+    left_join(base_cpi, by = "country_code") |>
+    mutate(
+      across(
+        all_of(cols),
+        ~ .x * (base_cpi / cpi),
+        .names = "{sub('_lcu$', '_real', .col)}"
+      )
+    ) |>
+    select(-c(cpi, base_cpi))
+
+  return(data_out)
+}
+
 merge_wrapper <- function(...){
 
   y <- merge(all.x = TRUE, ...)
