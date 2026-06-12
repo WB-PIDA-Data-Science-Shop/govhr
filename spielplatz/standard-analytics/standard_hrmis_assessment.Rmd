@@ -47,9 +47,9 @@ est_df <- govhr::bra_hrmis_est
 # process data
 contract_growth <- contract_df |> 
   convert_constant_ppp(
-    cols = c("gross_salary_lcu"),
-    macro_indicators = govhr::macro_indicators
+    cols = c("gross_salary_lcu")
   ) |>
+  mutate(year = lubridate::year(ref_date)) |>
   dtplyr::lazy_dt() |> 
   group_by(country_code, year) |>
   summarise(
@@ -128,9 +128,9 @@ lcu_vars <- colnames(govhr::macro_indicators)[grepl(
 ### compute ppp variables
 bra_wagebill <- contract_df |>
   convert_constant_ppp(
-    cols = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
-    macro_indicators = govhr::macro_indicators
-  )
+    cols = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")
+  ) |>
+  mutate(year = lubridate::year(ref_date))
 
 ppp_vars <- colnames(contract_df)[grepl("_ppp", colnames(contract_df))]
 
@@ -638,9 +638,9 @@ contract_df |>
 salary_dispersion <- contract_df |>
   filter(year < 2018) |> 
   convert_constant_ppp(
-    cols = c("base_salary_lcu"),
-    macro_indicators = govhr::macro_indicators
+    cols = c("base_salary_lcu")
   ) |>
+  mutate(year = lubridate::year(ref_date)) |>
   compute_fastsummary(
     cols = "base_salary_ppp",
     groups = c("occupation_isconame", "year"),
@@ -664,8 +664,7 @@ salary_dispersion <- contract_df |>
 salary_dispersion_occupation <- contract_df |>
   filter(year < 2018) |> 
   convert_constant_ppp(
-    cols = c("base_salary_lcu"),
-    macro_indicators = govhr::macro_indicators
+    cols = c("base_salary_lcu")
   ) |>
   sample_group(
     occupation_native,
@@ -781,14 +780,13 @@ print("Not available: no performance rating data available")
 # 3.6.2. annual, within-grade pay increases
 contract_df |>
   convert_constant_ppp(
-    "base_salary_lcu",
-    macro_indicators = govhr::macro_indicators
+    "base_salary_lcu"
   ) |> 
   filter(
     paygrade %in% seq(1, 4, 1)
   ) |>
   mutate(
-    year = as.numeric(year)
+    year = as.numeric(lubridate::year(ref_date))
   ) |>
   group_by(
     paygrade,
@@ -863,9 +861,9 @@ contract_df |>
 ```{r}
 contract_df |>
   convert_constant_ppp(
-    cols = c("base_salary_lcu", "allowance_lcu"),
-    macro_indicators = govhr::macro_indicators
+    cols = c("base_salary_lcu", "allowance_lcu")
   ) |> 
+  mutate(year = lubridate::year(ref_date)) |>
   compute_fastsummary(
     cols = c("base_salary_ppp", "allowance_ppp"),
     groups = c("paygrade", "year"),
@@ -914,9 +912,9 @@ Guidance questions for the assessment:
 ```{r}
 contract_annual_growth <- contract_df |>
   convert_constant_ppp(
-    cols = c("base_salary_lcu"),
-    macro_indicators = govhr::macro_indicators
-  ) |> 
+    cols = c("base_salary_lcu")
+  ) |>
+  mutate(year = lubridate::year(ref_date)) |>
   compute_fastsummary(
     cols = "base_salary_ppp",
     groups = c("year"),

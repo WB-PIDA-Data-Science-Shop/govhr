@@ -305,14 +305,12 @@ complete_columns <- function(data, cols) {
 #' in 2021 PPP international dollars using:
 #' \deqn{Real_{h}^{PPP} = (CPI_t / CPI_{2021}) * (Nominal_{h,t} / PPP_{2021})}
 #'
-#' Assumes
-#' - `data` has columns: country_code, year, wage
-#' - `cpi` has columns: country_code, year, cpi
-#' - `ppp` has columns: country_code, ppp  (ppp = LCU per 2021 Intl$)
+#' #' @details
+#' CPI data is sourced from [govhr::macro_indicators], which must contain
+#' columns \code{country_code}, \code{year}, and \code{cpi}.
 #'
 #' @param data Data frame with columns (country_code, year, wage).
 #' @param cols A character vector with column name to convert to constant PPP in international 2021 dollars.
-#' @param macro_indicators Macroeconomic indicators, can be lazy loaded.
 #' @return `data_out` augmented with columns converted to international 2021 dollars.
 #' @examples
 #' library(tibble)
@@ -327,32 +325,39 @@ complete_columns <- function(data, cols) {
 #'   cpi = c(85, 100), ppp = c(1.5, 3.5)
 #' )
 #'
-#' convert_constant_ppp(hh, "wage", macro_indicators)
+#' convert_constant_ppp(hh, "wage")
 #'
 #' @importFrom dplyr filter select rename left_join mutate
 #' @import glue
 #' @export
-convert_constant_ppp <- function(data, cols, macro_indicators) {
+convert_constant_ppp <- function(data, cols) {
 
   ## Basic input checks
-  required_df  <- c("country_code", "year")
+  required_df  <- c("country_code", "ref_date")
 
   if (!all(required_df %in% names(data))) {
-    stop("`data` must contain columns: country_code, year")
+    stop("`data` must contain columns: country_code, ref_date")
   }
 
   # extract CPI in base year (2021) by country
-  base_cpi <- macro_indicators |>
+  base_cpi <- govhr::macro_indicators |>
     filter(year == 2021) |>
     select(country_code, cpi) |>
     rename(base_cpi = cpi)
 
   # join and compute using the exact formula
   data_out <- data |>
-    left_join(macro_indicators, by = c("country_code", "year")) |>
+    mutate(
+      year = as.integer(format(as.Date(ref_date), "%Y"))
+    ) |>
+    left_join(
+      govhr::macro_indicators |> 
+        select(country_code, year, cpi), 
+      by = c("country_code", "year")
+    ) |>
     left_join(base_cpi, by = "country_code") |>
     left_join(
-      macro_indicators |>
+      govhr::macro_indicators |>
         filter(year == 2021) |>
         select(country_code, ppp) |>
         rename(ppp_2021 = ppp),
@@ -361,86 +366,83 @@ convert_constant_ppp <- function(data, cols, macro_indicators) {
     mutate(
       across(
         all_of({{cols}}),
-        ~ (cpi / base_cpi) * (.x / ppp_2021),
+        ~ round((cpi / base_cpi) * (.x / ppp_2021), 2),
         .names = "{sub('_lcu$', '_ppp', .col)}"
       )
     ) |>
-    select(-c(ppp_2021, base_cpi))
+    select(-c(ppp_2021, base_cpi, year))
 
   return(data_out)
 }
 
-#' Convert nominal wages to real local currency units (2021 base year)
+#' Deflate a nominal LCU column to real values
 #'
-#' Convert nominal wages (LCU at survey-year prices) into real wages expressed
-#' in constant 2021 LCU using:
-#' \deqn{Real_{h}^{LCU} = Nominal_{h,t} * (CPI_{2021} / CPI_t)}
+#' Convert nominal wages (LCU prices) into real wages expressed in constant LCU prices of a specified base year using:
+#' \deqn{\text{real} = \text{nominal} \times \frac{\text{CPI}_{base}}{\text{CPI}_{ref}}}
 #'
-#' Assumes
-#' - `data` has columns: country_code, year, and any columns in `cols`
-#' - `macro_indicators` has columns: country_code, year, cpi
+#' @param col Numeric vector. The nominal LCU values to deflate (a data column).
+#' @param ref_date A vector coercible to \code{Date} (or a \code{Date} column).
+#'   The reference date for each observation; the year is extracted internally.
+#' @param country_code Character. Either a scalar (e.g. \code{"MOZ"}) recycled
+#'   across all rows, or a character column of ISO3 country codes.
+#' @param base_year Integer scalar. The base year to deflate to. Defaults to
+#'   \code{2021}.
 #'
-#' @param data Data frame with columns (country_code, year, ...).
-#' @param cols A character vector of column names to convert to constant 2021 LCU.
-#' @param macro_indicators Macroeconomic indicators with CPI data, can be lazy loaded.
-#' @return `data` augmented with deflated columns renamed from `*_lcu` to `*_real`.
+#' @return A numeric vector of the same length as \code{col}, expressed in
+#'   constant \code{base_year} LCU prices. Returns \code{NA} for any row where
+#'   CPI data is missing for the given country/year combination.
+#'
+#' @details
+#' CPI data is sourced from [govhr::macro_indicators], which must contain
+#' columns \code{country_code}, \code{year}, and \code{cpi}.
+#'
 #' @examples
-#' library(tibble)
-#' hh <- tibble(
-#'   country_code = c("A", "A"),
-#'   year         = c(2010, 2021),
-#'   wage_lcu     = c(20000, 25000)
+#' library(dplyr)
+#'
+#' data <- tibble::tibble(
+#'   country_code = c("MOZ", "MOZ", "BWA", "BWA"),
+#'   survey_date  = as.Date(c("2019-06-01", "2020-03-15", "2021-09-01", "2022-11-30")),
+#'   wage_lcu     = c(15000, 18000, 42000, 51000)
 #' )
 #'
-#' macro_indicators <- tibble(
-#'   country_code = c("A", "A"),
-#'   year         = c(2010, 2021),
-#'   cpi          = c(85, 100)
-#' )
+#' # Scalar country code
+#' data |>
+#'   dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, "MOZ"))
 #'
-#' convert_constant_lcu(hh, "wage_lcu", macro_indicators)
-#' # wage_lcu for 2010: 20000 * (100 / 85) ≈ 23529
-#' # wage_lcu for 2021: 25000 * (100 / 100) = 25000
+#' # Country code from a column
+#' data |>
+#'   dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, country_code))
 #'
-#' @importFrom dplyr filter select rename left_join mutate across all_of
+#' # Custom base year
+#' data |>
+#'   dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, country_code, base_year = 2015))
+#' 
+#' @importFrom tibble tibble
+#' @import dplyr
+#' @importFrom govhr macro_indicators
 #' @export
-convert_constant_lcu <- function(data, cols, macro_indicators) {
+deflate_to_real <- function(col, ref_date, country_code, base_year = 2021) {
 
-  ## Basic input checks
-  required_cols <- c("country_code", "year")
+  year <- as.integer(format(as.Date(ref_date), "%Y"))
 
-  if (!all(required_cols %in% names(data))) {
-    stop("`data` must contain columns: country_code, year")
-  }
+  input_tbl <- tibble(
+    country_code = country_code,
+    year         = year,
+    col          = col
+  )
 
-  if (!all(cols %in% names(data))) {
-    missing <- setdiff(cols, names(data))
-    stop(glue::glue("Column(s) not found in `data`: {paste(missing, collapse = ', ')}"))
-  }
+  cpi_lookup <- govhr::macro_indicators |>
+    select(country_code, year, cpi)
 
-  # Extract CPI in base year (2021) by country
-  base_cpi <- macro_indicators |>
-    filter(year == 2021) |>
-    select(country_code, cpi) |>
-    rename(base_cpi = cpi)
+  base_cpi_lookup <- govhr::macro_indicators |>
+    filter(year == base_year) |>
+    select(country_code, base_cpi = cpi)
 
-  # Join CPI for the survey year, then deflate
-  data_out <- data |>
-    left_join(
-      macro_indicators |> select(country_code, year, cpi),
-      by = c("country_code", "year")
-    ) |>
-    left_join(base_cpi, by = "country_code") |>
-    mutate(
-      across(
-        all_of(cols),
-        ~ .x * (base_cpi / cpi),
-        .names = "{sub('_lcu$', '_real', .col)}"
-      )
-    ) |>
-    select(-c(cpi, base_cpi))
-
-  return(data_out)
+  input_tbl |>
+    left_join(cpi_lookup,      by = c("country_code", "year"), relationship = "many-to-one") |>
+    left_join(base_cpi_lookup, by = "country_code",            relationship = "many-to-one") |>
+    mutate(result = col * (.data[["base_cpi"]] / .data[["cpi"]])) |>
+    pull(.data[["result"]])
 }
 
 merge_wrapper <- function(...){
