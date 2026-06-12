@@ -26,15 +26,10 @@ columns \code{country_code}, \code{year}, and \code{cpi}.
 }
 \examples{
 library(tibble)
-hh <- tibble(
-  country_code = c("A","A"),
-  year = c("2010", "2021"),
+data <- tibble(
+  country_code = c("BRA","BRA"),
+  ref_date = c("2010-01-01", "2021-01-01"),
   wage = c(20000, 25000)
-)
-
-macro_indicators <- tibble(
-  country_code = "A", year = "2010", "2021",
-  cpi = c(85, 100), ppp = c(1.5, 3.5)
 )
 
 convert_constant_ppp(hh, "wage")

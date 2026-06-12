@@ -431,8 +431,7 @@ compute_hrmreport_stats <- function(contract_dt,
   ### compute ppp variables
   contract_dt <-
   convert_constant_ppp(data = contract_dt,
-                       cols = wage_vars,
-                       macro_indicators = macro_indicators)
+                       cols = wage_vars)
 
   ppp_vars <- colnames(contract_dt)[grepl("_ppp", colnames(contract_dt))]
 
@@ -967,8 +966,7 @@ compute_wagebill <- function(
 ) {  
   data_ppp <- contract_df |>
     convert_constant_ppp(
-      cols = wage_vars,
-      macro_indicators = govhr::macro_indicators
+      cols = wage_vars
     )
   
   if(share_macro) {
