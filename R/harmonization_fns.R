@@ -419,7 +419,6 @@ convert_constant_ppp <- function(data, cols) {
 #' 
 #' @importFrom tibble tibble
 #' @import dplyr
-#' @importFrom govhr macro_indicators
 #' @export
 deflate_to_real <- function(col, ref_date, country_code, base_year = 2021) {
 
