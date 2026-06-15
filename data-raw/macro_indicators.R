@@ -1,6 +1,7 @@
 ## code to prepare `economy_wide` variables for wage diagnostics
-# last updated: 12/23/2025
+# last updated: 6/11/2026
 library(purrr)
+library(dplyr)
 
 idvar_list <- list(
   "gdp_lcu" = "WB_WDI_NY_GDP_MKTP_CN",
@@ -25,18 +26,23 @@ macro_indicators <- lapply(X = idvar_list,
       as_tibble() |>
       setNames(c("country_code", "year", names(idvar_list)))
 
-fiscal_balance <- get_data360_api(
-  dataset_id = "WB_MPO",
-  indicator_id = "WB_MPO_GGBALOVRLCD_",
-  pivot = FALSE
+fiscal_balance <- readr::read_csv(
+  "https://data360files.worldbank.org/data360-data/data/WB_MPO/GGBALOVRL_WIDEF.csv"
 ) |>
-  # extract latest vintage
   filter(
-    COMP_BREAKDOWN_1 == "WB_MPO_VINTAGE_SM_2025"
+    VINTAGE == "V_SM2026" & # spring meetings 2026
+    UNIT_MEASURE == "PT_GDP" & # percentage of GDP
+    OBS_STATUS == "A"
   ) |>
-  pivot_data360() |>
-  rename(
-    fiscal_balance = wb_mpo_ggbalovrlcd
+  tidyr::pivot_longer(
+    cols = c(`1980`:`2028`),
+    names_to = "TIME_PERIOD",
+    values_to = "fiscal_balance"
+  ) |>
+  select(
+    country_code = REF_AREA,
+    year = TIME_PERIOD,
+    fiscal_balance
   )
 
 macro_indicators <-

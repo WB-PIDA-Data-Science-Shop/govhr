@@ -4,14 +4,12 @@
 \alias{convert_constant_ppp}
 \title{Convert nominal wages to real PPP-adjusted wages (2021 base year)}
 \usage{
-convert_constant_ppp(data, cols, macro_indicators)
+convert_constant_ppp(data, cols)
 }
 \arguments{
 \item{data}{Data frame with columns (country_code, year, wage).}
 
 \item{cols}{A character vector with column name to convert to constant PPP in international 2021 dollars.}
-
-\item{macro_indicators}{Macroeconomic indicators, can be lazy loaded.}
 }
 \value{
 `data_out` augmented with columns converted to international 2021 dollars.
@@ -22,24 +20,18 @@ in 2021 PPP international dollars using:
 \deqn{Real_{h}^{PPP} = (CPI_t / CPI_{2021}) * (Nominal_{h,t} / PPP_{2021})}
 }
 \details{
-Assumes
-- `data` has columns: country_code, year, wage
-- `cpi` has columns: country_code, year, cpi
-- `ppp` has columns: country_code, ppp  (ppp = LCU per 2021 Intl$)
+#' @details
+CPI data is sourced from [govhr::macro_indicators], which must contain
+columns \code{country_code}, \code{year}, and \code{cpi}.
 }
 \examples{
 library(tibble)
-hh <- tibble(
-  country_code = c("A","A"),
-  year = c("2010", "2021"),
+data <- tibble(
+  country_code = c("BRA","BRA"),
+  ref_date = c("2010-01-01", "2021-01-01"),
   wage = c(20000, 25000)
 )
 
-macro_indicators <- tibble(
-  country_code = "A", year = "2010", "2021",
-  cpi = c(85, 100), ppp = c(1.5, 3.5)
-)
-
-convert_constant_ppp(hh, "wage", macro_indicators)
+convert_constant_ppp(data, "wage")
 
 }
