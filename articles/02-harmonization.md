@@ -453,9 +453,7 @@ bra_hrmis[, (cols_to_convert) := lapply(.SD, as.numeric), .SDcols = cols_to_conv
 
 
 ### apply the convert_constant_ppp function to produce those estimates
-bra_hrmis <- convert_constant_ppp(data = bra_hrmis[, year := lubridate::year(ref_date)],
-                                  cols = cols_to_convert,
-                                  macro_indicators = macro_indicators)
+bra_hrmis <- convert_constant_ppp(data = bra_hrmis, cols = cols_to_convert)
 
 ### while we are at this lets include the working hour variable as well
 bra_hrmis[, whours := as.numeric(JORNADA)]

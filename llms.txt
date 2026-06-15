@@ -98,6 +98,8 @@ pak::pak("WB-PIDA-Data-Science-Shop/govhr")
   values
 - [`dedup_values()`](https://wb-pida-data-science-shop.github.io/govhr/reference/dedup_values.md)
   : Deduplicate values within grouped data
+- [`deflate_to_real()`](https://wb-pida-data-science-shop.github.io/govhr/reference/deflate_to_real.md)
+  : Deflate a nominal LCU column to real values
 - [`detect_career_transitions()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_career_transitions.md)
   : Detect Career Transitions Based on Contract Attributes
 - [`detect_inconsistent_cols()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_inconsistent_cols.md)
