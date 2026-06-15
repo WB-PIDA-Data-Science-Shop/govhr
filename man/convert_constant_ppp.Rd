@@ -32,6 +32,6 @@ data <- tibble(
   wage = c(20000, 25000)
 )
 
-convert_constant_ppp(hh, "wage")
+convert_constant_ppp(data, "wage")
 
 }
