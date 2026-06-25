@@ -68,7 +68,7 @@ get_metadata360("WB_MPO")
 #> 31      21.98952   META_ENENRGHGE ac596a77-81b6-4c85-9bd4-88333895b0eb
 #> 32      21.98952   META_NECONPRVT eb28a228-e24c-4c85-a8f0-a2341ce1f653
 #> 33      21.98952   META_SPPOPTOTL a4707329-948b-4afa-bdd5-80d3fc5f44ae
-#> 34      21.31285   META_NEGDIFTOT f2bd3acf-3cc3-44eb-9ef7-efda0bdfee62
+#> 34      21.31623   META_NEGDIFTOT f2bd3acf-3cc3-44eb-9ef7-efda0bdfee62
 #>         type    subtype                  disaggregation_types isDelete cfPath
 #> 1  indicator timeseries              Vintage, Unit of measure       NA     NA
 #> 2  indicator timeseries Price Basis, Vintage, Unit of measure       NA     NA
