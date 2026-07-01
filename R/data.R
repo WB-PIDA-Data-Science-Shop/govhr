@@ -282,7 +282,7 @@
 #' }
 "bra_hrmis"
 
-#' Brazil HRMIS Contract Dataset
+#' HRMIS Contract Dataset
 #'
 #' Harmonized contract-level human resource management information system (HRMIS)
 #' data for the State of Alagoas, Brazil. Each observation represents a unique
@@ -338,7 +338,7 @@
 #' head(bra_hrmis_contract)
 "bra_hrmis_contract"
 
-#' Brazil HRMIS Personnel Dataset
+#' HRMIS Personnel Dataset
 #'
 #' Harmonized personnel-level human resource management information system
 #' (HRMIS) data for the State of Alagoas, Brazil. Each observation represents a
@@ -384,10 +384,9 @@
 #'
 #' @examples
 #' data(bra_hrmis_personnel)
-#' head(bra_hrmis_personnel)
 "bra_hrmis_personnel"
 
-#' Brazil HRMIS Establishment Dataset
+#' HRMIS Establishment Dataset
 #'
 #' Harmonized establishment-level human resource management information system
 #' (HRMIS) data for the State of Alagoas, Brazil. Each observation represents a

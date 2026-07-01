@@ -3,7 +3,7 @@
 \docType{data}
 \name{bra_hrmis_contract}
 \alias{bra_hrmis_contract}
-\title{Brazil HRMIS Contract Dataset}
+\title{HRMIS Contract Dataset}
 \format{
 A data frame with 16,434 rows and 19 variables:
 \describe{

@@ -3,7 +3,7 @@
 \docType{data}
 \name{bra_hrmis_personnel}
 \alias{bra_hrmis_personnel}
-\title{Brazil HRMIS Personnel Dataset}
+\title{HRMIS Personnel Dataset}
 \format{
 A data frame with 15,681 rows and 11 variables:
 \describe{
@@ -50,7 +50,6 @@ sector workforces.
 }
 \examples{
 data(bra_hrmis_personnel)
-head(bra_hrmis_personnel)
 }
 \seealso{
 \code{\link{bra_hrmis_contract}},

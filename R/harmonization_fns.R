@@ -466,6 +466,9 @@ merge_wrapper <- function(...){
 #' @param stopwords    Character vector of stopwords to remove. NULL uses a built-in English set.
 #'
 #' @return A data.table with columns: <id_col>, class_id, class_label, score
+#' 
+#' @importFrom rlang .data
+#' 
 classify_text <- function(corpus,
                           taxonomy,
                           id_col          = "id",
