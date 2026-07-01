@@ -1,3 +1,10 @@
+# govhr 0.3.0
+This release:
+
+- Updates the standard dictionary by including a new allowance module.
+- Adds a new function, `classify_text`, to classify a vector of characters against a taxonomy. Built for COFOG but generalizable to other taxonomies.
+- Update lazy-loaded data for the harmonized data, using the updated dictionary.
+
 # govhr 0.2.2
 
 This release: 
