@@ -3,41 +3,64 @@
 \docType{data}
 \name{bra_hrmis_contract}
 \alias{bra_hrmis_contract}
-\title{Contract Dataset}
+\title{Brazil HRMIS Contract Dataset}
 \format{
-A data frame with N rows and 24 variables:
+A data frame with 16,434 rows and 19 variables:
 \describe{
-  \item{contract_id}{Unique identifier for the contract}
-  \item{personnel_id}{Foreign key linking to Personnel module}
-  \item{est_id}{Foreign key linking to Establishment module}
-  \item{ref_date}{Timestamp for the contract record}
-  \item{contract_type_code}{Type of contract code}
-  \item{contract_type_native}{Type of contract in local language}
-  \item{base_salary_lcu}{Base compensation in local currency units (LCU)}
-  \item{gross_salary_lcu}{Total compensation before deductions in local currency units}
-  \item{net_salary_lcu}{Compensation after deductions in local currency units}
-  \item{allowance_lcu}{Allowances in local currency units}
-  \item{occupation_native}{Job title in the local language}
-  \item{occupation_english}{Job title translated to English}
-  \item{occupation_isconame}{ISCO standard occupation name}
-  \item{occupation_iscocode}{ISCO standard occupation code}
-  \item{start_date}{Contract start date}
-  \item{end_date}{Contract end date, if applicable}
-  \item{country_code}{Official World Bank ISO-3 country code}
-  \item{country_name}{Official World Bank country name}
-  \item{adm1_name}{First-level administrative division name}
-  \item{adm1_code}{First-level administrative division code}
-  \item{whours}{Standard or actual hours worked}
-  \item{paygrade}{Salary scale or grade level}
-  \item{seniority}{Years of service or seniority level}
+  \item{contract_id}{Unique identifier assigned to each contract.}
+  \item{personnel_id}{Unique identifier assigned to each worker.}
+  \item{est_id}{Unique identifier assigned to each establishment.}
+  \item{ref_date}{Reference date of the HRMIS record.}
+  \item{base_salary_lcu}{Basic salary before allowances and deductions (local currency units).}
+  \item{allowance_lcu}{Total allowances paid in addition to base salary (local currency units).}
+  \item{gross_salary_lcu}{Total compensation before taxes and deductions (local currency units).}
+  \item{net_salary_lcu}{Take-home pay after taxes and deductions (local currency units).}
+  \item{whours}{Contracted working hours.}
+  \item{start_date}{Employment contract start date.}
+  \item{end_date}{Employment contract end date, if applicable.}
+  \item{paygrade}{Pay grade or salary scale classification.}
+  \item{seniority}{Level or step within the pay grade.}
+  \item{occupation_native}{Occupation title in the native language.}
+  \item{occupation_english}{Occupation title translated into English.}
+  \item{occupation_iscocode}{ISCO-08 occupation code (4-digit level).}
+  \item{occupation_isconame}{ISCO-08 occupation name corresponding to the occupation code.}
+  \item{contract_type_native}{Employment contract type in the native language.}
+  \item{contract_type}{Standardized employment contract type. One of
+  \code{"permanent"}, \code{"fixed-term"}, \code{"short-term"},
+  \code{"pensioner"}, or \code{"inactive"}.}
 }
+}
+\source{
+Government of the State of Alagoas Human Resource Management Information
+System (HRMIS), harmonized by the GovHR project.
 }
 \usage{
 bra_hrmis_contract
 }
 \description{
-This dataset contains detailed information about contracts, including salaries,
-allowances, occupation, work hours, and establishmental context. Each row represents
-a unique contract record.
+Harmonized contract-level human resource management information system (HRMIS)
+data for the State of Alagoas, Brazil. Each observation represents a unique
+contract at a given reference date (`contract_id`, `ref_date`) and contains
+information on remuneration, contract characteristics, occupation, and
+employment details.
+}
+\details{
+The dataset follows the GovHR contract module data dictionary and is intended
+for workforce analytics, payroll analysis, and personnel microsimulation.
+
+
+This dataset is harmonized according to the GovHR data dictionary. Salary
+variables are expressed in nominal local currency units (LCU). Occupations
+are translated into English and mapped to the International Standard
+Classification of Occupations (ISCO-08). Contract types are standardized
+across countries to facilitate comparative analysis.
+}
+\examples{
+data(bra_hrmis_contract)
+head(bra_hrmis_contract)
+}
+\seealso{
+\code{\link{bra_hrmis_personnel}},
+\code{\link{bra_hrmis_est}}
 }
 \keyword{datasets}

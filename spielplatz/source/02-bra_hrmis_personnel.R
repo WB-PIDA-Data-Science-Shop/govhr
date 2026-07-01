@@ -84,7 +84,7 @@ personnel_active <- personnel_active_list |>
   # extract the month of september
   filter(month == 9) |>
   mutate(
-    status = "active"
+    employment_status = "active"
   )
 
 personnel_inactive <- personnel_inactive_list |>
@@ -98,7 +98,7 @@ personnel_inactive <- personnel_inactive_list |>
   # extract the month of september
   filter(month == 9) |>
   mutate(
-    status = "inactive"
+    employment_status = "inactive"
   )
 
 personnel_df <- personnel_active |>
@@ -225,6 +225,118 @@ personnel_birthdate_inconsistency_df <- personnel_df |>
     by = c("personnel_id")
   ]
 
+### birth_date needs to be one for each person and has to be the same across all
+### periods for that person. Lets fix that! 
+
+birth_df <- 
+  personnel_df |> 
+  dplyr::select(personnel_id, birth_date) |>
+  distinct()
+
+birth_df <- 
+  birth_df |>
+  group_by(personnel_id) |>
+  filter(birth_date == max(birth_date)) 
+
+#### lets quickly look at the distribution of ages by the latest reference date within the public sector
+birth_df <- 
+birth_df |>
+  mutate(age = as.numeric(as.Date("2018-09-01") - birth_date) / 365.25) 
+
+### ok we are going to drop reassign birth days to all those who are below 18 and those who are above 100
+## starting with all those under 18
+
+
+# birth_df |>
+#   filter(age > 0 & age < 100) |>
+#   ggplot(aes(x = age)) + 
+#   geom_histogram(binwidth = 1) + 
+#   labs(x = "Age", y = "Personnel Count")
+
+set.seed(1234)
+
+ref_date <- min(personnel_df$ref_date, na.rm = TRUE)
+
+birth_df_fixed <-
+  birth_df |>
+  left_join(
+    personnel_df |>
+      distinct(personnel_id, employment_status),
+    by = "personnel_id"
+  ) |>
+  mutate(
+    age = as.numeric(ref_date - birth_date) / 365.25,
+    replacement_age = age
+  )
+
+# Under 18, active -> random age 18-65
+idx <- birth_df_fixed$age < 18 &
+  birth_df_fixed$employment_status == "active"
+
+birth_df_fixed$replacement_age[idx] <-
+  sample(18:65, sum(idx), replace = TRUE)
+
+# Under 18, inactive -> random age 65-90
+idx <- birth_df_fixed$age < 18 &
+  birth_df_fixed$employment_status == "inactive"
+
+birth_df_fixed$replacement_age[idx] <-
+  sample(65:90, sum(idx), replace = TRUE)
+
+# Under 18, other status -> random age 18-65
+idx <- birth_df_fixed$age < 18 &
+  !birth_df_fixed$employment_status %in% c("active", "inactive")
+
+birth_df_fixed$replacement_age[idx] <-
+  sample(18:65, sum(idx), replace = TRUE)
+
+# 100+, active -> random age 18-65
+idx <- birth_df_fixed$age >= 100 &
+  birth_df_fixed$employment_status == "active"
+
+birth_df_fixed$replacement_age[idx] <-
+  sample(18:65, sum(idx), replace = TRUE)
+
+# 100+, inactive -> random age 65-90
+idx <- birth_df_fixed$age >= 100 &
+  birth_df_fixed$employment_status == "inactive"
+
+birth_df_fixed$replacement_age[idx] <-
+  sample(65:90, sum(idx), replace = TRUE)
+
+# 100+, other status -> random age 18-65
+idx <- birth_df_fixed$age >= 100 &
+  !birth_df_fixed$employment_status %in% c("active", "inactive")
+
+birth_df_fixed$replacement_age[idx] <-
+  sample(18:65, sum(idx), replace = TRUE)
+
+# Convert replacement ages back to birth dates
+birth_df_fixed <-
+  birth_df_fixed |>
+  mutate(
+    # Random day within the assigned age year
+    day_offset = sample(0:364, n(), replace = TRUE),
+
+    birth_date = if_else(
+      age < 18 | age >= 100,
+      ref_date - round(replacement_age * 365.25) - day_offset,
+      birth_date
+    )
+  ) |>
+  select(-age, -replacement_age, -day_offset)
+
+birth_df_fixed <- 
+  birth_df_fixed |>
+  mutate(age = as.numeric(as.Date("2018-09-01") - birth_date) / 365.25)
+
+birth_df_fixed |>
+  filter(age > 0 & age < 100) |>
+  ggplot(aes(x = age)) + 
+  geom_histogram(binwidth = 1) + 
+  labs(x = "Age", y = "Personnel Count")
+
+
 # establish protocol that if there are inconsistencies,
 # we use the highest frequency value to override the inconsistencies
 # fix birthdate
@@ -233,16 +345,56 @@ personnel_birthdate_inconsistency_df <- personnel_df |>
 #     birth_date =
 #   )
 
-# only one personnel per reference date per status
-personnel_module <- personnel_df |>
-  distinct(
-    personnel_id,
-    ref_date,
-    status,
-    gender,
-    educat7
+birth_df_fixed <- 
+  birth_df_fixed |>
+  select(-employment_status, -age) |> 
+  distinct() |>
+  group_by(personnel_id) |>
+  filter(birth_date == min(birth_date))
+
+### ok lets merge this back in
+personnel_df <- 
+  personnel_df |>
+  select(-birth_date, -age) |>
+  left_join(birth_df_fixed |> select(personnel_id, birth_date), 
+            by = "personnel_id") |>
+  mutate(age = difftime(ref_date, birth_date) / 365.25)
+
+### include service type
+personnel_df <-
+  personnel_df |>
+  mutate(
+    service_type = case_when(
+      department %in% c(
+        "CORPO DE BOMBEIROS MILITAR DE ALAGOAS",
+        "POLICIA MILITAR DE ALAGOAS",
+        "GABINETE MILITAR DO GOVERNO"
+      ) ~ "military",
+
+      TRUE ~ "civilian"
+    )
   )
 
+
+personnel_df <-
+  personnel_df |>
+  arrange(personnel_id, ref_date) |>
+  group_by(personnel_id, ref_date) |>
+  slice(1) |>
+  ungroup() |>
+  select(
+    personnel_id,
+    ref_date,
+    birth_date,
+    age,
+    gender,
+    educat7,
+    employment_status,
+    service_type,
+  )
+
+personnel_df$race <- NA
+personnel_df$tribe <- NA
 # extract personnel_df module ---------------------------------------------------
 # personnel_df
 #   - Reference date (ref_date)
@@ -254,22 +406,25 @@ personnel_module <- personnel_df |>
 #   - Race (race)
 #   - Status (active/retired)
 
-# create a function that does a conformity assessment
-# and fill out missing columns with NA
-dictionary_personnel_cols <- c(
-  "ref_date", "personnel_id", "birth_date", "gender", "educat7", "tribe", "race", "status"
-)
+# # create a function that does a conformity assessment
+# # and fill out missing columns with NA
+# dictionary_personnel_cols <- c(
+#   "ref_date", "personnel_id", "birth_date", "gender", "educat7", "tribe", "race", "status"
+# )
 
-personnel_module_clean <- personnel_module |>
-  complete_columns(
-    dictionary_personnel_cols
-  ) |>
-  mutate(
-    country_code = "BRA"
-  )
+# personnel_module_clean <- personnel_module |>
+#   complete_columns(
+#     dictionary_personnel_cols
+#   ) |>
+#   mutate(
+#     country_code = "BRA"
+#   )
+
+## the age variable needs to be a numeric and not a difftime object
+personnel_df <- personnel_df |> mutate(age = as.numeric(age))
 
 # personnel_module_clean |>
-arrow::write_parquet(personnel_module_clean, 
+arrow::write_parquet(personnel_df, 
                      "spielplatz/data/personnel_alagoas_tbl.parquet", 
                      compression = "zstd", 
                      compression_level = 22)

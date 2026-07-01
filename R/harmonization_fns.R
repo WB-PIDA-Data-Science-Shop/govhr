@@ -447,3 +447,172 @@ merge_wrapper <- function(...){
 
 }
 
+
+
+#' Classify free-text items against a user-supplied taxonomy using TF-IDF
+#'
+#' @param corpus       A data.frame with at minimum an id column and a text column.
+#' @param taxonomy     Either:
+#'                       - A named character vector: names = class IDs, values = class labels/descriptions
+#'                       - A data.frame with columns identified by `class_id_col` and `class_label_col`
+#' @param id_col       Name of the id column in `corpus`. Default "id".
+#' @param text_col     Name of the text column in `corpus`. Default "text".
+#' @param class_id_col Name of the class ID column in `taxonomy` (if data.frame). Default "class_id".
+#' @param class_label_col Name of the class label column in `taxonomy` (if data.frame). Default "class_label".
+#' @param num_leaves   Number of top-matching classes to return per item. Default 1.
+#' @param method       "tfidf_sum" (mirrors labourR) or "cosine" (improved, length-normalised). Default "tfidf_sum".
+#' @param max_dist     Maximum string distance for fuzzy token matching (used when `string_dist` is set).
+#' @param string_dist  String distance method passed to `stringdist::amatch()`. NULL disables fuzzy matching.
+#' @param stopwords    Character vector of stopwords to remove. NULL uses a built-in English set.
+#'
+#' @return A data.table with columns: <id_col>, class_id, class_label, score
+classify_text <- function(corpus,
+                          taxonomy,
+                          id_col          = "id",
+                          text_col        = "text",
+                          class_id_col    = "class_id",
+                          class_label_col = "class_label",
+                          num_leaves      = 1,
+                          method          = c("tfidf_sum", "cosine"),
+                          max_dist        = 0.1,
+                          string_dist     = NULL,
+                          stopwords       = NULL) {
+
+  method <- match.arg(method)
+
+  # ── 0. Input validation ────────────────────────────────────────────────────
+  if (!inherits(corpus, "data.frame"))
+    stop("`corpus` must be a data.frame or data.table.")
+  if (!all(c(id_col, text_col) %in% names(corpus)))
+    stop(sprintf("`corpus` must contain columns '%s' and '%s'.", id_col, text_col))
+
+  # ── 1. Normalise taxonomy to a data.table ─────────────────────────────────
+  if (is.character(taxonomy) && !is.null(names(taxonomy))) {
+    taxonomy_dt <- data.table(class_id = names(taxonomy), class_label = unname(taxonomy))
+  } else if (inherits(taxonomy, "data.frame")) {
+    if (!all(c(class_id_col, class_label_col) %in% names(taxonomy)))
+      stop(sprintf("`taxonomy` must contain columns '%s' and '%s'.", class_id_col, class_label_col))
+    taxonomy_dt <- as.data.table(taxonomy)
+    setnames(taxonomy_dt, c(class_id_col, class_label_col), c("class_id", "class_label"))
+  } else {
+    stop("`taxonomy` must be a named character vector or a data.frame.")
+  }
+
+  # ── 2. Helpers ─────────────────────────────────────────────────────────────
+  default_stopwords <- c(
+    "a","an","the","and","or","of","in","to","for","with","on","at","by",
+    "from","is","are","was","were","be","been","being","have","has","had",
+    "do","does","did","will","would","could","should","may","might","shall",
+    "can","that","this","it","its","as","not","but","if","so","up","out","into"
+  )
+  sw <- if (is.null(stopwords)) default_stopwords else stopwords
+
+  cleanse <- function(x) {
+    x <- tolower(trimws(x))
+    x <- gsub("[^a-z0-9 ]", " ", x)
+    gsub("\\s+", " ", x)
+  }
+
+  tokenize_dt <- function(texts, ids) {
+    tokens <- strsplit(cleanse(texts), " ")
+    names(tokens) <- ids
+    tokens <- lapply(tokens, function(tk) tk[tk != "" & !tk %in% sw])
+    rbindlist(lapply(tokens, data.table), idcol = "id") |>
+      setnames(c("id", "term"))
+  }
+
+  # ── 3. Build TF-IDF index from taxonomy ───────────────────────────────────
+  taxonomy_dt[, label_clean := cleanse(class_label)]
+
+  # Term frequencies per class
+  tax_tokens_dt <- tokenize_dt(taxonomy_dt$label_clean, taxonomy_dt$class_id)
+
+  N_classes <- nrow(taxonomy_dt)
+
+  tf_dt <- tax_tokens_dt[
+    , .N, by = c("id", "term")
+  ][
+    , tf := N / sum(N), by = "id"          # within-class relative frequency
+  ] |> setnames("id", "class_id")
+
+  # IDF: log(N / document frequency)  — "document" = one taxonomy class
+  idf_dt <- tf_dt[, .(df = .N), by = "term"][, idf := log(N_classes / df)]
+
+  tfidf_dt <- merge(tf_dt, idf_dt, by = "term")[, tfidf := tf * idf]
+
+  vocabulary <- sort(unique(tfidf_dt$term))
+
+  # ── 4. Tokenize corpus ────────────────────────────────────────────────────
+  corpus_dt <- as.data.table(corpus)
+  setnames(corpus_dt, c(id_col, text_col), c("id", "text"))
+  corpus_dt[, text := cleanse(text)]
+
+  corpus_tokens_dt <- tokenize_dt(corpus_dt$text, corpus_dt$id)
+
+  # ── 5. Token matching (exact + optional fuzzy) ────────────────────────────
+  voca_idx <- match(corpus_tokens_dt$term, vocabulary)
+
+  if (!is.null(string_dist)) {
+    na_pos <- is.na(voca_idx)
+    if (any(na_pos))
+      voca_idx[na_pos] <- stringdist::amatch(
+        corpus_tokens_dt$term[na_pos], vocabulary,
+        maxDist = max_dist, method = string_dist
+      )
+  }
+
+  matches_dt <- data.table(
+    id   = corpus_tokens_dt$id,
+    term = vocabulary[voca_idx]
+  )[!is.na(term)]
+
+  # ── 6. Score: TF-IDF sum (labourR-equivalent) or cosine similarity ────────
+  if (method == "tfidf_sum") {
+
+    # Sum TF-IDF weights of matching tokens per (corpus item, class) pair
+    predictions <- merge(
+      matches_dt,
+      tfidf_dt[, .(term, class_id, tfidf)],
+      by = "term", allow.cartesian = TRUE
+    )[, .(score = sum(tfidf)), by = .(id, class_id)
+    ][order(id, -score)
+    ][, head(.SD, num_leaves), by = "id"]
+
+  } else {  # cosine
+
+    # Build a TF-IDF vector for the corpus side using the same IDF
+    corpus_tf <- matches_dt[, .N, by = .(id, term)]
+    corpus_tf[, tf := N / sum(N), by = "id"]
+    corpus_tfidf <- merge(corpus_tf, idf_dt[, .(term, idf)], by = "term")[, tfidf := tf * idf]
+
+    # Dot product
+    dot_dt <- merge(
+      corpus_tfidf[, .(id, term, tfidf_c = tfidf)],
+      tfidf_dt[, .(term, class_id, tfidf_t = tfidf)],
+      by = "term", allow.cartesian = TRUE
+    )[, .(dot = sum(tfidf_c * tfidf_t)), by = .(id, class_id)]
+
+    # L2 norms
+    corpus_norm <- corpus_tfidf[, .(norm_c = sqrt(sum(tfidf^2))), by = "id"]
+    class_norm  <- tfidf_dt[,    .(norm_t = sqrt(sum(tfidf^2))), by = "class_id"]
+
+    predictions <- dot_dt |>
+      merge(corpus_norm, by = "id") |>
+      merge(class_norm,  by = "class_id")
+
+    predictions[, score := dot / (norm_c * norm_t)
+    ][order(id, -score)
+    ][, head(.SD, num_leaves), by = "id"
+    ][, .(id, class_id, score)]
+  }
+
+  # ── 7. Attach taxonomy labels and restore original id column name ──────────
+  result <- merge(
+    predictions,
+    taxonomy_dt[, .(class_id, class_label)],
+    by = "class_id"
+  )[order(id)
+  ] |> setnames("id", id_col)
+
+  result[]
+}

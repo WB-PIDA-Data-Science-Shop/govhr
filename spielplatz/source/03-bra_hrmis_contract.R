@@ -15,7 +15,7 @@ library(labourR)
 library(stringr)
 library(polyglotr)
 library(here)
-
+library(tidyr)
 devtools::load_all()
 
 dir.create(
@@ -160,35 +160,29 @@ inactive_alagoas_tbl <-
 contract_alagoas_tbl <-
   bind_rows(
     active_alagoas_tbl |>
-      transmute(
-        contract_id = MATRICULA,
-        personnel_id = CPF,
-        est_id = ORGAO,
-        ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
-        base_salary_lcu = SALARIO_BASE,
-        allowance_lcu = ABONO_PERMANENCIA,
-        gross_salary_lcu = SALARIO_BRUTO,
-        net_salary_lcu = SALARIO_LIQUIDO,
-        whours = as.numeric(JORNADA),
-        country_code = "BRA",
-        country_name = "Brazil",
-        adm1_name = "Alagoas",
-        adm1_code = "AL",
-        start_date = as.Date(as.integer(DATA_ADMISSAO), origin = "1899-12-30"),
-        end_date = NA,
-        paygrade = CLASSE,
-        seniority = NIVEL,
-        occupation_native = occupation_native,
-        occupation_english = occupation_english,
-        occupation_iscocode = occupation_iscocode,
-        occupation_isconame = occupation_isconame,
-        contract_type_native = TIPO_CONTRATO,
-        contract_type_code = case_when(TIPO_CONTRATO %in% c("EFETIVO", "EFETIVO COMISSIONADO") ~ "perm",
-                                       TIPO_CONTRATO == "EXCLUSIVAMENTE COMISSIONADO" ~ "fterm",
-                                       TIPO_CONTRATO %in% c("TEMPORÁRIO", "TEMPOR¡RIO") ~ "temp",
-                                       is.na(TIPO_CONTRATO) ~ NA_character_,
-                                       TRUE ~ "other")
-      ),
+      transmute(contract_id = MATRICULA,
+                personnel_id = CPF,
+                est_id = ORGAO,
+                ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
+                base_salary_lcu = SALARIO_BASE,
+                allowance_lcu = ABONO_PERMANENCIA,
+                gross_salary_lcu = SALARIO_BRUTO,
+                net_salary_lcu = SALARIO_LIQUIDO,
+                whours = as.numeric(JORNADA),
+                start_date = as.Date(as.integer(DATA_ADMISSAO), origin = "1899-12-30"),
+                end_date = NA,
+                paygrade = CLASSE,
+                seniority = NIVEL,
+                occupation_native = occupation_native,
+                occupation_english = occupation_english,
+                occupation_iscocode = occupation_iscocode,
+                occupation_isconame = occupation_isconame,
+                contract_type_native = TIPO_CONTRATO,
+                contract_type = case_when(TIPO_CONTRATO %in% c("EFETIVO", "EFETIVO COMISSIONADO") ~ "permanent",
+                                          TIPO_CONTRATO == "EXCLUSIVAMENTE COMISSIONADO" ~ "fixed-term",
+                                          TIPO_CONTRATO %in% c("TEMPORÁRIO", "TEMPOR¡RIO") ~ "short-term",
+                                            is.na(TIPO_CONTRATO) ~ NA_character_,
+                                            TRUE ~ "other")),
     inactive_alagoas_tbl |>
       transmute(
         contract_id = MATRICULA,
@@ -200,10 +194,6 @@ contract_alagoas_tbl <-
         gross_salary_lcu = VALOR_BRUTO,
         net_salary_lcu = VALOR_LIQUIDO,
         whours = 0,
-        country_code = "BRA",
-        country_name = "Brazil",
-        adm1_name = "Alagoas",
-        adm1_code = "AL",
         start_date = as.Date(as.integer(DATA_ADMISSAO), origin = "1899-12-30"),
         end_date = as.Date(as.integer(DATA_APOSENTADORIA), origin = "1899-12-30"),
         paygrade = CLASSE,
@@ -213,11 +203,7 @@ contract_alagoas_tbl <-
         occupation_iscocode = occupation_iscocode,
         occupation_isconame = occupation_isconame,
         contract_type_native = TIPO_CONTRATO,
-        contract_type_code = case_when(TIPO_CONTRATO == "INATIVO" ~ "inactive",
-                                       TIPO_CONTRATO == "PENSIONISTA" ~ "pensioner",
-                                       is.na(TIPO_CONTRATO) ~ NA_character_,
-                                       TRUE ~ "other")
-      )
+        contract_type = NA_character_)
   )
 
 contract_alagoas_tbl <-
@@ -226,6 +212,22 @@ contract_alagoas_tbl <-
     c(ends_with("_lcu"), whours),
     ~ as.numeric(.)
   ))
+
+
+### quickly create the allowance harmonization
+allowance_tbl <- 
+  active_alagoas_tbl |>
+              transmute(contract_id = MATRICULA,
+                        ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
+                        ADICIONAL_TEMPO_SERVICO, 
+                        COMISSAO, 
+                        ABONO_PERMANENCIA, 
+                        DEMAIS_GRATIFICACOES_CARREIRA,
+                        DEMAIS_GRATIFICACOES_TRANSITORIAS) |>
+              pivot_longer(cols = -c(contract_id, ref_date),
+                           names_to = "allowance_type",
+                           values_to = "allowance_lcu")
+
 
 arrow::write_parquet(occup_df, 
                      "spielplatz/data/occupations_tbl.parquet",
@@ -237,4 +239,8 @@ arrow::write_parquet(contract_alagoas_tbl,
                      compression = "zstd", 
                      compression_level = 22)
 
+arrow::write_parquet(allowance_tbl,
+                     "spielplatz/data/allowance_alagoas_tbl.parquet", 
+                     compression = "zstd", 
+                     compression_level = 22)
 

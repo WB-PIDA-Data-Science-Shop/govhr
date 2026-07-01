@@ -28,7 +28,9 @@ if (getRversion() >= "2.15.1"){
     "to_period", ".grp_base", ".ind_base", "group_val", "group_var",
     "stat_type", "variable_id", "variable_name", "vol_fn", ".row_id",
     "group_label", "target_label", "target_var", "module", "variable",
-    "name", "items", "passes", "fails", "error"
+    "name", "items", "passes", "fails", "error", "label_clean", "class_label",
+    "tf", "idf", "df", "tfidf", "text", "class_id", "score", "head", "tfidf_c",
+    "tfidf_t", "dot", "norm_c", "norm_t"
   ))
 
 }
