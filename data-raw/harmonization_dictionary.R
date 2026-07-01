@@ -16,9 +16,9 @@ dict_df <-
 
   read_excel(path_chr, sheet = sheet)
 
-}) |>
- bind_rows() |> 
- janitor::clean_names()
+  }) |>
+  bind_rows() |> 
+  janitor::clean_names()
 
 dictionary <- dict_df
 

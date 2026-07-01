@@ -3,27 +3,61 @@
 \docType{data}
 \name{bra_hrmis_est}
 \alias{bra_hrmis_est}
-\title{Establishment Dataset}
+\title{HRMIS Establishment Dataset}
 \format{
-A data frame with N rows and 9 variables:
+A data frame with 65 rows and 6 variables:
 \describe{
-  \item{est_id}{Unique identifier for the establishment}
-  \item{est_name_native}{Official establishment name in local language}
-  \item{est_name_en}{Establishment name translated to English}
-  \item{country_code}{Official World Bank ISO-3 country code}
-  \item{country_name}{Official World Bank country name}
-  \item{adm1_name}{First-level administrative division name}
-  \item{adm1_code}{First-level administrative division code}
-  \item{est_parent}{Identifier for parent establishment in hierarchy}
-  \item{est_child}{Identifier for child establishments in hierarchy}
+  \item{est_name_native}{Official establishment name in the native language (Portuguese).}
+  \item{est_id}{Unique identifier assigned to each establishment.}
+  \item{country_code}{Three-letter ISO 3166-1 alpha-3 country code following the World Bank convention (e.g., \code{"BRA"}).}
+  \item{country_name}{Official World Bank country name.}
+  \item{est_name_en}{Official establishment name translated into English.}
+  \item{sector}{Standardized Classification of the Functions of Government (COFOG) sector assigned to the establishment.}
 }
+}
+\source{
+Government of the State of Alagoas Human Resource Management Information
+System (HRMIS), harmonized by the GovHR project.
 }
 \usage{
 bra_hrmis_est
 }
 \description{
-This dataset contains information about public sector establishments, including
-identifiers, names, hierarchical relationships, and geographic context.
-Each row represents a unique establishment record.
+Harmonized establishment-level human resource management information system
+(HRMIS) data for the State of Alagoas, Brazil. Each observation represents a
+unique public sector establishment and contains standardized establishment
+names, country identifiers, and functional classifications.
+}
+\details{
+The dataset follows the GovHR establishment module data dictionary and is
+intended to support organizational analysis, workforce reporting, and
+aggregation of personnel and contract records.
+
+
+This dataset is harmonized according to the GovHR establishment module data
+dictionary. Establishment names are translated into English to facilitate
+international comparative analysis. Each establishment is assigned to one of
+the ten top-level COFOG functional sectors:
+
+\itemize{
+  \item General Public Services
+  \item Defence
+  \item Public Order and Safety
+  \item Economic Affairs
+  \item Environmental Protection
+  \item Housing and Community Amenities
+  \item Health
+  \item Recreation, Culture and Religion
+  \item Education
+  \item Social Protection
+}
+}
+\examples{
+data(bra_hrmis_est)
+head(bra_hrmis_est)
+}
+\seealso{
+\code{\link{bra_hrmis_contract}},
+\code{\link{bra_hrmis_personnel}}
 }
 \keyword{datasets}

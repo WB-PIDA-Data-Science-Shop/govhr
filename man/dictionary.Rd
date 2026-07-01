@@ -3,51 +3,80 @@
 \docType{data}
 \name{dictionary}
 \alias{dictionary}
-\title{Harmonization Dictionary for Payroll Data}
+\title{Harmonization Dictionary for Payroll and HRMIS Data}
 \format{
-A tibble with 45 rows and 5 variables:
+A tibble with 50 rows and 6 variables:
 \describe{
-  \item{variable_name}{Character. Human-readable variable name.}
-  \item{variable_id}{Character. Standardized snake_case variable identifier.}
-  \item{variable_description}{Character. Definition of the variable.}
-  \item{variable_class}{Character. Target R class for the variable.}
-  \item{module}{Character. Harmonization module using this variable.}
+  \item{variable_name}{Character. Human-readable name of the standardized variable.}
+  \item{variable_id}{Character. Standardized machine-readable variable identifier.}
+  \item{variable_description}{Character. Definition and intended use of the variable.}
+  \item{variable_class}{Character. Expected R class for the variable.}
+  \item{module}{Character. Harmonization module to which the variable belongs.}
+  \item{values}{Character. Expected values, formats, coding schemes, or controlled vocabularies associated with the variable.}
 }
 }
 \source{
-Created by the Institutional Capacity and EFfectiveness team as part of
-the payroll harmonization ETL framework.
+Created and maintained by the Public Institutions Data and Analytics Unit
+(EGVPI) of the World Bank as part of the GovHR harmonization framework.
 }
 \usage{
 dictionary
 }
 \description{
-A dictionary defining the standardized variable names, descriptions,
-classes, and module assignments used during the payroll data harmonization
-process.
+A dictionary defining the standardized variables, descriptions, data types,
+module assignments, and permissible values used in the GovHR harmonization
+framework.
 }
 \details{
-This dictionary is used by the harmonization pipeline to map raw payroll,
-contract, personnel, and establishment variables from government HRMIS /
-payroll systems to a consistent, analysis-ready schema. Each row represents
-one standardized variable name and specifies:
+This dictionary serves as the authoritative data standard for harmonizing
+payroll and Human Resource Management Information System (HRMIS) data from
+government institutions into a consistent, analysis-ready structure.
+Each row represents a standardized variable and provides its identifier,
+definition, expected data type, module assignment, and expected values or
+coding scheme where applicable.
 
-* **variable_name** — The human-readable name of the variable as it appears in the
-  final harmonized dataset.  
-* **variable_id** — The machine-readable variable name (snake_case) used in the
-  harmonized output.  
-* **variable_description** — A concise definition of the variable’s meaning and intended use.  
-* **variable_class** — The R class the variable should be cast to (e.g., character,
-  Date, numeric, integer).  
-* **module** — The module where the variable belongs (e.g., *Establishment*,
-  *Personnel*, *Contract*).
+The dictionary is used throughout the harmonization pipeline to map raw
+source variables from government payroll and HRMIS systems to a common
+schema, enabling cross-country comparability and reproducible analytics.
 
-This dictionary is designed so that automated harmonization scripts can:
-1. Validate presence and structure of required variables;  
-2. Rename raw variables to standardized IDs;  
-3. Coerce variables to the correct data type;  
-4. Split harmonized outputs into module-specific files.
+The dictionary contains the following fields:
+
+\itemize{
+  \item \strong{variable_name} -- Human-readable name of the standardized variable.
+  \item \strong{variable_id} -- Machine-readable variable identifier used in harmonized datasets.
+  \item \strong{variable_description} -- Definition and intended use of the variable.
+  \item \strong{variable_class} -- Expected R data type for the variable.
+  \item \strong{module} -- Harmonization module to which the variable belongs (e.g., Establishment, Personnel, or Contract).
+  \item \strong{values} -- Expected values, formats, coding schemes, or controlled vocabularies associated with the variable.
 }
+
+This dictionary is designed to support:
+
+\enumerate{
+  \item Validation of required variables and schema compliance;
+  \item Standardized renaming of source variables;
+  \item Data type coercion and consistency checks;
+  \item Generation of harmonized module-specific outputs;
+  \item Documentation and governance of the GovHR data standard.
+}
+}
+\section{Dictionary Version}{
+
+\strong{Version 1.0.0}
+
+This version corresponds to the initial public release of the GovHR
+harmonization dictionary.
+}
+
+\section{Version History}{
+
+\itemize{
+  \item \strong{Version 1.0.0} (2026-06-25): Initial release.
+}
+}
+
 \keyword{datasets}
+\keyword{governance}
 \keyword{harmonization}
+\keyword{hrmis}
 \keyword{payroll}

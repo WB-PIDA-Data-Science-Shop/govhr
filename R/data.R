@@ -158,49 +158,73 @@
 #' \url{https://data360.worldbank.org/en/int/indicator/WB_ES_T_WK10}
 "enterprise_surveys"
 
-#' Harmonization Dictionary for Payroll Data
+#' Harmonization Dictionary for Payroll and HRMIS Data
 #'
-#' A dictionary defining the standardized variable names, descriptions,
-#' classes, and module assignments used during the payroll data harmonization
-#' process.  
+#' A dictionary defining the standardized variables, descriptions, data types,
+#' module assignments, and permissible values used in the GovHR harmonization
+#' framework.
 #'
-#' This dictionary is used by the harmonization pipeline to map raw payroll,
-#' contract, personnel, and establishment variables from government HRMIS /
-#' payroll systems to a consistent, analysis-ready schema. Each row represents
-#' one standardized variable name and specifies:
-#' 
-#' * **variable_name** — The human-readable name of the variable as it appears in the
-#'   final harmonized dataset.  
-#' * **variable_id** — The machine-readable variable name (snake_case) used in the
-#'   harmonized output.  
-#' * **variable_description** — A concise definition of the variable’s meaning and intended use.  
-#' * **variable_class** — The R class the variable should be cast to (e.g., character,
-#'   Date, numeric, integer).  
-#' * **module** — The module where the variable belongs (e.g., *Establishment*,
-#'   *Personnel*, *Contract*).
+#' This dictionary serves as the authoritative data standard for harmonizing
+#' payroll and Human Resource Management Information System (HRMIS) data from
+#' government institutions into a consistent, analysis-ready structure.
+#' Each row represents a standardized variable and provides its identifier,
+#' definition, expected data type, module assignment, and expected values or
+#' coding scheme where applicable.
 #'
-#' This dictionary is designed so that automated harmonization scripts can:
-#' 1. Validate presence and structure of required variables;  
-#' 2. Rename raw variables to standardized IDs;  
-#' 3. Coerce variables to the correct data type;  
-#' 4. Split harmonized outputs into module-specific files.
+#' The dictionary is used throughout the harmonization pipeline to map raw
+#' source variables from government payroll and HRMIS systems to a common
+#' schema, enabling cross-country comparability and reproducible analytics.
 #'
-#' @format A tibble with 45 rows and 5 variables:
+#' The dictionary contains the following fields:
+#'
+#' \itemize{
+#'   \item \strong{variable_name} -- Human-readable name of the standardized variable.
+#'   \item \strong{variable_id} -- Machine-readable variable identifier used in harmonized datasets.
+#'   \item \strong{variable_description} -- Definition and intended use of the variable.
+#'   \item \strong{variable_class} -- Expected R data type for the variable.
+#'   \item \strong{module} -- Harmonization module to which the variable belongs (e.g., Establishment, Personnel, or Contract).
+#'   \item \strong{values} -- Expected values, formats, coding schemes, or controlled vocabularies associated with the variable.
+#' }
+#'
+#' This dictionary is designed to support:
+#'
+#' \enumerate{
+#'   \item Validation of required variables and schema compliance;
+#'   \item Standardized renaming of source variables;
+#'   \item Data type coercion and consistency checks;
+#'   \item Generation of harmonized module-specific outputs;
+#'   \item Documentation and governance of the GovHR data standard.
+#' }
+#'
+#' @section Dictionary Version:
+#' \strong{Version 1.0.0}
+#'
+#' This version corresponds to the initial public release of the GovHR
+#' harmonization dictionary.
+#'
+#' @section Version History:
+#' \itemize{
+#'   \item \strong{Version 1.0.0} (2026-06-25): Initial release.
+#' }
+#'
+#' @format A tibble with 50 rows and 6 variables:
 #' \describe{
-#'   \item{variable_name}{Character. Human-readable variable name.}
-#'   \item{variable_id}{Character. Standardized snake_case variable identifier.}
-#'   \item{variable_description}{Character. Definition of the variable.}
-#'   \item{variable_class}{Character. Target R class for the variable.}
-#'   \item{module}{Character. Harmonization module using this variable.}
+#'   \item{variable_name}{Character. Human-readable name of the standardized variable.}
+#'   \item{variable_id}{Character. Standardized machine-readable variable identifier.}
+#'   \item{variable_description}{Character. Definition and intended use of the variable.}
+#'   \item{variable_class}{Character. Expected R class for the variable.}
+#'   \item{module}{Character. Harmonization module to which the variable belongs.}
+#'   \item{values}{Character. Expected values, formats, coding schemes, or controlled vocabularies associated with the variable.}
 #' }
 #'
 #' @usage
 #' dictionary
 #'
-#' @source Created by the Institutional Capacity and EFfectiveness team as part of
-#' the payroll harmonization ETL framework.
+#' @source
+#' Created and maintained by the Public Institutions Data and Analytics Unit
+#' (EGVPI) of the World Bank as part of the GovHR harmonization framework.
 #'
-#' @keywords datasets harmonization payroll
+#' @keywords datasets harmonization payroll hrmis governance
 "dictionary"
 
 #' Brazilian Public Employee Payroll Data
@@ -258,81 +282,161 @@
 #' }
 "bra_hrmis"
 
-#' Contract Dataset
+#' HRMIS Contract Dataset
 #'
-#' This dataset contains detailed information about contracts, including salaries,
-#' allowances, occupation, work hours, and establishmental context. Each row represents
-#' a unique contract record.
+#' Harmonized contract-level human resource management information system (HRMIS)
+#' data for the State of Alagoas, Brazil. Each observation represents a unique
+#' contract at a given reference date (`contract_id`, `ref_date`) and contains
+#' information on remuneration, contract characteristics, occupation, and
+#' employment details.
 #'
-#' @format A data frame with N rows and 24 variables:
+#' The dataset follows the GovHR contract module data dictionary and is intended
+#' for workforce analytics, payroll analysis, and personnel microsimulation.
+#'
+#' @format A data frame with 16,434 rows and 19 variables:
 #' \describe{
-#'   \item{contract_id}{Unique identifier for the contract}
-#'   \item{personnel_id}{Foreign key linking to Personnel module}
-#'   \item{est_id}{Foreign key linking to Establishment module}
-#'   \item{ref_date}{Timestamp for the contract record}
-#'   \item{contract_type_code}{Type of contract code}
-#'   \item{contract_type_native}{Type of contract in local language}
-#'   \item{base_salary_lcu}{Base compensation in local currency units (LCU)}
-#'   \item{gross_salary_lcu}{Total compensation before deductions in local currency units}
-#'   \item{net_salary_lcu}{Compensation after deductions in local currency units}
-#'   \item{allowance_lcu}{Allowances in local currency units}
-#'   \item{occupation_native}{Job title in the local language}
-#'   \item{occupation_english}{Job title translated to English}
-#'   \item{occupation_isconame}{ISCO standard occupation name}
-#'   \item{occupation_iscocode}{ISCO standard occupation code}
-#'   \item{start_date}{Contract start date}
-#'   \item{end_date}{Contract end date, if applicable}
-#'   \item{country_code}{Official World Bank ISO-3 country code}
-#'   \item{country_name}{Official World Bank country name}
-#'   \item{adm1_name}{First-level administrative division name}
-#'   \item{adm1_code}{First-level administrative division code}
-#'   \item{whours}{Standard or actual hours worked}
-#'   \item{paygrade}{Salary scale or grade level}
-#'   \item{seniority}{Years of service or seniority level}
+#'   \item{contract_id}{Unique identifier assigned to each contract.}
+#'   \item{personnel_id}{Unique identifier assigned to each worker.}
+#'   \item{est_id}{Unique identifier assigned to each establishment.}
+#'   \item{ref_date}{Reference date of the HRMIS record.}
+#'   \item{base_salary_lcu}{Basic salary before allowances and deductions (local currency units).}
+#'   \item{allowance_lcu}{Total allowances paid in addition to base salary (local currency units).}
+#'   \item{gross_salary_lcu}{Total compensation before taxes and deductions (local currency units).}
+#'   \item{net_salary_lcu}{Take-home pay after taxes and deductions (local currency units).}
+#'   \item{whours}{Contracted working hours.}
+#'   \item{start_date}{Employment contract start date.}
+#'   \item{end_date}{Employment contract end date, if applicable.}
+#'   \item{paygrade}{Pay grade or salary scale classification.}
+#'   \item{seniority}{Level or step within the pay grade.}
+#'   \item{occupation_native}{Occupation title in the native language.}
+#'   \item{occupation_english}{Occupation title translated into English.}
+#'   \item{occupation_iscocode}{ISCO-08 occupation code (4-digit level).}
+#'   \item{occupation_isconame}{ISCO-08 occupation name corresponding to the occupation code.}
+#'   \item{contract_type_native}{Employment contract type in the native language.}
+#'   \item{contract_type}{Standardized employment contract type. One of
+#'   \code{"permanent"}, \code{"fixed-term"}, \code{"short-term"},
+#'   \code{"pensioner"}, or \code{"inactive"}.}
 #' }
 #'
+#' @details
+#' This dataset is harmonized according to the GovHR data dictionary. Salary
+#' variables are expressed in nominal local currency units (LCU). Occupations
+#' are translated into English and mapped to the International Standard
+#' Classification of Occupations (ISCO-08). Contract types are standardized
+#' across countries to facilitate comparative analysis.
+#'
+#' @source
+#' Government of the State of Alagoas Human Resource Management Information
+#' System (HRMIS), harmonized by the GovHR project.
+#'
+#' @seealso
+#' \code{\link{bra_hrmis_personnel}},
+#' \code{\link{bra_hrmis_est}}
+#'
+#' @examples
+#' data(bra_hrmis_contract)
+#' head(bra_hrmis_contract)
 "bra_hrmis_contract"
 
-#' Personnel Dataset
+#' HRMIS Personnel Dataset
 #'
-#' This dataset contains demographic and employment information for personnel,
-#' including identifiers, education, tribal/racial classification, employment status,
-#' and geographic context. Each row represents a unique personnel record.
+#' Harmonized personnel-level human resource management information system
+#' (HRMIS) data for the State of Alagoas, Brazil. Each observation represents a
+#' unique worker at a given reference date (`personnel_id`, `ref_date`) and
+#' contains demographic characteristics, education, employment status, and
+#' public service information.
 #'
-#' @format A data frame with N rows and 9 variables:
+#' The dataset follows the GovHR personnel module data dictionary and is
+#' intended for workforce analytics, demographic analysis, and personnel
+#' microsimulation.
+#'
+#' @format A data frame with 15,681 rows and 11 variables:
 #' \describe{
-#'   \item{personnel_id}{Unique identifier for the personnel}
-#'   \item{birth_date}{Personnel’s date of birth}
-#'   \item{gender}{Personnel’s gender}
-#'   \item{educat7}{Education level using 7-category classification}
-#'   \item{tribe}{Tribal affiliation (where applicable)}
-#'   \item{race}{Racial/ethnic classification}
-#'   \item{status}{Current employment status (active/retired)}
-#'   \item{country_code}{Official World Bank ISO-3 country code}
-#'   \item{ref_date}{Timestamp for the personnel record}
+#'   \item{personnel_id}{Unique identifier assigned to each worker.}
+#'   \item{ref_date}{Reference date of the HRMIS record.}
+#'   \item{birth_date}{Worker's date of birth.}
+#'   \item{age}{Worker's age in years at the reference date.}
+#'   \item{gender}{Worker's gender.}
+#'   \item{educat7}{Educational attainment using the World Bank Global Labor Database (GLD) seven-level education classification.}
+#'   \item{employment_status}{Standardized employment status. One of
+#'   \code{"active"}, \code{"inactive"}, or \code{"pensioner"}.}
+#'   \item{service_type}{Type of public service. One of
+#'   \code{"civilian"} or \code{"military"}.}
+#'   \item{race}{Worker's race or broad ethnic classification, where available.}
+#'   \item{tribe}{Worker's ethnic or tribal affiliation, where available.}
+#'   \item{first_employment_date}{Date the worker first entered the public service.}
 #' }
 #'
+#' @details
+#' This dataset is harmonized according to the GovHR data dictionary. Educational
+#' attainment follows the seven-level classification used by the World Bank's
+#' Global Labor Database (GLD). Employment status and service type are
+#' standardized across countries to facilitate comparative analysis of public
+#' sector workforces.
+#'
+#' @source
+#' Government of the State of Alagoas Human Resource Management Information
+#' System (HRMIS), harmonized by the GovHR project.
+#'
+#' @seealso
+#' \code{\link{bra_hrmis_contract}},
+#' \code{\link{bra_hrmis_est}}
+#'
+#' @examples
+#' data(bra_hrmis_personnel)
 "bra_hrmis_personnel"
 
-#' Establishment Dataset
+#' HRMIS Establishment Dataset
 #'
-#' This dataset contains information about public sector establishments, including
-#' identifiers, names, hierarchical relationships, and geographic context.
-#' Each row represents a unique establishment record.
+#' Harmonized establishment-level human resource management information system
+#' (HRMIS) data for the State of Alagoas, Brazil. Each observation represents a
+#' unique public sector establishment and contains standardized establishment
+#' names, country identifiers, and functional classifications.
 #'
-#' @format A data frame with N rows and 9 variables:
+#' The dataset follows the GovHR establishment module data dictionary and is
+#' intended to support organizational analysis, workforce reporting, and
+#' aggregation of personnel and contract records.
+#'
+#' @format A data frame with 65 rows and 6 variables:
 #' \describe{
-#'   \item{est_id}{Unique identifier for the establishment}
-#'   \item{est_name_native}{Official establishment name in local language}
-#'   \item{est_name_en}{Establishment name translated to English}
-#'   \item{country_code}{Official World Bank ISO-3 country code}
-#'   \item{country_name}{Official World Bank country name}
-#'   \item{adm1_name}{First-level administrative division name}
-#'   \item{adm1_code}{First-level administrative division code}
-#'   \item{est_parent}{Identifier for parent establishment in hierarchy}
-#'   \item{est_child}{Identifier for child establishments in hierarchy}
+#'   \item{est_name_native}{Official establishment name in the native language (Portuguese).}
+#'   \item{est_id}{Unique identifier assigned to each establishment.}
+#'   \item{country_code}{Three-letter ISO 3166-1 alpha-3 country code following the World Bank convention (e.g., \code{"BRA"}).}
+#'   \item{country_name}{Official World Bank country name.}
+#'   \item{est_name_en}{Official establishment name translated into English.}
+#'   \item{sector}{Standardized Classification of the Functions of Government (COFOG) sector assigned to the establishment.}
 #' }
 #'
+#' @details
+#' This dataset is harmonized according to the GovHR establishment module data
+#' dictionary. Establishment names are translated into English to facilitate
+#' international comparative analysis. Each establishment is assigned to one of
+#' the ten top-level COFOG functional sectors:
+#'
+#' \itemize{
+#'   \item General Public Services
+#'   \item Defence
+#'   \item Public Order and Safety
+#'   \item Economic Affairs
+#'   \item Environmental Protection
+#'   \item Housing and Community Amenities
+#'   \item Health
+#'   \item Recreation, Culture and Religion
+#'   \item Education
+#'   \item Social Protection
+#' }
+#'
+#' @source
+#' Government of the State of Alagoas Human Resource Management Information
+#' System (HRMIS), harmonized by the GovHR project.
+#'
+#' @seealso
+#' \code{\link{bra_hrmis_contract}},
+#' \code{\link{bra_hrmis_personnel}}
+#'
+#' @examples
+#' data(bra_hrmis_est)
+#' head(bra_hrmis_est)
 "bra_hrmis_est"
 
 #' Personnel Validation Rules
@@ -421,3 +525,110 @@
 #' @source Created for the govhr package data quality framework
 "contract_rules"
 
+
+#' COFOG Functional Classification Taxonomy
+#'
+#' A lookup table containing the first-level Classification of the Functions
+#' of Government (COFOG) taxonomy used by `govhrcast` to classify government
+#' establishments according to their primary functional responsibilities.
+#'
+#' The dataset includes the ten top-level COFOG classes defined by the
+#' International Monetary Fund (IMF) Government Finance Statistics Manual
+#' and the United Nations Classification of the Functions of Government,
+#' together with descriptive keyword dictionaries that facilitate automated
+#' establishment classification during HRMIS harmonization.
+#'
+#' @format A data frame with 10 rows and 3 variables:
+#' \describe{
+#'   \item{class_id}{Character. Two-digit COFOG class identifier (e.g.,
+#'   `"01"`, `"02"`).}
+#'
+#'   \item{class_label}{Character. Name of the first-level COFOG function.}
+#'
+#'   \item{description}{Character. Collection of keywords and descriptive
+#'   terms associated with each COFOG function. These are intended to support
+#'   rule-based and machine-assisted classification of government
+#'   establishments.}
+#' }
+#'
+#' The ten first-level COFOG functions are:
+#' \enumerate{
+#'   \item General Public Services
+#'   \item Defence
+#'   \item Public Order and Safety
+#'   \item Economic Affairs
+#'   \item Environmental Protection
+#'   \item Housing and Community Amenities
+#'   \item Health
+#'   \item Recreation, Culture and Religion
+#'   \item Education
+#'   \item Social Protection
+#' }
+#'
+#' @details
+#' This dataset is intended primarily for internal use by the establishment
+#' harmonization workflow, where establishment names are mapped to functional
+#' classifications using keyword matching and other natural language
+#' processing methods. Users may also employ the taxonomy directly when
+#' developing custom classification rules or validating automated
+#' classifications in general.
+#'
+#' @seealso
+#' \code{\link{dictionary}},
+#'
+#' @source
+#' United Nations. *Classification of the Functions of Government (COFOG)*;
+#' International Monetary Fund. *Government Finance Statistics Manual 2014*.
+#'
+#' @docType data
+#' @keywords datasets
+#' @name cofog_taxonomy
+#' @usage data(cofog_taxonomy)
+NULL
+
+#' Brazil HRMIS Allowance Module
+#'
+#' A harmonized personnel allowance dataset derived from the Brazil Human
+#' Resource Management Information System (HRMIS). Each record represents a
+#' single allowance or bonus received by a personnel contract during a
+#' reference period.
+#'
+#' The dataset follows a long format, with one observation per
+#' `contract_id`–`ref_date`–`allowance_type` combination. Monetary values are
+#' reported in local currency units (LCU).
+#'
+#' @format A data frame with 60,430 rows and 5 variables:
+#' \describe{
+#'   \item{contract_id}{Character. Unique identifier for the employment
+#'   contract associated with the allowance.}
+#'
+#'   \item{ref_date}{Date. Reference date for the payroll record.}
+#'
+#'   \item{allowance_type}{Character. Harmonized allowance or bonus category.}
+#'
+#'   \item{allowance_lcu}{Numeric. Value of the allowance in local currency
+#'   units (LCU).}
+#'
+#'   \item{personnel_id}{Character. Unique identifier for the individual
+#'   receiving the allowance.}
+#' }
+#'
+#' @details
+#' The allowance module records non-base salary remuneration components paid
+#' to employees, including permanent and temporary allowances, bonuses,
+#' commissions, and other supplementary payments. Each observation
+#' corresponds to a single allowance category for a specific contract and
+#' payroll reference date.
+#'
+#' Multiple allowance records may exist for the same contract and reference
+#' date when an employee receives more than one type of allowance.
+#'
+#' @source
+#' Government of the State of Alagoas Human Resource Management Information
+#' System (HRMIS), harmonized by the `govhrcast` package.
+#'
+#' @docType data
+#' @keywords datasets
+#' @name bra_hrmis_allowance
+#' @usage data(bra_hrmis_allowance)
+NULL

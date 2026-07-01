@@ -28,7 +28,8 @@ Imports:
     jsonlite,
     purrr,
     rmarkdown,
-    tidyselect
+    tidyselect,
+    stringdist
 Suggests: 
     forcats,
     readr,
