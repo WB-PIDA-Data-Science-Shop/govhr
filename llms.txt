@@ -41,18 +41,25 @@ pak::pak("WB-PIDA-Data-Science-Shop/govhr")
   : Add Contract Information to Event Records
 - [`bra_hrmis`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis.md)
   : Brazilian Public Employee Payroll Data
+- [`bra_hrmis_allowance`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_allowance.md)
+  : Brazil HRMIS Allowance Module
 - [`bra_hrmis_contract`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_contract.md)
-  : Contract Dataset
+  : HRMIS Contract Dataset
 - [`bra_hrmis_est`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_est.md)
-  : Establishment Dataset
+  : HRMIS Establishment Dataset
 - [`bra_hrmis_personnel`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_personnel.md)
-  : Personnel Dataset
+  : HRMIS Personnel Dataset
 - [`calculate_date_intervals()`](https://wb-pida-data-science-shop.github.io/govhr/reference/calculate_date_intervals.md)
   : Calculate time intervals between reference dates
 - [`check_orphan_id()`](https://wb-pida-data-science-shop.github.io/govhr/reference/check_orphan_id.md)
   : Detect Orphan Records Between Parent and Child Modules
+- [`classify_text()`](https://wb-pida-data-science-shop.github.io/govhr/reference/classify_text.md)
+  : Classify free-text items against a user-supplied taxonomy using
+  TF-IDF
 - [`clean_hr_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/clean_hr_data.md)
   : Apply Standard HR Data Cleaning Pipeline
+- [`cofog_taxonomy`](https://wb-pida-data-science-shop.github.io/govhr/reference/cofog_taxonomy.md)
+  : COFOG Functional Classification Taxonomy
 - [`compare_names_qc()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compare_names_qc.md)
   : Compare the contents of two character vectors
 - [`compare_to_dictionary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compare_to_dictionary.md)
@@ -111,7 +118,7 @@ pak::pak("WB-PIDA-Data-Science-Shop/govhr")
 - [`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md)
   : Detect Personnel Retirement Events
 - [`dictionary`](https://wb-pida-data-science-shop.github.io/govhr/reference/dictionary.md)
-  : Harmonization Dictionary for Payroll Data
+  : Harmonization Dictionary for Payroll and HRMIS Data
 - [`enterprise_surveys`](https://wb-pida-data-science-shop.github.io/govhr/reference/enterprise_surveys.md)
   : World Bank Enterprise Surveys
 - [`estimate_exit_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_exit_rates.md)

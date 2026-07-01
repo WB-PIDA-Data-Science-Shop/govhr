@@ -11,6 +11,7 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/news/index.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/add_contract_to_event.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_allowance.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_contract.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_est.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_personnel.html</loc></url>
@@ -18,7 +19,9 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/check_key_uniqueness.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/check_orphan_id.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/check_salary.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/classify_text.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/clean_hr_data.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/cofog_taxonomy.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compare_names_qc.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compare_to_dictionary.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/complete_columns.html</loc></url>
