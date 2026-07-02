@@ -12,7 +12,7 @@ library(tidyr)
 library(writexl)
 library(here)
 
-plan(multisession, personnels = 6)
+plan(multisession, workers = 6)
 set.seed(1789)
 
 # read-in data ------------------------------------------------------------
@@ -126,6 +126,9 @@ alagoas_est_tbl <-
   transmute(
     est_id = ORGAO,
     est_name_native = ORGAO,
+    ref_date = lubridate::ymd(
+      paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")
+    ),
     country_code = "BRA",
     country_name = "Brazil",
     adm1_name = "Alagoas",
@@ -160,6 +163,9 @@ alagoas_est_tbl <-
       transmute(
         est_id = ORGAO,
         est_name_native = ORGAO,
+        ref_date = lubridate::ymd(
+          paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")
+        ),
         country_code = "BRA",
         country_name = "Brazil",
         adm1_name = "Alagoas",
