@@ -58,6 +58,9 @@ names, country identifiers, and functional classifications.</p>
   <dt>est_id</dt>
 <dd><p>Unique identifier assigned to each establishment.</p></dd>
 
+  <dt>ref_date</dt>
+<dd><p>Reference date of the HRMIS record.</p></dd>
+
   <dt>country_code</dt>
 <dd><p>Three-letter ISO 3166-1 alpha-3 country code following the World Bank convention (e.g., <code>"BRA"</code>).</p></dd>
 
@@ -108,15 +111,15 @@ the ten top-level COFOG functional sectors:</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">bra_hrmis_est</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">bra_hrmis_est</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 6</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   est_name_native            est_id country_code country_name est_name_en sector</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> AGENCIA DE DEFESA E INSPE… AGENC… BRA          Brazil       defense an… Defen…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> AGENCIA DE FOMENTO DE ALA… AGENC… BRA          Brazil       alagoas fo… Econo…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> AGENCIA DE HABITACAO E DE… AGENC… BRA          Brazil       al housing… Housi…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> AGENCIA DE MODERNIZACAO D… AGENC… BRA          Brazil       process ma… Gener…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> AGENCIA REGULADORA DE SER… AGENC… BRA          Brazil       public ser… Gener…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> ALAGOAS PREVIDENCIA        ALAGO… BRA          Brazil       alagoas pe… Socia…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   est_name_native est_id ref_date   country_code country_name est_name_en sector</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> AGENCIA DE DEF… AGENC… 2007-09-01 BRA          Brazil       defense an… Defen…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> AGENCIA DE DEF… AGENC… 2017-09-01 BRA          Brazil       defense an… Defen…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> AGENCIA DE DEF… AGENC… 2015-09-01 BRA          Brazil       defense an… Defen…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> AGENCIA DE DEF… AGENC… 2012-09-01 BRA          Brazil       defense an… Defen…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> AGENCIA DE DEF… AGENC… 2009-09-01 BRA          Brazil       defense an… Defen…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> AGENCIA DE DEF… AGENC… 2010-09-01 BRA          Brazil       defense an… Defen…</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
