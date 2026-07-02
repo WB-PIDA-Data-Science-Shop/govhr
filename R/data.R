@@ -401,6 +401,7 @@
 #' \describe{
 #'   \item{est_name_native}{Official establishment name in the native language (Portuguese).}
 #'   \item{est_id}{Unique identifier assigned to each establishment.}
+#'   \item{ref_date}{Reference date of the HRMIS record.}
 #'   \item{country_code}{Three-letter ISO 3166-1 alpha-3 country code following the World Bank convention (e.g., \code{"BRA"}).}
 #'   \item{country_name}{Official World Bank country name.}
 #'   \item{est_name_en}{Official establishment name translated into English.}
