@@ -146,16 +146,6 @@ personnel_df <- personnel_df |>
       ) ~ "University incomplete or complete",
       education == "NA" ~ NA_character_,
       TRUE ~ NA_character_
-    ),
-    educat7 = factor(
-      educat7,
-      levels = c(
-        "No education", "Primary incomplete", "Primary complete",
-        "Secondary incomplete", "Secondary complete",
-        "Higher than secondary but not university",
-        "University incomplete or complete"
-      ),
-      ordered = TRUE
     )
   )
 
