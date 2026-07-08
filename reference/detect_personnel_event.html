@@ -11,7 +11,7 @@ personnel–date combinations, fills missing periods, and identifies "hire" or
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,6 +50,7 @@ personnel–date combinations, fills missing periods, and identifies "hire" or
 <span>  <span class="va">event_type</span>,</span>
 <span>  <span class="va">start_date</span>,</span>
 <span>  <span class="va">end_date</span>,</span>
+<span>  <span class="va">status_col</span>,</span>
 <span>  freq <span class="op">=</span> <span class="st">"year"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -62,7 +63,7 @@ personnel–date combinations, fills missing periods, and identifies "hire" or
 <dd><p>A data.table or data.frame containing at least the columns:
 - `personnel_id`: Unique identifier for personnel.
 - `ref_date`: Reference date (must be coercible to Date).
-- `status`: Personnel status (e.g., "active", "inactive").</p></dd>
+- `employment_status`: Personnel status (e.g., "active", "pensioner", "inactive").</p></dd>
 
 
 <dt id="arg-id-col">id_col<a class="anchor" aria-label="anchor" href="#arg-id-col"></a></dt>
@@ -81,6 +82,10 @@ personnel–date combinations, fills missing periods, and identifies "hire" or
 <dt id="arg-end-date">end_date<a class="anchor" aria-label="anchor" href="#arg-end-date"></a></dt>
 <dd><p>Optional end date for the full date sequence
 (default: `"2018-01-01"`).</p></dd>
+
+
+<dt id="arg-status-col">status_col<a class="anchor" aria-label="anchor" href="#arg-status-col"></a></dt>
+<dd><p>a column within `data` object for the employment status of personnel</p></dd>
 
 
 <dt id="arg-freq">freq<a class="anchor" aria-label="anchor" href="#arg-freq"></a></dt>
@@ -113,7 +118,7 @@ Can be any valid value for <code>seq.Date(by = ...)</code>.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

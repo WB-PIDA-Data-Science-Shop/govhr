@@ -13,6 +13,7 @@ detect_personnel_event(
   event_type,
   start_date,
   end_date,
+  status_col,
   freq = "year"
 )
 ```
@@ -23,8 +24,8 @@ detect_personnel_event(
 
   A data.table or data.frame containing at least the columns: -
   \`personnel_id\`: Unique identifier for personnel. - \`ref_date\`:
-  Reference date (must be coercible to Date). - \`status\`: Personnel
-  status (e.g., "active", "inactive").
+  Reference date (must be coercible to Date). - \`employment_status\`:
+  Personnel status (e.g., "active", "pensioner", "inactive").
 
 - id_col:
 
@@ -44,6 +45,10 @@ detect_personnel_event(
 
   Optional end date for the full date sequence (default:
   \`"2018-01-01"\`).
+
+- status_col:
+
+  a column within \`data\` object for the employment status of personnel
 
 - freq:
 

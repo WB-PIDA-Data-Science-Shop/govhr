@@ -18,9 +18,9 @@ estimate_exit_rates(
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
   start_date_col = "start_date",
-  contract_type_col = "contract_type_code",
+  contract_type_col = "contract_type",
   end_date_col = "end_date",
-  status_col = "status"
+  status_col = "employment_status"
 )
 ```
 

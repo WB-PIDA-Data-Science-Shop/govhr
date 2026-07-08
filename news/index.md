@@ -1,5 +1,11 @@
 # Changelog
 
+## govhr 0.3.1
+
+This release: - Updates the movement functions and unit tests to be more
+robust to changes in the harmonization dictionary and lazy-loaded
+objects.
+
 ## govhr 0.3.0
 
 This release:
