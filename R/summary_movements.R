@@ -517,7 +517,7 @@ estimate_exit_rates <- function(contract_dt,
     exit_counts <- fire_events[, .(n_exits = .N), by = ref_date_col]
   }
 
-  active_types <- c("fterm", "perm", "temp")
+  active_types <- c("fixed-term", "permanent", "short-term")
   stock_dt <-
     panel_contract_dt[
       ,
