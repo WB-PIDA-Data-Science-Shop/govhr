@@ -28,7 +28,8 @@ test_that("detect_personnel_event detects hires correctly", {
     event_type = "hire",
     start_date = "2015-01-01",
     end_date = "2025-12-31",
-    freq = "year"
+    freq = "year",
+    status_col = "status"
   )
 
   # Output should have only 'hire' events
@@ -48,7 +49,8 @@ test_that("detect_personnel_event detects fires correctly", {
     event_type = "fire",
     start_date = "2015-01-01",
     end_date = "2025-12-31",
-    freq = "year"
+    freq = "year",
+    status_col = "status"
   )
 
   # Output should have only 'fire' events
@@ -72,7 +74,8 @@ test_that("detect_personnel_event ignores inactive personnel", {
     event_type = "hire",
     start_date = "2015-01-01",
     end_date = "2025-12-31",
-    freq = "year"
+    freq = "year",
+    status_col = "status"
   )
 
   # personnel_id 1 should not appear
@@ -84,8 +87,8 @@ test_that("detect_personnel_event works with multiple personnel and dates", {
   dt3 <- copy(personnel_dt)
   dt3[, status := sample(c("active", "inactive"), .N, replace = TRUE)]
 
-  res_hire <- detect_personnel_event(dt3, "personnel_id", "hire", "2015-01-01", "2025-12-31")
-  res_fire <- detect_personnel_event(dt3, "personnel_id", "fire", "2015-01-01", "2025-12-31")
+  res_hire <- detect_personnel_event(dt3, "personnel_id", "hire", "2015-01-01", "2025-12-31", status_col = "status")
+  res_fire <- detect_personnel_event(dt3, "personnel_id", "fire", "2015-01-01", "2025-12-31", status_col = "status")
 
   # Should return data.tables with correct columns
   expect_true(all(c("personnel_id", "ref_date", "type_event") %in% names(res_hire)))
@@ -103,7 +106,8 @@ test_that("detect_personnel_event output respects start_date / end_date filterin
     id_col = "personnel_id",
     event_type = "hire",
     start_date = "2020-01-01",
-    end_date = "2025-12-31"
+    end_date = "2025-12-31",
+    status_col = "status"
   )
 
   expect_true(all(res$ref_date > ymd("2020-01-01")))
@@ -113,7 +117,8 @@ test_that("detect_personnel_event output respects start_date / end_date filterin
     id_col = "personnel_id",
     event_type = "fire",
     start_date = "2015-01-01",
-    end_date = "2020-01-01"
+    end_date = "2020-01-01",
+    status_col = "status"
   )
 
   expect_true(all(res_fire$ref_date < ymd("2020-01-01")))

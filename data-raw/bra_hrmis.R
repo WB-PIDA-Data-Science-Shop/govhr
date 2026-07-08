@@ -194,6 +194,7 @@ bra_hrmis_est <- est_tbl
 #   mutate(
 #     CPF = purrr::map_chr(CPF, digest, algo = "sha256")
 #   )
+
 set.seed(123)
 
 personnel_list <- 

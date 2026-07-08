@@ -10,7 +10,7 @@ n_personnel <- 1000
 dt <- data.table(
   personnel_id = rep(1:n_personnel, each = length(years)),
   ref_date = rep(ymd(paste0(years, "-01-01")), times = n_personnel),
-  status = sample(c("active", "inactive"), n_personnel * length(years), replace = TRUE, prob = c(0.7,0.3))
+  employment_status = sample(c("active", "pensioner"), n_personnel * length(years), replace = TRUE, prob = c(0.7,0.3))
 )
 
 # Mock convert_data if not available
@@ -22,7 +22,7 @@ test_that("detect_retirement detects retirement events correctly", {
   dt2 <- data.table(
     personnel_id = c(1,1,1,2,2),
     ref_date = ymd(c("2020-01-01","2021-01-01","2022-01-01","2020-01-01","2021-01-01")),
-    status = c("active","active","inactive","active","inactive")
+    employment_status = c("active","active","pensioner","active","pensioner")
   )
 
   res <- detect_retirement(dt2)
@@ -42,7 +42,7 @@ test_that("detect_retirement ignores non-retire transitions", {
   dt3 <- data.table(
     personnel_id = 1:3,
     ref_date = ymd(c("2020-01-01","2021-01-01","2022-01-01")),
-    status = c("active","active","active")
+    employment_status = c("active","active","active")
   )
 
   res <- detect_retirement(dt3)
@@ -52,7 +52,7 @@ test_that("detect_retirement ignores non-retire transitions", {
 test_that("detect_retirement works with multiple personnel and years", {
   dt_large <- copy(dt)
   # Randomly set the last year of each personnel to inactive
-  dt_large[, status := ifelse(ref_date == max(ref_date), "inactive", "active"), by = personnel_id]
+  dt_large[, employment_status := ifelse(ref_date == max(ref_date), "pensioner", "active"), by = personnel_id]
 
   res <- detect_retirement(dt_large)
 
@@ -77,7 +77,7 @@ test_that("detect_retirement handles edge cases with single-year personnel", {
   dt_edge <- data.table(
     personnel_id = c(1,2),
     ref_date = ymd(c("2020-01-01","2020-01-01")),
-    status = c("active","inactive")
+    employment_status = c("active","pensioner")
   )
 
   res <- detect_retirement(dt_edge)

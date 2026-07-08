@@ -9,9 +9,9 @@ library(data.table)
 # between them (person P2 disappears at T1).
 make_personnel <- function() {
   data.table::rbindlist(list(
-    data.table(personnel_id = "P1", ref_date = as.Date("2015-09-01"), status = "active"),
-    data.table(personnel_id = "P2", ref_date = as.Date("2015-09-01"), status = "active"),
-    data.table(personnel_id = "P1", ref_date = as.Date("2016-09-01"), status = "active")
+    data.table(personnel_id = "P1", ref_date = as.Date("2015-09-01"), employment_status = "active"),
+    data.table(personnel_id = "P2", ref_date = as.Date("2015-09-01"), employment_status = "active"),
+    data.table(personnel_id = "P1", ref_date = as.Date("2016-09-01"), employment_status = "active")
     # P2 absent at T1 → detected as fire event
   ))
 }
@@ -22,7 +22,7 @@ make_contract <- function(est_id = "E1") {
       personnel_id       = "P1",
       ref_date           = as.Date("2015-09-01"),
       est_id             = est_id,
-      contract_type_code = "perm",
+      contract_type      = "permanent",
       start_date         = as.Date("2010-01-01"),
       end_date           = NA_real_
     ),
@@ -30,7 +30,7 @@ make_contract <- function(est_id = "E1") {
       personnel_id       = "P2",
       ref_date           = as.Date("2015-09-01"),
       est_id             = est_id,
-      contract_type_code = "perm",
+      contract_type      = "permanent",
       start_date         = as.Date("2010-01-01"),
       end_date           = NA_real_
     ),
@@ -38,7 +38,7 @@ make_contract <- function(est_id = "E1") {
       personnel_id       = "P1",
       ref_date           = as.Date("2016-09-01"),
       est_id             = est_id,
-      contract_type_code = "perm",
+      contract_type      = "permanent",
       start_date         = as.Date("2010-01-01"),
       end_date           = NA_real_
     )
@@ -125,10 +125,10 @@ test_that("exit_rate is numeric and non-negative", {
 test_that("zero exits produces exit_rate of 0", {
   # Both persons present at both snapshots → no fire events
   p <- data.table::rbindlist(list(
-    data.table(personnel_id = "P1", ref_date = as.Date("2015-09-01"), status = "active"),
-    data.table(personnel_id = "P2", ref_date = as.Date("2015-09-01"), status = "active"),
-    data.table(personnel_id = "P1", ref_date = as.Date("2016-09-01"), status = "active"),
-    data.table(personnel_id = "P2", ref_date = as.Date("2016-09-01"), status = "active")
+    data.table(personnel_id = "P1", ref_date = as.Date("2015-09-01"), employment_status = "active"),
+    data.table(personnel_id = "P2", ref_date = as.Date("2015-09-01"), employment_status = "active"),
+    data.table(personnel_id = "P1", ref_date = as.Date("2016-09-01"), employment_status = "active"),
+    data.table(personnel_id = "P2", ref_date = as.Date("2016-09-01"), employment_status = "active")
   ))
   c <- data.table::rbindlist(list(
     make_contract()[personnel_id == "P1"],
@@ -154,7 +154,7 @@ test_that("integer ref_date column is coerced without error", {
 test_that("contracts with non-active types (inactive) are excluded from stock", {
   c <- make_contract()
   # Replace contract type with inactive — stock should be 0
-  c[, contract_type_code := "inactive"]
+  c[, contract_type := "inactive"]
   p <- make_personnel()
   out <- estimate_exit_rates(contract_dt = c, personnel_dt = p)
   # No active stock → exit_rate = 0 (fifelse guard)
@@ -167,7 +167,7 @@ test_that("contracts with non-active types (inactive) are excluded from stock", 
 test_that("group with no contract stock gets exit_rate of 0, not NA", {
   c <- make_contract("E1")
   # Remove contracts for E1 stock (make all inactive)
-  c[, contract_type_code := "inactive"]
+  c[, contract_type := "inactive"]
   p <- make_personnel()
   out <- estimate_exit_rates(
     contract_dt  = c,
