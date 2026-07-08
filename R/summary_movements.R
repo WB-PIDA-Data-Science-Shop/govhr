@@ -449,9 +449,9 @@ estimate_exit_rates <- function(contract_dt,
                                 personnel_id_col  = "personnel_id",
                                 ref_date_col      = "ref_date",
                                 start_date_col    = "start_date",
-                                contract_type_col = "contract_type_code",
+                                contract_type_col = "contract_type",
                                 end_date_col      = "end_date",
-                                status_col        = "status") {
+                                status_col        = "employment_status") {
 
   panel_contract_dt  <- data.table::as.data.table(contract_dt)
   panel_personnel_dt <- data.table::as.data.table(personnel_dt)
@@ -495,7 +495,8 @@ estimate_exit_rates <- function(contract_dt,
     event_type = "fire",
     start_date = start_str,
     end_date   = end_str,
-    freq       = freq
+    freq       = freq,
+    status_col = status_col
   )
   # fire_events columns: personnel_id_col, ref_date, type_event
 

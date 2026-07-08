@@ -30,7 +30,7 @@ if (getRversion() >= "2.15.1"){
     "group_label", "target_label", "target_var", "module", "variable",
     "name", "items", "passes", "fails", "error", "label_clean", "class_label",
     "tf", "idf", "df", "tfidf", "text", "class_id", "score", "head", "tfidf_c",
-    "tfidf_t", "dot", "norm_c", "norm_t", "id"
+    "tfidf_t", "dot", "norm_c", "norm_t", "id", "employment_status"
   ))
 
 }

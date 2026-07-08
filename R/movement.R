@@ -49,11 +49,12 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
 #' @param data A data.table or data.frame containing at least the columns:
 #'   - `personnel_id`: Unique identifier for personnel.
 #'   - `ref_date`: Reference date (must be coercible to Date).
-#'   - `status`: Personnel status (e.g., "active", "inactive").
+#'   - `employment_status`: Personnel status (e.g., "active", "pensioner", "inactive").
 #' @param id_col Character. Name of the identifier column (e.g., `"personnel_id"`).
 #' @param event_type Character. Either `"hire"` or `"fire"`, controlling which event to detect.
 #' @param start_date Optional start date for the full date sequence
 #'   (default: `"2007-09-01"`).
+#' @param status_col a column within `data` object for the employment status of personnel
 #' @param end_date Optional end date for the full date sequence
 #'   (default: `"2018-01-01"`).
 #' @param freq Frequency for the sequence of dates (default: `"year"`).
@@ -73,19 +74,18 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
 #'                        end_date = "2018-01-01", event_type = "fire")
 #' }
 #' @export
-detect_personnel_event <- function(
-  data,
-  id_col,
-  event_type,
-  start_date,
-  end_date,
-  freq = "year"
-) {
+detect_personnel_event <- function(data,
+                                   id_col,
+                                   event_type,
+                                   start_date,
+                                   end_date,
+                                   status_col,
+                                   freq = "year") {
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
   # Filter for active personnel
-  active_personnel_dt <- dt[status == "active"]
+  active_personnel_dt <- dt[get(status_col) == "active"]
 
   # Build full date range and unique personnel IDs
   expanded_active_personnel_dt <- active_personnel_dt |>
@@ -109,9 +109,9 @@ detect_personnel_event <- function(
       .(
         personnel_id = get(id_col),
         ref_date,
-        status,
+        get(status_col),
         type_event = fifelse(
-          status == "active" & is.na(data.table::shift(status, type = "lag")),
+          get(status_col) == "active" & is.na(data.table::shift(get(status_col), type = "lag")),
           "hire",
           "no hire"
         )
@@ -127,9 +127,9 @@ detect_personnel_event <- function(
       .(
         personnel_id = get(id_col),
         ref_date,
-        status,
+        get(status_col),
         type_event = fifelse(
-          status == "active" & is.na(data.table::shift(status, type = "lead")),
+          get(status_col) == "active" & is.na(data.table::shift(get(status_col), type = "lead")),
           "fire",
           "no fire"
         )
@@ -177,13 +177,13 @@ detect_retirement <- function(data) {
 
   # Create lag_status within each personnel
   dt[,
-    lead_status := data.table::shift(status, type = "lead"),
+    lead_status := data.table::shift(employment_status, type = "lead"),
     by = personnel_id
   ]
 
   # Filter for retire events
   retire_dt <- dt[
-    lead_status == "inactive" & status == "active",
+    lead_status == "pensioner" & employment_status == "active",
     .(personnel_id, ref_date)
   ]
 
@@ -393,12 +393,10 @@ add_contract_to_event <- function(event_dt, contract_dt, keep_vars) {
 #'
 #' @export
 
-detect_career_transitions <- function(
-  contract_dt,
-  vars,
-  decision_var,
-  decision_fn = max
-) {
+detect_career_transitions <- function(contract_dt,
+                                      vars,
+                                      decision_var,
+                                      decision_fn = max) {
   # Keep only needed columns
   contract_dt <- contract_dt[,
     c("personnel_id", "ref_date", vars, decision_var),
@@ -493,13 +491,11 @@ detect_career_transitions <- function(
 #' )
 #' }
 #' @export
-complete_dates <- function(
-  data,
-  id_col,
-  start_date,
-  end_date,
-  freq = "year"
-) {
+complete_dates <- function(data,
+                           id_col,
+                           start_date,
+                           end_date,
+                           freq = "year") {
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 

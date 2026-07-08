@@ -10,6 +10,7 @@ detect_personnel_event(
   event_type,
   start_date,
   end_date,
+  status_col,
   freq = "year"
 )
 }
@@ -17,7 +18,7 @@ detect_personnel_event(
 \item{data}{A data.table or data.frame containing at least the columns:
 - `personnel_id`: Unique identifier for personnel.
 - `ref_date`: Reference date (must be coercible to Date).
-- `status`: Personnel status (e.g., "active", "inactive").}
+- `employment_status`: Personnel status (e.g., "active", "pensioner", "inactive").}
 
 \item{id_col}{Character. Name of the identifier column (e.g., `"personnel_id"`).}
 
@@ -28,6 +29,8 @@ detect_personnel_event(
 
 \item{end_date}{Optional end date for the full date sequence
 (default: `"2018-01-01"`).}
+
+\item{status_col}{a column within `data` object for the employment status of personnel}
 
 \item{freq}{Frequency for the sequence of dates (default: `"year"`).
 Can be any valid value for \code{seq.Date(by = ...)}.}
