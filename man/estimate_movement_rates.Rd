@@ -11,46 +11,84 @@ estimate_movement_rates(
   ref_date_col = "ref_date",
   start_date_col = "start_date",
   end_date_col = "end_date",
-  contract_type_col = "contract_type_code"
+  contract_type_col = "contract_type",
+  salary_col = NULL
 )
 }
 \arguments{
 \item{contract_dt}{data.table. Contract data in long (panel) format.
-Must contain ref_date_col for panel identification.}
+Must contain \code{ref_date_col} for panel snapshot identification.}
 
-\item{group_cols}{Character vector. Columns defining movement states
-(e.g., c("est_id", "paygrade") or c("paygrade"))}
+\item{group_cols}{Character vector. One or more columns defining the movement
+states between which transitions are measured
+(e.g., \code{c("est_id", "paygrade")} or \code{c("paygrade")}). Values
+are concatenated into a single state label when multiple columns are
+provided.}
 
-\item{personnel_id_col}{Character. Personnel ID column (default: "personnel_id")}
+\item{personnel_id_col}{Character. Name of the personnel identifier column.
+Default: \code{"personnel_id"}.}
 
-\item{ref_date_col}{Character. Reference date column (default: "ref_date")}
+\item{ref_date_col}{Character. Name of the reference (snapshot) date column
+used to identify panel periods. Default: \code{"ref_date"}.}
 
-\item{start_date_col}{Character. Contract start date column (default: "start_date")}
+\item{start_date_col}{Character. Name of the contract start date column.
+Default: \code{"start_date"}.}
 
-\item{end_date_col}{Character. Contract end date column (default: "end_date")}
+\item{end_date_col}{Character. Name of the contract end date column.
+Default: \code{"end_date"}.}
 
-\item{contract_type_col}{Character. Contract type column (default: "contract_type_code")}
+\item{contract_type_col}{Character. Name of the contract type column.
+Default: \code{"contract_type"}.}
+
+\item{salary_col}{Character or \code{NULL}. Name of a compensation column in
+\code{contract_dt}. When provided, salary summary columns are appended to
+the output (see Value). Default: \code{NULL}.}
 }
 \value{
-data.table with columns:
+A \code{data.table} with one row per
+  \code{(from_group, to_group, from_period, to_period)} transition pair,
+  keyed on those four columns. Returns an empty \code{data.table} with the
+  same schema if no valid transitions are found. Columns:
   \describe{
-    \item{from_group}{Character. State at period start (concatenated group_cols)}
-    \item{to_group}{Character. State at period end (concatenated group_cols)}
-    \item{movement_rate}{Numeric. Transition probability for this specific period pair}
-    \item{from_period}{Date. Start snapshot date (T0)}
-    \item{to_period}{Date. End snapshot date (T1)}
-    \item{n_pop}{Integer. Number of persons in from_group at T0}
-    \item{n_moves}{Integer. Number of persons who moved from from_group to to_group}
+    \item{from_group}{Character. Concatenated \code{group_cols} state at the
+      start of the period (T0).}
+    \item{to_group}{Character. Concatenated \code{group_cols} state at the
+      end of the period (T1).}
+    \item{movement_rate}{Numeric. Empirical transition probability for this
+      specific period pair: \eqn{n\_moves / n\_pop}.}
+    \item{from_period}{Date. Snapshot date at the start of the period (T0).}
+    \item{to_period}{Date. Snapshot date at the end of the period (T1).}
+    \item{n_pop}{Integer. Number of persons in \code{from_group} at T0.}
+    \item{n_moves}{Integer. Number of persons who moved from
+      \code{from_group} to \code{to_group} between T0 and T1.}
+  }
+  When \code{salary_col} is not \code{NULL}, five additional columns are
+  appended:
+  \describe{
+    \item{mean_salary_t0}{Numeric. Mean salary in \code{from_group} at T0.}
+    \item{mean_salary_t1}{Numeric. Mean salary in \code{to_group} at T1.}
+    \item{mean_salary_change}{Numeric. Absolute change in mean salary
+      (T1 minus T0).}
+    \item{median_salary_change}{Numeric. Median absolute salary change across
+      movers.}
+    \item{mean_salary_pct_change}{Numeric. Mean percentage salary change
+      across movers.}
   }
 }
 \description{
 Analyzes longitudinal panel data to compute empirical transition probabilities
-for promotions and transfers. Compares consecutive snapshots (T0->T1, T1->T2,
-etc.) and returns one row per \code{(from_group, to_group, from_period, to_period)}
-pair. Only actual transitions (\code{from_group != to_group}) are returned;
-stay rows and rows with NA in any group_col are dropped.
+for promotions and transfers. Compares consecutive snapshots (T0 -> T1,
+T1 -> T2, etc.) using \code{roll_snapshot_pairs()} and
+\code{.compute_transition_pair()}, and returns one row per
+\code{(from_group, to_group, from_period, to_period)} pair.
+
+Only actual transitions (\code{from_group != to_group}) are returned; stay
+rows and rows where any \code{group_cols} value is \code{NA} (or the string
+\code{"NA"}) are dropped.
 
 To obtain a single averaged rate across all periods, aggregate the result:
-\code{result[, .(movement_rate = mean(movement_rate)), by = .(from_group, to_group)]}
+\preformatted{
+result[, .(movement_rate = mean(movement_rate)), by = .(from_group, to_group)]
+}
 }
 \keyword{internal}

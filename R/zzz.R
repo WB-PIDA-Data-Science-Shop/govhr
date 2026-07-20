@@ -30,8 +30,87 @@ if (getRversion() >= "2.15.1"){
     "group_label", "target_label", "target_var", "module", "variable",
     "name", "items", "passes", "fails", "error", "label_clean", "class_label",
     "tf", "idf", "df", "tfidf", "text", "class_id", "score", "head", "tfidf_c",
-    "tfidf_t", "dot", "norm_c", "norm_t", "id", "employment_status"
+    "tfidf_t", "dot", "norm_c", "norm_t", "id", "employment_status", "..active_cols",
+    "..active_cols", "last_salary", "max_date", "mean_salary_change",
+    "mean_salary_pct_change", "mean_salary_t0", "mean_salary_t1",
+    "median_salary_change", "replacement_rate", "salary_change", "salary_pct_change",
+    "spell_years"
+
   ))
 
 }
 
+
+#' Validate Column Exists in Data Table
+#'
+#' @param dt data.table to check
+#' @param colname Character. Column name to validate
+#' @param varname Character. Variable name for error messages
+#'
+#' @return Invisible TRUE if valid, stops with error otherwise
+#' @keywords internal
+validate_column_exists <- function(dt, colname, varname) {
+  if (!colname %in% names(dt)) {
+    stop(
+      "Column '", colname, "' not found in ", varname,
+      call. = FALSE
+    )
+  }
+  
+  return(invisible(TRUE))
+}
+
+#' Validate Multiple Columns Exist
+#'
+#' @param dt data.table to check
+#' @param colnames Character vector. Column names to validate
+#' @param varname Character. Variable name for error messages
+#'
+#' @return Invisible TRUE if valid, stops with error otherwise
+#' @keywords internal
+validate_columns_exist <- function(dt, colnames, varname) {
+  missing_cols <- setdiff(colnames, names(dt))
+  
+  if (length(missing_cols) > 0) {
+    stop(
+      "Columns not found in ", varname, ": ",
+      paste(missing_cols, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  
+  return(invisible(TRUE))
+}
+
+#' Validate Date Format
+#'
+#' @param date Object to validate
+#' @param varname Character. Variable name for error messages
+#'
+#' @return Invisible TRUE if valid, stops with error otherwise
+#' @keywords internal
+validate_date_format <- function(date, varname) {
+  # Accept both Date objects and character strings
+  if (is.character(date)) {
+    tryCatch({
+      date <- as.Date(date)
+    }, error = function(e) {
+      stop(varname, " must be a valid date string (e.g., '2024-01-01') or Date object. ",
+           "Error: ", e$message, call. = FALSE)
+    })
+  }
+  
+  if (!inherits(date, "Date")) {
+    stop(varname, " must be a Date object or date string (e.g., '2024-01-01')", call. = FALSE)
+  }
+  
+  if (length(date) != 1) {
+    stop(varname, " must be a single Date value", call. = FALSE)
+  }
+  
+  if (is.na(date)) {
+    stop(varname, " cannot be NA", call. = FALSE)
+  }
+  
+  return(date)
+}
