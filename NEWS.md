@@ -1,3 +1,5 @@
+# govhr 0.3.2
+
 # govhr 0.3.1
 This release: 
 - Updates the movement functions and unit tests to be more robust to changes in the harmonization dictionary and
