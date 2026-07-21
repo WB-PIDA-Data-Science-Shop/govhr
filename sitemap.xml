@@ -27,11 +27,13 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/complete_columns.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/complete_dates.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_baseline_index.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_employment_spells.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastchange.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastshare.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastsummary.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_hrmreport_stats.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_missingness.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_pension_ratio.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_qualitycontrol.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_tenure.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_tenure_panel.html</loc></url>
@@ -54,6 +56,7 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_reallocation.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/dictionary.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/dot-compute_transition_pair.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/enterprise_surveys.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_exit_rates.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_movement_rates.html</loc></url>
@@ -89,7 +92,10 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/roll_snapshot_pairs.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/sample_group.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/social_sustainability.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/validate_column_exists.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/validate_columns_exist.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/validate_data.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/validate_date_format.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/wwbi.html</loc></url>
 </urlset>
 

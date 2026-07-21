@@ -1,22 +1,11 @@
-# Calculate Tenure from Contract History
+# Compute employment tenure from contract history
 
-Computes total years of service for each personnel as of a reference
-date using a vectorised interval-union algorithm based on
-[`cummax()`](https://rdrr.io/r/base/cumsum.html). Overlapping and nested
-contracts are correctly de-duplicated; gaps between contracts are
-excluded from the total.
-
-The algorithm sorts each person's contracts by start date, then
-propagates the "furthest right endpoint seen so far" with
-[`cummax()`](https://rdrr.io/r/base/cumsum.html). Three cases cover all
-interval relationships:
-
-- **Case 1** (new span): start \> lag_cummax → contributes `end - start`
-
-- **Case 2** (extension): end \> lag_cummax ≥ start → contributes
-  `end - lag_cummax`
-
-- **Case 3** (nested): end ≤ lag_cummax → contributes 0
+Computes cumulative employment tenure for each personnel member as of a
+specified reference date while avoiding double-counting overlapping
+contracts. Contracts with type `"inactive"` or `"pensioner"` are
+excluded. Open-ended contracts are truncated at the reference date
+before overlapping contract periods are merged to calculate total
+tenure.
 
 ## Usage
 
@@ -28,7 +17,8 @@ compute_tenure(
   contract_id_col = "contract_id",
   start_date_col = "start_date",
   end_date_col = "end_date",
-  contract_type_col = "contract_type_code"
+  contract_type_col = "contract_type",
+  group_cols = NULL
 )
 ```
 
@@ -36,36 +26,69 @@ compute_tenure(
 
 - contract_dt:
 
-  data.table. Contract data (may contain panel observations)
+  data.table containing the contract history. Must include personnel
+  identifiers, contract identifiers, contract start and end dates,
+  contract types, and any grouping variables supplied in `group_cols`.
 
 - ref_date:
 
-  Date. Reference date for tenure calculation
+  Date. Reference date at which tenure is calculated.
 
 - personnel_id_col:
 
-  Character. Name of personnel ID column (default: "personnel_id")
+  Character. Name of the personnel identifier column. Default is
+  `"personnel_id"`.
 
 - contract_id_col:
 
-  Character. Name of contract ID column (default: "contract_id")
+  Character. Name of the contract identifier column. Default is
+  `"contract_id"`.
 
 - start_date_col:
 
-  Character. Name of start date column (default: "start_date")
+  Character. Name of the contract start date column. Default is
+  `"start_date"`.
 
 - end_date_col:
 
-  Character. Name of end date column (default: "end_date")
+  Character. Name of the contract end date column. Default is
+  `"end_date"`.
 
 - contract_type_col:
 
-  Character. Name of contract type column (default:
-  "contract_type_code")
+  Character. Name of the contract type column. Default is
+  `"contract_type"`.
+
+- group_cols:
+
+  Optional character vector of additional variables over which tenure
+  should be calculated independently (for example, establishment,
+  occupation, or organization). Default is `NULL`.
 
 ## Value
 
-data.table with personnel_id, tenure_days, and tenure_years columns
+A data.table with one row per unique combination of `personnel_id` and
+optional `group_cols`, containing:
+
+- tenure_days:
+
+  Total employment tenure in days.
+
+- tenure_years:
+
+  Total employment tenure in years, calculated as tenure days divided by
+  365.25.
+
+## Details
+
+Tenure is calculated independently for each personnel member and,
+optionally, within additional grouping variables supplied through
+`group_cols`. Gaps between contracts are excluded from the total tenure.
+
+The implementation uses an interval-union algorithm based on
+[`cummax()`](https://rdrr.io/r/base/cumsum.html) to efficiently merge
+overlapping contract periods, resulting in an \\O(n \log n)\\ algorithm
+dominated by the initial sorting step.
 
 ## Examples
 

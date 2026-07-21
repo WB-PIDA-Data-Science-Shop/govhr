@@ -1,19 +1,11 @@
-# Compute Tenure from a Stacked Contract Panel (Panel Version)
+# Compute employment tenure from a stacked contract panel
 
-Vectorised equivalent of
-[`compute_tenure`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_tenure.md)
-for a panel dataset where `ref_date_col` is a column rather than a
-scalar. Computes cumulative years of service per *person × snapshot* in
-a single pass over the full stacked panel — no per-snapshot loop
-required.
-
-The union-of-intervals algorithm is identical to `compute_tenure`:
-contracts are sorted by start date, a `cummax` propagates the furthest
-end seen so far, and each interval's contribution is classified as a new
-span, partial extension, or nested (zero-contribution) segment. The key
-difference is that `ref_date_col` participates in every row-wise
-comparison and in the `cummax` grouping key, so each
-`(personnel_id, ref_date)` pair is handled independently.
+Computes cumulative employment tenure for each personnel member at each
+reference date while avoiding double-counting overlapping contracts.
+Contracts with type `"inactive"` or `"pensioner"` are excluded.
+Open-ended contracts are truncated at the corresponding reference date,
+after which overlapping contract periods are merged before calculating
+total tenure.
 
 ## Usage
 
@@ -25,7 +17,8 @@ compute_tenure_panel(
   contract_id_col = "contract_id",
   start_date_col = "start_date",
   end_date_col = "end_date",
-  contract_type_col = "contract_type_code"
+  contract_type_col = "contract_type",
+  group_cols = NULL
 )
 ```
 
@@ -33,36 +26,62 @@ compute_tenure_panel(
 
 - contract_dt:
 
-  data.table. Full stacked contract panel. Must contain
-  `personnel_id_col`, `ref_date_col`, `contract_id_col`,
-  `start_date_col`, `end_date_col`, and `contract_type_col`.
+  data.table containing the stacked contract panel. Must include
+  personnel identifiers, contract identifiers, contract start and end
+  dates, reference dates, contract types, and any grouping variables
+  supplied in `group_cols`.
 
 - personnel_id_col:
 
-  Character. Default: `"personnel_id"`.
+  Character. Name of the personnel identifier column. Default is
+  `"personnel_id"`.
 
 - ref_date_col:
 
-  Character. Name of the snapshot date column. Default: `"ref_date"`.
+  Character. Name of the reference date column. Default is `"ref_date"`.
 
 - contract_id_col:
 
-  Character. Default: `"contract_id"`.
+  Character. Name of the contract identifier column. Default is
+  `"contract_id"`.
 
 - start_date_col:
 
-  Character. Default: `"start_date"`.
+  Character. Name of the contract start date column. Default is
+  `"start_date"`.
 
 - end_date_col:
 
-  Character. Default: `"end_date"`.
+  Character. Name of the contract end date column. Default is
+  `"end_date"`.
 
 - contract_type_col:
 
-  Character. Default: `"contract_type_code"`.
+  Character. Name of the contract type column. Default is
+  `"contract_type"`.
+
+- group_cols:
+
+  Optional character vector of additional variables over which tenure
+  should be calculated independently (for example, establishment,
+  occupation, or organization). Default is `NULL`.
 
 ## Value
 
-data.table with columns `personnel_id_col`, `ref_date_col`, and
-`tenure_years`. One row per unique `(personnel_id, ref_date)`
-combination present in `contract_dt`.
+A data.table with one row per unique combination of `personnel_id`,
+optional `group_cols`, and `ref_date`, containing:
+
+- tenure_days:
+
+  Total employment tenure in days.
+
+- tenure_years:
+
+  Total employment tenure in years, calculated as tenure days divided by
+  365.25.
+
+## Details
+
+Tenure is calculated independently within each combination of
+`personnel_id`, optional grouping variables supplied through
+`group_cols`, and `ref_date`.

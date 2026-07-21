@@ -1,5 +1,10 @@
 # Changelog
 
+## govhr 0.3.2
+
+This release: - Further updates and additions to the movement functions
+and unit tests to support indicator generation for the govhrapp
+
 ## govhr 0.3.1
 
 This release: - Updates the movement functions and unit tests to be more
