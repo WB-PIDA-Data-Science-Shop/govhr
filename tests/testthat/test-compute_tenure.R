@@ -10,11 +10,11 @@ make_contracts <- function(personnel_id,
                            end_date,
                            contract_type_code = "permanent") {
   data.table::data.table(
-    personnel_id       = personnel_id,
-    contract_id        = contract_id,
-    start_date         = as.Date(start_date),
-    end_date           = as.Date(end_date),
-    contract_type_code = contract_type_code
+    personnel_id  = personnel_id,
+    contract_id   = contract_id,
+    start_date    = as.Date(start_date),
+    end_date      = as.Date(end_date),
+    contract_type = contract_type_code
   )
 }
 

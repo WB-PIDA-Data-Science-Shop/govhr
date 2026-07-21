@@ -13,32 +13,54 @@ utils::globalVariables(c(
   "n_exits", "exit_rate", "current_stock"
 ))
 
-#' Calculate Tenure from Contract History
+
+#' Compute employment tenure from contract history
 #'
-#' @description
-#' Computes total years of service for each personnel as of a reference date
-#' using a vectorised interval-union algorithm based on \code{cummax()}.
-#' Overlapping and nested contracts are correctly de-duplicated; gaps between
-#' contracts are excluded from the total.
+#' Computes cumulative employment tenure for each personnel member as of a
+#' specified reference date while avoiding double-counting overlapping
+#' contracts. Contracts with type \code{"inactive"} or
+#' \code{"pensioner"} are excluded. Open-ended contracts are truncated at
+#' the reference date before overlapping contract periods are merged to
+#' calculate total tenure.
 #'
-#' The algorithm sorts each person's contracts by start date, then propagates
-#' the "furthest right endpoint seen so far" with \code{cummax()}.  Three
-#' cases cover all interval relationships:
-#' \itemize{
-#'   \item \strong{Case 1} (new span): start > lag_cummax → contributes \code{end - start}
-#'   \item \strong{Case 2} (extension): end > lag_cummax ≥ start → contributes \code{end - lag_cummax}
-#'   \item \strong{Case 3} (nested): end ≤ lag_cummax → contributes 0
-#' }
+#' Tenure is calculated independently for each personnel member and,
+#' optionally, within additional grouping variables supplied through
+#' \code{group_cols}. Gaps between contracts are excluded from the total
+#' tenure.
 #'
-#' @param contract_dt data.table. Contract data (may contain panel observations)
-#' @param ref_date Date. Reference date for tenure calculation
-#' @param personnel_id_col Character. Name of personnel ID column (default: "personnel_id")
-#' @param contract_id_col Character. Name of contract ID column (default: "contract_id")
-#' @param start_date_col Character. Name of start date column (default: "start_date")
-#' @param end_date_col Character. Name of end date column (default: "end_date")
-#' @param contract_type_col Character. Name of contract type column (default: "contract_type_code")
+#' The implementation uses an interval-union algorithm based on
+#' \code{cummax()} to efficiently merge overlapping contract periods,
+#' resulting in an \eqn{O(n \log n)} algorithm dominated by the initial
+#' sorting step.
 #'
-#' @return data.table with personnel_id, tenure_days, and tenure_years columns
+#' @param contract_dt data.table containing the contract history. Must include
+#'   personnel identifiers, contract identifiers, contract start and end
+#'   dates, contract types, and any grouping variables supplied in
+#'   \code{group_cols}.
+#' @param ref_date Date. Reference date at which tenure is calculated.
+#' @param personnel_id_col Character. Name of the personnel identifier column.
+#'   Default is \code{"personnel_id"}.
+#' @param contract_id_col Character. Name of the contract identifier column.
+#'   Default is \code{"contract_id"}.
+#' @param start_date_col Character. Name of the contract start date column.
+#'   Default is \code{"start_date"}.
+#' @param end_date_col Character. Name of the contract end date column.
+#'   Default is \code{"end_date"}.
+#' @param contract_type_col Character. Name of the contract type column.
+#'   Default is \code{"contract_type"}.
+#' @param group_cols Optional character vector of additional variables over
+#'   which tenure should be calculated independently (for example,
+#'   establishment, occupation, or organization). Default is
+#'   \code{NULL}.
+#'
+#' @return A data.table with one row per unique combination of
+#'   \code{personnel_id} and optional \code{group_cols}, containing:
+#'   \describe{
+#'     \item{tenure_days}{Total employment tenure in days.}
+#'     \item{tenure_years}{Total employment tenure in years, calculated as
+#'     tenure days divided by 365.25.}
+#'   }
+#'
 #' @keywords internal
 #'
 #' @examples
@@ -48,22 +70,30 @@ utils::globalVariables(c(
 #'   ref_date = as.Date("2025-01-01")
 #' )
 #' }
+#' 
 compute_tenure <- function(contract_dt,
                            ref_date,
                            personnel_id_col = "personnel_id",
                            contract_id_col = "contract_id",
                            start_date_col = "start_date",
                            end_date_col = "end_date",
-                           contract_type_col = "contract_type_code") {
+                           contract_type_col = "contract_type",
+                           group_cols = NULL) {
   
-  ### ensure the contract dataset is a data.table
+  # 0. always ensure data.table
   contract_dt <- as.data.table(contract_dt)
 
+  if (is.null(group_cols) == FALSE) {
+
+     validate_columns_exist(dt = contract_dt, 
+                            colnames = group_cols)
+
+  }
+
+  
   # Alias ref_date to a name that cannot be shadowed by a column named 'ref_date'
   # in panel data.tables (data.table resolves column names before env variables).
-  # Coerce to Date so fifelse() type-matches Date columns (dates are stored as
-  # doubles internally; character input causes a type mismatch error).
-  .ref_date_ <- as.Date(ref_date)
+  .ref_date_ <- if (inherits(ref_date, "Date")) ref_date else as.Date(ref_date)
 
   # 1. Filter inactive types — subset returns a new object, no copy() needed
   dt <- contract_dt[!get(contract_type_col) %in% c("inactive", "pensioner")]
@@ -100,14 +130,14 @@ compute_tenure <- function(contract_dt,
   }
 
   # 6. Sort by person then start — O(n log n)
-  data.table::setorderv(dt, c(personnel_id_col, ".s"))
+  data.table::setorderv(dt, c(personnel_id_col, group_cols, ".s"))
 
   # 7. Lagged cummax of end-dates within each person.
   #    fill = -1e15 (a numeric constant far outside any real date range) ensures
   #    the first interval per person is always classified as a new span without
   #    triggering integer overflow.
   dt[, .lag_max_e := data.table::shift(cummax(.e), fill = -1e15),
-     by = c(personnel_id_col)]
+     by = c(personnel_id_col, group_cols)]
 
   # 8. Classify each interval and compute its contribution to the union
   #    >= in Case 1: adjacent intervals (end_prev == start_curr) are new spans,
@@ -119,130 +149,513 @@ compute_tenure <- function(contract_dt,
   )]
 
   # 9. Sum contributions per person
-  result <- dt[,
-    .(tenure_days = sum(.contrib, na.rm = TRUE)),
-    by = .(personnel_id_val = get(personnel_id_col))
-  ]
+  # result <- dt[,
+  #   .(tenure_days = sum(.contrib, na.rm = TRUE)),
+  #   by = .(personnel_id_val = get(personnel_id_col))
+  # ]
+
+  result <- dt[, .(tenure_days = sum(.contrib, na.rm = TRUE)),
+                  by = c(personnel_id_col, group_cols)]
+
   result[, tenure_years := tenure_days / 365.25]
-  data.table::setnames(result, "personnel_id_val", personnel_id_col)
+  # data.table::setnames(result, "personnel_id_val", personnel_id_col)
 
-  result[, c(personnel_id_col, "tenure_days", "tenure_years"), with = FALSE]
+  result[, c(personnel_id_col, group_cols, 
+             "tenure_days", "tenure_years"), with = FALSE]
 }
 
 
-
-# ---------------------------------------------------------------------------
-# Internal: process one consecutive snapshot pair for the movement baseline.
-# Called by roll_snapshot_pairs() inside estimate_movement_baseline().
-#
-# @param snap_t0  data.table subset at time T0 (one snapshot).
-# @param snap_t1  data.table subset at time T1 (next snapshot).
-# @param group_cols,personnel_id_col,start_date_col,end_date_col,
-#        contract_type_col  Same semantics as estimate_movement_baseline().
-#
-# @return data.table with columns from_group, to_group, n_moves, n_pop,
-#         period_prob, t0_date, t1_date; or NULL when either snapshot is empty.
+#' Compute employment tenure from a stacked contract panel
+#'
+#' Computes cumulative employment tenure for each personnel member at each
+#' reference date while avoiding double-counting overlapping contracts.
+#' Contracts with type \code{"inactive"} or \code{"pensioner"} are excluded.
+#' Open-ended contracts are truncated at the corresponding reference date,
+#' after which overlapping contract periods are merged before calculating
+#' total tenure.
+#'
+#' Tenure is calculated independently within each combination of
+#' \code{personnel_id}, optional grouping variables supplied through
+#' \code{group_cols}, and \code{ref_date}.
+#'
+#' @param contract_dt data.table containing the stacked contract panel.
+#'   Must include personnel identifiers, contract identifiers, contract
+#'   start and end dates, reference dates, contract types, and any grouping
+#'   variables supplied in \code{group_cols}.
+#' @param personnel_id_col Character. Name of the personnel identifier column.
+#'   Default is \code{"personnel_id"}.
+#' @param ref_date_col Character. Name of the reference date column.
+#'   Default is \code{"ref_date"}.
+#' @param contract_id_col Character. Name of the contract identifier column.
+#'   Default is \code{"contract_id"}.
+#' @param start_date_col Character. Name of the contract start date column.
+#'   Default is \code{"start_date"}.
+#' @param end_date_col Character. Name of the contract end date column.
+#'   Default is \code{"end_date"}.
+#' @param contract_type_col Character. Name of the contract type column.
+#'   Default is \code{"contract_type"}.
+#' @param group_cols Optional character vector of additional variables over
+#'   which tenure should be calculated independently (for example,
+#'   establishment, occupation, or organization). Default is \code{NULL}.
+#'
+#' @return A data.table with one row per unique combination of
+#'   \code{personnel_id}, optional \code{group_cols}, and
+#'   \code{ref_date}, containing:
+#'   \describe{
+#'     \item{tenure_days}{Total employment tenure in days.}
+#'     \item{tenure_years}{Total employment tenure in years, calculated as
+#'     tenure days divided by 365.25.}
+#'   }
+#'
 #' @keywords internal
-.compute_transition_pair <- function(snap_t0,
-                                     snap_t1,
-                                     ref_date_col,
-                                     group_cols,
-                                     personnel_id_col,
-                                     start_date_col,
-                                     end_date_col,
-                                     contract_type_col) {
 
-  # Read snapshot dates from the known date column (passed explicitly so we
-  # are robust to panels that contain multiple Date-class columns).
-  t0_date <- snap_t0[[ref_date_col]][1L]
-  t1_date <- snap_t1[[ref_date_col]][1L]
+compute_tenure_panel <- function(contract_dt,
+                                 personnel_id_col  = "personnel_id",
+                                 ref_date_col      = "ref_date",
+                                 contract_id_col   = "contract_id",
+                                 start_date_col    = "start_date",
+                                 end_date_col      = "end_date",
+                                 contract_type_col = "contract_type",
+                                 group_cols        = NULL) {
+  
+  # 0. Quick set up ensuring data.table and to define a grouping key once at the start
+  contract_dt <- as.data.table(contract_dt)
 
-  # Active persons at T0
-  active_t0 <- snap_t0[
-    get(start_date_col) <= t0_date &
-      (is.na(get(end_date_col)) | get(end_date_col) >= t0_date) &
-      get(contract_type_col) != "inactive"
+  if (is.null(group_cols) == FALSE) {
+
+     validate_columns_exist(dt = contract_dt, 
+                            colnames = group_cols)
+
+  }
+ 
+  by_cols <- c(personnel_id_col, group_cols, ref_date_col)
+  
+  # 1. Filter: active types only, started on or before each row's ref_date
+  dt <- contract_dt[
+    get(start_date_col) <= get(ref_date_col) &
+      !get(contract_type_col) %in% c("inactive", "pensioner")
   ]
 
-  if (nrow(active_t0) == 0L) return(NULL)
+  # 2. Cap open-ended / future contracts at each row's ref_date
+  dt[, .eff_end := data.table::fifelse(
+    is.na(get(end_date_col)) | get(end_date_col) > get(ref_date_col),
+    get(ref_date_col),
+    get(end_date_col)
+  )]
 
-  state_t0 <- unique(active_t0[, c(personnel_id_col, group_cols), with = FALSE])
-  state_t0 <- stats::na.omit(state_t0, cols = group_cols)
-  state_t0[, from_group := do.call(paste, c(.SD, sep = "||")), .SDcols = group_cols]
-  data.table::setnames(state_t0, personnel_id_col, ".pid")
+  # 3. Dedup panel snapshots: one row per (contract_id, start_date, ref_date)
+  dt <- dt[dt[, .I[1L], by = c(contract_id_col, start_date_col, ref_date_col)]$V1]
 
-  # Active persons at T1
-  active_t1 <- snap_t1[
-    get(start_date_col) <= t1_date &
-      (is.na(get(end_date_col)) | get(end_date_col) >= t1_date) &
-      get(contract_type_col) != "inactive"
+  # 4. Numeric days for arithmetic; drop zero-length contracts
+  dt[, .s := as.numeric(get(start_date_col))]
+  dt[, .e := as.numeric(.eff_end)]
+  dt <- dt[.e > .s]
+
+  if (nrow(dt) == 0L) {
+    empty <- data.table::data.table(
+      .pid = character(0), .refdt = as.Date(character(0)), tenure_years = numeric(0)
+    )
+    data.table::setnames(empty, c(".pid", ".refdt"), c(personnel_id_col, ref_date_col))
+    return(empty)
+  }
+
+  # 5. Sort by (person, snapshot, start) then apply cummax within each group
+  data.table::setorderv(dt, c(personnel_id_col, ref_date_col, ".s"))
+  dt[, .lag_max_e := data.table::shift(cummax(.e), fill = -1e15),
+     by = by_cols]
+
+  # 6. Classify and sum contributions
+  dt[, .contrib := data.table::fcase(
+    .s >= .lag_max_e,  .e - .s,
+    .e >  .lag_max_e,  .e - .lag_max_e,
+    default = 0
+  )]
+
+  result <- dt[,
+    .(tenure_years = sum(.contrib, na.rm = TRUE) / 365.25,
+      tenure_days = sum(.contrib, na.rm = TRUE)),
+    by = by_cols
   ]
 
-  if (nrow(active_t1) == 0L) return(NULL)
-
-  state_t1 <- unique(active_t1[, c(personnel_id_col, group_cols), with = FALSE])
-  state_t1 <- stats::na.omit(state_t1, cols = group_cols)
-  state_t1[, to_group := do.call(paste, c(.SD, sep = "||")), .SDcols = group_cols]
-  data.table::setnames(state_t1, personnel_id_col, ".pid")
-
-  # Persons present at both snapshots
-  transitions <- state_t0[state_t1[, .(.pid, to_group)], on = ".pid", nomatch = NULL]
-
-  if (nrow(transitions) == 0L) return(NULL)
-
-  movement_counts <- transitions[, .(n_moves = .N), by = .(from_group, to_group)]
-  pop_t0          <- state_t0[, .(n_pop = .N), by = from_group]
-
-  period_trans <- movement_counts[pop_t0, on = "from_group", nomatch = NA]
-  period_trans[is.na(n_moves), n_moves := 0L]
-  period_trans[, period_prob := n_moves / n_pop]
-  period_trans[, t0_date     := t0_date]
-  period_trans[, t1_date     := t1_date]
-
-  period_trans
+  result[, c(personnel_id_col, group_cols, ref_date_col, 
+             "tenure_days", "tenure_years"), with = FALSE]
 }
 
+
+#' Compute total time spent in each specific group per person (eg paygrade, occupation)
+#'
+#' @description
+#' Derives, for each person and (optionally) each grouping variable such as
+#' paygrade, the total cumulative tenure accrued in that state, taken from
+#' the most recent panel snapshot at which the person is still observed in
+#' that state. Built on top of \code{\link{compute_tenure_panel}}, which
+#' computes overlap-safe cumulative tenure at every reference date; this
+#' function collapses that panel down to one row per
+#' \code{personnel_id}/\code{group_cols} combination by keeping only the
+#' latest \code{ref_date} at which the combination appears.
+#'
+#' @details
+#' A \code{group_cols} combination (e.g. \code{paygrade}, or
+#' \code{contract_id} + \code{paygrade}) stops appearing in the underlying
+#' tenure panel once the person's recorded state changes, so the last
+#' \code{ref_date} at which a combination is observed marks the end of that
+#' spell. \code{spell_years} is the cumulative tenure value at that final
+#' snapshot, summed across any residual duplicate rows for the same
+#' combination and date.
+#'
+#' Two caveats affect interpretation:
+#' \itemize{
+#'   \item If \code{contract_id} is included in \code{group_cols} and a
+#'   person is renewed onto a new contract while remaining on the same
+#'   paygrade, this will be treated as two separate spells rather than one
+#'   continuous spell, understating true time-in-grade for that person.
+#'   \item If a person leaves a given \code{group_cols} state and later
+#'   returns to it (e.g. paygrade A -> B -> A) under the same grouping
+#'   combination, the two non-contiguous stints are combined into a single
+#'   spell, and \code{spell_years} will reflect their combined duration
+#'   rather than just the most recent stint.
+#' }
+#'
+#' This function does not distinguish spells that ended because the person
+#' transitioned to a new state from spells that are still ongoing as of the
+#' last available panel snapshot (right-censored spells); both are treated
+#' identically.
+#'
+#' @param contract_dt data.table. Stacked contract panel, as passed to
+#'   \code{\link{compute_tenure_panel}}.
+#' @param personnel_id_col Character. Name of the personnel identifier
+#'   column. Default is \code{"personnel_id"}.
+#' @param ref_date_col Character. Name of the reference date column.
+#'   Default is \code{"ref_date"}.
+#' @param contract_id_col Character. Name of the contract identifier column.
+#'   Default is \code{"contract_id"}.
+#' @param start_date_col Character. Name of the contract start date column.
+#'   Default is \code{"start_date"}.
+#' @param end_date_col Character. Name of the contract end date column.
+#'   Default is \code{"end_date"}.
+#' @param contract_type_col Character. Name of the contract type column.
+#'   Default is \code{"contract_type"}.
+#' @param group_cols Optional character vector of additional variables
+#'   over which tenure should be calculated independently (for example,
+#'   establishment, occupation, or organization). Default is \code{NULL}.
+#'
+#' @return A data.table with one row per unique combination of
+#'   \code{personnel_id} and \code{group_cols}, containing:
+#'   \describe{
+#'     \item{ref_date}{The last reference date at which the person was
+#'     observed in this \code{group_cols} state.}
+#'     \item{spell_years}{Total cumulative tenure, in years, accrued in
+#'     this state as of that date.}
+#'   }
+#'
+#' @seealso \code{\link{compute_tenure_panel}}
+#' @keywords internal
+
+compute_employment_spells <- function(contract_dt,
+                                      personnel_id_col  = "personnel_id",
+                                      ref_date_col      = "ref_date",
+                                      contract_id_col   = "contract_id",
+                                      start_date_col    = "start_date",
+                                      end_date_col      = "end_date",
+                                      contract_type_col = "contract_type",
+                                      group_cols        = NULL){
+  
+  ### first use the compute_tenure_panel function to figure out tenure
+  ### at each ref_date
+  tenure_dt <- 
+  compute_tenure_panel(contract_dt       = contract_dt, 
+                       personnel_id_col  = personnel_id_col,
+                       ref_date_col      = ref_date_col,
+                       contract_id_col   = contract_id_col,
+                       start_date_col    = start_date_col,
+                       end_date_col      = end_date_col,
+                       contract_type_col = contract_type_col,
+                       group_cols        = group_cols )
+  
+
+  ### get the tenure at the last snapshot for each group_col personel_id combination
+  tenure_dt <- 
+    tenure_dt[, max_date := fifelse(ref_date == max(ref_date, na.rm = TRUE), 1, 0), 
+                by = c(personnel_id_col, group_cols)]
+  
+  ### keep only the latest dates
+  tenure_dt <- tenure_dt[max_date == 1,]
+  
+  ### get total spell for each personnel_id group_cols combination
+  spell_dt <- tenure_dt[, spell_years := sum(tenure_years, na.rm = TRUE), by = c(personnel_id_col, group_cols)]
+
+  return(spell_dt[, c(personnel_id_col, group_cols, ref_date_col, "spell_years"), with = FALSE])
+
+}
+
+
+
+#' Compute Transition Counts for a Single Consecutive Snapshot Pair
+#'
+#' @description
+#' Internal workhorse called by \code{roll_snapshot_pairs()} inside
+#' \code{estimate_movement_rates()}. Given two consecutive panel snapshots
+#' (\code{snap_t0} at T0 and \code{snap_t1} at T1), this function:
+#'
+#' \enumerate{
+#'   \item Filters each snapshot to \emph{active} contracts, defined as records
+#'         where \code{start_date_col <= ref_date}, \code{end_date_col} >= \code{ref_date}
+#'         (or \code{end_date} is \code{NA}), and \code{contract_type_col != "inactive"}.
+#'   \item Constructs a state label per person at T0 (\code{from_group}) and T1
+#'         (\code{to_group}) by concatenating \code{group_cols} values with
+#'         \code{"||"} as separator. When \code{salary_col} is supplied, salary
+#'         is first summed within each person-group combination via
+#'         \code{compute_fastsummary()} to handle multi-contract persons before
+#'         state labels are formed.
+#'   \item Joins T0 and T1 states on person ID (inner join), so persons who
+#'         exit between T0 and T1 are excluded from transition counts.
+#'   \item Counts transitions per \code{(from_group, to_group)} pair and
+#'         divides by the T0 population in \code{from_group} to obtain a
+#'         period-specific transition probability. Groups with zero movers are
+#'         retained with \code{n_moves = 0L}.
+#'   \item When \code{salary_col} is supplied, computes salary summary
+#'         statistics \emph{over movers only} (persons who appear in both
+#'         snapshots), not over the full T0 population.
+#' }
+#'
+#' @param snap_t0 data.table. Subset of the full panel at snapshot T0, already
+#'   filtered to a single reference date. Must contain \code{ref_date_col},
+#'   \code{personnel_id_col}, \code{group_cols}, \code{start_date_col},
+#'   \code{end_date_col}, and \code{contract_type_col}.
+#' @param snap_t1 data.table. Subset of the full panel at snapshot T1 (the
+#'   period immediately following T0). Same column requirements as
+#'   \code{snap_t0}.
+#' @param ref_date_col Character. Name of the reference date column used to
+#'   extract T0 and T1 dates from the snapshots.
+#' @param group_cols Character vector. Columns whose concatenated values define
+#'   the movement state for each person. Rows with \code{NA} in any of these
+#'   columns are dropped via \code{na.omit()} before state labels are formed.
+#' @param personnel_id_col Character. Name of the personnel identifier column.
+#'   Internally renamed to \code{".pid"} during processing.
+#' @param start_date_col Character. Name of the contract start date column,
+#'   used in the active-contract filter.
+#' @param end_date_col Character. Name of the contract end date column,
+#'   used in the active-contract filter. \code{NA} values are treated as open-ended
+#'   contracts (i.e., still active at the snapshot date).
+#' @param contract_type_col Character. Name of the contract type column. Records
+#'   with value \code{"inactive"} are excluded from both snapshots.
+#' @param salary_col Character or \code{NULL}. Name of a compensation column.
+#'   When provided, salary is summed per person-group via
+#'   \code{compute_fastsummary(fns = "sum")} before state construction, and
+#'   salary summary columns are appended to the output. Default: \code{NULL}.
+#'
+#' @return A \code{data.table} with one row per \code{(from_group, to_group)}
+#'   pair observed in this period, or \code{NULL} if either snapshot contains
+#'   no active contracts after filtering. Columns:
+#'   \describe{
+#'     \item{from_group}{Character. Concatenated \code{group_cols} state at T0.}
+#'     \item{to_group}{Character. Concatenated \code{group_cols} state at T1.
+#'       \code{NA} for T0 groups where no movers were observed (these rows
+#'       carry \code{n_moves = 0L} and are filtered downstream).}
+#'     \item{n_moves}{Integer. Number of persons who moved from
+#'       \code{from_group} to \code{to_group} between T0 and T1. Set to
+#'       \code{0L} for T0 groups with no observed movers.}
+#'     \item{n_pop}{Integer. Number of active persons in \code{from_group}
+#'       at T0 (the denominator for \code{period_prob}).}
+#'     \item{period_prob}{Numeric. Transition probability for this pair in
+#'       this period: \eqn{n\_moves / n\_pop}.}
+#'     \item{t0_date}{Date. Reference date of the T0 snapshot.}
+#'     \item{t1_date}{Date. Reference date of the T1 snapshot.}
+#'   }
+#'   When \code{salary_col} is not \code{NULL}, the following columns are
+#'   prepended (computed over movers only, i.e., persons present in both
+#'   snapshots):
+#'   \describe{
+#'     \item{mean_salary_t0}{Numeric. Mean of per-person salary sums in
+#'       \code{from_group} at T0.}
+#'     \item{mean_salary_t1}{Numeric. Mean of per-person salary sums in
+#'       \code{to_group} at T1.}
+#'     \item{mean_salary_change}{Numeric. Mean absolute salary change
+#'       (T1 sum minus T0 sum) across movers.}
+#'     \item{median_salary_change}{Numeric. Median absolute salary change
+#'       across movers.}
+#'     \item{mean_salary_pct_change}{Numeric. Mean percentage salary change
+#'       (\eqn{(salary_{T1} - salary_{T0}) / salary_{T0}}) across movers.}
+#'   }
+#'
+#' @seealso \code{\link{estimate_movement_rates}}, \code{\link{roll_snapshot_pairs}}
+#' @keywords internal
+
+.compute_transition_pair <- function(snap_t0, 
+                                     snap_t1, 
+                                     ref_date_col, 
+                                     group_cols, 
+                                     personnel_id_col, 
+                                     start_date_col, 
+                                     end_date_col, 
+                                     contract_type_col, 
+                                     salary_col = NULL) { 
+
+  if (!is.null(salary_col) &&
+      !(salary_col %in% names(snap_t0) && salary_col %in% names(snap_t1))) {
+    stop(sprintf("salary_col '%s' not found in snap_t0 and/or snap_t1", salary_col))
+  }
+
+  t0_date <- snap_t0[[ref_date_col]][1L] 
+  t1_date <- snap_t1[[ref_date_col]][1L] 
+
+  active_t0 <- snap_t0[ 
+    get(start_date_col) <= t0_date & 
+      (is.na(get(end_date_col)) | get(end_date_col) >= t0_date) & 
+      get(contract_type_col) != "inactive" 
+  ] 
+  if (nrow(active_t0) == 0L) return(NULL) 
+
+  if (is.null(salary_col)) {
+    state_t0 <- unique(active_t0[, c(personnel_id_col, group_cols), with = FALSE])
+  } else {
+    state_t0 <- compute_fastsummary(data = active_t0, 
+                                     cols = salary_col, 
+                                     fns = "sum", 
+                                     groups = c(personnel_id_col, group_cols), 
+                                     output = "wide") 
+  }
+  state_t0 <- stats::na.omit(state_t0, cols = group_cols) 
+  state_t0[, from_group := do.call(paste, c(.SD, sep = "||")), .SDcols = group_cols] 
+  data.table::setnames(state_t0, personnel_id_col, ".pid") 
+
+  active_t1 <- snap_t1[ 
+    get(start_date_col) <= t1_date & 
+      (is.na(get(end_date_col)) | get(end_date_col) >= t1_date) & 
+      get(contract_type_col) != "inactive" 
+  ] 
+  if (nrow(active_t1) == 0L) return(NULL) 
+
+  if (is.null(salary_col)) {
+    state_t1 <- unique(active_t1[, c(personnel_id_col, group_cols), with = FALSE])
+  } else {
+    state_t1 <- compute_fastsummary(data = active_t1, 
+                                     cols = salary_col, 
+                                     fns = "sum", 
+                                     groups = c(personnel_id_col, group_cols), 
+                                     output = "wide") 
+  }
+  state_t1 <- stats::na.omit(state_t1, cols = group_cols) 
+  state_t1[, to_group := do.call(paste, c(.SD, sep = "||")), .SDcols = group_cols] 
+  data.table::setnames(state_t1, personnel_id_col, ".pid") 
+
+  tag_vars <- if (is.null(salary_col)) group_cols else c(group_cols, paste0(salary_col, "_sum"))  
+  setnames(state_t0, tag_vars, paste0(tag_vars, "_t0")) 
+  setnames(state_t1, tag_vars, paste0(tag_vars, "_t1")) 
+
+  transitions <- state_t0[state_t1, on = ".pid", nomatch = NULL] 
+  if (nrow(transitions) == 0L) return(NULL) 
+
+  movement_counts <- transitions[, .(n_moves = .N), by = .(from_group, to_group)] 
+  pop_t0          <- state_t0[, .(n_pop = .N), by = from_group] 
+
+  period_trans <- movement_counts[pop_t0, on = "from_group", nomatch = NA] 
+  period_trans[is.na(n_moves), n_moves := 0L] 
+  period_trans[, period_prob := n_moves / n_pop] 
+  period_trans[, t0_date     := t0_date] 
+  period_trans[, t1_date     := t1_date] 
+
+  if (!is.null(salary_col)) {
+
+    sal_t0_col <- paste0(salary_col, "_sum_t0")
+    sal_t1_col <- paste0(salary_col, "_sum_t1")
+
+    transitions[, salary_change     := get(sal_t1_col) - get(sal_t0_col)]
+    transitions[, salary_pct_change := salary_change / get(sal_t0_col)]
+
+    salary_by_pair <- transitions[, .(
+      mean_salary_t0         = mean(get(sal_t0_col), na.rm = TRUE),
+      mean_salary_t1         = mean(get(sal_t1_col), na.rm = TRUE),
+      mean_salary_change     = mean(salary_change, na.rm = TRUE),
+      median_salary_change   = stats::median(salary_change, na.rm = TRUE),
+      mean_salary_pct_change = mean(salary_pct_change, na.rm = TRUE)
+    ), by = .(from_group, to_group)]
+
+    period_trans <- salary_by_pair[period_trans, on = c("from_group", "to_group")]
+  }
+
+  period_trans 
+}
 
 #' Estimate Movement Baseline from Panel Data
 #'
 #' @description
 #' Analyzes longitudinal panel data to compute empirical transition probabilities
-#' for promotions and transfers. Compares consecutive snapshots (T0->T1, T1->T2,
-#' etc.) and returns one row per \code{(from_group, to_group, from_period, to_period)}
-#' pair. Only actual transitions (\code{from_group != to_group}) are returned;
-#' stay rows and rows with NA in any group_col are dropped.
+#' for promotions and transfers. Compares consecutive snapshots (T0 -> T1,
+#' T1 -> T2, etc.) using \code{roll_snapshot_pairs()} and
+#' \code{.compute_transition_pair()}, and returns one row per
+#' \code{(from_group, to_group, from_period, to_period)} pair.
+#'
+#' Only actual transitions (\code{from_group != to_group}) are returned; stay
+#' rows and rows where any \code{group_cols} value is \code{NA} (or the string
+#' \code{"NA"}) are dropped.
 #'
 #' To obtain a single averaged rate across all periods, aggregate the result:
-#' \code{result[, .(movement_rate = mean(movement_rate)), by = .(from_group, to_group)]}
+#' \preformatted{
+#' result[, .(movement_rate = mean(movement_rate)), by = .(from_group, to_group)]
+#' }
 #'
 #' @param contract_dt data.table. Contract data in long (panel) format.
-#'   Must contain ref_date_col for panel identification.
-#' @param group_cols Character vector. Columns defining movement states
-#'   (e.g., c("est_id", "paygrade") or c("paygrade"))
-#' @param personnel_id_col Character. Personnel ID column (default: "personnel_id")
-#' @param ref_date_col Character. Reference date column (default: "ref_date")
-#' @param start_date_col Character. Contract start date column (default: "start_date")
-#' @param end_date_col Character. Contract end date column (default: "end_date")
-#' @param contract_type_col Character. Contract type column (default: "contract_type_code")
+#'   Must contain \code{ref_date_col} for panel snapshot identification.
+#' @param group_cols Character vector. One or more columns defining the movement
+#'   states between which transitions are measured
+#'   (e.g., \code{c("est_id", "paygrade")} or \code{c("paygrade")}). Values
+#'   are concatenated into a single state label when multiple columns are
+#'   provided.
+#' @param personnel_id_col Character. Name of the personnel identifier column.
+#'   Default: \code{"personnel_id"}.
+#' @param ref_date_col Character. Name of the reference (snapshot) date column
+#'   used to identify panel periods. Default: \code{"ref_date"}.
+#' @param start_date_col Character. Name of the contract start date column.
+#'   Default: \code{"start_date"}.
+#' @param end_date_col Character. Name of the contract end date column.
+#'   Default: \code{"end_date"}.
+#' @param contract_type_col Character. Name of the contract type column.
+#'   Default: \code{"contract_type"}.
+#' @param salary_col Character or \code{NULL}. Name of a compensation column in
+#'   \code{contract_dt}. When provided, salary summary columns are appended to
+#'   the output (see Value). Default: \code{NULL}.
 #'
-#' @return data.table with columns:
+#' @return A \code{data.table} with one row per
+#'   \code{(from_group, to_group, from_period, to_period)} transition pair,
+#'   keyed on those four columns. Returns an empty \code{data.table} with the
+#'   same schema if no valid transitions are found. Columns:
 #'   \describe{
-#'     \item{from_group}{Character. State at period start (concatenated group_cols)}
-#'     \item{to_group}{Character. State at period end (concatenated group_cols)}
-#'     \item{movement_rate}{Numeric. Transition probability for this specific period pair}
-#'     \item{from_period}{Date. Start snapshot date (T0)}
-#'     \item{to_period}{Date. End snapshot date (T1)}
-#'     \item{n_pop}{Integer. Number of persons in from_group at T0}
-#'     \item{n_moves}{Integer. Number of persons who moved from from_group to to_group}
+#'     \item{from_group}{Character. Concatenated \code{group_cols} state at the
+#'       start of the period (T0).}
+#'     \item{to_group}{Character. Concatenated \code{group_cols} state at the
+#'       end of the period (T1).}
+#'     \item{movement_rate}{Numeric. Empirical transition probability for this
+#'       specific period pair: \eqn{n\_moves / n\_pop}.}
+#'     \item{from_period}{Date. Snapshot date at the start of the period (T0).}
+#'     \item{to_period}{Date. Snapshot date at the end of the period (T1).}
+#'     \item{n_pop}{Integer. Number of persons in \code{from_group} at T0.}
+#'     \item{n_moves}{Integer. Number of persons who moved from
+#'       \code{from_group} to \code{to_group} between T0 and T1.}
 #'   }
+#'   When \code{salary_col} is not \code{NULL}, five additional columns are
+#'   appended:
+#'   \describe{
+#'     \item{mean_salary_t0}{Numeric. Mean salary in \code{from_group} at T0.}
+#'     \item{mean_salary_t1}{Numeric. Mean salary in \code{to_group} at T1.}
+#'     \item{mean_salary_change}{Numeric. Absolute change in mean salary
+#'       (T1 minus T0).}
+#'     \item{median_salary_change}{Numeric. Median absolute salary change across
+#'       movers.}
+#'     \item{mean_salary_pct_change}{Numeric. Mean percentage salary change
+#'       across movers.}
+#'   }
+#'
 #' @keywords internal
+
 estimate_movement_rates <- function(contract_dt,
                                     group_cols,
                                     personnel_id_col = "personnel_id",
                                     ref_date_col = "ref_date",
                                     start_date_col = "start_date",
                                     end_date_col = "end_date",
-                                    contract_type_col = "contract_type_code") {
+                                    contract_type_col = "contract_type",
+                                    salary_col = NULL) {
 
   # Validate inputs
   if (!data.table::is.data.table(contract_dt)) {
@@ -283,7 +696,8 @@ estimate_movement_rates <- function(contract_dt,
     personnel_id_col  = personnel_id_col,
     start_date_col    = start_date_col,
     end_date_col      = end_date_col,
-    contract_type_col = contract_type_col
+    contract_type_col = contract_type_col,
+    salary_col        = salary_col
   )
   # Attach a period index so we can count distinct periods later.
   if (nrow(all_periods) > 0L)
@@ -307,6 +721,15 @@ estimate_movement_rates <- function(contract_dt,
 
   baseline_matrix <- all_periods[, .(from_group, to_group, movement_rate,
                                      from_period, to_period, n_pop, n_moves)]
+  
+  if (!is.null(salary_col)){
+
+    baseline_matrix <- all_periods[, .(from_group, to_group, movement_rate,
+                                       from_period, to_period, n_pop, n_moves,
+                                       mean_salary_t0, mean_salary_t1, mean_salary_change,
+                                       median_salary_change, mean_salary_pct_change)]
+    
+  }
 
   # Drop stay rows (from_group == to_group): we only want actual transitions
   baseline_matrix <- baseline_matrix[from_group != to_group]
@@ -517,7 +940,7 @@ estimate_exit_rates <- function(contract_dt,
     exit_counts <- fire_events[, .(n_exits = .N), by = ref_date_col]
   }
 
-  active_types <- c("fterm", "perm", "temp")
+  active_types <- c("fixed-term", "permanent", "short-term")
   stock_dt <-
     panel_contract_dt[
       ,
@@ -549,93 +972,4 @@ estimate_exit_rates <- function(contract_dt,
   result
 }
 
-#' Compute Tenure from a Stacked Contract Panel (Panel Version)
-#'
-#' @description
-#' Vectorised equivalent of \code{\link{compute_tenure}} for a panel dataset
-#' where \code{ref_date_col} is a column rather than a scalar.  Computes
-#' cumulative years of service per \emph{person × snapshot} in a single pass
-#' over the full stacked panel — no per-snapshot loop required.
-#'
-#' The union-of-intervals algorithm is identical to \code{compute_tenure}:
-#' contracts are sorted by start date, a \code{cummax} propagates the furthest
-#' end seen so far, and each interval's contribution is classified as a new
-#' span, partial extension, or nested (zero-contribution) segment.  The key
-#' difference is that \code{ref_date_col} participates in every row-wise
-#' comparison and in the \code{cummax} grouping key, so each
-#' \code{(personnel_id, ref_date)} pair is handled independently.
-#'
-#' @param contract_dt data.table.  Full stacked contract panel.  Must contain
-#'   \code{personnel_id_col}, \code{ref_date_col}, \code{contract_id_col},
-#'   \code{start_date_col}, \code{end_date_col}, and \code{contract_type_col}.
-#' @param personnel_id_col Character.  Default: \code{"personnel_id"}.
-#' @param ref_date_col Character.  Name of the snapshot date column.
-#'   Default: \code{"ref_date"}.
-#' @param contract_id_col Character.  Default: \code{"contract_id"}.
-#' @param start_date_col Character.  Default: \code{"start_date"}.
-#' @param end_date_col Character.  Default: \code{"end_date"}.
-#' @param contract_type_col Character.  Default: \code{"contract_type_code"}.
-#'
-#' @return data.table with columns \code{personnel_id_col},
-#'   \code{ref_date_col}, and \code{tenure_years}.  One row per unique
-#'   \code{(personnel_id, ref_date)} combination present in
-#'   \code{contract_dt}.
-#' @keywords internal
-compute_tenure_panel <- function(contract_dt,
-                                 personnel_id_col  = "personnel_id",
-                                 ref_date_col      = "ref_date",
-                                 contract_id_col   = "contract_id",
-                                 start_date_col    = "start_date",
-                                 end_date_col      = "end_date",
-                                 contract_type_col = "contract_type_code") {
-  # 0. ensure dataset is data.table
-  contract_dt <- as.data.table(contract_dt)
 
-  # 1. Filter: active types only, started on or before each row's ref_date
-  dt <- contract_dt[
-    get(start_date_col) <= get(ref_date_col) &
-      !get(contract_type_col) %in% c("inactive", "pensioner")
-  ]
-
-  # 2. Cap open-ended / future contracts at each row's ref_date
-  dt[, .eff_end := data.table::fifelse(
-    is.na(get(end_date_col)) | get(end_date_col) > get(ref_date_col),
-    get(ref_date_col),
-    get(end_date_col)
-  )]
-
-  # 3. Dedup panel snapshots: one row per (contract_id, start_date, ref_date)
-  dt <- dt[dt[, .I[1L], by = c(contract_id_col, start_date_col, ref_date_col)]$V1]
-
-  # 4. Numeric days for arithmetic; drop zero-length contracts
-  dt[, .s := as.numeric(get(start_date_col))]
-  dt[, .e := as.numeric(.eff_end)]
-  dt <- dt[.e > .s]
-
-  if (nrow(dt) == 0L) {
-    empty <- data.table::data.table(
-      .pid = character(0), .refdt = as.Date(character(0)), tenure_years = numeric(0)
-    )
-    data.table::setnames(empty, c(".pid", ".refdt"), c(personnel_id_col, ref_date_col))
-    return(empty)
-  }
-
-  # 5. Sort by (person, snapshot, start) then apply cummax within each group
-  data.table::setorderv(dt, c(personnel_id_col, ref_date_col, ".s"))
-  dt[, .lag_max_e := data.table::shift(cummax(.e), fill = -1e15),
-     by = c(personnel_id_col, ref_date_col)]
-
-  # 6. Classify and sum contributions
-  dt[, .contrib := data.table::fcase(
-    .s >= .lag_max_e,  .e - .s,
-    .e >  .lag_max_e,  .e - .lag_max_e,
-    default = 0
-  )]
-
-  result <- dt[,
-    .(tenure_years = sum(.contrib, na.rm = TRUE) / 365.25),
-    by = c(personnel_id_col, ref_date_col)
-  ]
-
-  result
-}
