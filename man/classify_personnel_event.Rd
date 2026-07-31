@@ -2,7 +2,7 @@
 % Please edit documentation in R/movement.R
 \name{classify_personnel_event}
 \alias{classify_personnel_event}
-\title{Classify Personnel Movements}
+\title{Classify Personnel Movement Events}
 \usage{
 classify_personnel_event(
   .data,

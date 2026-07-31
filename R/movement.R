@@ -35,8 +35,6 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
     by = group_vars
   ]
 
-  data_out <- data.table::copy(data)
-
   return(data_out)
 }
 
@@ -538,7 +536,7 @@ complete_dates <- function(data,
   return(expanded_dt)
 }
 
-#' Classify Personnel Movements
+#' Classify Personnel Movement Events
 #'
 #' This function classifies the personnel module into three types of movements: hires, fires, or retirements.
 #'
