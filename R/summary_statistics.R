@@ -1159,10 +1159,12 @@ compute_compression_ratio <- function(
 #' @param binwidth The width of the bins for grouping the measure values (default is 1).
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
 #'
+#' @return A data frame with the cumulative distribution function.
+#' 
 #' @importFrom data.table as.data.table setorderv
 #' @importFrom collapse fquantile
-#'
-#' @return A data frame with the cumulative distribution function.
+#' 
+#' @export
 compute_cumulative <- function(
   .data,
   group_col = NULL,
@@ -1231,6 +1233,7 @@ compute_cumulative <- function(
 #'
 #' @importFrom data.table as.data.table
 #' @importFrom govhr compute_fastsummary
+#' 
 #' @export
 compute_time_trend <- function(.data, group, measure_col = NULL) {
   .data_dt <- data.table::as.data.table(.data)
@@ -1269,6 +1272,7 @@ compute_time_trend <- function(.data, group, measure_col = NULL) {
 #' @return The input data frame with `value` rescaled to a baseline index.
 #'
 #' @importFrom dplyr arrange mutate across all_of ungroup first
+#' 
 #' @export
 rescale_baseline <- function(data, group) {
   if (group == "ref_date") {
@@ -1306,6 +1310,7 @@ rescale_baseline <- function(data, group) {
 #'
 #' @importFrom dplyr group_by across all_of filter ungroup summarise n
 #' @importFrom govhr compute_fastsummary
+#' 
 #' @export
 compute_cross_section <- function(data, group, measure_col = NULL) {
   # only consider latest reference date
@@ -1346,6 +1351,7 @@ compute_cross_section <- function(data, group, measure_col = NULL) {
 #'
 #' @importFrom dplyr group_by across all_of filter ungroup summarise n first last
 #' @importFrom govhr compute_fastsummary
+#' 
 #' @export
 compute_growth <- function(.data, group, measure_col = NULL) {
   endpoints <- .data |>

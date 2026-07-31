@@ -392,7 +392,6 @@ add_contract_to_event <- function(event_dt, contract_dt, keep_vars) {
 #' )
 #'
 #' @export
-
 detect_career_transitions <- function(contract_dt,
                                       vars,
                                       decision_var,
@@ -450,7 +449,6 @@ detect_career_transitions <- function(contract_dt,
 
   return(transitions_dt[])
 }
-
 
 #' Complete Panel Data by Identifier and Reference Dates
 #'
@@ -557,6 +555,7 @@ complete_dates <- function(data,
 #' @importFrom lubridate ymd
 #' @importFrom govhr detect_personnel_event
 #'
+#' @export
 #' @return A data frame with an additional column indicating the type of movement for each personnel record.
 classify_personnel_event <- function(
   .data,
@@ -624,6 +623,7 @@ classify_personnel_event <- function(
 #'
 #' @importFrom data.table as.data.table setorderv rbindlist
 #'
+#' @export
 #' @return A data frame containing the movement cost for each requested event type within the specified groups and reference dates.
 compute_movement_cost <- function(
   .data,

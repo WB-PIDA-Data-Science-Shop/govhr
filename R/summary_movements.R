@@ -208,7 +208,6 @@ compute_tenure <- function(contract_dt,
 #'   }
 #'
 #' @keywords internal
-
 compute_tenure_panel <- function(contract_dt,
                                  personnel_id_col  = "personnel_id",
                                  ref_date_col      = "ref_date",

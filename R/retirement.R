@@ -12,6 +12,8 @@
 #' @return A data frame with projected retirement dates and counts of staff eligible for retirement at each reference date.
 #'
 #' @importFrom data.table as.data.table
+#' 
+#' @export
 project_retirement <- function(
   .data,
   threshold_age = 60,
@@ -91,7 +93,6 @@ project_retirement <- function(
 
   projected_retirement_data[]
 }
-
 
 #' Compute Ratio of Last Salary to First Pension for Retired Workers
 #'
