@@ -1,3 +1,7 @@
+# govhr 0.3.3
+This release:
+- Ports a set of functionalities from `govhrapp` into `govhr`. This include functions that project retirements, compute compression ratios, among others.
+
 # govhr 0.3.2
 This release: 
 - Further updates and additions to the movement functions and unit tests to support indicator generation for the govhrapp

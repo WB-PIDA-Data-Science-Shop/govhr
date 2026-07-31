@@ -1,7 +1,7 @@
 Package: govhr
 Type: Package
 Title: Clean and analyze data that informs human resource management
-Version: 0.3.2
+Version: 0.3.3
 Description: This package is a toolkit developed by the World Bank. It cleans, harmonizes, and analyzes human resource data with a standardized methodology.
 License: MIT + file LICENSE
 Encoding: UTF-8
