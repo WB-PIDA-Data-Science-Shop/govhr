@@ -319,7 +319,6 @@ detect_reallocation <- function(data, personnel_hire) {
 #'
 #' @seealso [data.table::merge()], [data.table::unique()]
 #' @export
-
 add_contract_to_event <- function(event_dt, contract_dt, keep_vars) {
   contract_dt <- unique(contract_dt[,
     c("personnel_id", "ref_date", keep_vars),

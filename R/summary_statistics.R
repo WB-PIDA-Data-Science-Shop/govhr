@@ -1104,10 +1104,12 @@ compute_quantile <- function(
 #' @param measure_col The name of the column for which the compression ratio will be computed.
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
 #'
+#' @return A data frame containing the 90th, 50th, and 10th percentiles for the specified measure column within the specified groups and reference dates.
+#'
 #' @importFrom data.table as.data.table setorderv
 #' @importFrom collapse fquantile
 #'
-#' @return A data frame containing the 90th, 50th, and 10th percentiles for the specified measure column within the specified groups and reference dates.
+#' @export
 compute_compression_ratio <- function(
   .data,
   group_cols = NULL,
