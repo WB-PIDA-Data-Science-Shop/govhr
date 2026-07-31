@@ -34,10 +34,8 @@ if (getRversion() >= "2.15.1"){
     "..active_cols", "last_salary", "max_date", "mean_salary_change",
     "mean_salary_pct_change", "mean_salary_t0", "mean_salary_t1",
     "median_salary_change", "replacement_rate", "salary_change", "salary_pct_change",
-    "spell_years"
-
+    "spell_years", "bin", "decile", "i.type_event", "retirement_date"
   ))
-
 }
 
 

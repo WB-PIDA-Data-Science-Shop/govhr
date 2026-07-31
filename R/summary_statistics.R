@@ -1045,3 +1045,341 @@ compute_baseline_index <- function(.data, date_col, ...) {
 
   indexed_df
 }
+
+#' Function to compute quantiles of a measure column within groups and reference dates.
+#'
+#' @param .data A data frame containing the data to be processed.
+#' @param group_cols A character vector of column names to group the data by.
+#' @param measure_col The name of the column for which quantiles will be computed.
+#' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date's quantiles (default is FALSE).
+#' @param n_quantiles The number of quantiles to compute (default is 10 for deciles).
+#' 
+#' @return A data frame containing the quantiles, median values, and mean values for the specified measure column within the specified groups and reference dates.
+#'
+#' @importFrom data.table as.data.table setorderv
+#' @importFrom collapse fquantile
+#'
+#' @export
+compute_quantile <- function(
+  .data,
+  group_cols = NULL,
+  measure_col,
+  latest_measure = FALSE,
+  n_quantiles = 10
+) {
+  dt <- data.table::as.data.table(.data)
+
+  # change group_cols based on the choice of latest measure
+  by_cols <- if (latest_measure) {
+    group_cols
+  } else {
+    c(group_cols, "ref_date")
+  }
+
+  if (latest_measure) {
+    dt <- dt[ref_date == max(ref_date)]
+  }
+
+  dt[, decile := collapse::fquantile(get(measure_col), probs = seq(0, 1, by = 1/n_quantiles)), by = by_cols]
+
+  out <- dt[
+    !is.na(decile),
+    .(
+      median_value = stats::median(get(measure_col), na.rm = TRUE),
+      mean_value = mean(get(measure_col), na.rm = TRUE)
+    ),
+    keyby = c(by_cols, "decile")
+  ]
+
+  data.table::setorderv(out, c(by_cols, "decile"))
+
+  out[]
+}
+
+#' Function to compute the compression ratio
+#'
+#' @param .data A data frame.
+#' @param group_cols A character vector of column names to group the data by.
+#' @param percentiles A numeric vector of length 3 indicating the upper, middle, and lower percentiles to compute (default is c(0.9, 0.5, 0.1)).
+#' @param measure_col The name of the column for which the compression ratio will be computed.
+#' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
+#'
+#' @importFrom data.table as.data.table setorderv
+#' @importFrom collapse fquantile
+#'
+#' @return A data frame containing the 90th, 50th, and 10th percentiles for the specified measure column within the specified groups and reference dates.
+compute_compression_ratio <- function(
+  .data,
+  group_cols = NULL,
+  percentiles = c(0.9, 0.5, 0.1),
+  measure_col,
+  latest_measure = FALSE
+) {
+  # consider generalizing this function to compute any percentile, not just 90th, 50th, and 10th
+  dt <- data.table::as.data.table(.data)
+
+  by_cols <- c(group_cols, "ref_date")
+
+  out <- dt[
+    !is.na(get(measure_col)),
+    .(
+      percentile_upper = collapse::fquantile(
+        get(measure_col),
+        probs = percentiles[1],
+        na.rm = TRUE
+      ),
+      percentile_50 = collapse::fquantile(
+        get(measure_col),
+        probs = percentiles[2],
+        na.rm = TRUE
+      ),
+      percentile_lower = collapse::fquantile(
+        get(measure_col),
+        probs = percentiles[3],
+        na.rm = TRUE
+      )
+    ),
+    keyby = by_cols
+  ]
+
+  if (latest_measure && group_cols != "ref_date") {
+    out <- out[ref_date == max(ref_date)]
+  }
+
+  data.table::setorderv(out, by_cols)
+
+  out[]
+}
+
+#' Function to compute the cumulative distribution function of a variable.
+#'
+#' @param .data A data frame.
+#' @param group_col A character vector of column names to group the data by.
+#' @param measure_col The name of the column for which the percentile values will be computed.
+#' @param binwidth The width of the bins for grouping the measure values (default is 1).
+#' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
+#'
+#' @importFrom data.table as.data.table setorderv
+#' @importFrom collapse fquantile
+#'
+#' @return A data frame with the cumulative distribution function.
+compute_cumulative <- function(
+  .data,
+  group_col = NULL,
+  measure_col,
+  binwidth = 1,
+  latest_measure = FALSE
+) {
+  if (latest_measure) {
+    .data <- .data[.data[["ref_date"]] == max(.data[["ref_date"]]), ]
+  }
+
+  dt <- data.table::as.data.table(.data)
+  dt[, bin := floor(get(measure_col) / binwidth) * binwidth]
+  dt <- dt[!is.na(bin)]
+
+  binned <- dt[, .(count = .N), by = c(group_col, "bin")]
+
+  # full grid of every bin in range, crossed with every group present
+  all_bins <- seq(min(dt$bin), max(dt$bin), by = binwidth)
+
+  full_grid <- if (is.null(group_col)) {
+    data.table::data.table(bin = all_bins)
+  } else {
+    data.table::CJ(
+      unique(dt[[group_col]]),
+      all_bins,
+      sorted = FALSE
+    ) |>
+      data.table::setnames(c(group_col, "bin"))
+  }
+
+  binned <- merge(full_grid, binned, by = c(group_col, "bin"), all.x = TRUE)
+  binned[is.na(count), count := 0L]
+
+  data.table::setorderv(binned, c(group_col, "bin"))
+
+  binned <- binned[,
+    c(
+      .SD,
+      list(
+        pct = count / sum(count),
+        cum_pct = cumsum(count) / sum(count)
+      )
+    ),
+    by = group_col
+  ]
+
+  binned[]
+}
+
+#' Compute time trend 
+#'
+#' Summarizes data over time by grouping variable, producing a tidy data frame
+#' with `ref_date`, optional group column, and `value`.
+#'
+#' When `measure_col` is `NULL`, counts rows per period (headcount). When a
+#' column name is supplied, sums that column per period (wage bill).
+#'
+#' @param .data A data frame containing at least a `ref_date` column.
+#' @param group Character string naming the grouping column, or `"ref_date"` for
+#'   no grouping.
+#' @param measure_col Character string naming the numeric column to sum, or
+#'   `NULL` to count rows.
+#'
+#' @return A summarized data frame with columns `ref_date`, optionally `group`, and `value`. Value denotes either a sum or headcount (if `measure_col` is `NULL`).
+#'
+#' @importFrom data.table as.data.table
+#' @importFrom govhr compute_fastsummary
+#' @export
+compute_time_trend <- function(.data, group, measure_col = NULL) {
+  .data_dt <- data.table::as.data.table(.data)
+
+  groups <- if (group == "ref_date") "ref_date" else c("ref_date", group)
+
+  if (is.null(measure_col)) {
+    # headcount by group
+    .data_dt <- .data_dt[, .(value = .N), by = groups]
+
+    # order by groups
+    data.table::setorderv(.data_dt, groups)
+
+    .data_dt
+  } else {
+    .data_dt |>
+      compute_fastsummary(
+        cols = measure_col,
+        fns = "sum",
+        groups = groups
+      )
+  }
+}
+
+#' Rescale to Baseline Index
+#'
+#' Rescales the `value` column so that the first observation equals 100,
+#' producing a baseline index. When a grouping variable is present, the
+#' rescaling is applied within each group.
+#'
+#' @param data A data frame with columns `ref_date` and `value`, as returned by
+#'   [compute_time_trend()].
+#' @param group Character string naming the grouping column, or `"ref_date"` for
+#'   no grouping.
+#'
+#' @return The input data frame with `value` rescaled to a baseline index.
+#'
+#' @importFrom dplyr arrange mutate across all_of ungroup first
+#' @export
+rescale_baseline <- function(data, group) {
+  if (group == "ref_date") {
+    data |>
+      dplyr::arrange(.data[["ref_date"]]) |>
+      dplyr::mutate(
+        value = .data[["value"]] / dplyr::first(.data[["value"]]) * 100
+      )
+  } else {
+    data |>
+      dplyr::arrange(.data[["ref_date"]]) |>
+      dplyr::mutate(
+        value = .data[["value"]] / dplyr::first(.data[["value"]]) * 100,
+        .by = dplyr::all_of(group)
+      )
+  }
+}
+
+#' Compute Cross-Section Summary Table
+#'
+#' Filters to the latest reference date within each group, then aggregates to
+#' produce a per-group `value`. Used as the data source for total-by-group bar
+#' charts.
+#'
+#' When `measure_col` is `NULL`, counts rows (headcount). When a column name is
+#' supplied, sums that column (wage bill).
+#'
+#' @param data A data frame containing a `ref_date` column and the grouping
+#'   column.
+#' @param group Character string naming the grouping column.
+#' @param measure_col Character string naming the numeric column to sum, or
+#'   `NULL` to count rows.
+#'
+#' @return A data frame with the grouping column and a `value` column.
+#'
+#' @importFrom dplyr group_by across all_of filter ungroup summarise n
+#' @importFrom govhr compute_fastsummary
+#' @export
+compute_cross_section <- function(data, group, measure_col = NULL) {
+  # only consider latest reference date
+  data_latest <- data |>
+    dplyr::filter(
+      .data[["ref_date"]] == max(.data[["ref_date"]]),
+      .by = dplyr::all_of(group)
+    )
+
+  if (is.null(measure_col)) {
+    data_latest |>
+      dplyr::summarise(value = dplyr::n(), .by = dplyr::all_of(group))
+  } else {
+    data_latest |>
+      compute_fastsummary(
+        cols = measure_col,
+        fns = "sum",
+        groups = group
+      )
+  }
+}
+
+#' Compute Growth Rate Summary Table
+#'
+#' Filters to the first and last reference date within each group and computes
+#' the percentage change from first `ref_date` to last `ref_date`.
+#'
+#' When `measure_col` is `NULL`, counts rows per date-group cell (headcount).
+#' When a column name is supplied, sums that column (wage bill).
+#'
+#' @param .data A data frame with `ref_date` and the grouping column.
+#' @param group Character string naming the grouping column.
+#' @param measure_col Character string naming the numeric column to sum, or
+#'   `NULL` to count rows.
+#'
+#' @return A data frame with the grouping column and a `growth_rate` column
+#'   (percentage points, e.g. 12.5 for +12.5%).
+#'
+#' @importFrom dplyr group_by across all_of filter ungroup summarise n first last
+#' @importFrom govhr compute_fastsummary
+#' @export
+compute_growth <- function(.data, group, measure_col = NULL) {
+  endpoints <- .data |>
+    dplyr::filter(
+      .data[["ref_date"]] %in%
+        c(max(.data[["ref_date"]]), min(.data[["ref_date"]])),
+      .by = dplyr::all_of(group)
+    ) |>
+    dplyr::arrange(.data[["ref_date"]])
+
+  summarized <- if (is.null(measure_col)) {
+    endpoints |>
+      dplyr::summarise(
+        value = dplyr::n(),
+        .by = dplyr::all_of(c("ref_date", group))
+      )
+  } else {
+    endpoints |>
+      compute_fastsummary(
+        cols = measure_col,
+        fns = "sum",
+        groups = c("ref_date", group)
+      )
+  }
+
+  summarized |>
+    dplyr::filter(!is.na(.data[[group]])) |>
+    dplyr::summarise(
+      growth_rate = round(
+        dplyr::last(.data[["value"]]) / dplyr::first(.data[["value"]]) - 1,
+        3
+      ) *
+        100,
+      .by = dplyr::all_of(group)
+    ) |>
+    dplyr::filter(!is.na(.data[["growth_rate"]]))
+}
