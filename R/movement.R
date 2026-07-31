@@ -551,12 +551,13 @@ complete_dates <- function(data,
 #' @param status_col The name of the column representing employment status.
 #' @param freq The frequency of the reference dates (default is "year").
 #'
+#' @return A data frame with an additional column indicating the type of movement for each personnel record.
+#' 
 #' @importFrom data.table setDT fcase copy
 #' @importFrom lubridate ymd
 #' @importFrom govhr detect_personnel_event
 #'
 #' @export
-#' @return A data frame with an additional column indicating the type of movement for each personnel record.
 classify_personnel_event <- function(
   .data,
   id_col,
