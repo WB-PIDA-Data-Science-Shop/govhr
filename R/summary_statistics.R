@@ -1057,7 +1057,7 @@ compute_baseline_index <- function(.data, date_col, ...) {
 #' @return A data frame containing the quantiles, median values, and mean values for the specified measure column within the specified groups and reference dates.
 #'
 #' @importFrom data.table as.data.table setorderv
-#' @importFrom collapse fquantile
+#' @importFrom dplyr ntile
 #'
 #' @export
 compute_quantile <- function(
@@ -1070,17 +1070,16 @@ compute_quantile <- function(
   dt <- data.table::as.data.table(.data)
 
   # change group_cols based on the choice of latest measure
-  by_cols <- if (latest_measure) {
-    group_cols
-  } else {
-    c(group_cols, "ref_date")
-  }
-
   if (latest_measure) {
+    by_cols <- group_cols
     dt <- dt[ref_date == max(ref_date)]
-  }
 
-  dt[, decile := collapse::fquantile(get(measure_col), probs = seq(0, 1, by = 1/n_quantiles)), by = by_cols]
+    dt[, decile := dplyr::ntile(get(measure_col), n_quantiles)]
+  } else {
+    by_cols <- c(group_cols, "ref_date")
+
+    dt[, decile := dplyr::ntile(get(measure_col), n_quantiles), by = by_cols]
+  }  
 
   out <- dt[
     !is.na(decile),
@@ -1153,7 +1152,7 @@ compute_compression_ratio <- function(
   out[]
 }
 
-#' Function to compute the cumulative distribution function of a variable.
+#' Function to compute the distribution function of a variable.
 #'
 #' @param .data A data frame.
 #' @param group_col A character vector of column names to group the data by.
@@ -1161,13 +1160,13 @@ compute_compression_ratio <- function(
 #' @param binwidth The width of the bins for grouping the measure values (default is 1).
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
 #'
-#' @return A data frame with the cumulative distribution function.
+#' @return A data frame with the distribution function, where `pct` denotes the percentage of observations in each bin and `cum_pct` denotes the cumulative percentage.
 #' 
 #' @importFrom data.table as.data.table setorderv
 #' @importFrom collapse fquantile
 #' 
 #' @export
-compute_cumulative <- function(
+compute_density <- function(
   .data,
   group_col = NULL,
   measure_col,
