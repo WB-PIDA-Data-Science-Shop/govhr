@@ -78,31 +78,3 @@ test_that("detect_career_transitions works with multiple personnel", {
   expect_true(all(res$personnel_id %in% 1:3))
   expect_true(all(res$attribute == "job_role"))
 })
-
-# test_that("detect_career_transitions works with large datasets", {
-#   skip_on_cran()
-#   n_personnel <- 5000
-#   years <- 2015:2025
-#   n_rows <- n_personnel * length(years)
-
-#   dt_large <- data.table(
-#     personnel_id = rep(1:n_personnel, each = length(years)),
-#     ref_date = rep(ymd(paste0(years,"-01-01")), times = n_personnel),
-#     job_role = sample(c("Analyst","Manager","Clerk"), n_rows, replace = TRUE),
-#     department = sample(c("HR","Finance","IT"), n_rows, replace = TRUE),
-#     decision_score = sample(1:100, n_rows, replace = TRUE)
-#   )
-
-#   start_time <- Sys.time()
-#   res <- detect_career_transitions(dt_large,
-#                                    vars = c("job_role","department"),
-#                                    decision_var = "decision_score")
-#   end_time <- Sys.time()
-
-#   runtime <- as.numeric(difftime(end_time, start_time, units = "secs"))
-#   message(sprintf("Runtime for %d rows: %.2f seconds", n_rows, runtime))
-
-#   res
-#   expect_true(all(res$attribute %in% c("job_role","department")))
-#   expect_true(all(res$personnel_id %in% 1:n_personnel))
-# })

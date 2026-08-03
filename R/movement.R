@@ -35,8 +35,6 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
     by = group_vars
   ]
 
-  data_out <- data.table::copy(data)
-
   return(data_out)
 }
 
@@ -319,7 +317,6 @@ detect_reallocation <- function(data, personnel_hire) {
 #'
 #' @seealso [data.table::merge()], [data.table::unique()]
 #' @export
-
 add_contract_to_event <- function(event_dt, contract_dt, keep_vars) {
   contract_dt <- unique(contract_dt[,
     c("personnel_id", "ref_date", keep_vars),
@@ -392,7 +389,6 @@ add_contract_to_event <- function(event_dt, contract_dt, keep_vars) {
 #' )
 #'
 #' @export
-
 detect_career_transitions <- function(contract_dt,
                                       vars,
                                       decision_var,
@@ -450,7 +446,6 @@ detect_career_transitions <- function(contract_dt,
 
   return(transitions_dt[])
 }
-
 
 #' Complete Panel Data by Identifier and Reference Dates
 #'
@@ -541,51 +536,152 @@ complete_dates <- function(data,
   return(expanded_dt)
 }
 
-#' Convert Data to Match Original Class
+#' Classify Personnel Movement Events
 #'
-#' Converts a dataset to have the same class as another reference dataset.
-#' This is useful for ensuring consistent output formats when performing
-#' operations that temporarily convert data structures (e.g., between
-#' `data.table`, `data.frame`, or `tibble`).
+#' This function classifies the personnel module into three types of movements: hires, fires, or retirements.
 #'
-#' @param data A dataset to be converted. Typically a `data.table` or `data.frame`.
-#' @param data_original The original dataset whose class should be matched.
+#' @param .data A data frame containing personnel data.
+#' @param id_col The name of the column representing personnel IDs.
+#' @param event_type The type of movement to classify (e.g., "hire", "fire", and "retirement").
+#' @param start_date The start date for the classification period.
+#' @param end_date The end date for the classification period.
+#' @param status_col The name of the column representing employment status.
+#' @param freq The frequency of the reference dates (default is "year").
 #'
-#' @return The input \code{data} converted to the same class as \code{data_original}.
+#' @return A data frame with an additional column indicating the type of movement for each personnel record.
+#' 
+#' @importFrom data.table setDT fcase copy
+#' @importFrom lubridate ymd
+#' @importFrom govhr detect_personnel_event
 #'
-#' @details
-#' The function checks the class of \code{data_original} in the following order:
-#' \itemize{
-#'   \item If it is a tibble (`tbl_df`), \code{data} is converted using
-#'     \code{tibble::as_tibble()}.
-#'   \item If it is a base data frame but not a data.table, \code{data} is converted
-#'     using \code{as.data.frame()}.
-#'   \item Otherwise, \code{data} is returned unchanged (e.g., for data.table input).
-#' }
-#'
-#' @examples
-#' \dontrun{
-#' df <- data.frame(x = 1:3)
-#' dt <- data.table::as.data.table(df)
-#'
-#' # Convert dt back to data.frame to match df
-#' convert_data(dt, df)
-#'
-#' # Convert to tibble if original was tibble
-#' convert_data(dt, tibble::as_tibble(df))
-#' }
-#'
-#' @importFrom tibble as_tibble
-#'
-convert_data <- function(data, data_original) {
-  if ("tbl_df" %in% class(data_original)) {
-    data <- tibble::as_tibble(data)
-  } else if (
-    "data.frame" %in%
-      class(data_original) &&
-      !"data.table" %in% class(data_original)
-  ) {
-    data <- as.data.frame(data)
+#' @export
+classify_personnel_event <- function(
+  .data,
+  id_col,
+  event_type,
+  start_date,
+  end_date,
+  status_col,
+  freq = "year"
+) {
+  if (event_type %in% c("hire", "fire")) {
+    personnel_event <- detect_personnel_event(
+      data = .data,
+      event_type = event_type,
+      id_col = id_col,
+      start_date = start_date,
+      end_date = end_date,
+      status_col = status_col,
+      freq = freq
+    )
+  } else if (event_type == "retirement") {
+    personnel_event <- detect_retirement(.data)
   }
-  return(data)
+
+  .data <- data.table::copy(setDT(.data))
+  personnel_event <- data.table::setDT(personnel_event)
+
+  .data[personnel_event, on = c(id_col, "ref_date"), type_event := i.type_event]
+
+  .data[,
+    type_event := fcase(
+      type_event == "hire"   , "hire"       ,
+      type_event == "fire"   , "fire"       ,
+      type_event == "retire" , "retirement" ,
+      default = "stayed"
+    )
+  ]
+
+  # exclude minimum ref_date when movement_type is hire
+  # and exclude maximum ref_date when movement_type is fire
+  start_ref_date <- lubridate::ymd(start_date)
+  end_ref_date <- lubridate::ymd(end_date)
+
+  if (event_type == "hire") {
+    .data <- .data[ref_date > start_ref_date]
+  } else if (event_type == "fire") {
+    .data <- .data[ref_date < end_ref_date]
+  }
+
+  .data[]
+}
+
+#' Function to compute the total cost associated with personnel movements.
+#'
+#' @param .data A data frame containing the data to be processed.
+#' @param id_col The name of the column representing personnel IDs (default is "personnel_id").
+#' @param event_type A character vector indicating which movement event(s) to include (e.g., "hire", "fire", "retirement"). Multiple types can be supplied to compute costs for each type.
+#' @param start_date The start date for the classification period. Defaults to the minimum reference date found in `.data`.
+#' @param end_date The end date for the classification period. Defaults to the maximum reference date found in `.data`.
+#' @param status_col The name of the column representing employment status (default is "employment_status").
+#' @param freq The frequency of the reference dates. Defaults to a guess based on `.data`.
+#' @param measure_col The name of the column containing the cost/measure to sum.
+#' @param group_cols A character vector of column names to group the data by.
+#' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
+#'
+#' @importFrom data.table as.data.table setorderv rbindlist
+#'
+#' @export
+#' @return A data frame containing the movement cost for each requested event type within the specified groups and reference dates.
+compute_movement_cost <- function(
+  .data,
+  id_col = "personnel_id",
+  event_type,
+  start_date = NULL,
+  end_date = NULL,
+  status_col = "employment_status",
+  freq = NULL,
+  measure_col,
+  group_cols = NULL,
+  latest_measure = FALSE
+) {
+  dt <- data.table::as.data.table(.data)
+
+  if (is.null(start_date)) {
+    start_date <- as.character(min(dt[["ref_date"]]))
+  }
+  if (is.null(end_date)) {
+    end_date <- as.character(max(dt[["ref_date"]]))
+  }
+  if (is.null(freq)) {
+    freq <- guess_date_frequency(dt)
+  }
+
+  by_cols <- c(group_cols, "ref_date")
+
+  out <- data.table::rbindlist(
+    lapply(event_type, function(type) {
+      # classify personnel events
+      classified <- classify_personnel_event(
+        .data = dt,
+        id_col = id_col,
+        event_type = type,
+        start_date = start_date,
+        end_date = end_date,
+        status_col = status_col,
+        freq = freq
+      )
+
+      # compute movement cost
+      classified[
+        type_event == type,
+        .(
+          movement_type = type,
+          measurement = measure_col,
+          movement_cost = sum(get(measure_col), na.rm = TRUE)
+        ),
+        keyby = by_cols
+      ]
+    })
+  )
+
+  data.table::setorderv(out, "ref_date")
+
+  if (latest_measure) {
+    latest_ref_date <- max(out[["ref_date"]])
+
+    out <- out[ref_date == latest_ref_date]
+  }
+
+  out[]
 }
