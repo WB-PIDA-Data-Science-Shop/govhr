@@ -18,6 +18,8 @@
   : Calculate time intervals between reference dates
 - [`check_orphan_id()`](https://wb-pida-data-science-shop.github.io/govhr/reference/check_orphan_id.md)
   : Detect Orphan Records Between Parent and Child Modules
+- [`classify_personnel_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/classify_personnel_event.md)
+  : Classify Personnel Movement Events
 - [`classify_text()`](https://wb-pida-data-science-shop.github.io/govhr/reference/classify_text.md)
   : Classify free-text items against a user-supplied taxonomy using
   TF-IDF
@@ -35,6 +37,12 @@
   : Complete Panel Data by Identifier and Reference Dates
 - [`compute_baseline_index()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_baseline_index.md)
   : Compute index values relative to base year
+- [`compute_compression_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_compression_ratio.md)
+  : Function to compute the compression ratio
+- [`compute_cross_section()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_cross_section.md)
+  : Compute Cross-Section Summary Table
+- [`compute_density()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_density.md)
+  : Function to compute the distribution function of a variable.
 - [`compute_fastchange()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastchange.md)
   : Calculate year-over-year growth for a numeric column
 - [`compute_fastshare()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastshare.md)
@@ -42,13 +50,23 @@
   indicators
 - [`compute_fastsummary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastsummary.md)
   : Compute Fast Summary Statistics by Group
+- [`compute_growth()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_growth.md)
+  : Compute Growth Rate Summary Table
 - [`compute_hrmreport_stats()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_hrmreport_stats.md)
   : Compute Core HRMIS Analytical Tables
+- [`compute_movement_cost()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement_cost.md)
+  : Function to compute the total cost associated with personnel
+  movements.
 - [`compute_pension_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_pension_ratio.md)
   : Compute Ratio of Last Salary to First Pension for Retired Workers
 - [`compute_qualitycontrol()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_qualitycontrol.md)
   : Compute Comprehensive Quality Control Checks for Harmonized HRMIS
   Data
+- [`compute_quantile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_quantile.md)
+  : Function to compute quantiles of a measure column within groups and
+  reference dates.
+- [`compute_time_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_time_trend.md)
+  : Compute time trend
 - [`compute_volatility()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_volatility.md)
   : Compute Volatility Measures Over Time
 - [`compute_wagebill()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wagebill.md)
@@ -130,6 +148,8 @@
   : Plot grouped line chart with labeled points
 - [`ggplot_segment()`](https://wb-pida-data-science-shop.github.io/govhr/reference/ggplot_segment.md)
   : Plot segments overlaid with points, ordered by median
+- [`guess_date_frequency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/guess_date_frequency.md)
+  : Guess the Reporting Frequency of the Reference Dates
 - [`harmonize_columns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/harmonize_columns.md)
   : Harmonize column names based on a dictionary
 - [`isco`](https://wb-pida-data-science-shop.github.io/govhr/reference/isco.md)
@@ -140,10 +160,14 @@
   : Personnel Validation Rules
 - [`pivot_data360()`](https://wb-pida-data-science-shop.github.io/govhr/reference/pivot_data360.md)
   : Pivot Data360 dataset to wide format
+- [`project_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/project_retirement.md)
+  : Project Retirement Dates
 - [`remove_duplicate_contracts()`](https://wb-pida-data-science-shop.github.io/govhr/reference/remove_duplicate_contracts.md)
   : Remove Duplicate Contract Records
 - [`remove_duplicate_personnel()`](https://wb-pida-data-science-shop.github.io/govhr/reference/remove_duplicate_personnel.md)
   : Remove Duplicate Personnel Records
+- [`rescale_baseline()`](https://wb-pida-data-science-shop.github.io/govhr/reference/rescale_baseline.md)
+  : Rescale to Baseline Index
 - [`sample_group()`](https://wb-pida-data-science-shop.github.io/govhr/reference/sample_group.md)
   : Sample groups and return all rows for those groups
 - [`social_sustainability`](https://wb-pida-data-science-shop.github.io/govhr/reference/social_sustainability.md)
