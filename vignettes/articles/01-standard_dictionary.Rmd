@@ -9,123 +9,158 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Overview
 
-This article describes a standard dictionary for human resource management information system (HRMIS) data, organized into three main modules: Establishment, Personnel, and Contract. These modules are designed to organize and standardize information about public sector personnel across different countries and administrative levels.
+This article describes the standard dictionary for `govhr`, organized into
+four main modules: Establishment, Personnel, Contract, and Allowance. These
+modules are designed to organize and standardize information about public
+sector personnel across different countries and administrative levels.
 
 # Module 1: Establishment
 
-The Establishment module captures information about public sector institutions, including ministries, departments, and agencies.
+The Establishment module captures information about public sector institutions,
+including ministries, departments, and agencies, along with their sector
+classification and geographic/administrative location.
 
 ## Fields
 
 | Field Name | Variable Name | Description |
 |------------|---------------|-------------|
-| Establishment ID | `est_id` | Unique identifier for the establishment |
-| Establishment Name (Native) | `est_name_native` | Official establishment name in local language |
-| Establishment Name (English) | `est_name_en` | Establishment name translated to English |
-| Reference Date | `ref_date` | Latest date when the establishment had that name |
-| Establishment Type | `est_type` | Type of establishment (Ministry/Department/Agency) |
-| Parent Establishment | `est_parent` | Identifier for parent establishment in hierarchy |
-| Child Establishment | `est_child` | Identifier for child establishments in hierarchy |
-| Country Code | `country_code` | Official World Bank ISO-3 country code |
-| Country Name | `country_name` | Official World Bank country name |
-| Administration 1 Name | `adm1_name` | First-level administrative division name |
-| Administration 1 Code | `adm1_code` | First-level administrative division code |
+| Establishment ID | `est_id` | Unique identifier assigned to each establishment. |
+| Establishment Name (Native) | `est_name_native` | Official Establishment name in the country's native language. |
+| Establishment Name (English) | `est_name_english` | Official Establishment name translated into English. |
+| Sector | `sector` | The COFOG sector classification an establishment belongs to at the adm1 level. |
+| Reference Date | `ref_date` | Date of the HRMIS record. |
+| Administration 1 Name | `adm1` | First-level administrative division. For example, a Ministry or Secretariat. |
+| Administration 1 Code | `adm1_code` | First-level administrative division code, if available. |
+| Administration 2 Name | `adm2` | Second-level administrative division. For example, a Department or Division. |
+| Administration 2 Code | `adm2_code` | Second-level administrative division code, if available. |
+| Administration 3 Name | `adm3` | Third-level administrative division. For example, an Agency or Unit. |
+| Administration 3 Code | `adm3_code` | Third-level administrative division code, if available. |
+| Geography 1 Name | `geo1` | First-level geographic division. For example, a state or region. |
+| Geography 2 Name | `geo2` | Second-level geographic division. For example, a municipality or county. |
+| Country Code | `country_code` | Official World Bank ISO 3-letter country code. |
+| Country Name | `country_name` | Official World Bank country name. |
 
 ## Notes
 
-- **Establishment Type**: Indicates the hierarchical level of the institution within the government structure. Ideally, this would support parent-child relationships, though such data may be rare in practice.
-- **Administration Level**: Refers to the geographic/administrative level of government (e.g., national, state/provincial, local).
-- **Reference Date**: Critical for tracking establishmental changes, mergers, or renaming over time.
+- **Sector**: Uses the COFOG (Classification of the Functions of Government)
+  classification to categorize establishments.
+- **Administration vs. Geography**: Administration levels (`adm1`/`adm2`/`adm3`)
+  refer to institutional/administrative divisions (e.g., Ministry, Department,
+  Agency), while geography levels (`geo1`/`geo2`) refer to physical location
+  (e.g., state/region, municipality/county).
 
 # Module 2: Personnel
 
-The Personnel module contains demographic and employment information about individual public sector employees.
+The Personnel module contains demographic and employment information about
+individual public sector employees.
 
 ## Fields
 
 | Field Name | Variable Name | Description |
 |------------|---------------|-------------|
-| Personnel ID | `personnel_id` | Unique identifier for the personnel |
-| Establishment ID | `est_id` | Foreign key linking to Establishment module |
-| Establishment Name | `est_name_native` | Foreign key linking to the Establishment module | 
-| Reference Date | `ref_date` | Timestamp for the personnel record |
-| Date of Birth | `birth_date` | Personnel's date of birth |
-| Gender | `gender` | Personnel's gender |
-| Education Attainment (7 categories) | `educat7` | Education level using 10-category classification |
-| Tribe | `tribe` | Tribal affiliation|
-| Race | `race` | Racial/ethnic classification |
-| Country Code | `country_code` | Official World Bank ISO-3 country code |
-| Country Name | `country_name` | Official World Bank country name |
-| Administration 1 Name | `adm1_name` | First-level administrative division name |
-| Administration 1 Code | `adm1_code` | First-level administrative division code |
+| Personnel ID | `personnel_id` | Unique identifier assigned to each worker. |
+| Reference Date | `ref_date` | Date of the HRMIS record. |
+| Date of Birth | `birth_date` | The date of birth of a person. |
+| Age | `age` | The age of the person. |
+| Gender | `gender` | Gender of the person. |
+| Educational Attainment | `educat7` | Educational attainment in 7-level classification, following the World Bank's GLD convention. |
+| Tribe | `tribe` | Person's ethnic or tribal affiliation. |
+| Race | `race` | Person's race or broad ethnic classification. |
+| Employment Status | `employment_status` | Employment status of the person (active or retired). |
+| Person Tenure | `personnel_tenure` | How much time a person has worked in the public sector. |
+| Type of Service | `service_type` | The type of service of a person: civilian or military. |
+| First Employment Date | `first_employment_date` | Date personnel enter the public service for the first time. |
 
 ## Notes
 
-- **Education Categories**: Multiple classification systems are provided to allow for cross-country comparisons and mapping to international standards.
-- **Geographic Information**: While personnels are linked to establishments, separate geographic fields allow for tracking mobility and remote work arrangements.
-- **Privacy Considerations**: This module contains sensitive personal information and should be handled according to applicable data protection regulations.
+- **Employment Status**: Used together with `ref_date` to detect movement
+  events such as hires, fires, and retirements (see `classify_personnel_event()`).
+- **Educational Attainment**: Follows the World Bank's [Global Labor Database](https://worldbank.github.io/gld/Support/A%20-%20Guides%20and%20Documentation/GLD%20Manual%20Files/Education.html)
+  (GLD) 7-level classification convention.
+- **Tenure Fields**: `personnel_tenure` tracks overall public sector tenure,
+  distinct from `contract_tenure` in the Contract module, which tracks tenure
+  within a specific contract.
+- **Privacy Considerations**: This module contains sensitive personal
+  information and should be handled according to applicable data protection
+  regulations.
 
 # Module 3: Contract
 
-The Contract module captures details about employment contracts, compensation, and job characteristics.
+The Contract module captures details about employment contracts,
+compensation, and job characteristics.
 
 ## Fields
 
 | Field Name | Variable Name | Description |
 |------------|---------------|-------------|
-| Contract ID | `contract_id` | Unique identifier for the contract |
-| Personnel ID | `personnel_id` | Foreign key linking to Personnel module |
-| Establishment ID | `est_id` | Foreign key linking to Establishment module |
-| Establishment Name | `est_name_native` | Foreign key linking to Establishment module |
-| Reference Date | `ref_date` | Timestamp for the contract record |
-| Base Salary (LCU) | `base_salary_lcu` | Base compensation in local currency units |
-| Base Salary (PPP) | `base_salary_ppp` | Base compensation in constant 2021 international dollars |
-| Gross Salary (LCU) | `gross_salary_lcu` | Total compensation before deductions in local currency units|
-| Gross Salary (PPP) | `gross_salary_ppp` | Total compensation before deductions in constant 2021 international dollars|
-| Net Salary (LCU)| `net_salary_lcu` | Compensation after deductions in local currency units|
-| Net Salary (PPP)| `net_salary_ppp` | Compensation after deductions in constant 2021 international dollars|
-| Allowances (LCU) | `allowance_lcu` | Allowances in local currency units |
-| Allowances (PPP) | `allowance_ppp` Allowances in constant 2021 international dollars |
-| Contract Type | `contract_type` | Contract modality (short-term/open-term/permanent/inactive/retired) |
-| Occupation (Native) | `occupation_native` | Job title in local language |
-| Occupation (English) | `occupation_english` | Job title translated to English |
-| Occupation (ISCO Name) | `occupation_isconame` | ISCO standard occupation name |
-| Occupation (ISCO Code) | `occupation_iscocode` | ISCO standard occupation code |
-| Start Date | `start_date` | Contract start date |
-| End Date | `end_date` | Contract end date (if applicable) |
-| Country Code | `country_code` | Official World Bank ISO-3 country code |
-| Country Name | `country_name` | Official World Bank country name |
-| Administration 1 Name | `adm1_name` | First-level administrative division name |
-| Administration 1 Code | `adm1_code` | First-level administrative division code |
-| Hours Worked | `whours` | Standard or actual hours worked |
-| Pay Grade | `paygrade` | Salary scale or grade level |
-| Seniority | `seniority` | Years of service or seniority level |
+| Contract ID | `contract_id` | Unique identifier assigned to each contract. |
+| Personnel ID | `personnel_id` | Unique identifier assigned to each worker. |
+| Establishment ID | `est_id` | Unique identifier assigned to each establishment. |
+| Reference Date | `ref_date` | Date of the HRMIS record. |
+| Base Salary (Local Currency) | `base_salary_lcu` | Basic pay before allowances and deductions. |
+| Gross Salary (Local Currency) | `gross_salary_lcu` | Total compensation before taxes and deductions. |
+| Net Salary (Local Currency) | `net_salary_lcu` | Take-home pay after taxes and deductions. |
+| Allowance (Local Currency) | `allowance_lcu` | Allowances after salary has been paid. |
+| Contract Type (International) | `contract_type_international` | Type of employment contract following ILO standard ICSE-18 classifications. For example: permanent (e.g., civil servant), etc. |
+| Contract Type (Native) | `contract_type_native` | Type of employment contract in native language. |
+| Occupation (Native) | `occupation_native` | Worker's occupation title in the native language. |
+| Occupation (English) | `occupation_english` | Worker's occupation title in English. |
+| ISCO Occupation Name | `occupation_isconame` | Occupation mapped to ISCO-08 classification. |
+| ISCO Code | `occupation_iscocode` | ISCO-08 occupation code. |
+| Start Date | `start_date` | Start date of the employment contract. |
+| End Date | `end_date` | End date of the employment contract, if applicable. |
+| Working Hours | `whours` | Total weekly or monthly working hours as per contract. |
+| Pay Grade | `paygrade` | Pay grade or salary scale classification of a contract. |
+| Seniority | `seniority` | The level within the paygrade of a specific contract. |
+| Contract Tenure | `contract_tenure` | How much time a person has worked in a given contract. |
 
 ## Notes
 
-- **Compensation Fields**: Multiple salary measures allow for analysis of gross-to-net ratios, taxation effects, and allowances.
-- **Occupation Coding**: Both native and standardized (ISCO) classifications enable within-country detail and cross-country comparability.
-- **Contract Duration**: The combination of `contract_type`, `start_date`, and `end_date` provides comprehensive information about employment stability and temporary arrangements.
+- **Compensation Fields**: Base, gross, and net salary fields (local
+  currency only) allow analysis of gross-to-net ratios and the effect of
+  deductions and allowances. Itemized allowance amounts are tracked
+  separately in the Allowance module.
+- **Contract Type (International)**: Follows the ILO's ICSE-18 (International
+  Classification of Status in Employment) standard for cross-country
+  comparability, while `contract_type_native` preserves local terminology.
+- **Occupation Coding**: Both native and standardized (ISCO-08) classifications
+  enable within-country detail and cross-country comparability.
+- **Tenure vs. Seniority**: `contract_tenure` tracks time worked in the
+  current contract, while `seniority` tracks the level within the paygrade.
+
+# Module 4: Allowance
+
+The Allowance module captures detailed, itemized allowance payments
+associated with a contract, allowing analysis of allowance composition
+beyond the aggregate `allowance_lcu` figure in the Contract module.
+
+## Fields
+
+| Field Name | Variable Name | Description |
+|------------|---------------|-------------|
+| Personnel ID | `personnel_id` | Identifier assigned to each person. |
+| Contract ID | `contract_id` | Unique identifier assigned to each contract. |
+| Reference Date | `ref_date` | Date of the HRMIS record. |
+| Allowance Type | `allowance_type` | The allowance type. |
+| Allowance Value | `allowance_value` | Allowance value for the specific allowance type in local currency units. |
+
+## Notes
+
+- **Granularity**: Unlike the aggregate `allowance_lcu` field in the
+  Contract module, this module stores one row per allowance type per
+  contract per reference date, enabling detailed breakdowns of allowance
+  composition.
 
 # Relationship between modules
 
-The three modules are related as follows:
+The four modules are related as follows:
 
 ```
-Establishment (1) ←→ (N) Personnel
 Establishment (1) ←→ (N) Contract
 Personnel (1) ←→ (N) Contract
+Contract (1) ←→ (N) Allowance
 ```
 
-- One establishment can have many workers
-- One establishment can have many contracts
-- One worker can have multiple contracts (over time or concurrent)
-- One worker can have multiple establishments
-
-# Data Quality Considerations
-
-1. **Temporal Consistency**: Ensure `ref_date` fields are properly maintained across all modules
-2. **Geographic Consistency**: Country and administration codes should be consistent across all modules
-3. **Unique Identifiers**: All ID fields should be globally unique and persistent
-4. **Missing Data**: Document conventions for handling missing or unavailable data
-5. **Historical Records**: Consider versioning strategy for tracking changes over time
+- One establishment can have many contracts.
+- One person can have multiple contracts (over time or concurrent).
+- One contract can have multiple itemized allowances.
