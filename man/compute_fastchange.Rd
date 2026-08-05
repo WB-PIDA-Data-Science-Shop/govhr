@@ -33,8 +33,6 @@ using lagged values.
 - Missing years in the sequence are added automatically.
 - Missing values in `col` result in `NA` for the corresponding growth rate.
 - The first observation (or any row where the lag is missing) will have `NA`.
-- The function can accept both unquoted column names or strings.
-- To compute growth rates by group (e.g., country), use `group_by()` from `dplyr`.
 }
 \examples{
 library(data.table)
