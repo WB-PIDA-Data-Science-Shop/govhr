@@ -36,7 +36,6 @@
 #' }
 #'
 #' @seealso
-#' \code{\link{generate_qc_report}} for the data quality assessment report.
 #' \code{\link{dictionary}} for the harmonization dictionary.
 #'
 #' @importFrom rmarkdown render
