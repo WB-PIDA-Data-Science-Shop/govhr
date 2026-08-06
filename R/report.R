@@ -63,4 +63,3 @@ generate_hr_report <- function(
     output_file = output
   )
 }
-

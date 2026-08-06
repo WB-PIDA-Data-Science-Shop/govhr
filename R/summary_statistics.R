@@ -60,16 +60,19 @@
 #' @importFrom glue glue
 #'
 #' @export
-compute_fastsummary <- function(data,
-                                cols,
-                                fns = NULL,
-                                groups,
-                                output = c("long", "wide"),
-                                tbl = FALSE) {
-
+compute_fastsummary <- function(
+  data,
+  cols,
+  fns = NULL,
+  groups,
+  output = c("long", "wide"),
+  tbl = FALSE
+) {
   output <- match.arg(output)
   orig_class <- class(data)
-  if (!data.table::is.data.table(data)) data <- data.table::as.data.table(data)
+  if (!data.table::is.data.table(data)) {
+    data <- data.table::as.data.table(data)
+  }
 
   default_fns <- define_fns()
 
@@ -78,20 +81,29 @@ compute_fastsummary <- function(data,
     selected_fns <- default_fns
   } else if (is.character(fns)) {
     unknown <- setdiff(fns, names(default_fns))
-    if (length(unknown) > 0) stop(glue::glue("Unknown function name(s): {toString(unknown)}"))
+    if (length(unknown) > 0) {
+      stop(glue::glue("Unknown function name(s): {toString(unknown)}"))
+    }
     selected_fns <- default_fns[fns]
   } else if (is.list(fns)) {
     char_fns <- fns[sapply(fns, is.character)]
     formula_fns <- fns[sapply(fns, rlang::is_formula)]
-    selected_fns <- c(default_fns[intersect(unlist(char_fns), names(default_fns))], formula_fns)
-  } else stop("`fns` must be NULL, character vector, or a list")
+    selected_fns <- c(
+      default_fns[intersect(unlist(char_fns), names(default_fns))],
+      formula_fns
+    )
+  } else {
+    stop("`fns` must be NULL, character vector, or a list")
+  }
 
   # Build call list (fast)
   calls <- list()
   for (v in cols) {
     for (fname in names(selected_fns)) {
       fn <- selected_fns[[fname]]
-      if (rlang::is_formula(fn)) fn <- rlang::as_function(fn)
+      if (rlang::is_formula(fn)) {
+        fn <- rlang::as_function(fn)
+      }
       calls[[paste(v, fname, sep = "_")]] <- bquote(.(fn)(.(as.name(v))))
     }
   }
@@ -100,12 +112,16 @@ compute_fastsummary <- function(data,
   stats_dt <- data[, eval(j_call), by = groups]
 
   if (output == "long") {
-    stats_dt <- data.table::melt(stats_dt,
-                                 id.vars = groups,
-                                 variable.name = "indicator",
-                                 value.name = "value")
+    stats_dt <- data.table::melt(
+      stats_dt,
+      id.vars = groups,
+      variable.name = "indicator",
+      value.name = "value"
+    )
   }
-  if (tbl) stats_dt <- tibble::as_tibble(stats_dt)
+  if (tbl) {
+    stats_dt <- tibble::as_tibble(stats_dt)
+  }
 
   # Convert back to original class if needed
   if (!tbl) {
@@ -184,18 +200,24 @@ compute_fastsummary <- function(data,
 #' @importFrom stats as.formula
 #' @importFrom tibble as_tibble
 #' @export
-compute_fastshare <- function(data,
-                              macro_data = macro_indicators |> data.table::as.data.table(),
-                              macro_cols,
-                              cols,
-                              groups,
-                              fns,
-                              output = c("long", "wide")) {
+compute_fastshare <- function(
+  data,
+  macro_data = macro_indicators |> data.table::as.data.table(),
+  macro_cols,
+  cols,
+  groups,
+  fns,
+  output = c("long", "wide")
+) {
   output <- match.arg(output)
   orig_class <- class(data)
   orig_macro_class <- class(macro_data)
-  if (!data.table::is.data.table(data)) data <- data.table::as.data.table(data)
-  if (!data.table::is.data.table(macro_data)) macro_data <- data.table::as.data.table(macro_data)
+  if (!data.table::is.data.table(data)) {
+    data <- data.table::as.data.table(data)
+  }
+  if (!data.table::is.data.table(macro_data)) {
+    macro_data <- data.table::as.data.table(macro_data)
+  }
 
   summary_dt <- compute_fastsummary(
     data = data,
@@ -206,8 +228,9 @@ compute_fastshare <- function(data,
   )
 
   join_vars <- intersect(names(summary_dt), names(macro_data))
-  if (length(join_vars) == 0)
+  if (length(join_vars) == 0) {
     stop("No common grouping variables found between data and macro_data.")
+  }
 
   data.table::setkeyv(summary_dt, join_vars)
   data.table::setkeyv(macro_data, join_vars)
@@ -228,40 +251,68 @@ compute_fastshare <- function(data,
     value.name = "summary_value"
   )
 
-  ratio_dt <- merge(long_macro, long_summary,
-                    by = join_vars,
-                    allow.cartesian = TRUE)[
-                      , c("indicator", "value") := .(
-                        paste0(summary_var, "_per_", macro_var),
-                        summary_value / macro_value
-                      )
-                    ][
-                      , .SD,
-                      .SDcols = c(join_vars, "macro_var", "macro_value",
-                                  "summary_var", "summary_value", "indicator", "value")
-                    ]
+  ratio_dt <- merge(
+    long_macro,
+    long_summary,
+    by = join_vars,
+    allow.cartesian = TRUE
+  )[,
+    c("indicator", "value") := .(
+      paste0(summary_var, "_per_", macro_var),
+      summary_value / macro_value
+    )
+  ][,
+    .SD,
+    .SDcols = c(
+      join_vars,
+      "macro_var",
+      "macro_value",
+      "summary_var",
+      "summary_value",
+      "indicator",
+      "value"
+    )
+  ]
 
   if (output == "wide") {
-    keep_macro <- unique(ratio_dt[, c(join_vars, "macro_var", "macro_value"), with = FALSE])
+    keep_macro <- unique(ratio_dt[,
+      c(join_vars, "macro_var", "macro_value"),
+      with = FALSE
+    ])
     keep_macro <- data.table::dcast(
       keep_macro,
-      stats::as.formula(paste(paste(join_vars, collapse = " + "), "~ macro_var")),
+      stats::as.formula(paste(
+        paste(join_vars, collapse = " + "),
+        "~ macro_var"
+      )),
       value.var = "macro_value"
     )
 
-    keep_summary <- unique(ratio_dt[, c(join_vars, "summary_var", "summary_value"), with = FALSE])
+    keep_summary <- unique(ratio_dt[,
+      c(join_vars, "summary_var", "summary_value"),
+      with = FALSE
+    ])
     keep_summary <- data.table::dcast(
       keep_summary,
-      stats::as.formula(paste(paste(join_vars, collapse = " + "), "~ summary_var")),
+      stats::as.formula(paste(
+        paste(join_vars, collapse = " + "),
+        "~ summary_var"
+      )),
       value.var = "summary_value"
     )
 
     keep_dt <- merge(keep_macro, keep_summary, by = join_vars, all = TRUE)
 
-    ratio_dt <- unique(ratio_dt[, c(join_vars, "indicator", "value"), with = FALSE])
+    ratio_dt <- unique(ratio_dt[,
+      c(join_vars, "indicator", "value"),
+      with = FALSE
+    ])
     ratio_dt <- data.table::dcast(
       ratio_dt,
-      stats::as.formula(paste(paste(join_vars, collapse = " + "), "~ indicator")),
+      stats::as.formula(paste(
+        paste(join_vars, collapse = " + "),
+        "~ indicator"
+      )),
       value.var = "value"
     )
 
@@ -320,18 +371,28 @@ compute_fastchange <- function(data, col, date_col) {
   dt <- data.table::as.data.table(data)
 
   # if col/date_col are symbols, convert to strings
-  if (!is.character(col)) col <- deparse(substitute(col))
-  if (!is.character(date_col)) date_col <- deparse(substitute(date_col))
+  if (!is.character(col)) {
+    col <- deparse(substitute(col))
+  }
+  if (!is.character(date_col)) {
+    date_col <- deparse(substitute(date_col))
+  }
 
   # Generate full year sequence
-  years_full <- seq(min(dt[[date_col]], na.rm = TRUE),
-                    max(dt[[date_col]], na.rm = TRUE))
+  years_full <- seq(
+    min(dt[[date_col]], na.rm = TRUE),
+    max(dt[[date_col]], na.rm = TRUE)
+  )
 
   # Complete the table
   dt_full <- data.table::data.table(years_full)
   data.table::setnames(dt_full, "years_full", date_col)
-  dt_full <- merge(dt_full, dt[, .SD, .SDcols = c(date_col, col)],
-                   by = date_col, all.x = TRUE)
+  dt_full <- merge(
+    dt_full,
+    dt[, .SD, .SDcols = c(date_col, col)],
+    by = date_col,
+    all.x = TRUE
+  )
 
   # Compute year-over-year growth
   growth_col <- paste0(col, "_growth")
@@ -354,7 +415,7 @@ compute_fastchange <- function(data, col, date_col) {
 #' familiar `count()` interface while exploiting `data.table` performance.
 #'
 #' @inheritParams dplyr::count
-#' 
+#'
 #' @return A tibble with one row per group and a count column.
 #'
 #' @examples
@@ -364,7 +425,7 @@ compute_fastchange <- function(data, col, date_col) {
 #' @importFrom dtplyr lazy_dt
 #' @import dplyr
 #' @importFrom tibble as_tibble
-#' 
+#'
 #' @export
 fastcount <- function(x, ..., wt = NULL, sort = FALSE, name = NULL) {
   count_dt <- dtplyr::lazy_dt(x, immutable = TRUE) |>
@@ -395,14 +456,14 @@ fastcount <- function(x, ..., wt = NULL, sort = FALSE, name = NULL) {
 #'
 #' @seealso dplyr::count, fastcount
 #' @export
-fastprop <- function(.data, ...){
+fastprop <- function(.data, ...) {
   group_vars <- rlang::ensyms(...)
 
   prop_dt <- .data |>
-    dtplyr::lazy_dt() |> 
+    dtplyr::lazy_dt() |>
     dplyr::group_by(!!!group_vars) |>
     dplyr::mutate(prop = n / sum(n, na.rm = TRUE)) |>
-    dplyr::ungroup() |> 
+    dplyr::ungroup() |>
     as_tibble()
 
   prop_dt
@@ -435,7 +496,7 @@ fastprop <- function(.data, ...){
 #'   an `indicator` column (describing the wage variable and level of analysis),
 #'   and a `value` column. When `share_macro = TRUE`, values represent
 #'   shares (wage bill / macro aggregate).
-#' 
+#'
 #' @examples
 #' # Compute wage bill totals by country and year
 #' \dontrun{
@@ -452,9 +513,9 @@ fastprop <- function(.data, ...){
 #'   groups = c("country_code", "year"),
 #'   share_macro = TRUE,
 #'   macro_vars = c("gdp_lcu", "pexpenditure_lcu")
-#' ) 
+#' )
 #' }
-#' 
+#'
 #' @seealso
 #' \code{\link{convert_constant_ppp}} for PPP conversion
 #' \code{\link{compute_fastsummary}} for general aggregation
@@ -462,20 +523,25 @@ fastprop <- function(.data, ...){
 #'
 #' @export
 compute_wagebill <- function(
-  contract_df, 
+  contract_df,
   wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
   groups = c("country_code", "year"),
   share_macro = FALSE,
-  macro_vars = c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu"),
+  macro_vars = c(
+    "gdp_lcu",
+    "pexpenditure_lcu",
+    "prevenue_lcu",
+    "taxrevenue_lcu"
+  ),
   drop_na = TRUE
-) {  
+) {
   data_ppp <- contract_df |>
     convert_constant_ppp(
       cols = wage_vars
     )
-  
-  if(share_macro) {
-    data_ppp |> 
+
+  if (share_macro) {
+    data_ppp |>
       compute_fastshare(
         cols = wage_vars,
         macro_cols = macro_vars,
@@ -484,7 +550,7 @@ compute_wagebill <- function(
         output = "long"
       )
   } else {
-    data_ppp |> 
+    data_ppp |>
       compute_fastsummary(
         cols = wage_vars,
         groups = groups,
@@ -526,25 +592,34 @@ compute_wagebill <- function(
 compute_baseline_index <- function(.data, date_col, ...) {
   date_quo <- rlang::enquo(date_col)
   date_name <- rlang::as_name(date_quo)
-  
+
   cols_quos <- rlang::enquos(...)
   if (length(cols_quos) == 0) {
     stop("At least one column must be specified for indexing.", call. = FALSE)
   }
-  
+
   # resolve column names
   cols_sel <- tidyselect::eval_select(rlang::expr(c(!!!cols_quos)), .data)
   cols_names <- names(cols_sel)
-  
+
   # compute indices for each column
   indexed_df <- .data
   for (col in cols_names) {
-    base_val <- indexed_df[[col]][indexed_df[[date_name]] == min(indexed_df[[date_name]], na.rm = TRUE)]
+    base_val <- indexed_df[[col]][
+      indexed_df[[date_name]] == min(indexed_df[[date_name]], na.rm = TRUE)
+    ]
     if (length(base_val) == 0 || is.na(base_val[1])) {
-      warning(sprintf("Base year value for '%s' is NA or missing; index will be NA.", col), call. = FALSE)
+      warning(
+        sprintf(
+          "Base year value for '%s' is NA or missing; index will be NA.",
+          col
+        ),
+        call. = FALSE
+      )
       indexed_df[[paste0(col, "_index")]] <- NA_real_
     } else {
-      indexed_df[[paste0(col, "_index")]] <- (indexed_df[[col]] / base_val[1]) * 100
+      indexed_df[[paste0(col, "_index")]] <- (indexed_df[[col]] / base_val[1]) *
+        100
     }
   }
 
@@ -558,7 +633,7 @@ compute_baseline_index <- function(.data, date_col, ...) {
 #' @param measure_col The name of the column for which quantiles will be computed.
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date's quantiles (default is FALSE).
 #' @param n_quantiles The number of quantiles to compute (default is 10 for deciles).
-#' 
+#'
 #' @return A data frame containing the quantiles, median values, and mean values for the specified measure column within the specified groups and reference dates.
 #'
 #' @importFrom data.table as.data.table setorderv
@@ -584,7 +659,7 @@ compute_quantile <- function(
     by_cols <- c(group_cols, "ref_date")
 
     dt[, decile := dplyr::ntile(get(measure_col), n_quantiles), by = by_cols]
-  }  
+  }
 
   out <- dt[
     !is.na(decile),
@@ -666,10 +741,10 @@ compute_compression_ratio <- function(
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
 #'
 #' @return A data frame with the distribution function, where `pct` denotes the percentage of observations in each bin and `cum_pct` denotes the cumulative percentage.
-#' 
+#'
 #' @importFrom data.table as.data.table setorderv
 #' @importFrom collapse fquantile
-#' 
+#'
 #' @export
 compute_density <- function(
   .data,
@@ -721,7 +796,7 @@ compute_density <- function(
   binned[]
 }
 
-#' Compute time trend 
+#' Compute time trend
 #'
 #' Summarizes data over time by grouping variable, producing a tidy data frame
 #' with `ref_date`, optional group column, and `value`.
@@ -738,7 +813,7 @@ compute_density <- function(
 #' @return A summarized data frame with columns `ref_date`, optionally `group`, and `value`. Value denotes either a sum or headcount (if `measure_col` is `NULL`).
 #'
 #' @importFrom data.table as.data.table
-#' 
+#'
 #' @export
 compute_time_trend <- function(.data, group, measure_col = NULL) {
   .data_dt <- data.table::as.data.table(.data)
@@ -777,7 +852,7 @@ compute_time_trend <- function(.data, group, measure_col = NULL) {
 #' @return The input data frame with `value` rescaled to a baseline index.
 #'
 #' @importFrom dplyr arrange mutate across all_of ungroup first
-#' 
+#'
 #' @export
 rescale_baseline <- function(data, group) {
   if (group == "ref_date") {
@@ -814,7 +889,7 @@ rescale_baseline <- function(data, group) {
 #' @return A data frame with the grouping column and a `value` column.
 #'
 #' @importFrom dplyr group_by across all_of filter ungroup summarise n
-#' 
+#'
 #' @export
 compute_cross_section <- function(data, group, measure_col = NULL) {
   # only consider latest reference date
@@ -854,7 +929,7 @@ compute_cross_section <- function(data, group, measure_col = NULL) {
 #'   (percentage points, e.g. 12.5 for +12.5%).
 #'
 #' @importFrom dplyr filter arrange summarise last first all_of
-#' 
+#'
 #' @export
 compute_growth <- function(.data, group, measure_col = NULL) {
   endpoints <- .data |>
@@ -1028,7 +1103,6 @@ compute_percentile <- function(
 #'
 #' @export
 cv <- function(x, na.rm = TRUE) {
-
   ## handling missing values
   if (na.rm) {
     x <- x[!is.na(x)]
@@ -1039,15 +1113,12 @@ cv <- function(x, na.rm = TRUE) {
 
   ## numerator-denominator handling to avoid dividing by 0
   if (length(x) == 0 || is.na(m) || m == 0) {
-
     return(NA_real_)
-
   }
 
   y <- sd(x) / m
 
   return(y)
-
 }
 
 #' Compute a Compression Ratio Between Two Percentiles
@@ -1080,22 +1151,21 @@ cv <- function(x, na.rm = TRUE) {
 #'
 #' @importFrom stats quantile
 #' @export
-cp_ratio <- function(x, upper = 0.9, lower = 0.1, na.rm = TRUE){
-
+cp_ratio <- function(x, upper = 0.9, lower = 0.1, na.rm = TRUE) {
   if (na.rm) {
     x <- x[!is.na(x)]
   }
 
   q <- quantile(x, probs = c(lower, upper), na.rm = na.rm)
 
-  if (any(is.na(q)) || q[1] == 0) return(NA_real_)
+  if (any(is.na(q)) || q[1] == 0) {
+    return(NA_real_)
+  }
 
   ratio <- q[2] / q[1]
 
   return(ratio)
-
 }
-
 
 
 prop <- function(x) {
@@ -1133,7 +1203,7 @@ prop <- function(x) {
 #' count_unique(c(NA, NA, NA))
 #'
 #' @export
-count_unique <- function(x){
+count_unique <- function(x) {
   x <- x[!is.na(x)]
   y <- length(unique(x))
   return(y)
@@ -1212,31 +1282,29 @@ count_unique <- function(x){
 #' @keywords internal utilities summarization
 #' @export
 
-define_fns <- function(){
-
+define_fns <- function() {
   # --- 1. Define default summary functions ---
   default_fns <- list(
-    sum    = ~sum(.x, na.rm = TRUE),
-    mean   = ~mean(.x, na.rm = TRUE),
-    median = ~median(.x, na.rm = TRUE),
-    cv     = ~cv(.x),
-    cp_ratio = ~cp_ratio(.x),
-    var = ~var(.x, na.rm = TRUE),
-    iqr = ~diff(range(.x, na.rm = TRUE)),
-    min = ~min(.x, na.rm = TRUE),
-    max = ~max(.x, na.rm = TRUE),
-    count = ~length(.x),
-    prop = ~prop(.x),
-    dtprop = ~.N / sum(.N),
-    count_unique = ~count_unique(.x),
-    prop_na = ~mean(is.na(.x)),
-    prop_zero = ~mean(.x == 0, na.rm = TRUE),
-    p25 = ~quantile(.x, 0.25, na.rm = TRUE),
-    p75 = ~quantile(.x, 0.75, na.rm = TRUE),
-    p90 = ~quantile(.x, 0.9, na.rm = TRUE),
-    sd = ~sd(.x, na.rm = TRUE)
+    sum = ~ sum(.x, na.rm = TRUE),
+    mean = ~ mean(.x, na.rm = TRUE),
+    median = ~ median(.x, na.rm = TRUE),
+    cv = ~ cv(.x),
+    cp_ratio = ~ cp_ratio(.x),
+    var = ~ var(.x, na.rm = TRUE),
+    iqr = ~ diff(range(.x, na.rm = TRUE)),
+    min = ~ min(.x, na.rm = TRUE),
+    max = ~ max(.x, na.rm = TRUE),
+    count = ~ length(.x),
+    prop = ~ prop(.x),
+    dtprop = ~ .N / sum(.N),
+    count_unique = ~ count_unique(.x),
+    prop_na = ~ mean(is.na(.x)),
+    prop_zero = ~ mean(.x == 0, na.rm = TRUE),
+    p25 = ~ quantile(.x, 0.25, na.rm = TRUE),
+    p75 = ~ quantile(.x, 0.75, na.rm = TRUE),
+    p90 = ~ quantile(.x, 0.9, na.rm = TRUE),
+    sd = ~ sd(.x, na.rm = TRUE)
   )
 
   return(default_fns)
-
 }

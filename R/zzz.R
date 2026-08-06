@@ -60,10 +60,34 @@ if (getRversion() >= "2.15.1"){
     # estimate_exit_rates
     "n_exits",
     "exit_rate",
-    "current_stock"
+    "current_stock",
+    ".GRP", ".I", ".N", ".SD",
+      "year",
+  "cpi",
+  "ppp",
+  "ppp_2017",
+  "xmin",
+  "xmax",
+  "n_records",
+  "REF_AREA",
+  "TIME_PERIOD",
+  "OBS_VALUE",
+  "INDICATOR",
+  "ref_date",
+  "lead_status",
+  "expanded",
+  "interval_days",
+  "birth_date",
+  "ppp_2021",
+  "type_event",
+  "status",
+  "est_id_nested",
+  "term",
+  "estimate",
+  "conf.low",
+  "conf.high"
   ))
 }
-
 
 #' Validate Column Exists in Data Table
 #'

@@ -19,8 +19,8 @@ Plot Decile Summary
 }
 \examples{
 govhr::compute_decile(
-  govhr::bra_hrmis_contract, 
-  measure_col = "gross_salary_lcu", 
+  govhr::bra_hrmis_contract,
+  measure_col = "gross_salary_lcu",
   group_cols = "paygrade"
 ) |>
   govhr::plot_decile(group_cols = "paygrade")

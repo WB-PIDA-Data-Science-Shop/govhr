@@ -22,7 +22,7 @@ A data frame with the proportion of consistent records in the data frame, option
 Compute the proportion of consistent records in a data frame.
 }
 \details{
-A record is considered consistent if it has a unique identifier and all its associated values are consistent. 
+A record is considered consistent if it has a unique identifier and all its associated values are consistent.
 The function computes the proportion of consistent records in the data frame, optionally grouped by specified columns.
 }
 \examples{

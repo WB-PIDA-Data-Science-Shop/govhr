@@ -39,43 +39,46 @@
 #' @importFrom validate validator confront description label summary values
 #' @importFrom data.table as.data.table
 #' @export
-validate_data <- function(data, input_rules, output_format = c("report", "object")) {
-
+validate_data <- function(
+  data,
+  input_rules,
+  output_format = c("report", "object")
+) {
   data <- data.table::as.data.table(data)
 
   ## build validator and confront
   validation_results <- validate::validator(.data = input_rules)
-  results            <- validate::confront(data, validation_results)
+  results <- validate::confront(data, validation_results)
 
   ## --- audit report -------------------------------------------------------
-  rules_meta     <- as.data.frame(input_rules)
+  rules_meta <- as.data.frame(input_rules)
   results_summary <- as.data.frame(validate::summary(results))
 
   audit_report <- data.table::as.data.table(
     merge(results_summary, rules_meta, by = "name", all.x = TRUE)
   )[, .(
     name,
-    Rule           = label,
-    Description    = description,
+    Rule = label,
+    Description = description,
     `Total Records` = items,
-    Passes         = passes,
-    `Pass Rate`    = round(passes / items * 100, 2),
-    Fails          = fails,
-    Errors         = error
+    Passes = passes,
+    `Pass Rate` = round(passes / items * 100, 2),
+    Fails = fails,
+    Errors = error
   )]
 
   ## --- per-rule violating rows --------------------------------------------
   ## validate::values() → logical array: rows = observations, cols = rules
   ## FALSE  = rule failed for that row
   ## NA     = rule could not be evaluated (treated as a violation)
-  pass_matrix <- as.data.frame(validate::values(results))  ## nrow(data) × n_rules logical matrix
+  pass_matrix <- as.data.frame(validate::values(results)) ## nrow(data) × n_rules logical matrix
 
   ## map rule internal names → user-facing labels for the list names
   name_to_label <- stats::setNames(rules_meta$label, rules_meta$name)
 
   violations <- lapply(names(pass_matrix), function(rule_name) {
-    lgl        <- pass_matrix[[rule_name]]
-    fail_rows  <- which(!lgl | is.na(lgl))
+    lgl <- pass_matrix[[rule_name]]
+    fail_rows <- which(!lgl | is.na(lgl))
     data[fail_rows]
   })
   names(violations) <- name_to_label[names(pass_matrix)]

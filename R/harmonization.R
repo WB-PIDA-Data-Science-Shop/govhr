@@ -50,7 +50,7 @@ find_inconsistent_colnames <- function(data_list) {
 #' detect_inconsistent_cols(df, c("a", "c")) # returns TRUE
 #'
 #' @importFrom dplyr select if_else any_of
-#' 
+#'
 #' @export
 detect_inconsistent_cols <- function(data, inconsistent_cols) {
   n_inconsistent_cols <- data |>
@@ -100,7 +100,9 @@ harmonize_columns <- function(data, dictionary) {
 
   # Rename using dplyr::rename and !!! unquoting for tidy evaluation
   data_renamed <- data |>
-    dplyr::rename(!!!set_names(available_dictionary, names(available_dictionary))) |>
+    dplyr::rename(
+      !!!set_names(available_dictionary, names(available_dictionary))
+    ) |>
     select(any_of(names(available_dictionary)))
 
   return(data_renamed)
@@ -174,32 +176,35 @@ find_duplicate_ids <- function(data, identifier) {
 #' @import dplyr
 #'
 #' @export
-dedup_values <- function(data,
-                         id_col,
-                         date_col,
-                         value_col,
-                         method = c("mode", "first", "first_nonmissing")) {
+dedup_values <- function(
+  data,
+  id_col,
+  date_col,
+  value_col,
+  method = c("mode", "first", "first_nonmissing")
+) {
   method <- match.arg(method)
 
   if (method == "mode") {
     # Mode-based deduplication using count()
     data |>
-      group_by({{id_col}}, {{date_col}}, {{value_col}}) |>
+      group_by({{ id_col }}, {{ date_col }}, {{ value_col }}) |>
       summarise(n = n(), .groups = "drop_last") |>
-      filter(!is.na({{value_col}})) |>
+      filter(!is.na({{ value_col }})) |>
       slice_max(order_by = n, with_ties = FALSE) |>
       select(-n) |>
       ungroup()
-
   } else if (method == "first") {
     data |>
-      group_by({{id_col}}, {{date_col}}) |>
-      summarise({{value_col}} := first({{value_col}}), .groups = "drop")
-
+      group_by({{ id_col }}, {{ date_col }}) |>
+      summarise({{ value_col }} := first({{ value_col }}), .groups = "drop")
   } else if (method == "first_nonmissing") {
     data |>
-      group_by({{id_col}}, {{date_col}}) |>
-      summarise({{value_col}} := first(na.omit({{value_col}})), .groups = "drop")
+      group_by({{ id_col }}, {{ date_col }}) |>
+      summarise(
+        {{ value_col }} := first(na.omit({{ value_col }})),
+        .groups = "drop"
+      )
   }
 }
 
@@ -268,9 +273,8 @@ complete_columns <- function(data, cols) {
 #' @import glue
 #' @export
 convert_constant_ppp <- function(data, cols) {
-
   ## Basic input checks
-  required_df  <- c("country_code", "ref_date")
+  required_df <- c("country_code", "ref_date")
 
   if (!all(required_df %in% names(data))) {
     stop("`data` must contain columns: country_code, ref_date")
@@ -288,8 +292,8 @@ convert_constant_ppp <- function(data, cols) {
       year = as.integer(format(as.Date(ref_date), "%Y"))
     ) |>
     left_join(
-      govhr::macro_indicators |> 
-        select(country_code, year, cpi), 
+      govhr::macro_indicators |>
+        select(country_code, year, cpi),
       by = c("country_code", "year")
     ) |>
     left_join(base_cpi, by = "country_code") |>
@@ -302,7 +306,7 @@ convert_constant_ppp <- function(data, cols) {
     ) |>
     mutate(
       across(
-        all_of({{cols}}),
+        all_of({{ cols }}),
         ~ round((cpi / base_cpi) * (.x / ppp_2021), 2),
         .names = "{sub('_lcu$', '_ppp', .col)}"
       )
@@ -353,18 +357,17 @@ convert_constant_ppp <- function(data, cols) {
 #' # Custom base year
 #' data |>
 #'   dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, country_code, base_year = 2015))
-#' 
+#'
 #' @importFrom tibble tibble
 #' @import dplyr
 #' @export
 deflate_to_real <- function(col, ref_date, country_code, base_year = 2021) {
-
   year <- as.integer(format(as.Date(ref_date), "%Y"))
 
   input_tbl <- tibble(
     country_code = country_code,
-    year         = year,
-    col          = col
+    year = year,
+    col = col
   )
 
   cpi_lookup <- govhr::macro_indicators |>
@@ -375,18 +378,24 @@ deflate_to_real <- function(col, ref_date, country_code, base_year = 2021) {
     select(country_code, base_cpi = cpi)
 
   input_tbl |>
-    left_join(cpi_lookup,      by = c("country_code", "year"), relationship = "many-to-one") |>
-    left_join(base_cpi_lookup, by = "country_code",            relationship = "many-to-one") |>
+    left_join(
+      cpi_lookup,
+      by = c("country_code", "year"),
+      relationship = "many-to-one"
+    ) |>
+    left_join(
+      base_cpi_lookup,
+      by = "country_code",
+      relationship = "many-to-one"
+    ) |>
     mutate(result = col * (.data[["base_cpi"]] / .data[["cpi"]])) |>
     pull(.data[["result"]])
 }
 
-merge_wrapper <- function(...){
-
+merge_wrapper <- function(...) {
   y <- merge(all.x = TRUE, ...)
 
   return(y)
-
 }
 
 #' Classify free-text items against a user-supplied taxonomy using TF-IDF
@@ -406,47 +415,109 @@ merge_wrapper <- function(...){
 #' @param stopwords    Character vector of stopwords to remove. NULL uses a built-in English set.
 #'
 #' @return A data.table with columns: <id_col>, class_id, class_label, score
-#' 
+#'
 #' @importFrom rlang .data
-#' 
-classify_text <- function(corpus,
-                          taxonomy,
-                          id_col          = "id",
-                          text_col        = "text",
-                          class_id_col    = "class_id",
-                          class_label_col = "class_label",
-                          num_leaves      = 1,
-                          method          = c("tfidf_sum", "cosine"),
-                          max_dist        = 0.1,
-                          string_dist     = NULL,
-                          stopwords       = NULL) {
-
+#'
+classify_text <- function(
+  corpus,
+  taxonomy,
+  id_col = "id",
+  text_col = "text",
+  class_id_col = "class_id",
+  class_label_col = "class_label",
+  num_leaves = 1,
+  method = c("tfidf_sum", "cosine"),
+  max_dist = 0.1,
+  string_dist = NULL,
+  stopwords = NULL
+) {
   method <- match.arg(method)
 
   # ── 0. Input validation ────────────────────────────────────────────────────
-  if (!inherits(corpus, "data.frame"))
+  if (!inherits(corpus, "data.frame")) {
     stop("`corpus` must be a data.frame or data.table.")
-  if (!all(c(id_col, text_col) %in% names(corpus)))
-    stop(sprintf("`corpus` must contain columns '%s' and '%s'.", id_col, text_col))
+  }
+  if (!all(c(id_col, text_col) %in% names(corpus))) {
+    stop(sprintf(
+      "`corpus` must contain columns '%s' and '%s'.",
+      id_col,
+      text_col
+    ))
+  }
 
   # ── 1. Normalise taxonomy to a data.table ─────────────────────────────────
   if (is.character(taxonomy) && !is.null(names(taxonomy))) {
-    taxonomy_dt <- data.table(class_id = names(taxonomy), class_label = unname(taxonomy))
+    taxonomy_dt <- data.table(
+      class_id = names(taxonomy),
+      class_label = unname(taxonomy)
+    )
   } else if (inherits(taxonomy, "data.frame")) {
-    if (!all(c(class_id_col, class_label_col) %in% names(taxonomy)))
-      stop(sprintf("`taxonomy` must contain columns '%s' and '%s'.", class_id_col, class_label_col))
+    if (!all(c(class_id_col, class_label_col) %in% names(taxonomy))) {
+      stop(sprintf(
+        "`taxonomy` must contain columns '%s' and '%s'.",
+        class_id_col,
+        class_label_col
+      ))
+    }
     taxonomy_dt <- as.data.table(taxonomy)
-    setnames(taxonomy_dt, c(class_id_col, class_label_col), c("class_id", "class_label"))
+    setnames(
+      taxonomy_dt,
+      c(class_id_col, class_label_col),
+      c("class_id", "class_label")
+    )
   } else {
     stop("`taxonomy` must be a named character vector or a data.frame.")
   }
 
   # ── 2. Helpers ─────────────────────────────────────────────────────────────
   default_stopwords <- c(
-    "a","an","the","and","or","of","in","to","for","with","on","at","by",
-    "from","is","are","was","were","be","been","being","have","has","had",
-    "do","does","did","will","would","could","should","may","might","shall",
-    "can","that","this","it","its","as","not","but","if","so","up","out","into"
+    "a",
+    "an",
+    "the",
+    "and",
+    "or",
+    "of",
+    "in",
+    "to",
+    "for",
+    "with",
+    "on",
+    "at",
+    "by",
+    "from",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "being",
+    "have",
+    "has",
+    "had",
+    "do",
+    "does",
+    "did",
+    "will",
+    "would",
+    "could",
+    "should",
+    "may",
+    "might",
+    "shall",
+    "can",
+    "that",
+    "this",
+    "it",
+    "its",
+    "as",
+    "not",
+    "but",
+    "if",
+    "so",
+    "up",
+    "out",
+    "into"
   )
   sw <- if (is.null(stopwords)) default_stopwords else stopwords
 
@@ -472,11 +543,14 @@ classify_text <- function(corpus,
 
   N_classes <- nrow(taxonomy_dt)
 
-  tf_dt <- tax_tokens_dt[
-    , .N, by = c("id", "term")
-  ][
-    , tf := N / sum(N), by = "id"          # within-class relative frequency
-  ] |> setnames("id", "class_id")
+  tf_dt <- tax_tokens_dt[,
+    .N,
+    by = c("id", "term")
+  ][,
+    tf := N / sum(N),
+    by = "id" # within-class relative frequency
+  ] |>
+    setnames("id", "class_id")
 
   # IDF: log(N / document frequency)  — "document" = one taxonomy class
   idf_dt <- tf_dt[, .(df = .N), by = "term"][, idf := log(N_classes / df)]
@@ -497,55 +571,62 @@ classify_text <- function(corpus,
 
   if (!is.null(string_dist)) {
     na_pos <- is.na(voca_idx)
-    if (any(na_pos))
+    if (any(na_pos)) {
       voca_idx[na_pos] <- stringdist::amatch(
-        corpus_tokens_dt$term[na_pos], vocabulary,
-        maxDist = max_dist, method = string_dist
+        corpus_tokens_dt$term[na_pos],
+        vocabulary,
+        maxDist = max_dist,
+        method = string_dist
       )
+    }
   }
 
   matches_dt <- data.table(
-    id   = corpus_tokens_dt$id,
+    id = corpus_tokens_dt$id,
     term = vocabulary[voca_idx]
   )[!is.na(term)]
 
   # ── 6. Score: TF-IDF sum (labourR-equivalent) or cosine similarity ────────
   if (method == "tfidf_sum") {
-
     # Sum TF-IDF weights of matching tokens per (corpus item, class) pair
     predictions <- merge(
       matches_dt,
       tfidf_dt[, .(term, class_id, tfidf)],
-      by = "term", allow.cartesian = TRUE
-    )[, .(score = sum(tfidf)), by = .(id, class_id)
-    ][order(id, -score)
-    ][, head(.SD, num_leaves), by = "id"]
-
-  } else {  # cosine
+      by = "term",
+      allow.cartesian = TRUE
+    )[, .(score = sum(tfidf)), by = .(id, class_id)][order(id, -score)][,
+      head(.SD, num_leaves),
+      by = "id"
+    ]
+  } else {
+    # cosine
 
     # Build a TF-IDF vector for the corpus side using the same IDF
     corpus_tf <- matches_dt[, .N, by = .(id, term)]
     corpus_tf[, tf := N / sum(N), by = "id"]
-    corpus_tfidf <- merge(corpus_tf, idf_dt[, .(term, idf)], by = "term")[, tfidf := tf * idf]
+    corpus_tfidf <- merge(corpus_tf, idf_dt[, .(term, idf)], by = "term")[,
+      tfidf := tf * idf
+    ]
 
     # Dot product
     dot_dt <- merge(
       corpus_tfidf[, .(id, term, tfidf_c = tfidf)],
       tfidf_dt[, .(term, class_id, tfidf_t = tfidf)],
-      by = "term", allow.cartesian = TRUE
+      by = "term",
+      allow.cartesian = TRUE
     )[, .(dot = sum(tfidf_c * tfidf_t)), by = .(id, class_id)]
 
     # L2 norms
     corpus_norm <- corpus_tfidf[, .(norm_c = sqrt(sum(tfidf^2))), by = "id"]
-    class_norm  <- tfidf_dt[,    .(norm_t = sqrt(sum(tfidf^2))), by = "class_id"]
+    class_norm <- tfidf_dt[, .(norm_t = sqrt(sum(tfidf^2))), by = "class_id"]
 
     predictions <- dot_dt |>
       merge(corpus_norm, by = "id") |>
-      merge(class_norm,  by = "class_id")
+      merge(class_norm, by = "class_id")
 
-    predictions[, score := dot / (norm_c * norm_t)
-    ][order(id, -score)
-    ][, head(.SD, num_leaves), by = "id"
+    predictions[, score := dot / (norm_c * norm_t)][order(id, -score)][,
+      head(.SD, num_leaves),
+      by = "id"
     ][, .(id, class_id, score)]
   }
 
@@ -554,8 +635,8 @@ classify_text <- function(corpus,
     predictions,
     taxonomy_dt[, .(class_id, class_label)],
     by = "class_id"
-  )[order(id)
-  ] |> setnames("id", id_col)
+  )[order(id)] |>
+    setnames("id", id_col)
 
   result[]
 }

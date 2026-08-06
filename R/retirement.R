@@ -12,7 +12,7 @@
 #' @return A data frame with projected retirement dates and counts of staff eligible for retirement at each reference date.
 #'
 #' @importFrom data.table as.data.table
-#' 
+#'
 #' @export
 project_retirement <- function(
   .data,
@@ -73,7 +73,10 @@ project_retirement <- function(
 
   if (!is.null(measure_col)) {
     projected_cost_dt <- data_dt[,
-      .(projected_cost = sum(get(measure_col), na.rm = TRUE) * retirement_coefficient),
+      .(
+        projected_cost = sum(get(measure_col), na.rm = TRUE) *
+          retirement_coefficient
+      ),
       by = retirement_date
     ]
 
@@ -107,7 +110,7 @@ project_retirement <- function(
 #'   e.g. `"gross_salary_def"` (default), `"base_salary_lcu"`, etc.
 #' @param personnel_id_col A single string naming the personnel identifier column.
 #'   Defaults to `"personnel_id"`.
-#' @param status_col A single string naming the employment status column inside 
+#' @param status_col A single string naming the employment status column inside
 #' `personnel_dt`.
 #'   Defaults to `"employment_status"`.
 #' @param date_col A single string naming the snapshot/reference date column.
@@ -116,7 +119,7 @@ project_retirement <- function(
 #'   that identifies a pensioner record. Defaults to `"pensioner"`.
 #' @param keep_vars A character vector of additional contract-level columns
 #'   to attach via `govhr::add_contract_to_event()`. Defaults to NULL
-#'   
+#'
 #'
 #' @return A data.table with one row per retiring individual containing
 #'   the `id_col` identifier, `ref_date_active` (last active date),
@@ -145,19 +148,20 @@ project_retirement <- function(
 #' }
 #'
 #' @export
-compute_pension_ratio <- function(personnel_dt,
-                                  contract_dt,
-                                  salary_col,
-                                  personnel_id_col = "personnel_id",
-                                  status_col = "employment_status",
-                                  date_col = "ref_date",
-                                  pensioner_value = "pensioner",
-                                  keep_vars = NULL) {
-
+compute_pension_ratio <- function(
+  personnel_dt,
+  contract_dt,
+  salary_col,
+  personnel_id_col = "personnel_id",
+  status_col = "employment_status",
+  date_col = "ref_date",
+  pensioner_value = "pensioner",
+  keep_vars = NULL
+) {
   ## ensure we have data.tables
   personnel_dt <- data.table::as.data.table(personnel_dt)
-  contract_dt  <- data.table::as.data.table(contract_dt)
-  
+  contract_dt <- data.table::as.data.table(contract_dt)
+
   stopifnot(
     salary_col %in% names(contract_dt),
     status_col %in% names(personnel_dt),
@@ -168,7 +172,10 @@ compute_pension_ratio <- function(personnel_dt,
   )
 
   # Identify pensioner IDs
-  retiree_ids <- unique(personnel_dt[get(status_col) == pensioner_value, get(personnel_id_col)])
+  retiree_ids <- unique(personnel_dt[
+    get(status_col) == pensioner_value,
+    get(personnel_id_col)
+  ])
 
   # Tag retiree contracts with employment_status from personnel table
   retiree_tagged <- merge(
@@ -201,19 +208,27 @@ compute_pension_ratio <- function(personnel_dt,
 
   # Add contract details
   last_active <- add_contract_to_event(
-    event_dt    = last_active,
+    event_dt = last_active,
     contract_dt = contract_dt,
-    keep_vars   = keep_vars
+    keep_vars = keep_vars
   )
-  data.table::setorderv(last_active, c(personnel_id_col, date_col, salary_col), order = c(1L, 1L, -1L))
+  data.table::setorderv(
+    last_active,
+    c(personnel_id_col, date_col, salary_col),
+    order = c(1L, 1L, -1L)
+  )
   last_active <- last_active[, .SD[1L], by = c(personnel_id_col, date_col)]
 
   first_pension <- add_contract_to_event(
-    event_dt    = first_pension,
+    event_dt = first_pension,
     contract_dt = contract_dt,
-    keep_vars   = keep_vars
+    keep_vars = keep_vars
   )
-  data.table::setorderv(first_pension, c(personnel_id_col, date_col, salary_col), order = c(1L, 1L, -1L))
+  data.table::setorderv(
+    first_pension,
+    c(personnel_id_col, date_col, salary_col),
+    order = c(1L, 1L, -1L)
+  )
   first_pension <- first_pension[, .SD[1L], by = c(personnel_id_col, date_col)]
 
   # Compute replacement rate
@@ -222,10 +237,22 @@ compute_pension_ratio <- function(personnel_dt,
   # with first_pension, which typically has the same static attributes anyway.
   active_cols <- c(personnel_id_col, date_col, salary_col, keep_vars)
   active <- last_active[status == "last_active", ..active_cols]
-  data.table::setnames(active, c(date_col, salary_col), c("ref_date_active", "last_salary"))
+  data.table::setnames(
+    active,
+    c(date_col, salary_col),
+    c("ref_date_active", "last_salary")
+  )
 
-  pension <- first_pension[status == "first_pension", c(personnel_id_col, date_col, salary_col), with = FALSE]
-  data.table::setnames(pension, c(date_col, salary_col), c("ref_date_pension", "first_pension"))
+  pension <- first_pension[
+    status == "first_pension",
+    c(personnel_id_col, date_col, salary_col),
+    with = FALSE
+  ]
+  data.table::setnames(
+    pension,
+    c(date_col, salary_col),
+    c("ref_date_pension", "first_pension")
+  )
 
   ratio_dt <- merge(active, pension, by = personnel_id_col)
   ratio_dt[, replacement_rate := first_pension / last_salary]

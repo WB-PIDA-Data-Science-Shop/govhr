@@ -127,10 +127,12 @@ detect_reallocation <- function(data, personnel_hire) {
 #' )
 #'
 #' @export
-detect_career_transitions <- function(contract_dt,
-                                      vars,
-                                      decision_var,
-                                      decision_fn = max) {
+detect_career_transitions <- function(
+  contract_dt,
+  vars,
+  decision_var,
+  decision_fn = max
+) {
   # Keep only needed columns
   contract_dt <- contract_dt[,
     c("personnel_id", "ref_date", vars, decision_var),

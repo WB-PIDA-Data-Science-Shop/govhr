@@ -1,13 +1,13 @@
 # ==============================================================================
 # Data Quality Treatment Functions
 # ==============================================================================
-# 
+#
 # This module provides functions to address violations identified by the
 # validation rules defined in govhr::personnel_rules and govhr::contract_rules.
-# 
+#
 # Each function corresponds to specific validation rules and offers different
 # strategies for handling violations (flagging, filtering, correcting).
-# 
+#
 # Design philosophy:
 # - Explicit over implicit: Functions require user to choose type of treatment.
 # - Non-destructive by default: Prefer flagging over automatic deletion
@@ -38,26 +38,27 @@
 #' @seealso \code{\link{personnel_rules}}, \code{\link{remove_duplicate_contracts}}
 #' @importFrom dplyr group_by slice_head slice_tail ungroup filter n
 #' @export
-remove_duplicate_personnel <- function(data, keep = c("first", "last", "none")) {
+remove_duplicate_personnel <- function(
+  data,
+  keep = c("first", "last", "none")
+) {
   keep <- match.arg(keep)
-  
+
   # Group by uniqueness constraint: personnel_id + ref_date
   data_grouped <- data |>
     dplyr::group_by(.data[["personnel_id"]], .data[["ref_date"]])
-  
+
   # Apply deduplication strategy
   if (keep == "first") {
     # Keep earliest record per group (by row order)
     data_grouped |>
       dplyr::slice_head(n = 1) |>
       dplyr::ungroup()
-      
   } else if (keep == "last") {
     # Keep latest record per group (by row order)
     data_grouped |>
       dplyr::slice_tail(n = 1) |>
       dplyr::ungroup()
-      
   } else {
     # Remove all records that have duplicates (conservative)
     # Only keeps records where n() == 1 (no duplicates)
@@ -93,12 +94,14 @@ remove_duplicate_personnel <- function(data, keep = c("first", "last", "none")) 
 #' @seealso \code{\link{contract_rules}}, \code{\link{remove_duplicate_personnel}}
 #' @importFrom dplyr group_by slice_head slice_tail ungroup filter n
 #' @export
-remove_duplicate_contracts <- function(data, 
-                                       level = c("contract", "assignment"),
-                                       keep = c("first", "last", "none")) {
+remove_duplicate_contracts <- function(
+  data,
+  level = c("contract", "assignment"),
+  keep = c("first", "last", "none")
+) {
   level <- match.arg(level)
   keep <- match.arg(keep)
-  
+
   # Group by appropriate uniqueness constraint
   if (level == "contract") {
     # Contract-level: contract_id + ref_date
@@ -107,11 +110,13 @@ remove_duplicate_contracts <- function(data,
   } else {
     # Assignment-level: contract_id + personnel_id + ref_date
     data_grouped <- data |>
-      dplyr::group_by(.data[["contract_id"]], 
-                      .data[["personnel_id"]], 
-                      .data[["ref_date"]])
+      dplyr::group_by(
+        .data[["contract_id"]],
+        .data[["personnel_id"]],
+        .data[["ref_date"]]
+      )
   }
-  
+
   # Apply deduplication strategy (same logic as personnel)
   if (keep == "first") {
     data_grouped |>
@@ -157,19 +162,21 @@ remove_duplicate_contracts <- function(data,
 #' @seealso \code{\link{fix_invalid_birthdates}}
 #' @importFrom dplyr mutate case_when filter
 #' @export
-fix_invalid_dates <- function(data, 
-                              min_date = as.Date("1900-01-01"),
-                              max_date = Sys.Date(),
-                              treatment = c("na", "clamp", "filter")) {
+fix_invalid_dates <- function(
+  data,
+  min_date = as.Date("1900-01-01"),
+  max_date = Sys.Date(),
+  treatment = c("na", "clamp", "filter")
+) {
   treatment <- match.arg(treatment)
-  
+
   if (treatment == "filter") {
     # Remove records with invalid dates
     data |>
       dplyr::filter(
         !is.na(.data[["ref_date"]]) &
-        .data[["ref_date"]] >= min_date &
-        .data[["ref_date"]] <= max_date
+          .data[["ref_date"]] >= min_date &
+          .data[["ref_date"]] <= max_date
       )
   } else {
     data |>
@@ -177,16 +184,18 @@ fix_invalid_dates <- function(data,
         ref_date = dplyr::case_when(
           # Already NA: keep as NA
           is.na(.data[["ref_date"]]) ~ .data[["ref_date"]],
-          
+
           # Treatment: set invalid to NA
-          treatment == "na" & (.data[["ref_date"]] < min_date | .data[["ref_date"]] > max_date) ~ as.Date(NA),
-          
+          treatment == "na" &
+            (.data[["ref_date"]] < min_date |
+              .data[["ref_date"]] > max_date) ~ as.Date(NA),
+
           # Treatment: clamp to minimum
           treatment == "clamp" & .data[["ref_date"]] < min_date ~ min_date,
-          
+
           # Treatment: clamp to maximum
           treatment == "clamp" & .data[["ref_date"]] > max_date ~ max_date,
-          
+
           # Valid dates: keep as-is
           TRUE ~ .data[["ref_date"]]
         )
@@ -218,26 +227,30 @@ fix_invalid_dates <- function(data,
 #' @importFrom dplyr mutate case_when filter
 #' @importFrom lubridate years
 #' @export
-fix_invalid_birthdates <- function(data,
-                                   min_date = as.Date("1920-01-01"),
-                                   max_date = Sys.Date(),
-                                   treatment = c("na", "clamp", "filter")) {
+fix_invalid_birthdates <- function(
+  data,
+  min_date = as.Date("1920-01-01"),
+  max_date = Sys.Date(),
+  treatment = c("na", "clamp", "filter")
+) {
   treatment <- match.arg(treatment)
-  
+
   if (treatment == "filter") {
     # Remove records with invalid birth dates
     data |>
       dplyr::filter(
         !is.na(.data[["birth_date"]]) &
-        .data[["birth_date"]] >= min_date &
-        .data[["birth_date"]] <= max_date
+          .data[["birth_date"]] >= min_date &
+          .data[["birth_date"]] <= max_date
       )
   } else {
     data |>
       dplyr::mutate(
         birth_date = dplyr::case_when(
           is.na(.data[["birth_date"]]) ~ .data[["birth_date"]],
-          treatment == "na" & (.data[["birth_date"]] < min_date | .data[["birth_date"]] > max_date) ~ as.Date(NA),
+          treatment == "na" &
+            (.data[["birth_date"]] < min_date |
+              .data[["birth_date"]] > max_date) ~ as.Date(NA),
           treatment == "clamp" & .data[["birth_date"]] < min_date ~ min_date,
           treatment == "clamp" & .data[["birth_date"]] > max_date ~ max_date,
           TRUE ~ .data[["birth_date"]]
@@ -274,21 +287,26 @@ fix_invalid_birthdates <- function(data,
 #' @seealso \code{\link{personnel_rules}}, \code{\link{fix_retirement_age}}
 #' @importFrom dplyr mutate filter case_when select starts_with
 #' @export
-fix_underage_workers <- function(data, 
-                                 min_age = 18,
-                                 treatment = c("flag", "filter")) {
+fix_underage_workers <- function(
+  data,
+  min_age = 18,
+  treatment = c("flag", "filter")
+) {
   treatment <- match.arg(treatment)
-  
+
   # Calculate age and identify underage workers
   # Use temporary columns (prefixed with .) to avoid namespace conflicts
   data <- data |>
     dplyr::mutate(
-      .age = as.numeric(difftime(.data[["ref_date"]], 
-                                  .data[["birth_date"]], 
-                                  units = "days")) / 365.25,
+      .age = as.numeric(difftime(
+        .data[["ref_date"]],
+        .data[["birth_date"]],
+        units = "days"
+      )) /
+        365.25,
       .underage = .data[[".age"]] < min_age & !is.na(.data[[".age"]])
     )
-  
+
   # Apply correction strategy
   if (treatment == "flag") {
     # Add flag column, remove temporary columns
@@ -297,7 +315,6 @@ fix_underage_workers <- function(data,
       dplyr::select(
         -all_of(c(".age", ".underage"))
       )
-      
   } else if (treatment == "filter") {
     # Remove underage records
     data |>
@@ -334,22 +351,27 @@ fix_underage_workers <- function(data,
 #' @seealso \code{\link{personnel_rules}}, \code{\link{fix_underage_workers}}
 #' @importFrom dplyr mutate case_when select starts_with
 #' @export
-fix_retirement_age <- function(data,
-                               max_age = 65,
-                               treatment = c("flag", "adjust_status")) {
+fix_retirement_age <- function(
+  data,
+  max_age = 65,
+  treatment = c("flag", "adjust_status")
+) {
   treatment <- match.arg(treatment)
-  
+
   # Calculate age and identify over-retirement-age active workers
   data <- data |>
     dplyr::mutate(
-      .age = as.numeric(difftime(.data[["ref_date"]], 
-                                  .data[["birth_date"]], 
-                                  units = "days")) / 365.25,
-      .over_retirement = .data[["status"]] == "active" & 
-                          .data[[".age"]] > max_age & 
-                          !is.na(.data[[".age"]])
+      .age = as.numeric(difftime(
+        .data[["ref_date"]],
+        .data[["birth_date"]],
+        units = "days"
+      )) /
+        365.25,
+      .over_retirement = .data[["status"]] == "active" &
+        .data[[".age"]] > max_age &
+        !is.na(.data[[".age"]])
     )
-  
+
   if (treatment == "flag") {
     data |>
       dplyr::mutate(over_retirement_flag = .data[[".over_retirement"]]) |>
@@ -396,16 +418,15 @@ fix_retirement_age <- function(data,
 #' @export
 fix_working_hours <- function(data, treatment = c("na", "clamp", "flag")) {
   treatment <- match.arg(treatment)
-  
+
   if (treatment == "flag") {
     # Flag invalid hours (outside 0-40 or NA)
     data |>
       dplyr::mutate(
-        invalid_hours_flag = .data[["whours"]] < 0 | 
-                             .data[["whours"]] > 40 | 
-                             is.na(.data[["whours"]])
+        invalid_hours_flag = .data[["whours"]] < 0 |
+          .data[["whours"]] > 40 |
+          is.na(.data[["whours"]])
       )
-      
   } else if (treatment == "na") {
     # Set invalid hours to NA
     data |>
@@ -415,7 +436,6 @@ fix_working_hours <- function(data, treatment = c("na", "clamp", "flag")) {
           TRUE ~ .data[["whours"]]
         )
       )
-      
   } else {
     # Clamp to valid range [0, 40]
     data |>
@@ -459,53 +479,60 @@ fix_working_hours <- function(data, treatment = c("na", "clamp", "flag")) {
 #' @seealso \code{\link{contract_rules}}, \code{\link{fix_negative_salaries}}
 #' @importFrom dplyr mutate case_when if_else
 #' @export
-fix_salary_components <- function(data, 
-                                  strategy = c("recalculate_gross", 
-                                             "cap_net", 
-                                             "cap_base",
-                                             "flag")) {
+fix_salary_components <- function(
+  data,
+  strategy = c("recalculate_gross", "cap_net", "cap_base", "flag")
+) {
   strategy <- match.arg(strategy)
-  
+
   if (strategy == "recalculate_gross") {
     # Recalculate gross = base + allowance (treating NA allowance as 0)
     data |>
       dplyr::mutate(
-        gross_salary_lcu = .data[["base_salary_lcu"]] + 
+        gross_salary_lcu = .data[["base_salary_lcu"]] +
           dplyr::if_else(
-            is.na(.data[["allowance_lcu"]]), 
-            0, 
+            is.na(.data[["allowance_lcu"]]),
+            0,
             .data[["allowance_lcu"]]
           )
       )
-      
   } else if (strategy == "cap_net") {
     # Cap net salary at gross (net cannot exceed gross)
     data |>
       dplyr::mutate(
         net_salary_lcu = dplyr::case_when(
-          .data[["net_salary_lcu"]] > .data[["gross_salary_lcu"]] ~ .data[["gross_salary_lcu"]],
+          .data[["net_salary_lcu"]] > .data[["gross_salary_lcu"]] ~ .data[[
+            "gross_salary_lcu"
+          ]],
           TRUE ~ .data[["net_salary_lcu"]]
         )
       )
-      
   } else if (strategy == "cap_base") {
     # Cap base salary at gross (base cannot exceed gross)
     data |>
       dplyr::mutate(
         base_salary_lcu = dplyr::case_when(
-          .data[["base_salary_lcu"]] > .data[["gross_salary_lcu"]] ~ .data[["gross_salary_lcu"]],
+          .data[["base_salary_lcu"]] > .data[["gross_salary_lcu"]] ~ .data[[
+            "gross_salary_lcu"
+          ]],
           TRUE ~ .data[["base_salary_lcu"]]
         )
       )
-      
   } else {
     # Flag violations without correction
     data |>
       dplyr::mutate(
-        gross_composition_flag = .data[["gross_salary_lcu"]] < 
-          (.data[["base_salary_lcu"]] + dplyr::if_else(is.na(.data[["allowance_lcu"]]), 0, .data[["allowance_lcu"]])),
-        net_exceeds_gross_flag = .data[["net_salary_lcu"]] > .data[["gross_salary_lcu"]],
-        base_exceeds_gross_flag = .data[["base_salary_lcu"]] > .data[["gross_salary_lcu"]]
+        gross_composition_flag = .data[["gross_salary_lcu"]] <
+          (.data[["base_salary_lcu"]] +
+            dplyr::if_else(
+              is.na(.data[["allowance_lcu"]]),
+              0,
+              .data[["allowance_lcu"]]
+            )),
+        net_exceeds_gross_flag = .data[["net_salary_lcu"]] >
+          .data[["gross_salary_lcu"]],
+        base_exceeds_gross_flag = .data[["base_salary_lcu"]] >
+          .data[["gross_salary_lcu"]]
       )
   }
 }
@@ -537,13 +564,13 @@ fix_salary_components <- function(data,
 #' @seealso \code{\link{contract_rules}}, \code{\link{fix_salary_components}}
 #' @importFrom dplyr mutate across all_of case_when
 #' @export
-fix_negative_salaries <- function(data,
-                                  columns = c("gross_salary_lcu", 
-                                            "base_salary_lcu", 
-                                            "net_salary_lcu"),
-                                  treatment = c("na", "abs", "zero")) {
+fix_negative_salaries <- function(
+  data,
+  columns = c("gross_salary_lcu", "base_salary_lcu", "net_salary_lcu"),
+  treatment = c("na", "abs", "zero")
+) {
   treatment <- match.arg(treatment)
-  
+
   # Apply correction across all specified salary columns
   data |>
     dplyr::mutate(
@@ -604,29 +631,38 @@ fix_negative_salaries <- function(data,
 #' \code{\link{fix_retirement_age}}, \code{\link{fix_working_hours}},
 #' \code{\link{fix_salary_components}}, \code{\link{fix_negative_salaries}}
 #' @export
-clean_hr_data <- function(data,
-                         data_type = c("personnel", "contract"),
-                         remove_duplicates = TRUE,
-                         fix_dates = TRUE,
-                         fix_ages = TRUE,
-                         fix_salaries = TRUE,
-                         verbose = FALSE) {
-  
+clean_hr_data <- function(
+  data,
+  data_type = c("personnel", "contract"),
+  remove_duplicates = TRUE,
+  fix_dates = TRUE,
+  fix_ages = TRUE,
+  fix_salaries = TRUE,
+  verbose = FALSE
+) {
   data_type <- match.arg(data_type)
   n_original <- nrow(data)
-  
-  if (verbose) message("Starting HR data cleaning pipeline...")
-  
+
+  if (verbose) {
+    message("Starting HR data cleaning pipeline...")
+  }
+
   # Step 1: Remove duplicates ------------------------------------------------
   if (remove_duplicates) {
     if (data_type == "personnel") {
       data <- remove_duplicate_personnel(data, keep = "first")
     } else {
-      data <- remove_duplicate_contracts(data, level = "contract", keep = "first")
+      data <- remove_duplicate_contracts(
+        data,
+        level = "contract",
+        keep = "first"
+      )
     }
-    if (verbose) message("  - Removed ", n_original - nrow(data), " duplicate records")
+    if (verbose) {
+      message("  - Removed ", n_original - nrow(data), " duplicate records")
+    }
   }
-  
+
   # Step 2: Fix dates --------------------------------------------------------
   if (fix_dates) {
     data <- fix_invalid_dates(data, treatment = "na")
@@ -635,28 +671,39 @@ clean_hr_data <- function(data,
     }
     if (verbose) message("  - Fixed invalid dates (set out-of-bounds to NA)")
   }
-  
+
   # Step 3: Fix age issues (personnel only) ----------------------------------
   if (fix_ages && data_type == "personnel") {
     data <- fix_underage_workers(data, treatment = "flag")
     data <- fix_retirement_age(data, treatment = "flag")
-    if (verbose) message("  - Handled age issues (flagged underage and over-retirement)")
+    if (verbose) {
+      message("  - Handled age issues (flagged underage and over-retirement)")
+    }
   }
-  
+
   # Step 4: Fix salary issues (contract only) --------------------------------
   if (fix_salaries && data_type == "contract") {
     data <- fix_working_hours(data, treatment = "clamp")
     data <- fix_negative_salaries(data, treatment = "abs")
     data <- fix_salary_components(data, strategy = "recalculate_gross")
-    if (verbose) message("  - Fixed salary inconsistencies (clamped hours, abs(negatives), recalculated gross)")
+    if (verbose) {
+      message(
+        "  - Fixed salary inconsistencies (clamped hours, abs(negatives), recalculated gross)"
+      )
+    }
   }
-  
+
   # Summary ------------------------------------------------------------------
   if (verbose) {
     n_final <- nrow(data)
-    message("Cleaning complete. ", n_final, " records retained (",
-            n_original - n_final, " removed).")
+    message(
+      "Cleaning complete. ",
+      n_final,
+      " records retained (",
+      n_original - n_final,
+      " removed)."
+    )
   }
-  
+
   data
 }

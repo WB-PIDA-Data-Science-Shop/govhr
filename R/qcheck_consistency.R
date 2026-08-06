@@ -15,16 +15,16 @@
 #'   across the dataset. A record is considered consistent if it has a unique identifier and all
 #'   its associated values are consistent. A value is considered consistent if it does not
 #'   contradict other values for the same record.
-#' 
+#'
 #' @export
-#' 
+#'
 #' @examples
 #' govhr::compute_global_consistency(
 #'   data = govhr::bra_hrmis_personnel,
 #'   id_col = "personnel_id",
 #'   value_cols = c("birth_date")
 #' )
-#' 
+#'
 compute_global_consistency <- function(data, id_col, value_cols, digits = 2) {
   # don't round intermediate results, to avoid compounding rounding error in the average
   record_consistency <- compute_record_consistency(
@@ -67,18 +67,18 @@ compute_global_consistency <- function(data, id_col, value_cols, digits = 2) {
 #' @import dplyr
 #'
 #' @return A data frame with the proportion of consistent records in the data frame, optionally by group.
-#' 
-#' @details A record is considered consistent if it has a unique identifier and all its associated values are consistent. 
+#'
+#' @details A record is considered consistent if it has a unique identifier and all its associated values are consistent.
 #' The function computes the proportion of consistent records in the data frame, optionally grouped by specified columns.
-#' 
+#'
 #' @export
-#' 
+#'
 #' @examples
 #' govhr::compute_record_consistency(
 #'  data = govhr::bra_hrmis_personnel,
 #'  id_col = "personnel_id",
 #' )
-#' 
+#'
 compute_record_consistency <- function(
   data,
   id_col,
@@ -140,21 +140,21 @@ compute_record_consistency <- function(
 #' @importFrom tibble as_tibble
 #'
 #' @return A data frame with the proportion of consistent values in the data frame, optionally by group.
-#' 
+#'
 #' @details Consistency is broadly defined as the proportion of records and values that are consistent
-#'   across the dataset. A value is considered consistent if it does not differ from 
-#'   other values for the same record. The function computes the proportion of records with consistent values 
+#'   across the dataset. A value is considered consistent if it does not differ from
+#'   other values for the same record. The function computes the proportion of records with consistent values
 #'   in the data frame, optionally grouped by specified columns.
-#' 
+#'
 #' @export
-#' 
+#'
 #' @examples
 #' govhr::compute_value_consistency(
 #'  data = govhr::bra_hrmis_personnel,
 #'  id_col = "personnel_id",
 #'  value_col = "birth_date"
 #' )
-#' 
+#'
 compute_value_consistency <- function(
   data,
   id_col,

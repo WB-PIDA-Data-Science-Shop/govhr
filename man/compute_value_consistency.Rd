@@ -31,8 +31,8 @@ Compute the proportion of consistent values in a data frame.
 }
 \details{
 Consistency is broadly defined as the proportion of records and values that are consistent
-  across the dataset. A value is considered consistent if it does not differ from 
-  other values for the same record. The function computes the proportion of records with consistent values 
+  across the dataset. A value is considered consistent if it does not differ from
+  other values for the same record. The function computes the proportion of records with consistent values
   in the data frame, optionally grouped by specified columns.
 }
 \examples{

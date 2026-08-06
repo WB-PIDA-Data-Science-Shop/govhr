@@ -9,7 +9,12 @@
 #' @importFrom tibble as_tibble
 #'
 #' @return A data frame with coverage values for each column, optionally grouped by the specified `group`.
-compute_coverage <- function(.data, group = NULL, include_ref_date = FALSE, aggregate = FALSE) {
+compute_coverage <- function(
+  .data,
+  group = NULL,
+  include_ref_date = FALSE,
+  aggregate = FALSE
+) {
   dt <- data.table::as.data.table(.data)
   data_cols <- colnames(dt)
 
@@ -20,15 +25,13 @@ compute_coverage <- function(.data, group = NULL, include_ref_date = FALSE, aggr
   summary_cols <- setdiff(data_cols, group)
 
   # wide: one coverage value per summary column, one row per group
-  if(is.null(group)){
-    coverage_wide <- dt[
-      ,
+  if (is.null(group)) {
+    coverage_wide <- dt[,
       lapply(.SD, \(col) (sum(!is.na(col)) / length(col)) * 100),
       .SDcols = summary_cols
     ]
-  }else{
-    coverage_wide <- dt[
-      ,
+  } else {
+    coverage_wide <- dt[,
       lapply(.SD, \(col) (sum(!is.na(col)) / length(col)) * 100),
       by = c(group),
       .SDcols = summary_cols
@@ -46,8 +49,7 @@ compute_coverage <- function(.data, group = NULL, include_ref_date = FALSE, aggr
   )
 
   if (aggregate) {
-    coverage_data <- coverage_data[
-      ,
+    coverage_data <- coverage_data[,
       .(coverage = mean(coverage, na.rm = TRUE)),
       by = c(group)
     ]

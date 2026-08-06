@@ -30,13 +30,11 @@
 #' @importFrom scales pretty_breaks
 #'
 #' @export
-ggplot_point_line <- function(data,
-                              x,
-                              y,
-                              group = NULL,
-                              label = NULL,
-                              ...) {
-  plot <- ggplot(data, aes(x = {{ x }}, y = {{ y }}, color = {{ group }}, ...)) +
+ggplot_point_line <- function(data, x, y, group = NULL, label = NULL, ...) {
+  plot <- ggplot(
+    data,
+    aes(x = {{ x }}, y = {{ y }}, color = {{ group }}, ...)
+  ) +
     geom_line(linewidth = 3) +
     geom_point(size = 8) +
     scale_x_continuous(
@@ -78,7 +76,7 @@ ggplot_point_line <- function(data,
 #' @param .data A data.frame or tibble.
 #' @param col Unquoted numeric column (values).
 #' @param group Unquoted grouping column.
-#' 
+#'
 #' @return A ggplot object.
 #' @examples
 #' \dontrun{
@@ -94,10 +92,10 @@ ggplot_point_line <- function(data,
 #' @importFrom stats median
 ggplot_segment <- function(.data, col, group) {
   colq <- rlang::enquo(col)
-  gq   <- rlang::enquo(group)
+  gq <- rlang::enquo(group)
 
   col_name <- rlang::as_label(colq)
-  g_name   <- rlang::as_label(gq)
+  g_name <- rlang::as_label(gq)
 
   df <- .data
 
@@ -105,15 +103,15 @@ ggplot_segment <- function(.data, col, group) {
     dtplyr::lazy_dt() |>
     dplyr::group_by(!!gq) |>
     dplyr::summarise(
-      xmin   = min(!!colq, na.rm = TRUE),
-      xmax   = max(!!colq, na.rm = TRUE),
+      xmin = min(!!colq, na.rm = TRUE),
+      xmax = max(!!colq, na.rm = TRUE),
       median = stats::median(!!colq, na.rm = TRUE),
       .groups = "drop"
     ) |>
     dplyr::mutate(
       xmin = ifelse(is.infinite(.data[["xmin"]]), NA_real_, .data[["xmin"]]),
       xmax = ifelse(is.infinite(.data[["xmax"]]), NA_real_, .data[["xmax"]])
-    ) |> 
+    ) |>
     tibble::as_tibble()
 
   ordered_levels <- summary_df |>
@@ -122,11 +120,19 @@ ggplot_segment <- function(.data, col, group) {
     as.character()
 
   # ensure factor ordering for plotting
-  summary_df[[g_name]] <- factor(as.character(summary_df[[g_name]]), levels = rev(ordered_levels))
+  summary_df[[g_name]] <- factor(
+    as.character(summary_df[[g_name]]),
+    levels = rev(ordered_levels)
+  )
   plot_data <- df |>
-    dplyr::mutate(!!g_name := factor(as.character(df[[g_name]]), levels = rev(ordered_levels)))
+    dplyr::mutate(
+      !!g_name := factor(
+        as.character(df[[g_name]]),
+        levels = rev(ordered_levels)
+      )
+    )
 
-  col_sym   <- rlang::sym(col_name)
+  col_sym <- rlang::sym(col_name)
   group_sym <- rlang::sym(g_name)
 
   ggplot2::ggplot() +
@@ -163,14 +169,14 @@ ggplot_segment <- function(.data, col, group) {
 #' @import ggplot2
 #' @importFrom stringr str_detect
 #' @importFrom dplyr filter
-#' 
+#'
 #' @export
-ggplot_coef <- function(model, coef){
-  model |> 
+ggplot_coef <- function(model, coef) {
+  model |>
     broom::tidy(conf.int = TRUE) |>
     dplyr::filter(
       stringr::str_detect(term, coef)
-    ) |> 
+    ) |>
     ggplot2::ggplot(ggplot2::aes(x = estimate, y = term)) +
     ggplot2::geom_point() +
     ggplot2::geom_linerange(
@@ -446,18 +452,18 @@ plot_segment <- function(.data, col, group) {
 }
 
 #' Plot Personnel Movement Over Time
-#' 
+#'
 #' @param .data A data frame containing the movement data with columns `ref_date`, `indicator`, and optionally a grouping column.
 #' @param movement_type A character string indicating the type of movement: "hire", "fire", or "turnover".
 #' @param measurement_type A character string indicating the measurement type: "count" or "rate".
 #' @param group_cols A character string indicating the grouping column, or "ref_date" for no grouping.
-#' 
+#'
 #' @return A ggplot2 object representing the personnel movement over time.
-#' 
+#'
 #' @importFrom ggplot2 ggplot aes geom_point geom_line labs scale_y_continuous
 #' @importFrom dplyr n_distinct
 #' @importFrom grDevices colorRampPalette
-#' 
+#'
 #' @export
 plot_movement <- function(.data, movement_type, measurement_type, group_cols) {
   plot <- .data |>
@@ -485,7 +491,11 @@ plot_movement <- function(.data, movement_type, measurement_type, group_cols) {
       ggplot2::scale_color_manual(values = orange_palette)
   }
 
-  if (movement_type %in% c("hire", "fire", "retirement") & measurement_type == "rate") {
+  if (
+    movement_type %in%
+      c("hire", "fire", "retirement") &
+      measurement_type == "rate"
+  ) {
     plot <- plot +
       scale_y_continuous(
         labels = scales::percent_format()
@@ -519,24 +529,24 @@ plot_movement <- function(.data, movement_type, measurement_type, group_cols) {
 }
 
 #' Plot Decile Summary
-#' 
+#'
 #' @param .data A data frame produced by `compute_decile()`, containing columns `decile`, `mean_value`, and optionally a grouping column.
 #' @param group_cols A character string indicating the grouping column, or "ref_date" for no grouping.
-#' 
+#'
 #' @return A ggplot2 object representing the decile summary.
-#' 
+#'
 #' @importFrom ggplot2 ggplot aes geom_col labs scale_x_continuous facet_wrap
 #'
 #' @export
-#' 
+#'
 #' @examples
 #' govhr::compute_decile(
-#'   govhr::bra_hrmis_contract, 
-#'   measure_col = "gross_salary_lcu", 
+#'   govhr::bra_hrmis_contract,
+#'   measure_col = "gross_salary_lcu",
 #'   group_cols = "paygrade"
 #' ) |>
 #'   govhr::plot_decile(group_cols = "paygrade")
-plot_decile <- function(.data, group_cols){
+plot_decile <- function(.data, group_cols) {
   plot <- .data |>
     ggplot2::ggplot(
       ggplot2::aes(x = .data[["decile"]], y = .data[["mean_value"]])
@@ -581,7 +591,7 @@ plot_decile <- function(.data, group_cols){
 #'
 #' @import ggplot2
 #' @importFrom grDevices colorRampPalette
-#' 
+#'
 #' @return A ggplot2 object.
 plot_histogram <- function(.data, plot_type = "histogram", group_col = NULL) {
   plot_type <- match.arg(plot_type, c("histogram", "cumulative"))
@@ -592,7 +602,7 @@ plot_histogram <- function(.data, plot_type = "histogram", group_col = NULL) {
     cumulative = "cum_pct"
   )
 
-  plot <- .data |> 
+  plot <- .data |>
     ggplot2::ggplot(ggplot2::aes(x = bin, y = .data[[y_var]])) +
     ggplot2::geom_col() +
     ggplot2::scale_y_continuous(labels = scales::label_percent()) +
@@ -610,19 +620,19 @@ plot_histogram <- function(.data, plot_type = "histogram", group_col = NULL) {
 }
 
 #' Plot Compression Ratio
-#' 
+#'
 #' @param .data A data frame containing the compression ratio data produced by `compute_compression_ratio()`.
 #' @param group_cols A character string indicating the grouping column, or "ref_date"
 #' for no grouping.
-#' 
+#'
 #' @return A ggplot2 object representing the compression ratio.
-#' 
+#'
 #' @importFrom ggplot2 ggplot aes geom_point geom_linerange labs scale_color_manual
 #' @importFrom dplyr n_distinct
 #' @importFrom grDevices colorRampPalette
-#' 
+#'
 #' @export
-plot_compression_ratio <- function(.data, group_cols){
+plot_compression_ratio <- function(.data, group_cols) {
   group_cols <- if (is.null(group_cols)) "ref_date" else group_cols
 
   # plot as a line range between percentile_10 and percentile_90, with a point at percentile_50
@@ -647,8 +657,8 @@ plot_compression_ratio <- function(.data, group_cols){
       x = "Wage Compression Ratio (10th to 90th Percentile)",
       y = ""
     )
-  
-    if (group_cols != "ref_date") {
+
+  if (group_cols != "ref_date") {
     n_groups <- dplyr::n_distinct(
       .data[[group_cols]],
       na.rm = TRUE
@@ -666,18 +676,18 @@ plot_compression_ratio <- function(.data, group_cols){
 }
 
 #' Plot Movement Cost
-#' 
+#'
 #' @param .data A data frame containing the movement cost data with columns `movement_cost` and optionally a grouping column.
 #' @param group_cols A character string indicating the grouping column, or "ref_date" for no grouping.
-#' 
+#'
 #' @return A ggplot2 object representing the movement cost.
-#' 
+#'
 #' @importFrom ggplot2 ggplot aes geom_col labs scale_color_manual
 #' @importFrom dplyr n_distinct
 #' @importFrom grDevices colorRampPalette
-#' 
+#'
 #' @export
-plot_movement_cost <- function(.data, group_cols){
+plot_movement_cost <- function(.data, group_cols) {
   group_cols <- if (is.null(group_cols)) "ref_date" else group_cols
 
   plot <- .data |>

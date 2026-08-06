@@ -32,13 +32,15 @@
 #'                        end_date = "2018-01-01", event_type = "fire")
 #' }
 #' @export
-detect_personnel_event <- function(data,
-                                   id_col,
-                                   event_type,
-                                   start_date,
-                                   end_date,
-                                   status_col,
-                                   freq = "year") {
+detect_personnel_event <- function(
+  data,
+  id_col,
+  event_type,
+  start_date,
+  end_date,
+  status_col,
+  freq = "year"
+) {
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
@@ -69,7 +71,8 @@ detect_personnel_event <- function(data,
         ref_date,
         get(status_col),
         type_event = fifelse(
-          get(status_col) == "active" & is.na(data.table::shift(get(status_col), type = "lag")),
+          get(status_col) == "active" &
+            is.na(data.table::shift(get(status_col), type = "lag")),
           "hire",
           "no hire"
         )
@@ -87,7 +90,8 @@ detect_personnel_event <- function(data,
         ref_date,
         get(status_col),
         type_event = fifelse(
-          get(status_col) == "active" & is.na(data.table::shift(get(status_col), type = "lead")),
+          get(status_col) == "active" &
+            is.na(data.table::shift(get(status_col), type = "lead")),
           "fire",
           "no fire"
         )
@@ -168,7 +172,7 @@ detect_retirement <- function(data) {
 #' @param freq The frequency of the reference dates (default is "year").
 #'
 #' @return A data frame with an additional column indicating the type of movement for each personnel record.
-#' 
+#'
 #' @importFrom data.table setDT fcase copy
 #' @importFrom lubridate ymd
 #'
@@ -347,13 +351,18 @@ generate_movement_data <- function(
       freq = freq_ref_date
     )
     setDT(movement_dt)
-    
-    movement_data <- if (measurement_type == "count") {
-      movement_dt[, .(indicator = sum(type_event == movement_type)), by = by_cols]
-    } else {
-      movement_dt[, .(indicator = mean(type_event == movement_type)), by = by_cols]
-    }
 
+    movement_data <- if (measurement_type == "count") {
+      movement_dt[,
+        .(indicator = sum(type_event == movement_type)),
+        by = by_cols
+      ]
+    } else {
+      movement_dt[,
+        .(indicator = mean(type_event == movement_type)),
+        by = by_cols
+      ]
+    }
   } else if (movement_type == "turnover") {
     hire_dt <- govhr::detect_personnel_event(
       dt,
@@ -366,9 +375,10 @@ generate_movement_data <- function(
     )
 
     setDT(hire_dt)
-    
-    hire_data <- dt[hire_dt, on = c("personnel_id", "ref_date")][
-      , .(hires = .N), by = by_cols
+
+    hire_data <- dt[hire_dt, on = c("personnel_id", "ref_date")][,
+      .(hires = .N),
+      by = by_cols
     ]
 
     fire_dt <- govhr::detect_personnel_event(
@@ -386,8 +396,9 @@ generate_movement_data <- function(
     # combine fired and retired personnel for turnover calculation
     separations_dt <- rbind(fire_dt, retirement_dt)
     setDT(separations_dt)
-    separations_dt <- dt[separations_dt, on = c("personnel_id", "ref_date")][
-      , .(separations = .N), by = by_cols
+    separations_dt <- dt[separations_dt, on = c("personnel_id", "ref_date")][,
+      .(separations = .N),
+      by = by_cols
     ]
 
     movement_data <- merge(hire_data, separations_dt, by = by_cols, all = TRUE)
@@ -613,11 +624,7 @@ estimate_exit_rates <- function(
 #' )
 #' }
 #' @export
-complete_dates <- function(data,
-                           id_col,
-                           start_date,
-                           end_date,
-                           freq = "year") {
+complete_dates <- function(data, id_col, start_date, end_date, freq = "year") {
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
