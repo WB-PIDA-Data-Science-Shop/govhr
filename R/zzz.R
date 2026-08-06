@@ -35,7 +35,32 @@ if (getRversion() >= "2.15.1"){
     "mean_salary_pct_change", "mean_salary_t0", "mean_salary_t1",
     "median_salary_change", "replacement_rate", "salary_change", "salary_pct_change",
     "spell_years", "bin", "decile", "i.type_event", "retirement_date",
-    "separations", "hires", "consistent_record", "coverage"
+    "separations", "hires", "consistent_record", "coverage",
+    # compute_tenure
+    ".eff_end",
+    ".s",
+    ".e",
+    ".lag_max_e",
+    ".contrib",
+    "tenure_days",
+    "tenure_years",
+    # .compute_transition_pair
+    ".pid",
+    "from_group",
+    "to_group",
+    "n_moves",
+    "period_prob",
+    "n_pop",
+    # estimate_movement_baseline (formerly estimate_movement_rates)
+    "period_key",
+    "t0_date",
+    "movement_rate",
+    "from_period",
+    "to_period",
+    # estimate_exit_rates
+    "n_exits",
+    "exit_rate",
+    "current_stock"
   ))
 }
 
