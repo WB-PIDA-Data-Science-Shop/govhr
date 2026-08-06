@@ -20,7 +20,7 @@
 #'
 #' @return A dataset with event types detected (e.g., hire or fire).
 #'
-#' @importFrom data.table as.data.table copy setorderv shift
+#' @importFrom data.table as.data.table copy setorderv shift fifelse
 #' @importFrom lubridate ymd
 #'
 #' @examples
@@ -70,7 +70,7 @@ detect_personnel_event <- function(
         personnel_id = get(id_col),
         ref_date,
         get(status_col),
-        type_event = fifelse(
+        type_event = data.table::fifelse(
           get(status_col) == "active" &
             is.na(data.table::shift(get(status_col), type = "lag")),
           "hire",
@@ -89,7 +89,7 @@ detect_personnel_event <- function(
         personnel_id = get(id_col),
         ref_date,
         get(status_col),
-        type_event = fifelse(
+        type_event = data.table::fifelse(
           get(status_col) == "active" &
             is.na(data.table::shift(get(status_col), type = "lead")),
           "fire",

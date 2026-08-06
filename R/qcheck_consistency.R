@@ -65,6 +65,8 @@ compute_global_consistency <- function(data, id_col, value_cols, digits = 2) {
 #' @param digits An integer specifying the number of decimal places to round the result to. Default is 2.
 #'
 #' @import dplyr
+#' @importFrom data.table as.data.table fifelse
+#' @importFrom tibble as_tibble
 #'
 #' @return A data frame with the proportion of consistent records in the data frame, optionally by group.
 #'

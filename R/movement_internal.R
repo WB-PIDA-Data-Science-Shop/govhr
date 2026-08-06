@@ -576,7 +576,7 @@ compute_employment_spells <- function(
   ### get the tenure at the last snapshot for each group_col personel_id combination
   tenure_dt <-
     tenure_dt[,
-      max_date := fifelse(ref_date == max(ref_date, na.rm = TRUE), 1, 0),
+      max_date := data.table::fifelse(ref_date == max(ref_date, na.rm = TRUE), 1, 0),
       by = c(personnel_id_col, group_cols)
     ]
 
