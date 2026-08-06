@@ -23,17 +23,17 @@ library(tibble)
 
 # Introduction
 
-Across many countries—especially in low- and middle-income settings—governments are increasingly seeking to adopt analytics-driven approaches to public sector human resource (HR) management and civil service reform. Yet most government offices and our World Bank regional counterparts often lack standardized tools for transforming raw HRMIS data into formats suitable for rigorous analysis. As a result, each new diagnostic requires bespoke data cleaning, ad hoc coding decisions, and country-specific scripts that are costly to maintain and difficult to replicate.
+There is growing demand for analytics-driven approaches to public sector human resource management (HRM) and civil service reform. Yet most government offices and our World Bank regional counterparts often lack standardized tools for transforming raw HRMIS data into formats suitable for rigorous analysis. As a result, each new analytical output requires bespoke data cleaning, ad hoc coding decisions, and country-specific scripts that are costly to maintain and difficult to replicate.
 
-This fragmentation makes HRM analytics expensive, slow, and inconsistent. It also limits the ability of governments and development partners—including the World Bank—to compare results across time, sectors, or countries, or to build reusable analytics pipelines.
+This fragmentation makes workforce and wagebill analytics expensive, slow, and inconsistent. It also limits the ability of governments and development partners—including the World Bank—to compare results across time, sectors, or countries, or to build reusable analytics pipelines.
 
-This article describes the standard approach for harmonizing human resource management information system (HRMIS) data, organized into three main modules: Establishment, Personnel, and Contract. The contents of each module are described in `vignette("standard_dictionary")`. In this article, we provide a set of helper functions to support the harmonization process across the modules. When users prepare their HRMIS data according to this standard, teams can immediately apply automated tools for data quality control as well as dynamic and reproducible reports on workforce structure dynamics, pay and compensation analytics, establishment control monitoring, staffing distribution analysis. 
+This article describes a standard approach for harmonizing human resource data, organized into three main modules: Establishment, Personnel, and Contract. The contents of each module are described in `vignette("standard_dictionary")`. In this article, we provide a set of helper functions to support the harmonization process across the modules. When users prepare their HRMIS data according to this standard, teams can immediately apply automated tools for data quality control as well as dynamic and reproducible reports on workforce structure dynamics, pay and compensation analytics, establishment control monitoring, staffing distribution analysis. 
 
-This vignette, harmonization.Rmd, presents the practical workflow for transforming raw HRMIS extracts into these standardized modules. It provides governments with a clear, repeatable procedure for preparing their data so that advanced analytics can be deployed rapidly and consistently—reducing costs, increasing comparability, and strengthening evidence-based HR decision making.
+This vignette presents the practical workflow for transforming raw HRMIS extracts into these standardized modules. It provides governments with a clear, repeatable procedure for preparing their data so that advanced analytics can be deployed rapidly and consistently—reducing costs, increasing comparability, and strengthening evidence-based HR decision making.
 
 The harmonization workflow demonstrated here shows how to:
 
-* map raw administrative HR variables into a standardized public sector schema,
+* map raw administrative HR variables into a standardized schema,
 
 * recode local classifications (education, occupation, contract type) into cross-country taxonomies,
 
@@ -43,7 +43,7 @@ The harmonization workflow demonstrated here shows how to:
 
 * structure the cleaned data into the three standard HRMIS modules, and
 
-* validate the outputs against the HRMIS Standard Data Dictionary.
+* validate the outputs against the `govhr` Standard Data Dictionary.
 
 By following this procedure, governments and World Bank teams can unlock a common analytics ecosystem in which standardized public sector HR data feeds directly into automated dashboards, diagnostic tools, and monitoring systems—enabling faster, cheaper, and more consistent evidence-based HR reform.
 

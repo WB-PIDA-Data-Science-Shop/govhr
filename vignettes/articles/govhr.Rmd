@@ -1,0 +1,22 @@
+---
+title: "govhr"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(govhr)
+```
+
+# Introduction to govhr
+
+The goal of `govhr` is to equip you with a set of open-source tools that:
+
+1.  Harmonize data extracted from a human resource management information system (HRMIS) data.
+2.  Produce workforce and wage bill analytics in a standard, but adjustable, format.
+

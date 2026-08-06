@@ -397,11 +397,8 @@ compute_fastchange <- function(data, col, date_col) {
 #' }
 #'
 #' @importFrom lubridate year
-#' @importFrom data.table :=
-#' @importFrom data.table fifelse
-#' @importFrom data.table setnames
-#' @importFrom dplyr rename
-#' @importFrom dplyr bind_rows
+#' @importFrom data.table fifelse setnames merge.data.table as.data.table
+#' @importFrom dplyr rename bind_rows
 #'
 #' @export
 
