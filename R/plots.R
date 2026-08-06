@@ -378,7 +378,6 @@ plot_bar_growth <- function(data, group) {
 #' @importFrom dplyr group_by summarise mutate arrange pull
 #' @importFrom ggplot2 ggplot aes geom_segment geom_jitter scale_y_discrete labs
 #' @importFrom tibble tibble
-#' @importFrom rlang :=
 #'
 #' @export
 plot_segment <- function(.data, col, group) {

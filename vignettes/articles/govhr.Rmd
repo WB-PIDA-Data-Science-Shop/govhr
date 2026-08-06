@@ -15,8 +15,32 @@ library(govhr)
 
 # Introduction to govhr
 
-The goal of `govhr` is to equip you with a set of open-source tools that:
+Across the world, public sectors employ over 400 million workers ([World Bank 2026](https://www.worldbank.org/en/publication/public-workforce-performance-and-prosperity)). The wage bill of this public sector workforce represents around 40 percent of government expenditure. Helping governments better manage their large and complex workforce, while ensuring fiscal sustainability of their wage bill, is a priority for the World Bank's Governance Global Practice.
 
-1.  Harmonize data extracted from a human resource management information system (HRMIS) data.
-2.  Produce workforce and wage bill analytics in a standard, but adjustable, format.
+# Why `govhr`?
 
+We believe that better management of human resources should be evidence-based. This means that governments need to have access to high-quality data on their workforce and wagebill, and the tools to analyze them in a systematic way. So far, this journey from raw data to analytics has been an odyssey.
+
+On the data engineering side, human resources (HR) data are complex and large. In addition, governments collect data in their own unique conventions, defying a common data standard. The lack of a common set of rulers to measure the workforce and wage bill makes it difficult to generate analytics from data.
+
+On the analytics side, governments have specific business problems and policy questions that defy a one-size-fits-all approach. One government might be trying to reform its pensions program. Another, ensuring that its workforce is adequately staffed. Each one of these business cases requires a different type of analysis.
+
+The `govhr` package offers solutions to these challenges. It provides a set of open-source tools for harmonizing and analyzing HR data, enabling evidence-based human resource management.
+
+# `govhr`: an overview
+
+`govhr` has a backend and frontend. The backend handles the data engineering or, as we prefer to call it, the harmonization. The foundation for the harmonization process is our `govhr`-specific [standard data dictionary](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html) for human resources. This dictionary provides a set of variable names and definitions that set expectations on how data should be harmonized, to comply with `govhr` standards.
+
+```{r}
+head(govhr::dictionary)
+```
+
+A user might be curious 
+
+
+```{r}
+compare_to_dictionary(
+  gohvr::bra_hrmis_personnel,
+  
+)
+```

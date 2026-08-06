@@ -35,7 +35,7 @@ if (getRversion() >= "2.15.1"){
     "mean_salary_pct_change", "mean_salary_t0", "mean_salary_t1",
     "median_salary_change", "replacement_rate", "salary_change", "salary_pct_change",
     "spell_years", "bin", "decile", "i.type_event", "retirement_date",
-    "separations", "hires"
+    "separations", "hires", "consistent_record", "coverage"
   ))
 }
 
