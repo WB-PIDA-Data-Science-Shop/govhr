@@ -520,3 +520,35 @@ reactable(
   head(bra_hrmis_est, 10)
 )
 ```
+
+The key piece for harmonization is our `govhr`-specific [standard data dictionary](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html) for human resources. This dictionary provides a set of variable names and definitions that set expectations on how data should be harmonized, to comply with `govhr` standards.
+
+```{r}
+head(govhr::dictionary)
+```
+
+Note that the dictionary comprises three modules: (1) establishments, (2) personnel, and (3) contract. As such, the harmonized data should comprise three tables, one for each module. Governments seldom share data in this format: the user is expected to modularize their data to conform to this modular structure.
+
+A few `govhr` functions make this process easier (e.g., `compare_to_dictionary`), though in our experience [`dplyr`](https://dplyr.tidyverse.org/index.html) is our tool of choice. For example, suppose we are harmonizing personnel data.
+
+Our approach would be as follows:
+
+```{r}
+library(dplyr)
+
+personnel_data <- tibble::tibble(
+  employee_id = c(1, 2, 3),
+  time_stamp = c("2026-01-01", "2026-01-01", "2026-01-01"),
+  gender = c("M", "F", "F"),
+  birth_date = c("1991-26-06", "1990-20-02", "1997-12-01")
+)
+
+personnel_colnames <- govhr::dictionary |>
+  filter(module == "Personnel") |>
+  pull()
+
+compare_to_dictionary(
+  personnel_data,
+  personnel_colnames
+)
+```
