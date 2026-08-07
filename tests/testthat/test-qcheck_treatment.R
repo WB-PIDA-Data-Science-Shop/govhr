@@ -124,7 +124,7 @@ test_that("fix_underage_workers handles all cases", {
   na_data <- data.frame(
     birth_date = as.Date(NA),
     ref_date = as.Date("2023-01-01"),
-    status = "active"
+    employment_status = "active"
   )
   result <- fix_underage_workers(na_data, treatment = "flag")
   expect_false(result$underage_flag[1])
@@ -134,7 +134,7 @@ test_that("fix_retirement_age works", {
   data <- data.frame(
     birth_date = as.Date(c("1950-01-01", "1960-01-01", "1970-01-01")),
     ref_date = as.Date(rep("2023-01-01", 3)),
-    status = c("active", "active", "retired")
+    employment_status = c("active", "active", "retired")
   )
   
   # Flag treatment
@@ -258,7 +258,7 @@ test_that("clean_hr_data works for personnel", {
     personnel_id = c("P001", "P001", "P002"),
     ref_date = as.Date(c("2023-01-01", "2023-01-01", "2100-01-01")),
     birth_date = as.Date(c("2010-01-01", "2010-01-01", "1990-01-01")),
-    status = rep("active", 3)
+    employment_status = rep("active", 3)
   )
   
   result <- clean_hr_data(data, data_type = "personnel")
@@ -341,7 +341,8 @@ test_that("functions preserve column order", {
     col_a = 1:3,
     personnel_id = c("P001", "P002", "P003"),
     col_b = letters[1:3],
-    ref_date = as.Date(rep("2023-01-01", 3))
+    ref_date = as.Date(rep("2023-01-01", 3)),
+    employment_status = c("active", "active", "retired")
   )
   result <- remove_duplicate_personnel(data)
   expect_equal(names(result), names(data))
