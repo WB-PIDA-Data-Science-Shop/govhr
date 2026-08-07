@@ -80,7 +80,7 @@ if (getRversion() >= "2.15.1"){
   "birth_date",
   "ppp_2021",
   "type_event",
-  "status",
+  "employment_status",
   "est_id_nested",
   "term",
   "estimate",

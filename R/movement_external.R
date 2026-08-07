@@ -432,7 +432,7 @@ compute_workforce_movement <- function(
 #' @param start_date_col Character.  Default \code{"start_date"}.
 #' @param end_date_col Character.  Default \code{"end_date"}.
 #' @param contract_type_col Character.  Default \code{"contract_type_code"}.
-#' @param status_col Character.  Default \code{"status"}.
+#' @param status_col Character.  Default \code{"employment_status"}.
 #'
 #' @return data.table with \code{group_cols} (if specified) and
 #'   \code{exit_rate} column.

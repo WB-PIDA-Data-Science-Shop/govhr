@@ -880,7 +880,7 @@ rescale_baseline <- function(data, group) {
 #' When `measure_col` is `NULL`, counts rows (headcount). When a column name is
 #' supplied, sums that column (wage bill).
 #'
-#' @param data A data frame containing a `ref_date` column and the grouping
+#' @param .data A data frame containing a `ref_date` column and the grouping
 #'   column.
 #' @param group Character string naming the grouping column.
 #' @param measure_col Character string naming the numeric column to sum, or
@@ -891,9 +891,9 @@ rescale_baseline <- function(data, group) {
 #' @importFrom dplyr group_by across all_of filter ungroup summarise n
 #'
 #' @export
-compute_cross_section <- function(data, group, measure_col = NULL) {
+compute_cross_section <- function(.data, group, measure_col = NULL) {
   # only consider latest reference date
-  data_latest <- data |>
+  data_latest <- .data |>
     dplyr::filter(
       .data[["ref_date"]] == max(.data[["ref_date"]]),
       .by = dplyr::all_of(group)
@@ -901,7 +901,10 @@ compute_cross_section <- function(data, group, measure_col = NULL) {
 
   if (is.null(measure_col)) {
     data_latest |>
-      dplyr::summarise(value = dplyr::n(), .by = dplyr::all_of(group))
+      fastcount(
+        dplyr::across(dplyr::all_of(group)),
+        name = "value"
+      )
   } else {
     data_latest |>
       compute_fastsummary(

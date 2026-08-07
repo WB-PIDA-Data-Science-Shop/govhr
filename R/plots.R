@@ -632,7 +632,7 @@ plot_histogram <- function(.data, plot_type = "histogram", group_col = NULL) {
 #' @importFrom grDevices colorRampPalette
 #'
 #' @export
-plot_compression_ratio <- function(.data, group_cols) {
+plot_compression_ratio <- function(.data, group_cols = NULL) {
   group_cols <- if (is.null(group_cols)) "ref_date" else group_cols
 
   # plot as a line range between percentile_10 and percentile_90, with a point at percentile_50

@@ -367,7 +367,7 @@ fix_retirement_age <- function(
         units = "days"
       )) /
         365.25,
-      .over_retirement = .data[["status"]] == "active" &
+      .over_retirement = .data[["employment_status"]] == "active" &
         .data[[".age"]] > max_age &
         !is.na(.data[[".age"]])
     )
@@ -382,7 +382,7 @@ fix_retirement_age <- function(
       dplyr::mutate(
         status = dplyr::case_when(
           .data[[".over_retirement"]] ~ "retired",
-          TRUE ~ .data[["status"]]
+          TRUE ~ .data[["employment_status"]]
         )
       ) |>
       dplyr::select(-dplyr::starts_with("."))
