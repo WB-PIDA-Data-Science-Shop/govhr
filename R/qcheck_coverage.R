@@ -9,6 +9,8 @@
 #' @importFrom tibble as_tibble
 #'
 #' @return A data frame with coverage values for each column, optionally grouped by the specified `group`.
+#' 
+#' @export
 compute_coverage <- function(
   .data,
   group = NULL,
