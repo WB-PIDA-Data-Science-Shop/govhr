@@ -64,6 +64,8 @@ compute_coverage <- function(
 #' @param digits An integer specifying the number of decimal places to round the result to. Default is 2.
 #'
 #' @return A numeric value representing the proportion of missing values in the data frame.
+#' 
+#' @export
 compute_global_coverage <- function(data, digits = 2) {
   coverage <- 100 * mean(!is.na(data))
 
