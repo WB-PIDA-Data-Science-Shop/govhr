@@ -40,7 +40,6 @@ A user might be curious
 
 ```{r}
 compare_to_dictionary(
-  gohvr::bra_hrmis_personnel,
-  
+  govhr::bra_hrmis_personnel
 )
 ```
