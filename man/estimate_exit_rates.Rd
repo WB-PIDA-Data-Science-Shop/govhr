@@ -43,7 +43,7 @@ included to prevent partial argument matching against \code{ref_date_col}).}
 
 \item{end_date_col}{Character.  Default \code{"end_date"}.}
 
-\item{status_col}{Character.  Default \code{"status"}.}
+\item{status_col}{Character.  Default \code{"employment_status"}.}
 }
 \value{
 data.table with \code{group_cols} (if specified) and

@@ -29,9 +29,16 @@ You can install the development version of `govhr` from
 ``` r
 # install.packages("pak")
 pak::pak("WB-PIDA-Data-Science-Shop/govhr")
+# or
+# install.packages("remotes")
+remotes::install_github("WB-PIDA-Data-Science-Shop/govhr")
 ```
 ## :link: Get started:
 1. [Standard dictionary for human resources (HR) data.](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html)
 2. [How to harmonize your HR data.](https://wb-pida-data-science-shop.github.io/govhr/articles/02-harmonization.html)
 3. [How to generate a data quality assessment.](https://wb-pida-data-science-shop.github.io/govhr/articles/03-quality_control.html)
 4. [How to generate a standard HR analytics report](https://wb-pida-data-science-shop.github.io/govhr/articles/04-standard_hrmis_assessment.html)
+
+## License
+
+`govhr` is licensed under the MIT License. However, it comes with no guarantees and the package developers cannot be held responsible for any issues arising from its use.
