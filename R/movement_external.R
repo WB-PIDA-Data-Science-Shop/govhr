@@ -308,8 +308,7 @@ compute_movement_cost <- function(
   out[]
 }
 
-# NOTE: consider renaming this function
-#' Function to generate movement data for hires, fires, retirement, or turnover
+#' Function to compute workforce movement for hires, fires, retirement, or turnover
 #'
 #' @param .data A data frame containing personnel data.
 #' @param movement_type A character string indicating the type of movement: "hire", "fire", "retirement", or "turnover".
@@ -320,9 +319,9 @@ compute_movement_cost <- function(
 #'
 #' @importFrom data.table as.data.table setDT
 #'
-#' @details The function generates movement data based on the specified movement type and measurement type. For hires, fires, and retirements, it calculates either the count or rate of events. For turnover, it calculates the ratio of hires to separations (including retirements). The data is grouped by the specified columns.
+#' @details The function computes workforce movement counts or rates, based on the specified movement type. For hires, fires, and retirements, it calculates either the count or rate of events. For turnover, it calculates the ratio of hires to separations (including retirements). The data is grouped by the specified columns.
 #' @export
-generate_movement_data <- function(
+compute_workforce_movement <- function(
   .data,
   movement_type,
   measurement_type,
@@ -585,6 +584,7 @@ estimate_exit_rates <- function(
 }
 
 # helpers ----------------------------------------------------------------
+
 #' Complete Panel Data by Identifier and Reference Dates
 #'
 #' Expands a dataset to include all combinations of identifiers and reference

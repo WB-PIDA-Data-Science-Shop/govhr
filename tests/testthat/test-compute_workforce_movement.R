@@ -1,4 +1,4 @@
-test_that("generate_movement_data computes hire count and rate correctly", {
+test_that("compute_workforce_movement computes hire count and rate correctly", {
   panel_dt <- data.table::data.table(
     personnel_id = rep(1:3, each = 3),
     ref_date = rep(as.Date(c("2020-01-01", "2021-01-01", "2022-01-01")), times = 3),
@@ -9,13 +9,13 @@ test_that("generate_movement_data computes hire count and rate correctly", {
     )
   )
 
-  res_count <- generate_movement_data(
+  res_count <- compute_workforce_movement(
     .data = panel_dt,
     movement_type = "hire",
     measurement_type = "count",
     group_cols = NULL
   )
-  res_rate <- generate_movement_data(
+  res_rate <- compute_workforce_movement(
     .data = panel_dt,
     movement_type = "hire",
     measurement_type = "rate",
@@ -30,7 +30,7 @@ test_that("generate_movement_data computes hire count and rate correctly", {
   expect_equal(res_rate$indicator, c(1/3, 0))
 })
 
-test_that("generate_movement_data computes fire count and rate correctly", {
+test_that("compute_workforce_movement computes fire count and rate correctly", {
   panel_dt <- data.table::data.table(
     personnel_id = rep(1:3, each = 3),
     ref_date = rep(as.Date(c("2020-01-01", "2021-01-01", "2022-01-01")), times = 3),
@@ -41,13 +41,13 @@ test_that("generate_movement_data computes fire count and rate correctly", {
     )
   )
 
-  res_count <- generate_movement_data(
+  res_count <- compute_workforce_movement(
     .data = panel_dt,
     movement_type = "fire",
     measurement_type = "count",
     group_cols = NULL
   )
-  res_rate <- generate_movement_data(
+  res_rate <- compute_workforce_movement(
     .data = panel_dt,
     movement_type = "fire",
     measurement_type = "rate",
@@ -62,7 +62,7 @@ test_that("generate_movement_data computes fire count and rate correctly", {
   expect_equal(res_rate$indicator, c(0, 1/3))
 })
 
-test_that("generate_movement_data computes turnover and accepts count/rate argument", {
+test_that("compute_workforce_movement computes turnover and accepts count/rate argument", {
   panel_dt <- data.table::data.table(
     personnel_id = rep(1:3, each = 3),
     ref_date = rep(as.Date(c("2020-01-01", "2021-01-01", "2022-01-01")), times = 3),
@@ -73,13 +73,13 @@ test_that("generate_movement_data computes turnover and accepts count/rate argum
     )
   )
 
-  res_count <- generate_movement_data(
+  res_count <- compute_workforce_movement(
     .data = panel_dt,
     movement_type = "turnover",
     measurement_type = "count",
     group_cols = NULL
   )
-  res_rate <- generate_movement_data(
+  res_rate <- compute_workforce_movement(
     .data = panel_dt,
     movement_type = "turnover",
     measurement_type = "rate",
