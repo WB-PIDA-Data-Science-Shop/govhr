@@ -1,5 +1,5 @@
 ---
-title: "HR Standard Data Dictionary"
+title: "Standard dictionary for `govhr`"
 output: rmarkdown::html_document
 ---
 

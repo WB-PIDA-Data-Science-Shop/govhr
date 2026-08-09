@@ -36,8 +36,7 @@ remotes::install_github("WB-PIDA-Data-Science-Shop/govhr")
 ## :link: Get started:
 1. [Standard dictionary for human resources (HR) data.](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html)
 2. [How to harmonize your HR data.](https://wb-pida-data-science-shop.github.io/govhr/articles/02-harmonization.html)
-3. [How to generate a data quality assessment.](https://wb-pida-data-science-shop.github.io/govhr/articles/03-quality_control.html)
-4. [How to generate a standard HR analytics report](https://wb-pida-data-science-shop.github.io/govhr/articles/04-standard_hrmis_assessment.html)
+3. [How to generate analytics.](https://wb-pida-data-science-shop.github.io/govhr/articles/03-analytics.html)
 
 ## License
 

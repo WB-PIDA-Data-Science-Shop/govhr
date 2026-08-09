@@ -12,9 +12,8 @@ years <- 2015:2025
 personnel_dt <- data.table(
   personnel_id = rep(1:n_personnel, each = length(years)),
   ref_date = rep(ymd(paste0(years, "-01-01")), times = n_personnel),
-  status = sample(c("active", "inactive"), n_personnel * length(years), replace = TRUE, prob = c(0.7, 0.3))
+  employment_status = sample(c("active", "inactive"), n_personnel * length(years), replace = TRUE, prob = c(0.7, 0.3))
 )
-
 
 convert_data <- function(dt_expanded, original_data) {
   # For testing: return dt_expanded
@@ -66,7 +65,7 @@ test_that("detect_personnel_event detects fires correctly", {
 test_that("detect_personnel_event ignores inactive personnel", {
   # Add a fully inactive personnel
   dt2 <- copy(personnel_dt)
-  dt2[personnel_id == 1, status := "inactive"]
+  dt2[personnel_id == 1, employment_status := "inactive"]
 
   res <- detect_personnel_event(
     data = dt2,

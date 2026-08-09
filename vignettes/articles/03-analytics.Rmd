@@ -1,0 +1,9 @@
+---
+title: "Analytics on the workforce and wagebill"
+output: rmarkdown::html_document
+---
+
+
+```{r setup}
+library(govhr)
+```
