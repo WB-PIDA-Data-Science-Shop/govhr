@@ -36,7 +36,6 @@ Suggests:
     readr,
     testthat (>= 3.0.0),
     reactable
-RoxygenNote: 7.3.3
 Config/testthat/edition: 3
 Depends: 
     R (>= 3.5)
@@ -46,3 +45,4 @@ Authors@R: c(
     person("Galileu", "Kim", , "galileukim@worldbank.org", role = c("aut", "cre")),
     person("Ifeanyi", "Edochie", , "iedochie@worldbank.org", role = c("aut"))
   )
+Config/roxygen2/version: 8.1.0

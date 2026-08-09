@@ -31,7 +31,7 @@ dim(bra_hrmis)
 
 # Step 1: check column consistency
 
-Before harmonizing, it's useful to check whether raw data sources (e.g. multiple years or offices) share a consistent structure (i.e., schema). `find_inconsistent_colnames()` flags columns that aren't shared across all sources.
+Before harmonizing, it's useful to check whether raw data sources (e.g. multiple years or offices) share a consistent column naming (i.e., schema). `find_inconsistent_colnames()` flags columns that aren't shared across all sources.
 
 ```{r}
 # simulate two extracts with slightly different schemas
@@ -41,9 +41,9 @@ extract_2021 <- bra_hrmis[ANO_PAGAMENTO == max(ANO_PAGAMENTO)]
 find_inconsistent_colnames(list(extract_2020, extract_2021))
 ```
 
-# Step 2: identify the unique keys
+# Step 2: Identifying primary keys
 
-Harmonization requires knowing which column identifies a contract and which identifies a person. `find_duplicate_ids()` is a quick way to test whether a candidate column is a valid unique key: if it returns rows, it isn't.
+Harmonization requires knowing which column identifies a contract and which identifies a person. These are our primary keys, that is, unique identifiers for contracts and personnel, respectively. `find_duplicate_ids()` is a quick way to test whether a candidate column is a valid unique key.
 
 ```{r}
 bra_hrmis |> find_duplicate_ids(MATRICULA)
@@ -53,7 +53,7 @@ bra_hrmis |> find_duplicate_ids(MATRICULA)
 
 # Step 3: map raw columns to standardized names
 
-Raw data columns rarely match dictionary names. `harmonize_columns()` renames using a dictionary of `to = from` pairs, keeping only columns that exist in the standard.
+Raw data columns rarely match the naming conventions of the `govhr` standard dictionary. `harmonize_columns()` renames the data with a key-value dictionary, keeping only the desired columns.
 
 ```{r}
 column_dictionary <- c(
@@ -73,7 +73,7 @@ bra_hrmis <- harmonize_columns(bra_hrmis, column_dictionary) |>
   ])
 ```
 
-# Step 4: build reference dates and detect frequency
+# Building reference dates
 
 Dates are often stored as serial numbers or split across year/month columns. Once a `ref_date` column is built, `guess_date_frequency()` confirms the reporting interval — useful for choosing the right window when computing growth or turnover indicators later.
 
@@ -85,7 +85,7 @@ bra_hrmis |>
   guess_date_frequency()
 ```
 
-# Step 5: deduplicate personnel attributes
+# Deduping values
 
 Attributes like education and gender should be constant for a given personnel-period, but raw data sometimes disagrees across rows for the same `personnel_id`/`ref_date` (e.g. due to concurrent contracts). `dedup_values()` resolves this using a chosen strategy — here, the modal value.
 
@@ -105,7 +105,7 @@ bra_hrmis <- dedup_values(
   as.data.table()
 ```
 
-# Step 6: convert compensation to constant PPP
+# Deflating wages
 
 Nominal wages in local currency aren't comparable across time or countries. `convert_constant_ppp()` uses the bundled `macro_indicators` dataset (with CPI and PPP conversion factors) to convert local currency units into international dollars.
 
@@ -128,7 +128,7 @@ bra_hrmis |>
   head()
 ```
 
-`deflate_to_real()` offers a lighter-weight alternative when you only need a single deflated column expressed in constant LCU (rather than PPP dollars):
+`deflate_to_real()` offers a lighter-weight alternative when you only need compensation expressed in constant local currency units (rather than constant international dollars):
 
 ```{r}
 bra_hrmis[, gross_salary_real := deflate_to_real(
@@ -139,9 +139,9 @@ bra_hrmis[, gross_salary_real := deflate_to_real(
 )]
 ```
 
-# Step 7: complete the module
+# Completing the module
 
-Not every raw dataset contains every dictionary column (e.g. `tribe`, `race` may be unavailable). `complete_columns()` adds any missing dictionary columns as `NA`, so the resulting table always matches the expected schema — no more, no less.
+Not every data extraction contains every dictionary column (e.g. `tribe`, `race` may be unavailable). `complete_columns()` adds any missing dictionary columns as `NA`, so the resulting table always matches the expected schema — no more, no less.
 
 ```{r}
 personnel_cols <- c(
@@ -159,7 +159,7 @@ bra_hrmis_personnel |> head()
 
 # Validating the harmonized data
 
-Once harmonized, `validate_data()` checks the result against a rule-based framework and reports both a pass-rate summary and the specific rows that fail each rule — useful for catching negative salaries, missing keys, or out-of-range dates before analytics are run.
+Once harmonized, `validate_data()` checks the harmonized dataset against a set of validation rules. It then reports both a pass-rate summary and the specific records that violate each rule. This helps you identify negative salaries, missing keys, or out-of-range dates before analytics are run.
 
 ```{r}
 result <- validate_data(
@@ -170,10 +170,10 @@ result <- validate_data(
 result$report
 ```
 
-Each rule's failing rows are available for drill-down, keyed by rule label:
+You can inspect the specific records that violate a given rule, for example, the `salary_non_negative` rule:
 
 ```{r}
 result$violations[["salary_non_negative"]]
 ```
 
-This report/violations structure is designed to support both quick tabular review (`report`) and row-level investigation (`violations`), making it straightforward to build audit dashboards or flag records for correction before they enter downstream analytics.
+Informed by this validation, you might want to revisit your harmonization process and address lingering data quality issues.

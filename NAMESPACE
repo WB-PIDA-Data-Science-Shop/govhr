@@ -78,123 +78,149 @@ import(glue)
 import(httr)
 importFrom(broom,tidy)
 importFrom(collapse,fquantile)
-importFrom(data.table,as.data.table)
-importFrom(data.table,copy)
-importFrom(data.table,data.table)
-importFrom(data.table,dcast)
-importFrom(data.table,fcase)
-importFrom(data.table,fifelse)
-importFrom(data.table,is.data.table)
-importFrom(data.table,melt)
-importFrom(data.table,merge.data.table)
-importFrom(data.table,rbindlist)
-importFrom(data.table,setDT)
-importFrom(data.table,setkeyv)
-importFrom(data.table,setnames)
-importFrom(data.table,setorderv)
-importFrom(data.table,shift)
-importFrom(dplyr,across)
-importFrom(dplyr,all_of)
-importFrom(dplyr,anti_join)
-importFrom(dplyr,any_of)
-importFrom(dplyr,arrange)
-importFrom(dplyr,case_when)
-importFrom(dplyr,count)
-importFrom(dplyr,desc)
-importFrom(dplyr,distinct)
-importFrom(dplyr,everything)
-importFrom(dplyr,filter)
-importFrom(dplyr,first)
-importFrom(dplyr,group_by)
-importFrom(dplyr,if_else)
-importFrom(dplyr,intersect)
-importFrom(dplyr,lag)
-importFrom(dplyr,last)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,n)
-importFrom(dplyr,n_distinct)
-importFrom(dplyr,ntile)
-importFrom(dplyr,pull)
-importFrom(dplyr,rename)
-importFrom(dplyr,select)
-importFrom(dplyr,slice_head)
-importFrom(dplyr,slice_tail)
-importFrom(dplyr,starts_with)
-importFrom(dplyr,summarise)
-importFrom(dplyr,symdiff)
-importFrom(dplyr,ungroup)
-importFrom(dplyr,union)
+importFrom(data.table,
+  as.data.table,
+  copy,
+  data.table,
+  dcast,
+  fcase,
+  fifelse,
+  is.data.table,
+  melt,
+  merge.data.table,
+  rbindlist,
+  setDT,
+  setkeyv,
+  setnames,
+  setorderv,
+  shift
+)
+importFrom(dplyr,
+  across,
+  all_of,
+  anti_join,
+  any_of,
+  arrange,
+  case_when,
+  count,
+  desc,
+  distinct,
+  everything,
+  filter,
+  first,
+  group_by,
+  if_else,
+  intersect,
+  lag,
+  last,
+  left_join,
+  mutate,
+  n,
+  n_distinct,
+  ntile,
+  pull,
+  rename,
+  select,
+  slice_head,
+  slice_tail,
+  starts_with,
+  summarise,
+  symdiff,
+  ungroup,
+  union
+)
 importFrom(dtplyr,lazy_dt)
-importFrom(ggplot2,aes)
-importFrom(ggplot2,arrow)
-importFrom(ggplot2,facet_wrap)
-importFrom(ggplot2,geom_col)
-importFrom(ggplot2,geom_hline)
-importFrom(ggplot2,geom_jitter)
-importFrom(ggplot2,geom_line)
-importFrom(ggplot2,geom_linerange)
-importFrom(ggplot2,geom_point)
-importFrom(ggplot2,geom_segment)
-importFrom(ggplot2,geom_vline)
-importFrom(ggplot2,ggplot)
-importFrom(ggplot2,guide_axis)
-importFrom(ggplot2,labs)
-importFrom(ggplot2,position_jitter)
-importFrom(ggplot2,scale_color_manual)
-importFrom(ggplot2,scale_x_continuous)
-importFrom(ggplot2,scale_y_continuous)
-importFrom(ggplot2,scale_y_discrete)
-importFrom(ggplot2,theme_minimal)
-importFrom(ggplot2,xlab)
-importFrom(ggplot2,ylab)
+importFrom(ggplot2,
+  aes,
+  arrow,
+  facet_wrap,
+  geom_col,
+  geom_hline,
+  geom_jitter,
+  geom_line,
+  geom_linerange,
+  geom_point,
+  geom_segment,
+  geom_vline,
+  ggplot,
+  guide_axis,
+  labs,
+  position_jitter,
+  scale_color_manual,
+  scale_x_continuous,
+  scale_y_continuous,
+  scale_y_discrete,
+  theme_minimal,
+  xlab,
+  ylab
+)
 importFrom(ggrepel,geom_text_repel)
 importFrom(ggthemes,scale_color_few)
 importFrom(glue,glue)
 importFrom(grDevices,colorRampPalette)
 importFrom(grid,unit)
-importFrom(httr,GET)
-importFrom(httr,content)
-importFrom(httr,modify_url)
-importFrom(httr,stop_for_status)
+importFrom(httr,
+  GET,
+  content,
+  modify_url,
+  stop_for_status
+)
 importFrom(janitor,clean_names)
 importFrom(jsonlite,fromJSON)
-importFrom(lubridate,years)
-importFrom(lubridate,ymd)
-importFrom(purrr,map2_chr)
-importFrom(purrr,map_dbl)
-importFrom(purrr,set_names)
-importFrom(rlang,"!!!")
-importFrom(rlang,.data)
-importFrom(rlang,as_function)
-importFrom(rlang,as_label)
-importFrom(rlang,as_name)
-importFrom(rlang,as_string)
-importFrom(rlang,enquo)
-importFrom(rlang,enquos)
-importFrom(rlang,ensym)
-importFrom(rlang,expr)
-importFrom(rlang,is_formula)
-importFrom(rlang,sym)
+importFrom(lubridate,
+  years,
+  ymd
+)
+importFrom(purrr,
+  map2_chr,
+  map_dbl,
+  set_names
+)
+importFrom(rlang,
+  "!!!",
+  .data,
+  as_function,
+  as_label,
+  as_name,
+  as_string,
+  enquo,
+  enquos,
+  ensym,
+  expr,
+  is_formula,
+  sym
+)
 importFrom(rmarkdown,render)
-importFrom(scales,cut_short_scale)
-importFrom(scales,label_number)
-importFrom(scales,pretty_breaks)
-importFrom(stats,as.formula)
-importFrom(stats,median)
-importFrom(stats,quantile)
-importFrom(stats,reorder)
-importFrom(stringr,str_detect)
-importFrom(stringr,str_wrap)
-importFrom(tibble,as_tibble)
-importFrom(tibble,is_tibble)
-importFrom(tibble,tibble)
-importFrom(tidyr,nest)
-importFrom(tidyr,pivot_wider)
+importFrom(scales,
+  cut_short_scale,
+  label_number,
+  pretty_breaks
+)
+importFrom(stats,
+  as.formula,
+  median,
+  quantile,
+  reorder
+)
+importFrom(stringr,
+  str_detect,
+  str_wrap
+)
+importFrom(tibble,
+  as_tibble,
+  is_tibble,
+  tibble
+)
+importFrom(tidyr,
+  nest,
+  pivot_wider
+)
 importFrom(tidyselect,eval_select)
-importFrom(validate,confront)
-importFrom(validate,description)
-importFrom(validate,label)
-importFrom(validate,summary)
-importFrom(validate,validator)
-importFrom(validate,values)
+importFrom(validate,
+  confront,
+  description,
+  label,
+  summary,
+  validator,
+  values
+)
