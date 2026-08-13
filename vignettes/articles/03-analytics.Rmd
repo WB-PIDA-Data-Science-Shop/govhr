@@ -5,6 +5,7 @@ output: rmarkdown::html_document
 
 ```{r setup}
 library(govhr)
+library(dplyr)
 ```
 
 
@@ -105,7 +106,7 @@ wagebill_paygrade_trend <- govhr::bra_hrmis_contract |>
     compute_time_trend(
         group = "paygrade",
         measure_col = "gross_salary_lcu"
-        )
+    )
 
 plot_trend(wagebill_paygrade_trend, group = "paygrade")
 ```
