@@ -30,6 +30,8 @@ A data frame with 993 rows and 11 variables:
   \item{\code{ps_wage_premium_professional}}{double Public sector wage premium for personnel in professional occupations, compared to formal wage employees in the private sector.}
   \item{\code{ps_wage_premium_manager}}{double Public sector wage premium for personnel in managerial occupations, compared to formal wage employees in the private sector.}
   \item{\code{ps_wage_premium_technical}}{double Public sector wage premium for personnel in technical and associate professional occupations, compared to formal wage employees in the private sector.}
+  \item{\code{ps_wagebill_share_gdp}}{double Public sector wage bill, as a share of GDP.}
+  \item{\code{ps_wagebill_share_expenditure}}{double Public sector wage bill, as a share of total government expenditure.}
 }
 }
 \source{
