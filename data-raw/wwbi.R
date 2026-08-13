@@ -14,7 +14,9 @@ wwbi_indicators <- c(
   "WB_WWBI_BI_PWK_PUBS_ED",
   "WB_WWBI_BI_EMP_TOTL_PB",
   "WB_WWBI_BI_EMP_PWRK_PB",
-  "WB_WWBI_BI_EMP_FRML_PB"
+  "WB_WWBI_BI_EMP_FRML_PB",
+  "WB_WWBI_BI_WAG_TOTL_GD_ZS",
+  "WB_WWBI_BI_WAG_TOTL_PB_ZS"
 )
 
 wwbi_raw <- get_data360_api(
@@ -73,6 +75,24 @@ wwbi_wage_premium <- wwbi_raw |>
     ps_wage_premium_technical = WB_WWBI_BI_WAG_PREM_FW_WB_WWBI_OCTN__T
   )
 
+wwbi_wagebill <- wwbi_raw |>
+  filter(
+    INDICATOR == "WB_WWBI_BI_WAG_TOTL_GD_ZS"|
+      INDICATOR == "WB_WWBI_BI_WAG_TOTL_PB_ZS"
+  ) |>
+  pivot_wider(
+    id_cols = c(REF_AREA, TIME_PERIOD),
+    values_from = OBS_VALUE,
+    names_from = c(INDICATOR, COMP_BREAKDOWN_1),
+    names_sep = "_"
+  ) |>
+  rename(
+    country_code = REF_AREA,
+    year = TIME_PERIOD,
+    ps_wagebill_share_gdp = WB_WWBI_BI_WAG_TOTL_GD_ZS__Z,
+    ps_wagebill_share_expenditure = WB_WWBI_BI_WAG_TOTL_PB_ZS__Z
+  )
+
 wwbi_employment <- wwbi_raw |> 
   filter(
     INDICATOR %in% c(
@@ -95,6 +115,10 @@ wwbi_employment <- wwbi_raw |>
 wwbi <- wwbi_educational_attainment |>
   full_join(
     wwbi_wage_premium,
+    by = c("country_code", "year")
+  ) |>
+  full_join(
+    wwbi_wagebill,
     by = c("country_code", "year")
   ) |>
   full_join(

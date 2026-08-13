@@ -4,10 +4,10 @@
 \alias{compute_cross_section}
 \title{Compute Cross-Section Summary Table}
 \usage{
-compute_cross_section(data, group, measure_col = NULL)
+compute_cross_section(.data, group, measure_col = NULL)
 }
 \arguments{
-\item{data}{A data frame containing a `ref_date` column and the grouping
+\item{.data}{A data frame containing a `ref_date` column and the grouping
 column.}
 
 \item{group}{Character string naming the grouping column.}

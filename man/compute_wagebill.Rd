@@ -62,7 +62,7 @@ compute_wagebill(
   groups = c("country_code", "year"),
   share_macro = TRUE,
   macro_vars = c("gdp_lcu", "pexpenditure_lcu")
-) 
+)
 }
 
 }

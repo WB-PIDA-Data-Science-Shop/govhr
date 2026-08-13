@@ -28,7 +28,7 @@ e.g. `"gross_salary_def"` (default), `"base_salary_lcu"`, etc.}
 \item{personnel_id_col}{A single string naming the personnel identifier column.
 Defaults to `"personnel_id"`.}
 
-\item{status_col}{A single string naming the employment status column inside 
+\item{status_col}{A single string naming the employment status column inside
 `personnel_dt`.
   Defaults to `"employment_status"`.}
 

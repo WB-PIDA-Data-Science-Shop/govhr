@@ -1,7 +1,7 @@
 Package: govhr
 Type: Package
 Title: Clean and analyze data that informs human resource management
-Version: 0.3.3
+Version: 0.3.4
 Description: This package is a toolkit developed by the World Bank. It cleans, harmonizes, and analyzes human resource data with a standardized methodology.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -36,7 +36,6 @@ Suggests:
     readr,
     testthat (>= 3.0.0),
     reactable
-RoxygenNote: 7.3.3
 Config/testthat/edition: 3
 Depends: 
     R (>= 3.5)
@@ -46,3 +45,4 @@ Authors@R: c(
     person("Galileu", "Kim", , "galileukim@worldbank.org", role = c("aut", "cre")),
     person("Ifeanyi", "Edochie", , "iedochie@worldbank.org", role = c("aut"))
   )
+Config/roxygen2/version: 8.1.0

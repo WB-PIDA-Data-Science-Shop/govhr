@@ -399,7 +399,7 @@ personnel_df$tribe <- NA
 # # create a function that does a conformity assessment
 # # and fill out missing columns with NA
 # dictionary_personnel_cols <- c(
-#   "ref_date", "personnel_id", "birth_date", "gender", "educat7", "tribe", "race", "status"
+#   "ref_date", "personnel_id", "birth_date", "gender", "educat7", "tribe", "race", "employment_status"
 # )
 
 # personnel_module_clean <- personnel_module |>

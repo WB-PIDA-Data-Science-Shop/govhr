@@ -60,16 +60,19 @@
 #' @importFrom glue glue
 #'
 #' @export
-compute_fastsummary <- function(data,
-                                cols,
-                                fns = NULL,
-                                groups,
-                                output = c("long", "wide"),
-                                tbl = FALSE) {
-
+compute_fastsummary <- function(
+  data,
+  cols,
+  fns = NULL,
+  groups,
+  output = c("long", "wide"),
+  tbl = FALSE
+) {
   output <- match.arg(output)
   orig_class <- class(data)
-  if (!data.table::is.data.table(data)) data <- data.table::as.data.table(data)
+  if (!data.table::is.data.table(data)) {
+    data <- data.table::as.data.table(data)
+  }
 
   default_fns <- define_fns()
 
@@ -78,20 +81,29 @@ compute_fastsummary <- function(data,
     selected_fns <- default_fns
   } else if (is.character(fns)) {
     unknown <- setdiff(fns, names(default_fns))
-    if (length(unknown) > 0) stop(glue::glue("Unknown function name(s): {toString(unknown)}"))
+    if (length(unknown) > 0) {
+      stop(glue::glue("Unknown function name(s): {toString(unknown)}"))
+    }
     selected_fns <- default_fns[fns]
   } else if (is.list(fns)) {
     char_fns <- fns[sapply(fns, is.character)]
     formula_fns <- fns[sapply(fns, rlang::is_formula)]
-    selected_fns <- c(default_fns[intersect(unlist(char_fns), names(default_fns))], formula_fns)
-  } else stop("`fns` must be NULL, character vector, or a list")
+    selected_fns <- c(
+      default_fns[intersect(unlist(char_fns), names(default_fns))],
+      formula_fns
+    )
+  } else {
+    stop("`fns` must be NULL, character vector, or a list")
+  }
 
   # Build call list (fast)
   calls <- list()
   for (v in cols) {
     for (fname in names(selected_fns)) {
       fn <- selected_fns[[fname]]
-      if (rlang::is_formula(fn)) fn <- rlang::as_function(fn)
+      if (rlang::is_formula(fn)) {
+        fn <- rlang::as_function(fn)
+      }
       calls[[paste(v, fname, sep = "_")]] <- bquote(.(fn)(.(as.name(v))))
     }
   }
@@ -100,12 +112,16 @@ compute_fastsummary <- function(data,
   stats_dt <- data[, eval(j_call), by = groups]
 
   if (output == "long") {
-    stats_dt <- data.table::melt(stats_dt,
-                                 id.vars = groups,
-                                 variable.name = "indicator",
-                                 value.name = "value")
+    stats_dt <- data.table::melt(
+      stats_dt,
+      id.vars = groups,
+      variable.name = "indicator",
+      value.name = "value"
+    )
   }
-  if (tbl) stats_dt <- tibble::as_tibble(stats_dt)
+  if (tbl) {
+    stats_dt <- tibble::as_tibble(stats_dt)
+  }
 
   # Convert back to original class if needed
   if (!tbl) {
@@ -184,18 +200,24 @@ compute_fastsummary <- function(data,
 #' @importFrom stats as.formula
 #' @importFrom tibble as_tibble
 #' @export
-compute_fastshare <- function(data,
-                              macro_data = macro_indicators |> data.table::as.data.table(),
-                              macro_cols,
-                              cols,
-                              groups,
-                              fns,
-                              output = c("long", "wide")) {
+compute_fastshare <- function(
+  data,
+  macro_data = macro_indicators |> data.table::as.data.table(),
+  macro_cols,
+  cols,
+  groups,
+  fns,
+  output = c("long", "wide")
+) {
   output <- match.arg(output)
   orig_class <- class(data)
   orig_macro_class <- class(macro_data)
-  if (!data.table::is.data.table(data)) data <- data.table::as.data.table(data)
-  if (!data.table::is.data.table(macro_data)) macro_data <- data.table::as.data.table(macro_data)
+  if (!data.table::is.data.table(data)) {
+    data <- data.table::as.data.table(data)
+  }
+  if (!data.table::is.data.table(macro_data)) {
+    macro_data <- data.table::as.data.table(macro_data)
+  }
 
   summary_dt <- compute_fastsummary(
     data = data,
@@ -206,8 +228,9 @@ compute_fastshare <- function(data,
   )
 
   join_vars <- intersect(names(summary_dt), names(macro_data))
-  if (length(join_vars) == 0)
+  if (length(join_vars) == 0) {
     stop("No common grouping variables found between data and macro_data.")
+  }
 
   data.table::setkeyv(summary_dt, join_vars)
   data.table::setkeyv(macro_data, join_vars)
@@ -228,40 +251,68 @@ compute_fastshare <- function(data,
     value.name = "summary_value"
   )
 
-  ratio_dt <- merge(long_macro, long_summary,
-                    by = join_vars,
-                    allow.cartesian = TRUE)[
-                      , c("indicator", "value") := .(
-                        paste0(summary_var, "_per_", macro_var),
-                        summary_value / macro_value
-                      )
-                    ][
-                      , .SD,
-                      .SDcols = c(join_vars, "macro_var", "macro_value",
-                                  "summary_var", "summary_value", "indicator", "value")
-                    ]
+  ratio_dt <- merge(
+    long_macro,
+    long_summary,
+    by = join_vars,
+    allow.cartesian = TRUE
+  )[,
+    c("indicator", "value") := .(
+      paste0(summary_var, "_per_", macro_var),
+      summary_value / macro_value
+    )
+  ][,
+    .SD,
+    .SDcols = c(
+      join_vars,
+      "macro_var",
+      "macro_value",
+      "summary_var",
+      "summary_value",
+      "indicator",
+      "value"
+    )
+  ]
 
   if (output == "wide") {
-    keep_macro <- unique(ratio_dt[, c(join_vars, "macro_var", "macro_value"), with = FALSE])
+    keep_macro <- unique(ratio_dt[,
+      c(join_vars, "macro_var", "macro_value"),
+      with = FALSE
+    ])
     keep_macro <- data.table::dcast(
       keep_macro,
-      stats::as.formula(paste(paste(join_vars, collapse = " + "), "~ macro_var")),
+      stats::as.formula(paste(
+        paste(join_vars, collapse = " + "),
+        "~ macro_var"
+      )),
       value.var = "macro_value"
     )
 
-    keep_summary <- unique(ratio_dt[, c(join_vars, "summary_var", "summary_value"), with = FALSE])
+    keep_summary <- unique(ratio_dt[,
+      c(join_vars, "summary_var", "summary_value"),
+      with = FALSE
+    ])
     keep_summary <- data.table::dcast(
       keep_summary,
-      stats::as.formula(paste(paste(join_vars, collapse = " + "), "~ summary_var")),
+      stats::as.formula(paste(
+        paste(join_vars, collapse = " + "),
+        "~ summary_var"
+      )),
       value.var = "summary_value"
     )
 
     keep_dt <- merge(keep_macro, keep_summary, by = join_vars, all = TRUE)
 
-    ratio_dt <- unique(ratio_dt[, c(join_vars, "indicator", "value"), with = FALSE])
+    ratio_dt <- unique(ratio_dt[,
+      c(join_vars, "indicator", "value"),
+      with = FALSE
+    ])
     ratio_dt <- data.table::dcast(
       ratio_dt,
-      stats::as.formula(paste(paste(join_vars, collapse = " + "), "~ indicator")),
+      stats::as.formula(paste(
+        paste(join_vars, collapse = " + "),
+        "~ indicator"
+      )),
       value.var = "value"
     )
 
@@ -301,8 +352,6 @@ compute_fastshare <- function(data,
 #' - Missing years in the sequence are added automatically.
 #' - Missing values in `col` result in `NA` for the corresponding growth rate.
 #' - The first observation (or any row where the lag is missing) will have `NA`.
-#' - The function can accept both unquoted column names or strings.
-#' - To compute growth rates by group (e.g., country), use `group_by()` from `dplyr`.
 #'
 #' @examples
 #' library(data.table)
@@ -322,18 +371,28 @@ compute_fastchange <- function(data, col, date_col) {
   dt <- data.table::as.data.table(data)
 
   # if col/date_col are symbols, convert to strings
-  if (!is.character(col)) col <- deparse(substitute(col))
-  if (!is.character(date_col)) date_col <- deparse(substitute(date_col))
+  if (!is.character(col)) {
+    col <- deparse(substitute(col))
+  }
+  if (!is.character(date_col)) {
+    date_col <- deparse(substitute(date_col))
+  }
 
   # Generate full year sequence
-  years_full <- seq(min(dt[[date_col]], na.rm = TRUE),
-                    max(dt[[date_col]], na.rm = TRUE))
+  years_full <- seq(
+    min(dt[[date_col]], na.rm = TRUE),
+    max(dt[[date_col]], na.rm = TRUE)
+  )
 
   # Complete the table
   dt_full <- data.table::data.table(years_full)
   data.table::setnames(dt_full, "years_full", date_col)
-  dt_full <- merge(dt_full, dt[, .SD, .SDcols = c(date_col, col)],
-                   by = date_col, all.x = TRUE)
+  dt_full <- merge(
+    dt_full,
+    dt[, .SD, .SDcols = c(date_col, col)],
+    by = date_col,
+    all.x = TRUE
+  )
 
   # Compute year-over-year growth
   growth_col <- paste0(col, "_growth")
@@ -349,499 +408,6 @@ compute_fastchange <- function(data, col, date_col) {
   return(dt_full)
 }
 
-
-################################################################################
-##################### PUBLIC SECTOR REPORTING FUNCTIONS ########################
-################################################################################
-
-#' Compute Core HRMIS Analytical Tables
-#'
-#' This function generates a suite of standardized analytical tables for HRMIS (Human Resource Management Information System) reports.
-#' It combines contract-level, personnel-level, and establishmental data to compute wage bill summaries, employment shares, decompositions,
-#' and profiles by occupation, pay grade, establishment, education, and seniority.
-#'
-#' @param contract_dt A `data.table` containing individual employment contracts with variables such as `personnel_id`, `ref_date`,
-#' wage variables (`gross_salary_lcu`, `net_salary_lcu`, `base_salary_lcu`), and job attributes.
-#' @param personnel_dt A `data.table` containing personnel-level panel data, including `personnel_id`, `ref_date`, demographic and employment information.
-#' @param est_dt A `data.table` containing establishmental information (e.g., institution identifiers, types, or sectors).
-#' @param macro_indicators A data frame containing macro indicators.
-#'
-#' @return A named list of `data.table` objects containing:
-#' \describe{
-#'   \item{wagebill_shares}{Wage bill components as shares of macro indicators.}
-#'   \item{publicemployment_share}{Public employment as a share of total employment.}
-#'   \item{wagebill_occupisco}{Wage bill decomposition by ISCO occupation group.}
-#'   \item{wagebill_occupnative}{Wage bill decomposition by native occupational titles.}
-#'   \item{wagebill_estdecomp}{Wage bill decomposition by establishment.}
-#'   \item{wagebill_allowshare_paygrade}{Allowance rate by pay grade.}
-#'   \item{wagebill_allowshare_seniority}{Allowance rate by seniority.}
-#'   \item{personnelevent}{Personnel-level hiring, firing, and retirement events over time.}
-#'   \item{employment_decomp}{Employment decomposition by occupation and ISCO group.}
-#'   \item{est_decomp}{Employment decomposition by establishment.}
-#'   \item{education_profile}{Distribution of public sector personnel by education, gender, and occupation.}
-#'   \item{mobilityprofile}{Distribution of public sector personnel by pay grade, seniority, gender, and occupation.}
-#' }
-#'
-#' @details
-#' The function integrates contract, personnel, and establishmental datasets to compute a standardized HRMIS statistical report.
-#' It relies on supporting helper functions such as:
-#' \code{convert_constant_ppp()}, \code{compute_fastshare()}, \code{compute_fastsummary()},
-#' \code{detect_personnel_event()}, and \code{detect_retirement()}.
-#'
-#' Each sub-table in the output list can be used directly in dashboards, reports, or further analytical aggregation.
-#'
-#' @examples
-#' \dontrun{
-#' hrm_stats <- compute_hrmreport_stats(contract_dt = contract_data,
-#'                                      personnel_dt = personnel_data,
-#'                                      est_dt = est_data)
-#' names(hrm_stats)
-#' }
-#'
-#' @importFrom lubridate year
-#' @importFrom data.table :=
-#' @importFrom data.table fifelse
-#' @importFrom data.table setnames
-#' @importFrom dplyr rename
-#' @importFrom dplyr bind_rows
-#'
-#' @export
-
-compute_hrmreport_stats <- function(contract_dt,
-                                    personnel_dt,
-                                    est_dt,
-                                    macro_indicators){
-
-  ## convert to data.table
-  contract_dt <-  as.data.table(contract_dt)
-  personnel_dt <- as.data.table(personnel_dt)
-  est_dt <- as.data.table(est_dt)
-
-
-  ### 3.1
-  wage_vars <- c("gross_salary_lcu",
-                 "net_salary_lcu",
-                 "base_salary_lcu")
-
-  lcu_vars <- colnames(macro_indicators)[grepl("_lcu",
-                                               colnames(macro_indicators))]
-
-  contract_dt[, year := lubridate::year(ref_date)]
-
-  ### compute ppp variables
-  contract_dt <-
-  convert_constant_ppp(data = contract_dt,
-                       cols = wage_vars)
-
-  ppp_vars <- colnames(contract_dt)[grepl("_ppp", colnames(contract_dt))]
-
-
-  wagebill_shares_dt <-
-    compute_fastshare(data = contract_dt,
-                      cols = wage_vars,
-                      macro_cols = lcu_vars,
-                      groups = c("country_code", "year"),
-                      fns = "sum",
-                      output = "long")
-
-  ### public sector employment as a share of total employment
-  personnel_dt[, year := lubridate::year(ref_date)]
-
-  pubempshare_dt <-
-    compute_fastshare(data = contract_dt,
-                      macro_cols = "labor_force_total",
-                      cols = "personnel_id",
-                      groups = c("country_code", "year"),
-                      fns = "count_unique",
-                      output = "long")
-
-
-  wagebill_annual_dt <-
-    compute_fastsummary(data = contract_dt,
-                        cols = c(wage_vars, ppp_vars),
-                        fns = c("sum", "mean", "median"),
-                        groups = c("year"),
-                        output = "long")
-
-  wagebill_iscodecomp_dt <-
-    compute_fastsummary(data = contract_dt,
-                        cols = c(wage_vars, ppp_vars),
-                        fns = c("sum", "mean", "cp_ratio", "cv"),
-                        groups = c("occupation_isconame", "occupation_iscocode", "year"),
-                        output = "long")
-
-  wagebill_occupdecomp_dt <-
-    compute_fastsummary(data = contract_dt,
-                        cols = c(wage_vars, ppp_vars),
-                        fns = c("sum", "mean"),
-                        groups = c("occupation_native", "occupation_english", "year"),
-                        output = "long")
-
-  wagebill_estdecomp_dt <-
-    compute_fastsummary(data = contract_dt,
-                        cols = c(wage_vars, ppp_vars),
-                        fns = c("sum", "mean"),
-                        groups = c("est_id", "year"),
-                        output = "long")
-
-  wagebill_paygrade_dt <-
-    compute_fastsummary(data = contract_dt,
-                        cols = c(wage_vars, ppp_vars),
-                        fns = "sum",
-                        groups = "paygrade")
-
-  wagebill_seniority_dt <-
-    compute_fastsummary(data = contract_dt,
-                        cols = c(wage_vars, ppp_vars),
-                        fns = "sum",
-                        groups = "seniority")
-
-  ## lets look into allowance a little
-  contract_dt[, allowance_ind := fifelse(allowance_lcu > 0, 1, 0)]
-
-  wagebill_allowpaygrade_dt <-
-    contract_dt[, mean(allowance_ind, na.rm = T), by = c("paygrade", "year")] |>
-    setnames(old = "V1", new = "allowance_rate")
-
-  wagebill_allowseniority_dt <-
-    contract_dt[, mean(allowance_ind, na.rm = T), by = c("seniority", "year")] |>
-    setnames(old = "V1", new = "allowance_rate")
-
-  ### allowance as a share of each salary type
-  allowsalary_share_dt <-
-    contract_dt[, allowshare := allowance_lcu / base_salary_lcu] %>%
-    .[, mean(allowshare, na.rm = TRUE), by = c("country_code", "year", "paygrade")]
-
-
-  ### compute annual recruitment patterns over time (still need to compute the reallocations, ask Gali!)
-
-  hire_dt <- detect_personnel_event(data = personnel_dt,
-                                 id_col = "personnel_id",
-                                 event_type = "hire",
-                                 start_date = min(personnel_dt$ref_date, na.rm = TRUE),
-                                 end_date = max(personnel_dt$ref_date, na.rm = TRUE))
-
-
-  personnel_active_dt <- personnel_dt[status == "active"]
-
-  contract_rename_est_dt <- merge(contract_dt,
-                                  personnel_active_dt,
-                                  by = c("personnel_id", "ref_date"),
-                                  allow.cartesian = TRUE)
-
-  personnel_reallocation_dt <- detect_reallocation(data = contract_rename_est_dt,
-                                                personnel_hire = hire_dt)
-
-  personnelevent_dt <-
-    bind_rows(hire_dt,
-              detect_personnel_event(data = personnel_dt,
-                                  id_col = "personnel_id",
-                                  event_type = "fire",
-                                  start_date = min(personnel_dt$ref_date, na.rm = TRUE),
-                                  end_date = max(personnel_dt$ref_date, na.rm = TRUE)),
-              detect_retirement(data = personnel_dt))
-
-
-
-  ## decomposition of public sector employment by industry and occupational group
-
-  empdecomp_dt <-
-    compute_fastsummary(data = contract_dt,
-                        cols = "personnel_id",
-                        groups = c("year", "occupation_isconame", "occupation_iscocode"),
-                        output = "long",
-                        fns = "count_unique") |>
-    merge(isco,
-          by.y = c("unit", "description"),
-          by.x = c("occupation_iscocode", "occupation_isconame"),
-          all.x = TRUE) |>
-    rename(count = "value") %>%
-    .[, prop := count / sum(count, na.rm = TRUE), by = "year"]
-
-  orgdecomp_dt <-
-    compute_fastsummary(data = contract_dt,
-                        cols = "personnel_id",
-                        groups = c("year", "est_id"),
-                        output = "long",
-                        fns = "count_unique") |>
-    rename(count = "value") %>%
-    .[, prop := count / sum(count, na.rm = TRUE), by = "year"]
-
-
-  ## Educational profile of public sector personnel by gender and occupation
-
-  combine_dt <- personnel_dt[contract_dt, on = c("personnel_id", "ref_date", "year")]
-
-  educprofile_dt <- combine_dt[, .N, by = .(year, gender, educat7,
-                                            occupation_iscocode, occupation_native)]
-
-  ## distribution of public sector personnels by pay grade
-  mobilityprofile_dt <- combine_dt[, .N, by = .(year, gender, paygrade, seniority, occupation_native, occupation_iscocode)]
-
-
-
-  hrm_list <- list(wagebill_shares = wagebill_shares_dt,
-                   publicemployment_share = pubempshare_dt,
-                   wagebill = list(
-                     wagebill_annual = wagebill_annual_dt,
-                     wagebill_occupisco = wagebill_iscodecomp_dt,
-                     wagebill_occupnative = wagebill_occupdecomp_dt,
-                     wagebill_estdecomp = wagebill_estdecomp_dt,
-                     wagebill_allowshare_paygrade = wagebill_allowpaygrade_dt,
-                     wagebill_allowshare_seniority = wagebill_allowseniority_dt
-                   ),
-                   personnel_movements = personnelevent_dt,
-                   employment_decomp = empdecomp_dt,
-                   est_decomp = orgdecomp_dt,
-                   education_profile = educprofile_dt,
-                   mobilityprofile = mobilityprofile_dt)
-
-  return(hrm_list)
-}
-
-
-
-
-#' Compute Volatility Measures Over Time
-#'
-#' @description
-#' Computes a variety of volatility statistics (e.g., percent change, 
-#' rolling standard deviation, coefficient of variation) for a variable 
-#' aggregated over time and optionally by grouping variables.  
-#' Missing time periods are automatically filled for all groups, ensuring 
-#' consistent temporal coverage before volatility is calculated.
-#'
-#' @details
-#' This function first summarizes the input data using 
-#' [compute_fastsummary()], aggregating `col` using `agg_fn` for each 
-#' combination of `groups` and `time`.  
-#'
-#' After aggregation, the function constructs a full grid of all time periods 
-#' crossed with all unique group combinations using `data.table::CJ()`, filling 
-#' implicit missing time–group combinations with `NA`.  
-#'
-#' Volatility measures are computed by calling an internal registry of 
-#' volatility functions defined in [`define_vol_fns()`].  
-#'
-#' Available volatility methods include:
-#'
-#' * **pct_change** — period-to-period percent change  
-#' * **sd** — standard deviation of the aggregated values over time  
-#' * **cv** — coefficient of variation (`sd(x) / mean(x)`)  
-#' * **rolling_sd** — rolling standard deviation using a fixed window  
-#' * **rolling_cv** — rolling coefficient of variation  
-#' * **rolling_pct_change** — percent change over a rolling window  
-#'
-#' @param data A data.frame or data.table containing the dataset.
-#' @param col A character string specifying the column whose volatility 
-#'   should be computed.
-#' @param agg_fn A character string specifying the aggregation function 
-#'   to apply before volatility is calculated. Must match a function 
-#'   name available to `compute_fastsummary()`.
-#' @param vol_fn A character string specifying the volatility measure 
-#'   to compute. Options are:
-#'   `"pct_change"`, `"sd"`, `"cv"`, `"rolling_sd"`, `"rolling_cv"`,
-#'   `"rolling_pct_change"`.
-#' @param time A character string representing the time variable. Must be 
-#'   sortable (e.g., Date, year, numeric).
-#' @param groups A character vector of grouping variables. Use `NULL` to 
-#'   compute volatility for the entire dataset without grouping.
-#' @param window_size Integer window length for rolling volatility functions. 
-#'   Required when `vol_fn` is one of the rolling variants.
-#'
-#' @return 
-#' A `data.table` containing:
-#' * grouping variables (if provided),  
-#' * the time variable (for rolling and period-based volatility), and  
-#' * the computed volatility statistic, named using `vol_fn`.  
-#'
-#' For non-rolling aggregate volatility functions (`sd`, `cv`), the function 
-#' returns one row per group.
-#' 
-#' @importFrom data.table as.data.table setorderv CJ merge.data.table setnames shift frollapply
-#' @importFrom stats sd
-#'
-#' @examples
-#' \dontrun{
-#' # Percent change in base salary by occupation over time
-#' compute_volatility(
-#'   data      = bra_hrmis_contract,
-#'   col       = "base_salary_lcu",
-#'   agg_fn    = "sum",
-#'   vol_fn    = "pct_change",
-#'   time      = "ref_date",
-#'   groups    = "occupation_isconame"
-#' )
-#'
-#' # Rolling 3-period coefficient of variation
-#' compute_volatility(
-#'   data      = bra_hrmis_contract,
-#'   col       = "whours",
-#'   agg_fn    = "mean",
-#'   vol_fn    = "rolling_cv",
-#'   time      = "ref_date",
-#'   groups    = "occupation_native",
-#'   window_size = 3
-#' )
-#' }
-#'
-#' @seealso 
-#' * [`define_vol_fns()`] for the internal volatility function registry  
-#' * [`compute_fastsummary()`] for the aggregation step  
-#'
-#' @export
-
-
-compute_volatility <- function(data, 
-                               col,
-                               agg_fn , 
-                               vol_fn = c("pct_change", "sd", "cv", 
-                                          "rolling_sd", "rolling_cv", 
-                                          "rolling_pct_change"),
-                               time,  
-                               groups,
-                               window_size = NULL) {
-  
-  vol_fn <- match.arg(vol_fn)
-
-
-  agg_dt <- 
-    compute_fastsummary(data = data |> as.data.table(),
-                        cols = col,
-                        fns = agg_fn,
-                        groups = c(groups, time)) 
-  
-  data.table::setorderv(agg_dt, c(groups, time))
-  
-  ## fill in the implicit missing values
-  ## Grid must include the indicator dimension so that imputed NA rows
-  ## are correctly associated with their indicator, not left as indicator = NA.
-
-  time_list      <- sort(unique(agg_dt[[time]]))
-  indicator_list <- as.character(unique(agg_dt[["indicator"]]))
-
-  if (is.null(groups)){
-
-    grid_dt <- data.table::CJ(indicator = indicator_list, ref = time_list)
-    data.table::setnames(grid_dt, "ref", time)
-
-  } else {
-
-    group_values <- unique(agg_dt[, ..groups])
-
-    ## construct the inputs for data.table::CJ function and wrap in a do.call
-    cj_inputs <- c(as.list(group_values),
-                   list(indicator = indicator_list, ref = time_list))
-
-    grid_dt <- do.call(data.table::CJ, c(cj_inputs, list(unique = TRUE)))
-
-    data.table::setnames(grid_dt, "ref", time)
-
-  }
-
-  ## coerce indicator back to factor to match agg_dt
-  agg_dt[, indicator := as.character(indicator)]
-
-  ### compute volatility based on selected method
-  agg_dt <- data.table::merge.data.table(
-    grid_dt, agg_dt,
-    by = c(groups, "indicator", time),
-    all.x = TRUE
-  )
-  agg_dt[, indicator := factor(indicator)]
-
-  ### compare registry of volatility functions to selected functions
-  vol_fns <- define_vol_fns(window_size = window_size)
-
-  fn <- vol_fns[[vol_fn]]
-
-  if (is.null(fn)) stop("Volatility function not defined: ", vol_fn)
-  
-  ### lets apply the function now
-  if (vol_fn %in% c("pct_change", "rolling_sd", 
-                    "rolling_cv", "rolling_pct_change")) {
-    
-    agg_dt[, (vol_fn) := fn(value), by = c(groups, "indicator")]
-
-  } else if (vol_fn %in% c("sd", "cv")) {
-
-    agg_dt <- agg_dt[, fn(value), by = groups]
-
-    data.table::setnames(agg_dt, "V1", vol_fn)
-
-
-  } else {
-
-    stop("Volatility function not recognized: ", vol_fn)
-
-  }
-  
-  return(agg_dt[])
-}
-
-
-#' Internal: Registry of Volatility Functions
-#'
-#' @description
-#' Creates and returns a named list of volatility functions used internally by 
-#' [`compute_volatility()`]. Each element of the list corresponds to a volatility 
-#' method such as percent change, standard deviation, coefficient of variation, 
-#' or rolling variants of these measures.
-#'
-#' @details
-#' The returned list maps volatility function names (e.g., `"pct_change"`, 
-#' `"rolling_sd"`) to functions that operate on numeric vectors.  
-#' Rolling functions rely on `data.table::frollapply()` and require 
-#' that the calling function supply a `window_size`.
-#'
-#' This function is not exported and is intended for internal use only.
-#'
-#' @param window_size Integer window length for rolling statistics. Defaults to 
-#'   `NULL` but must be provided when calling any rolling volatility function.
-#'
-#' @return A named list of functions used by `compute_volatility()`.
-#'
-#' @keywords internal
-#' @noRd
-
-
-
-define_vol_fns <- function(window_size = NULL) {
-
-  list(pct_change = function(x) {
-
-        (x - shift(x)) / shift(x)
-      },
-
-      sd = function(x) {
-        stats::sd(x, na.rm = TRUE)
-      },
-
-      cv = function(x) {
-        stats::sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)
-      },
-
-      rolling_sd = function(x) {
-        data.table::frollapply(x, n = window_size, FUN = sd, fill = NA)
-      },
-
-      rolling_cv = function(x) {
-        data.table::frollapply(x,
-                               n = window_size,
-                               FUN = function(w) stats::sd(w, na.rm = TRUE) / mean(w, na.rm = TRUE), 
-                               fill = NA)
-      },
-      rolling_pct_change = function(x) {
-        data.table::frollapply(x,
-                               n = window_size,
-                               FUN = function(w) (w[length(w)] - w[1]) / w[1],
-                               fill = NA)
-      }
-    )
-}
-
-
-
 #' Fast counting via dtplyr
 #'
 #' `fastcount()` delegates [dplyr::count()] to a `data.table` backend by
@@ -849,7 +415,7 @@ define_vol_fns <- function(window_size = NULL) {
 #' familiar `count()` interface while exploiting `data.table` performance.
 #'
 #' @inheritParams dplyr::count
-#' 
+#'
 #' @return A tibble with one row per group and a count column.
 #'
 #' @examples
@@ -859,7 +425,7 @@ define_vol_fns <- function(window_size = NULL) {
 #' @importFrom dtplyr lazy_dt
 #' @import dplyr
 #' @importFrom tibble as_tibble
-#' 
+#'
 #' @export
 fastcount <- function(x, ..., wt = NULL, sort = FALSE, name = NULL) {
   count_dt <- dtplyr::lazy_dt(x, immutable = TRUE) |>
@@ -890,14 +456,14 @@ fastcount <- function(x, ..., wt = NULL, sort = FALSE, name = NULL) {
 #'
 #' @seealso dplyr::count, fastcount
 #' @export
-fastprop <- function(.data, ...){
+fastprop <- function(.data, ...) {
   group_vars <- rlang::ensyms(...)
 
   prop_dt <- .data |>
-    dtplyr::lazy_dt() |> 
+    dtplyr::lazy_dt() |>
     dplyr::group_by(!!!group_vars) |>
     dplyr::mutate(prop = n / sum(n, na.rm = TRUE)) |>
-    dplyr::ungroup() |> 
+    dplyr::ungroup() |>
     as_tibble()
 
   prop_dt
@@ -930,7 +496,7 @@ fastprop <- function(.data, ...){
 #'   an `indicator` column (describing the wage variable and level of analysis),
 #'   and a `value` column. When `share_macro = TRUE`, values represent
 #'   shares (wage bill / macro aggregate).
-#' 
+#'
 #' @examples
 #' # Compute wage bill totals by country and year
 #' \dontrun{
@@ -947,9 +513,9 @@ fastprop <- function(.data, ...){
 #'   groups = c("country_code", "year"),
 #'   share_macro = TRUE,
 #'   macro_vars = c("gdp_lcu", "pexpenditure_lcu")
-#' ) 
+#' )
 #' }
-#' 
+#'
 #' @seealso
 #' \code{\link{convert_constant_ppp}} for PPP conversion
 #' \code{\link{compute_fastsummary}} for general aggregation
@@ -957,20 +523,25 @@ fastprop <- function(.data, ...){
 #'
 #' @export
 compute_wagebill <- function(
-  contract_df, 
+  contract_df,
   wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
   groups = c("country_code", "year"),
   share_macro = FALSE,
-  macro_vars = c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu"),
+  macro_vars = c(
+    "gdp_lcu",
+    "pexpenditure_lcu",
+    "prevenue_lcu",
+    "taxrevenue_lcu"
+  ),
   drop_na = TRUE
-) {  
+) {
   data_ppp <- contract_df |>
     convert_constant_ppp(
       cols = wage_vars
     )
-  
-  if(share_macro) {
-    data_ppp |> 
+
+  if (share_macro) {
+    data_ppp |>
       compute_fastshare(
         cols = wage_vars,
         macro_cols = macro_vars,
@@ -979,7 +550,7 @@ compute_wagebill <- function(
         output = "long"
       )
   } else {
-    data_ppp |> 
+    data_ppp |>
       compute_fastsummary(
         cols = wage_vars,
         groups = groups,
@@ -1021,25 +592,34 @@ compute_wagebill <- function(
 compute_baseline_index <- function(.data, date_col, ...) {
   date_quo <- rlang::enquo(date_col)
   date_name <- rlang::as_name(date_quo)
-  
+
   cols_quos <- rlang::enquos(...)
   if (length(cols_quos) == 0) {
     stop("At least one column must be specified for indexing.", call. = FALSE)
   }
-  
+
   # resolve column names
   cols_sel <- tidyselect::eval_select(rlang::expr(c(!!!cols_quos)), .data)
   cols_names <- names(cols_sel)
-  
+
   # compute indices for each column
   indexed_df <- .data
   for (col in cols_names) {
-    base_val <- indexed_df[[col]][indexed_df[[date_name]] == min(indexed_df[[date_name]], na.rm = TRUE)]
+    base_val <- indexed_df[[col]][
+      indexed_df[[date_name]] == min(indexed_df[[date_name]], na.rm = TRUE)
+    ]
     if (length(base_val) == 0 || is.na(base_val[1])) {
-      warning(sprintf("Base year value for '%s' is NA or missing; index will be NA.", col), call. = FALSE)
+      warning(
+        sprintf(
+          "Base year value for '%s' is NA or missing; index will be NA.",
+          col
+        ),
+        call. = FALSE
+      )
       indexed_df[[paste0(col, "_index")]] <- NA_real_
     } else {
-      indexed_df[[paste0(col, "_index")]] <- (indexed_df[[col]] / base_val[1]) * 100
+      indexed_df[[paste0(col, "_index")]] <- (indexed_df[[col]] / base_val[1]) *
+        100
     }
   }
 
@@ -1053,7 +633,7 @@ compute_baseline_index <- function(.data, date_col, ...) {
 #' @param measure_col The name of the column for which quantiles will be computed.
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date's quantiles (default is FALSE).
 #' @param n_quantiles The number of quantiles to compute (default is 10 for deciles).
-#' 
+#'
 #' @return A data frame containing the quantiles, median values, and mean values for the specified measure column within the specified groups and reference dates.
 #'
 #' @importFrom data.table as.data.table setorderv
@@ -1079,7 +659,7 @@ compute_quantile <- function(
     by_cols <- c(group_cols, "ref_date")
 
     dt[, decile := dplyr::ntile(get(measure_col), n_quantiles), by = by_cols]
-  }  
+  }
 
   out <- dt[
     !is.na(decile),
@@ -1161,10 +741,10 @@ compute_compression_ratio <- function(
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
 #'
 #' @return A data frame with the distribution function, where `pct` denotes the percentage of observations in each bin and `cum_pct` denotes the cumulative percentage.
-#' 
+#'
 #' @importFrom data.table as.data.table setorderv
 #' @importFrom collapse fquantile
-#' 
+#'
 #' @export
 compute_density <- function(
   .data,
@@ -1216,7 +796,7 @@ compute_density <- function(
   binned[]
 }
 
-#' Compute time trend 
+#' Compute time trend
 #'
 #' Summarizes data over time by grouping variable, producing a tidy data frame
 #' with `ref_date`, optional group column, and `value`.
@@ -1233,8 +813,7 @@ compute_density <- function(
 #' @return A summarized data frame with columns `ref_date`, optionally `group`, and `value`. Value denotes either a sum or headcount (if `measure_col` is `NULL`).
 #'
 #' @importFrom data.table as.data.table
-#' @importFrom govhr compute_fastsummary
-#' 
+#'
 #' @export
 compute_time_trend <- function(.data, group, measure_col = NULL) {
   .data_dt <- data.table::as.data.table(.data)
@@ -1273,7 +852,7 @@ compute_time_trend <- function(.data, group, measure_col = NULL) {
 #' @return The input data frame with `value` rescaled to a baseline index.
 #'
 #' @importFrom dplyr arrange mutate across all_of ungroup first
-#' 
+#'
 #' @export
 rescale_baseline <- function(data, group) {
   if (group == "ref_date") {
@@ -1301,7 +880,7 @@ rescale_baseline <- function(data, group) {
 #' When `measure_col` is `NULL`, counts rows (headcount). When a column name is
 #' supplied, sums that column (wage bill).
 #'
-#' @param data A data frame containing a `ref_date` column and the grouping
+#' @param .data A data frame containing a `ref_date` column and the grouping
 #'   column.
 #' @param group Character string naming the grouping column.
 #' @param measure_col Character string naming the numeric column to sum, or
@@ -1310,12 +889,11 @@ rescale_baseline <- function(data, group) {
 #' @return A data frame with the grouping column and a `value` column.
 #'
 #' @importFrom dplyr group_by across all_of filter ungroup summarise n
-#' @importFrom govhr compute_fastsummary
-#' 
+#'
 #' @export
-compute_cross_section <- function(data, group, measure_col = NULL) {
+compute_cross_section <- function(.data, group, measure_col = NULL) {
   # only consider latest reference date
-  data_latest <- data |>
+  data_latest <- .data |>
     dplyr::filter(
       .data[["ref_date"]] == max(.data[["ref_date"]]),
       .by = dplyr::all_of(group)
@@ -1323,7 +901,10 @@ compute_cross_section <- function(data, group, measure_col = NULL) {
 
   if (is.null(measure_col)) {
     data_latest |>
-      dplyr::summarise(value = dplyr::n(), .by = dplyr::all_of(group))
+      fastcount(
+        dplyr::across(dplyr::all_of(group)),
+        name = "value"
+      )
   } else {
     data_latest |>
       compute_fastsummary(
@@ -1350,9 +931,8 @@ compute_cross_section <- function(data, group, measure_col = NULL) {
 #' @return A data frame with the grouping column and a `growth_rate` column
 #'   (percentage points, e.g. 12.5 for +12.5%).
 #'
-#' @importFrom dplyr group_by across all_of filter ungroup summarise n first last
-#' @importFrom govhr compute_fastsummary
-#' 
+#' @importFrom dplyr filter arrange summarise last first all_of
+#'
 #' @export
 compute_growth <- function(.data, group, measure_col = NULL) {
   endpoints <- .data |>
@@ -1389,4 +969,345 @@ compute_growth <- function(.data, group, measure_col = NULL) {
       .by = dplyr::all_of(group)
     ) |>
     dplyr::filter(!is.na(.data[["growth_rate"]]))
+}
+
+#' Function to compute deciles of a measure column within groups and reference dates.
+#'
+#' @param .data A data frame containing the data to be processed.
+#' @param group_cols A character vector of column names to group the data by.
+#' @param measure_col The name of the column for which deciles will be computed.
+#' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date's deciles (default is FALSE).
+#'
+#' @return A data frame containing the deciles, median values, and mean values for the specified measure column within the specified groups and reference dates.
+#'
+#' @importFrom data.table as.data.table setorderv
+#' @importFrom dplyr ntile
+#'
+#' @export
+compute_decile <- function(
+  .data,
+  group_cols = NULL,
+  measure_col,
+  latest_measure = FALSE
+) {
+  dt <- data.table::as.data.table(.data)
+
+  by_cols <- if (latest_measure) {
+    group_cols
+  } else {
+    c(group_cols, "ref_date")
+  }
+
+  if (latest_measure) {
+    dt <- dt[ref_date == max(ref_date)]
+  }
+
+  dt[, decile := dplyr::ntile(get(measure_col), 10), by = by_cols]
+
+  out <- dt[
+    !is.na(decile),
+    .(
+      median_value = stats::median(get(measure_col), na.rm = TRUE),
+      mean_value = mean(get(measure_col), na.rm = TRUE)
+    ),
+    keyby = c(by_cols, "decile")
+  ]
+
+  data.table::setorderv(out, c(by_cols, "decile"))
+
+  out[]
+}
+
+#' Function to compute the percentile values
+#'
+#' @param .data A data frame.
+#' @param group_col A character vector of column names to group the data by.
+#' @param measure_col The name of the column for which the percentile values will be computed.
+#' @param binwidth The width of the bins for grouping the measure values (default is 1).
+#' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
+#'
+#' @importFrom data.table as.data.table setorderv
+#' @importFrom collapse fquantile
+#'
+#' @return A data frame containing the 90th, 50th, and 10th percentiles for the specified measure column within the specified groups and reference dates.
+compute_percentile <- function(
+  .data,
+  group_col = NULL,
+  measure_col,
+  binwidth = 1,
+  latest_measure = FALSE
+) {
+  if (latest_measure) {
+    .data <- .data[.data[["ref_date"]] == max(.data[["ref_date"]]), ]
+  }
+
+  dt <- data.table::as.data.table(.data)
+  dt[, bin := floor(get(measure_col) / binwidth) * binwidth]
+  dt <- dt[!is.na(bin)]
+
+  binned <- dt[, .(count = .N), by = c(group_col, "bin")]
+
+  # full grid of every bin in range, crossed with every group present
+  all_bins <- seq(min(dt$bin), max(dt$bin), by = binwidth)
+
+  full_grid <- if (is.null(group_col)) {
+    data.table::data.table(bin = all_bins)
+  } else {
+    data.table::CJ(
+      unique(dt[[group_col]]),
+      all_bins,
+      sorted = FALSE
+    ) |>
+      data.table::setnames(c(group_col, "bin"))
+  }
+
+  binned <- merge(full_grid, binned, by = c(group_col, "bin"), all.x = TRUE)
+  binned[is.na(count), count := 0L]
+
+  data.table::setorderv(binned, c(group_col, "bin"))
+
+  binned <- binned[,
+    c(
+      .SD,
+      list(
+        pct = count / sum(count),
+        cum_pct = cumsum(count) / sum(count)
+      )
+    ),
+    by = group_col
+  ]
+
+  binned[]
+}
+
+#' Compute the Coefficient of Variation (CV)
+#'
+#' Calculates the coefficient of variation for a numeric vector, defined as the
+#' ratio of the standard deviation to the mean. This provides a unitless measure
+#' of relative dispersion, allowing comparison of variability across variables
+#' or groups with different scales.
+#'
+#' @param x A numeric vector of values.
+#' @param na.rm Logical; if `TRUE`, missing values (`NA`) are removed before
+#' computation. Defaults to `TRUE`.
+#'
+#' @details
+#' The function safely handles missing values and cases where the mean is zero
+#' (to avoid division by zero). If the input vector is empty or the mean equals
+#' zero, the function returns `NA_real_`.
+#'
+#' @return A numeric value representing the coefficient of variation (CV).
+#' Returns `NA_real_` if the computation is not possible (e.g., all values are
+#' missing or the mean is zero).
+#'
+#' @examples
+#' x <- c(10, 12, 8, 15, NA)
+#' cv(x)
+#'
+#' @export
+cv <- function(x, na.rm = TRUE) {
+  ## handling missing values
+  if (na.rm) {
+    x <- x[!is.na(x)]
+  }
+
+  ## compute the vector mean
+  m <- mean(x)
+
+  ## numerator-denominator handling to avoid dividing by 0
+  if (length(x) == 0 || is.na(m) || m == 0) {
+    return(NA_real_)
+  }
+
+  y <- sd(x) / m
+
+  return(y)
+}
+
+#' Compute a Compression Ratio Between Two Percentiles
+#'
+#' Calculates a wage (or value) compression ratio by dividing one quantile by
+#' another, typically the 90th percentile divided by the 10th percentile.
+#' This provides a measure of wage inequality or spread within a group.
+#'
+#' @param x A numeric vector of values (e.g., wages or salaries).
+#' @param upper Numeric; the upper percentile to compute (default is `0.9` for
+#' the 90th percentile).
+#' @param lower Numeric; the lower percentile to compute (default is `0.1` for
+#' the 10th percentile).
+#' @param na.rm Logical; if `TRUE`, missing values (`NA`) are removed before
+#' computation. Defaults to `TRUE`.
+#'
+#' @details
+#' The function computes the specified upper and lower quantiles and returns
+#' their ratio (`upper / lower`). If either quantile is `NA` or the lower
+#' quantile is zero, the function returns `NA_real_`.
+#'
+#' @return A numeric value representing the ratio of the specified upper to
+#' lower percentile values. Returns `NA_real_` if computation is not possible
+#' (e.g., due to missing data or zero denominator).
+#'
+#' @examples
+#' wages <- c(1000, 1200, 900, 3000, 5000, NA)
+#' cp_ratio(wages)             # default 90/10 ratio
+#' cp_ratio(wages, 0.75, 0.25) # 75/25 ratio
+#'
+#' @importFrom stats quantile
+#' @export
+cp_ratio <- function(x, upper = 0.9, lower = 0.1, na.rm = TRUE) {
+  if (na.rm) {
+    x <- x[!is.na(x)]
+  }
+
+  q <- quantile(x, probs = c(lower, upper), na.rm = na.rm)
+
+  if (any(is.na(q)) || q[1] == 0) {
+    return(NA_real_)
+  }
+
+  ratio <- q[2] / q[1]
+
+  return(ratio)
+}
+
+
+prop <- function(x) {
+  # Count nonmissing values of x within each group
+  tbl <- data.table::data.table(val = x)[, .N, by = val]
+  tbl[, prop := N / sum(N)]
+
+  # Map back to the original vector
+  tbl$prop[match(x, tbl$val)]
+}
+
+
+#' Count Unique Non-Missing Values
+#'
+#' Returns the number of unique values in a vector, excluding missing values (NA).
+#'
+#' @param x A vector of any type (numeric, character, factor, etc.)
+#'
+#' @return An integer representing the count of unique non-missing values in `x`.
+#'
+#' @examples
+#' # Basic usage
+#' count_unique(c(1, 2, 2, 3, 3, 3))
+#'
+#' # With missing values
+#' count_unique(c(1, 2, NA, 2, 3, NA))
+#'
+#' # With character vector
+#' count_unique(c("a", "b", "a", "c"))
+#'
+#' # Empty vector
+#' count_unique(c())
+#'
+#' # All NA values
+#' count_unique(c(NA, NA, NA))
+#'
+#' @export
+count_unique <- function(x) {
+  x <- x[!is.na(x)]
+  y <- length(unique(x))
+  return(y)
+}
+
+#' Define Default Summary Functions
+#'
+#' @description
+#' Creates and returns a named list of default summary functions used
+#' throughout the analytics framework (e.g., by [compute_fastsummary()]).
+#' Each function is defined as a purrr-style formula (`~`) that operates
+#' on a vector `.x` and returns a scalar summary statistic. The returned
+#' list can be supplied directly to a summarization pipeline or extended
+#' by users with custom functions.
+#'
+#' @details
+#' The returned list contains commonly used descriptive statistics for
+#' numeric vectors, including measures of central tendency, dispersion,
+#' distribution, and data quality (e.g., share of missing or zero values).
+#' Users can extend or override the defaults by appending their own
+#' named formulas before passing to [compute_fastsummary()].
+#'
+#' @return
+#' A named list of formula functions suitable for use with
+#' `dplyr::across()`, where each element name is the function label
+#' and the value is a one-sided formula that computes the summary.
+#'
+#' @format
+#' The list includes the following summary functions:
+#' \describe{
+#'   \item{sum}{Sum of values, ignoring `NA`s.}
+#'   \item{mean}{Arithmetic mean.}
+#'   \item{median}{Median value.}
+#'   \item{cv}{Coefficient of variation (requires a `cv()` helper).}
+#'   \item{cp_ratio}{Custom "cp ratio" statistic (requires a `cp_ratio()` helper).}
+#'   \item{var}{Sample variance.}
+#'   \item{iqr}{Interquartile range, computed as `diff(range(.x))`.}
+#'   \item{min}{Minimum value.}
+#'   \item{max}{Maximum value.}
+#'   \item{count}{Number of observations.}
+#'   \item{count_unique}{Number of distinct (unique) values.}
+#'   \item{prop_na}{Proportion of missing (`NA`) values.}
+#'   \item{prop_zero}{Proportion of zero values among non-missing data.}
+#'   \item{p25}{25th percentile (first quartile).}
+#'   \item{p75}{75th percentile (third quartile).}
+#'   \item{p90}{90th percentile.}
+#'   \item{sd}{Standard deviation.}
+#' }
+#'
+#' @examples
+#' # Load the default function set
+#' fns <- define_fns()
+#'
+#' # Inspect available summaries
+#' names(fns)
+#'
+#' # Example usage with compute_fastsummary()
+#' compute_fastsummary(
+#'   data = tibble::tibble(
+#'      country_code = c(rep("A", 100), rep("B", 100)),
+#'      gross_salary_lcu = c(
+#'       rnorm(100, mean = 1000, sd = 100),
+#'       rnorm(100,  mean = 2000, sd = 100)
+#'       ),
+#'      net_salary_lcu = c(
+#'       rnorm(100, mean = 0.7 * 1000, sd = 100),
+#'       rnorm(100,  mean = 0.7 * 2000, sd = 100)
+#'      )
+#'   ) |> data.table::as.data.table(),
+#'   cols = c("gross_salary_lcu", "net_salary_lcu"),
+#'   groups = c("country_code"),
+#'   fns = c("mean", "sd", "cv")
+#' )
+#'
+#' @seealso [compute_fastsummary()], [compute_fastshare()]
+#' @keywords internal utilities summarization
+#' @export
+
+define_fns <- function() {
+  # --- 1. Define default summary functions ---
+  default_fns <- list(
+    sum = ~ sum(.x, na.rm = TRUE),
+    mean = ~ mean(.x, na.rm = TRUE),
+    median = ~ median(.x, na.rm = TRUE),
+    cv = ~ cv(.x),
+    cp_ratio = ~ cp_ratio(.x),
+    var = ~ var(.x, na.rm = TRUE),
+    iqr = ~ diff(range(.x, na.rm = TRUE)),
+    min = ~ min(.x, na.rm = TRUE),
+    max = ~ max(.x, na.rm = TRUE),
+    count = ~ length(.x),
+    prop = ~ prop(.x),
+    dtprop = ~ .N / sum(.N),
+    count_unique = ~ count_unique(.x),
+    prop_na = ~ mean(is.na(.x)),
+    prop_zero = ~ mean(.x == 0, na.rm = TRUE),
+    p25 = ~ quantile(.x, 0.25, na.rm = TRUE),
+    p75 = ~ quantile(.x, 0.75, na.rm = TRUE),
+    p90 = ~ quantile(.x, 0.9, na.rm = TRUE),
+    sd = ~ sd(.x, na.rm = TRUE)
+  )
+
+  return(default_fns)
 }

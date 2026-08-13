@@ -12,13 +12,13 @@ authors:
     roles: [cre, aut]
 
 articles:
-  - title: "Data cleaning and quality assessment"
+  - title: "Harmonization"
     contents:
       - articles/01-standard_dictionary
       - articles/02-harmonization
-      - articles/03-quality_control
   - title: "Analytics"
     contents:
+      - articles/03-analytics
       - 04-standard_hrmis_assessment
 
 external-articles:
