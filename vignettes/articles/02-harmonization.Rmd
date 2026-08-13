@@ -41,7 +41,7 @@ extract_2021 <- bra_hrmis[ANO_PAGAMENTO == max(ANO_PAGAMENTO)]
 find_inconsistent_colnames(list(extract_2020, extract_2021))
 ```
 
-# Step 2: Identifying primary keys
+# Step 2: generate module identifiers
 
 Harmonization requires knowing which column identifies a contract and which identifies a person. These are our primary keys, that is, unique identifiers for contracts and personnel, respectively. `find_duplicate_ids()` is a quick way to test whether a candidate column is a valid unique key.
 
@@ -49,7 +49,7 @@ Harmonization requires knowing which column identifies a contract and which iden
 bra_hrmis |> find_duplicate_ids(MATRICULA)
 ```
 
-`MATRICULA` is not unique on its own (multiple reference dates per contract), so it becomes the **contract identifier**, or `contract_id` in our standard data dictionary. `CPF` will serve as the **personnel identifier**, the `personnel_id`.
+`MATRICULA` uniquely identifies a contract for a given reference date, so it becomes the **contract identifier**, or `contract_id` in our standard data dictionary. `CPF` will serve as the **personnel identifier**, the `personnel_id`.
 
 # Step 3: map raw columns to standardized names
 
