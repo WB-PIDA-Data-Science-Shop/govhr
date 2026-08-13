@@ -7,12 +7,12 @@ total-by-group bar charts.
 ## Usage
 
 ``` r
-compute_cross_section(data, group, measure_col = NULL)
+compute_cross_section(.data, group, measure_col = NULL)
 ```
 
 ## Arguments
 
-- data:
+- .data:
 
   A data frame containing a \`ref_date\` column and the grouping column.
 

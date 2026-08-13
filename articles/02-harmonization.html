@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>HR Data Harmonization • govhr</title>
+<title>Data harmonization • govhr</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="HR Data Harmonization">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Data harmonization">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/govhr.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -51,11 +52,10 @@
 
 
 
-<script src="02-harmonization_files/core-js-2.5.3/shim.min.js"></script><script src="02-harmonization_files/react-18.2.0/react.min.js"></script><script src="02-harmonization_files/react-18.2.0/react-dom.min.js"></script><script src="02-harmonization_files/reactwidget-2.0.0/react-tools.js"></script><link href="02-harmonization_files/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
-<script src="02-harmonization_files/htmlwidgets-1.6.4/htmlwidgets.js"></script><link href="02-harmonization_files/reactable-0.4.5/reactable.css" rel="stylesheet">
-<script src="02-harmonization_files/reactable-binding-0.4.5/reactable.js"></script><div class="row">
+
+<div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>HR Data Harmonization</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Data harmonization</h1>
             
       
 
@@ -64,819 +64,252 @@
 
     
     
-<div class="section level2">
-<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
-</h2>
-<p>Across many countries—especially in low- and middle-income
-settings—governments are increasingly seeking to adopt analytics-driven
-approaches to public sector human resource (HR) management and civil
-service reform. Yet most government offices and our World Bank regional
-counterparts often lack standardized tools for transforming raw HRMIS
-data into formats suitable for rigorous analysis. As a result, each new
-diagnostic requires bespoke data cleaning, ad hoc coding decisions, and
-country-specific scripts that are costly to maintain and difficult to
-replicate.</p>
-<p>This fragmentation makes HRM analytics expensive, slow, and
-inconsistent. It also limits the ability of governments and development
-partners—including the World Bank—to compare results across time,
-sectors, or countries, or to build reusable analytics pipelines.</p>
-<p>This article describes the standard approach for harmonizing human
-resource management information system (HRMIS) data, organized into
-three main modules: Establishment, Personnel, and Contract. The contents
-of each module are described in
-<code>vignette("standard_dictionary")</code>. In this article, we
-provide a set of helper functions to support the harmonization process
-across the modules. When users prepare their HRMIS data according to
-this standard, teams can immediately apply automated tools for data
-quality control as well as dynamic and reproducible reports on workforce
-structure dynamics, pay and compensation analytics, establishment
-control monitoring, staffing distribution analysis.</p>
-<p>This vignette, harmonization.Rmd, presents the practical workflow for
-transforming raw HRMIS extracts into these standardized modules. It
-provides governments with a clear, repeatable procedure for preparing
-their data so that advanced analytics can be deployed rapidly and
-consistently—reducing costs, increasing comparability, and strengthening
-evidence-based HR decision making.</p>
-<p>The harmonization workflow demonstrated here shows how to:</p>
-<ul>
-<li><p>map raw administrative HR variables into a standardized public
-sector schema,</p></li>
-<li><p>recode local classifications (education, occupation, contract
-type) into cross-country taxonomies,</p></li>
-<li><p>generate unique and persistent identifiers for personnels,
-establishments, and contracts,</p></li>
-<li><p>attach missing metadata such as country codes, administrative
-hierarchies, or reference dates,</p></li>
-<li><p>structure the cleaned data into the three standard HRMIS modules,
-and</p></li>
-<li><p>validate the outputs against the HRMIS Standard Data
-Dictionary.</p></li>
-</ul>
-<p>By following this procedure, governments and World Bank teams can
-unlock a common analytics ecosystem in which standardized public sector
-HR data feeds directly into automated dashboards, diagnostic tools, and
-monitoring systems—enabling faster, cheaper, and more consistent
-evidence-based HR reform.</p>
-<div class="section level3">
-<h3 id="the-raw-data">The Raw Data<a class="anchor" aria-label="anchor" href="#the-raw-data"></a>
-</h3>
-<p>For this vignette, we apply our tools to data provided by Brazil
-HRMIS system provided at the contract level. We randomly sample 5
-percent of the original data. See the data below:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># bra_hrmis &lt;- govhr::bra_hrmis |&gt; </span></span>
-<span><span class="co">#   sample_n(1e3)</span></span>
-<span><span class="va">bra_hrmis_display</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span></span>
-<span><span class="va">char_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">bra_hrmis_display</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">bra_hrmis_display</span>, <span class="va">is.character</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">bra_hrmis_display</span><span class="op">[</span>, <span class="op">(</span><span class="va">char_cols</span><span class="op">)</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">.SD</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/iconv.html" class="external-link">iconv</a></span><span class="op">(</span><span class="va">x</span>, from <span class="op">=</span> <span class="st">"latin1"</span>, to <span class="op">=</span> <span class="st">"UTF-8"</span>, sub <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span>, .SDcols <span class="op">=</span> <span class="va">char_cols</span><span class="op">]</span></span>
-<span></span>
-<span><span class="fu">reactable</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">bra_hrmis_display</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="reactable html-widget html-fill-item" id="htmlwidget-ac96cb3ee4656e2e9ec3" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"ANO_PAGAMENTO":["2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014","2014"],"MES_REFERENCIA":["8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8"],"MATRICULA":["242","1613","1691","1704","1711","1754","1757","1760","1766","1796","1797","1819","1929","1993","2477","2655","3414","3415","3494","3931","3939","3950","3987","4018","4046","4067","4181","4227","4255","4278","4296","4337","4493","4603","4608","4611","4651","4673","5217","5220","5869","5937","5961","5965","6176","6617","6653","7100","7153","8431","8552","8637","8657","8849","9026","9590","9761","9805","10079","10844","11033","11821","11845","11963","13780","13932","15291","15635","16191","16436","16492","17225","17419","17733","18401","19023","19131","19683","19814","20789","21075","21287","21297","21464","21516","21649","21817","21878","21998","22479","22996","23023","23684","24307","24904","24998","25282","25462","25758","25943"],"CPF":["49670581400","46895175415","51663961468","2107011451","82801525472","2275616438","105271411","52936961491","74131591472","95437304404","1844533484","78636736404","2048711405","31006906487","20858272415","30706114434","30180333453","11091304491","20997205415","17747252404","38280647449","22299386491","47235870478","20962924415","9950516404","9717650497","20909241449","15165256472","9787615534","16260490410","11113812400","19073739420","30824729404","34857265400","44481098449","14434180487","34633405420","41115597434","14000385453","20919492487","22314679415","38245680478","16389492472","34834710491","22317066449","22795685434","16338693420","15381161468","22302743415","33149640482","22918140449","27199541449","20903111420","47358831420","22749519420","8740224449","16442962415","27065561453","13992139468","46883177434","51620057468","20874812453","28019164472","20909640491","8769613400","31344305415","14325730478","34918809472","15396134453","46881905491","37625314472","46902538468","48385794468","44923163453","35061529472","38413990459","34858059472","13369091453","20944853404","12397903415","45374562487","35221275449","45555680449","34907653468","33211906487","30435650459","36436879404","47005920449","24101150478","41163451487","44510063415","34843108472","51161362487","38241030444","7896905434","11109637420","45346704434","16408985491","39688445487","38262924487"],"DATA_NASCIMENTO":["23973","24265","25050","27527","26435","27182","27781","25185","26431","27343","27484","26352","27594","17848","21790","22544","22009","20586","20952","19502","17966","20881","24045","21293","20342","20439","22040","21772","19745","21315","20396","20185","22569","21460","23498","18212","23468","23090","17422","19615","22426","23058","16796","19554","19467","22722","20248","19346","20870","21286","22743","22573","22134","24284","22064","18398","20955","22510","17584","23955","21138","21647","22619","21550","19120","21821","20928","23358","21085","17763","22856","19932","22924","22749","23189","22418","22340","19553","21304","19688","24338","23612","23697","23608","23086","22750","21913","22147","20966","23099","23403","23614","22042","21071","19182","18665","23521","20151","23628","23372"],"GENERO":["FEMININO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","MASCULINO","FEMININO","FEMININO","MASCULINO","FEMININO","MASCULINO","MASCULINO","MASCULINO","FEMININO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","MASCULINO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","FEMININO","MASCULINO","MASCULINO","MASCULINO","FEMININO","FEMININO","MASCULINO","MASCULINO","MASCULINO","FEMININO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO"],"ESCOLARIDADE":["5 A 8 SERIE DO PRIM. GRAU INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","CURSO SUPERIOR INCOMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","CURSO SUPERIOR INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","CURSO SUPERIOR INCOMPLETO","CURSO SUPERIOR INCOMPLETO","CURSO SUPERIOR INCOMPLETO","CURSO SUPERIOR INCOMPLETO","CURSO SUPERIOR INCOMPLETO","CURSO SUPERIOR INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU INCOMPLETO","CURSO SUPERIOR COMPLETO","ESPECIALIZAÃÃO INCOMPLETO","SEGUNDO GRAU COMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","CURSO SUPERIOR INCOMPLETO","1 A 4 SERIE DO PRIM. GRAU COMPLETO","CURSO SUPERIOR INCOMPLETO","CURSO SUPERIOR INCOMPLETO","CURSO SUPERIOR INCOMPLETO","1 A 4 SERIE DO PRIM. GRAU COMPLETO","CURSO SUPERIOR INCOMPLETO","CURSO SUPERIOR INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","ESPECIALIZAÃÃO INCOMPLETO","ESPECIALIZAÃÃO INCOMPLETO","1 A 4 SERIE DO PRIM. GRAU INCOMPLETO","1 A 4 SERIE DO PRIM. GRAU INCOMPLETO","SEGUNDO GRAU COMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","ESPECIALIZAÃÃO INCOMPLETO","CURSO SUPERIOR INCOMPLETO","CURSO SUPERIOR INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","SEGUNDO GRAU INCOMPLETO","CURSO SUPERIOR INCOMPLETO","SEGUNDO GRAU COMPLETO","SEGUNDO GRAU INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","SEGUNDO GRAU INCOMPLETO","ESPECIALIZAÃÃO INCOMPLETO","SEGUNDO GRAU INCOMPLETO","CURSO SUPERIOR INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","CURSO SUPERIOR INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","ESPECIALIZAÃÃO COMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","CURSO SUPERIOR INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","1 A 4 SERIE DO PRIM. GRAU INCOMPLETO","1 A 4 SERIE DO PRIM. GRAU COMPLETO","1 A 4 SERIE DO PRIM. GRAU COMPLETO","SEGUNDO GRAU INCOMPLETO","1 A 4 SERIE DO PRIM. GRAU COMPLETO","ESPECIALIZAÃÃO INCOMPLETO","SEGUNDO GRAU INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","CURSO SUPERIOR INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU INCOMPLETO","SEGUNDO GRAU COMPLETO","ESPECIALIZAÃÃO INCOMPLETO","SEGUNDO GRAU INCOMPLETO","CURSO SUPERIOR INCOMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU COMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","ESPECIALIZAÃÃO INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","1 A 4 SERIE DO PRIM. GRAU COMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","ESPECIALIZAÃÃO INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","SEGUNDO GRAU COMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU INCOMPLETO","SEGUNDO GRAU COMPLETO","SEGUNDO GRAU COMPLETO","ESPECIALIZAÃÃO INCOMPLETO","5 A 8 SERIE DO PRIM. GRAU COMPLETO","SEGUNDO GRAU COMPLETO","ESPECIALIZAÃÃO INCOMPLETO"],"DATA_ADMISSAO":["31564","32177","36075","36075","36075","34444","34444","34444","34444","34444","34444","34444","34444","29993","31240","30011","29839","29839","30023","29998","30022","30019","30991","30991","29768","29768","29999","29999","29999","29997","30991","29952","31237","31237","31237","31237","31237","31237","30165","29526","32826","30145","30175","30176","30344","30174","30176","30169","30176","29725","30040","30053","30033","31224","29727","27894","27864","30036","30784","30958","31199","30175","30036","30057","29369","29417","31181","31027","31049","30903","30904","30894","31240","31082","31240","31240","31238","31230","31231","28888","31121","31082","31082","31082","31082","31082","31127","31148","31127","31107","31107","31111","31240","31240","31323","31320","31412","31474","31474","31563"],"ADMINISTRACAO":["DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","DIRETA","INDIRETA","DIRETA","INDIRETA","INDIRETA","DIRETA","DIRETA","DIRETA","DIRETA","INDIRETA","DIRETA","DIRETA","INDIRETA","DIRETA","DIRETA","INDIRETA","DIRETA","DIRETA","INDIRETA","INDIRETA","DIRETA","DIRETA","INDIRETA","DIRETA","DIRETA","DIRETA","INDIRETA","INDIRETA","INDIRETA","INDIRETA","DIRETA","DIRETA","DIRETA","INDIRETA","DIRETA","DIRETA","DIRETA","DIRETA","INDIRETA","INDIRETA","DIRETA","DIRETA","DIRETA","INDIRETA","INDIRETA","INDIRETA","DIRETA","DIRETA","DIRETA","INDIRETA","DIRETA","INDIRETA","INDIRETA","DIRETA","DIRETA","INDIRETA","INDIRETA","DIRETA","DIRETA","INDIRETA","INDIRETA","INDIRETA","INDIRETA","DIRETA","DIRETA","INDIRETA","INDIRETA","INDIRETA","INDIRETA","DIRETA","INDIRETA","INDIRETA","INDIRETA","DIRETA","INDIRETA","INDIRETA","INDIRETA","DIRETA","INDIRETA","INDIRETA","INDIRETA","INDIRETA","INDIRETA","DIRETA"],"TIPO_CONTRATO":["EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO COMISSIONADO","EFETIVO COMISSIONADO","EFETIVO COMISSIONADO","EFETIVO COMISSIONADO","EFETIVO","EFETIVO COMISSIONADO","EFETIVO","EFETIVO","EFETIVO COMISSIONADO","EFETIVO COMISSIONADO","EFETIVO COMISSIONADO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO COMISSIONADO","EFETIVO COMISSIONADO","EFETIVO","EFETIVO COMISSIONADO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO COMISSIONADO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO COMISSIONADO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO COMISSIONADO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO COMISSIONADO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO COMISSIONADO","EFETIVO","EFETIVO COMISSIONADO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO","EFETIVO"],"GRUPO":["OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","EDUCAÃÃO","EDUCAÃÃO","OUTROS","OUTROS","OUTROS","OUTROS","EDUCAÃÃO","EDUCAÃÃO","EDUCAÃÃO","OUTROS","EDUCAÃÃO","EDUCAÃÃO","EDUCAÃÃO","EDUCAÃÃO","OUTROS","OUTROS","EDUCAÃÃO","EDUCAÃÃO","EDUCAÃÃO","OUTROS","OUTROS","OUTROS","EDUCAÃÃO","EDUCAÃÃO","EDUCAÃÃO","OUTROS","EDUCAÃÃO","OUTROS","OUTROS","EDUCAÃÃO","EDUCAÃÃO","OUTROS","OUTROS","EDUCAÃÃO","EDUCAÃÃO","OUTROS","OUTROS","OUTROS","OUTROS","EDUCAÃÃO","EDUCAÃÃO","OUTROS","OUTROS","OUTROS","OUTROS","EDUCAÃÃO","OUTROS","OUTROS","OUTROS","EDUCAÃÃO","OUTROS","OUTROS","OUTROS","EDUCAÃÃO","OUTROS","OUTROS","OUTROS","OUTROS","OUTROS","EDUCAÃÃO"],"COD_ORGAO":["301101","301203","301203","301203","301203","301203","301203","301203","301203","301203","301203","301203","301203","301204","313010","313010","301400","404799","301400","404799","404799","301500","301500","301500","301500","404799","301500","301500","404799","301500","301500","404799","301500","301500","404799","404799","301500","301500","404799","301700","301800","301800","404799","404799","404799","404799","301800","301800","301800","404799","301800","301800","301800","301800","404799","404799","301800","301800","301800","404799","404799","404799","301800","301800","301800","404799","301800","404799","404799","301800","301800","404799","404799","301800","301800","404799","404799","404799","404799","301800","301800","404799","404799","404799","404799","301800","404799","404799","404799","301800","404799","404799","404799","301800","404799","404799","404799","404799","404799","301800"],"ORGAO":["GABINETE CIVIL","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","PROCURADORIA GERAL DO ESTADO","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA MULHER CIDADANIA DIREITOS HUMANOS","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO"],"CARREIRA":["AGENTE ADMINISTRATIVO","CAPITAO","SEGUNDO SARGENTO","PRIMEIRO SARGENTO","PRIMEIRO SARGENTO","TERCEIRO SARGENTO","SEGUNDO SARGENTO","TERCEIRO SARGENTO","TERCEIRO SARGENTO","TERCEIRO SARGENTO","SEGUNDO SARGENTO","PRIMEIRO SARGENTO","SEGUNDO SARGENTO","ASSISTENTE DE ADMINISTRAC","AUXILIAR DE SERVICOS DIVE","AUXILIAR DE SERVICOS DIVE","TECNICO AGRICOLA","TECNICO AGRICOLA","PESQ INFORMACOES SOCIAIS","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","FISCAL DE TRIBUTOS ESTADU","FISCAL DE TRIBUTOS ESTADU","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","AGENTE CONTROLADOR DE ARR","AGENTE CONTROLADOR DE ARR","AGENTE CONTROLADOR DE ARR","ASSISTENTE FAZENDARIO","FISCAL DE TRIBUTOS ESTADU","AUXILIAR FAZENDARIO","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","AUXILIAR FAZENDARIO","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","AUXILIAR DE SERVICOS DIVE","EDUCADOR SOCIAL","PROFESSOR","AGENTE ADMINISTRATIVO","MOTORISTA","VIGIA","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","VIGIA","AGENTE ADMINISTRATIVO","AGENTE ADMINISTRATIVO","VIGIA","PROFESSOR","PROFESSOR","ORIENTADOR EDUCACIONAL *","AGENTE ADMINISTRATIVO","PROFESSOR","VIGIA","PROFESSOR","OFICIAL DE APOIO TECNICO","AUXILIAR DE SERVICOS DIVE","AGENTE ADMINISTRATIVO","PROFESSOR","AGENTE ADMINISTRATIVO","PROFESSOR","PROFESSOR","AUXILIAR DE SERVICOS DIVE","AUXILIAR DE SERVICOS DIVE","AUXILIAR DE SERVICOS DIVE","MERENDEIRA","AUXILIAR DE SERVICOS DIVE","PROFESSOR","AGENTE ADMINISTRATIVO","AUXILIAR DE SERVICOS DIVE","TECNICO DE ESTATISTICA","VIGIA","SUPERVISOR ESCOLAR","OFICIAL DE APOIO TECNICO","AUXILIAR DE SERVICOS DIVE","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","AUXILIAR DE SERVICOS DIVE","AUXILIAR DE SERVICOS DIVE","AUXILIAR DE SERVICOS DIVE","PROFESSOR ATIVIDADES","PROFESSOR ATIVIDADES","PROFESSOR ATIVIDADES","AGENTE ADMINISTRATIVO","AUXILIAR DE SERVICOS DIVE","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","AGENTE ADMINISTRATIVO"],"CARGO":["AGENTE ADMINISTRATIVO","CAPITAO","SEGUNDO SARGENTO","PRIMEIRO SARGENTO","PRIMEIRO SARGENTO","TERCEIRO SARGENTO","SEGUNDO SARGENTO","TERCEIRO SARGENTO","TERCEIRO SARGENTO","TERCEIRO SARGENTO","SEGUNDO SARGENTO","PRIMEIRO SARGENTO","SEGUNDO SARGENTO","ASSISTENTE DE ADMINISTRAC","AUXILIAR DE SERVICOS DIVE","AUXILIAR DE SERVICOS DIVE","TECNICO AGRICOLA","TECNICO AGRICOLA","PESQ INFORMACOES SOCIAIS","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","FISCAL DE TRIBUTOS ESTADU","FISCAL DE TRIBUTOS ESTADU","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","AGENTE CONTROLADOR DE ARR","AGENTE CONTROLADOR DE ARR","AGENTE CONTROLADOR DE ARR","ASSISTENTE FAZENDARIO","FISCAL DE TRIBUTOS ESTADU","AUXILIAR FAZENDARIO","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","AUXILIAR FAZENDARIO","ASSISTENTE FAZENDARIO","ASSISTENTE FAZENDARIO","AUXILIAR DE SERVICOS DIVE","EDUCADOR SOCIAL","PROFESSOR","AGENTE ADMINISTRATIVO","MOTORISTA","VIGIA","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","VIGIA","AGENTE ADMINISTRATIVO","AGENTE ADMINISTRATIVO","VIGIA","PROFESSOR","PROFESSOR","ORIENTADOR EDUCACIONAL *","AGENTE ADMINISTRATIVO","PROFESSOR","VIGIA","PROFESSOR","OFICIAL DE APOIO TECNICO","AUXILIAR DE SERVICOS DIVE","AGENTE ADMINISTRATIVO","PROFESSOR","AGENTE ADMINISTRATIVO","PROFESSOR","PROFESSOR","AUXILIAR DE SERVICOS DIVE","AUXILIAR DE SERVICOS DIVE","AUXILIAR DE SERVICOS DIVE","MERENDEIRA","AUXILIAR DE SERVICOS DIVE","PROFESSOR","AGENTE ADMINISTRATIVO","AUXILIAR DE SERVICOS DIVE","TECNICO DE ESTATISTICA","VIGIA","SUPERVISOR ESCOLAR","OFICIAL DE APOIO TECNICO","AUXILIAR DE SERVICOS DIVE","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","AUXILIAR DE SERVICOS DIVE","AUXILIAR DE SERVICOS DIVE","AUXILIAR DE SERVICOS DIVE","PROFESSOR ATIVIDADES","PROFESSOR ATIVIDADES","PROFESSOR ATIVIDADES","AGENTE ADMINISTRATIVO","AUXILIAR DE SERVICOS DIVE","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","PROFESSOR","AGENTE ADMINISTRATIVO"],"JORNADA":["30","40","40","40","40","40","40","40","40","40","40","40","40","30","40","40","30","30","40","30","30","30","40","40","30","30","40","40","40","30","40","30","30","30","30","30","30","30","40","30","20","30","40","40","40","40","40","40","40","40","30","30","30","30","40","40","40","30","20","40","40","30","40","30","40","30","20","40","40","40","30","30","40","40","30","30","30","30","40","30","30","40","40","20","40","20","30","40","40","40","40","40","30","40","20","20","40","40","40","30"],"CLASSE":["C",null,null,null,null,null,null,null,null,null,null,null,null,"C","C","C","C","C","D","D","D","D","4","4","D","D","4","4","4","D","4","D","D","D","D","D","D","D","C","C","D","E","C","C","D","D","D","D","D","D","E","E","C","D","D","D","D","E","D","B","D","D","C","C","D","D","D","D","B","C","C","D","B","D","B","D","B","C","D","F","C","D","D","D","D","D","D","B","B","D","D","D","C","B","D","D","D","D","D","D"],"NIVEL":["ACMNC30","TC2","2SGT2","ST2","2TEN2","2SGT2","1SGT2","1SGT2","2SGT2","2SGT2","1SGT2","2TEN2","1SGT2","ACMNC30","ACENC40","ACENC40","ACMNC30","ACMNC30","ASSND40","ASFD30","ASFD30","ASFD30","GOTF04","GOTF04","ASFD30","ASFD30","GOTF04","GOTF04","GOTF04","ASFD30","GOTF04","AUFD30","ASFD30","ASFD30","ASFD30","AUFD30","ASFD30","ASFD30","ACENC40","ACMNC30","AELPD20","AEM30E4","ACENC40","ACENC40","AEESD40","AELPD40","AEESD40","AEESD40","AELPD40","AELPD40","AEF30E3","AEM30E3","AEM30C1","AEF30D2","AEESD40","AELPD40","AEESD40","AEM30E2","AELPD20","ACENB40","AEESD40","ACMND30","ACENC40","AEM30C2","AEMED40","AEM30D2","AELPD20","AEESD40","ACENB40","ACENC40","AEF30C2","AEF30D3","ACENB40","AEESD40","AEM30B1","AEF30D3","ACMNB30","AEF30C2","AEESD40","AEM30F4","AEF30C2","AELPD40","AEESD40","AEESD20","AELPD40","AEESD20","AEF30D3","ACENB40","ACENB40","AELPD40","AELPD40","AELPD40","AEM30C1","AEF30B1","AELPD20","AELPD20","AEESD40","AELPD40","AELPD40","AEM30D4"],"DATA_ULT_PROGRESSAO":["42941","43392","43388","43381","43381","43252","43068","43432","42337","42703","42150","43371","42705",null,"40634",null,"36100",null,"38869","41883","41883","41883",null,"37408","41883","41883",null,null,null,"41883",null,"41883","41883","41883","41883","41883","41883","41883","37561","41426",null,"43209",null,null,"37715","39083","42858","42773","37622","40912","42473","42473","42682","42473","39692","40544",null,"42920",null,null,"41332","37622",null,"42473","41051","41395",null,"38718",null,"38930","42473","42473",null,"42235","41773","42473","37158","41395",null,"42473","42648",null,"37861","40835","37226",null,"42473",null,null,"42856","38371","43040","41395","42968",null,null,"41662","41260","38961","43193"],"SALARIO_BASE":["712.68","9695.81","4087.87","4736.55","4736.55","4016.04","4496.87","4016.04","4016.04","4016.04","4496.87","5204.8900000000003","4496.87","715.87","703.09","703.09","715.87","715.87","5396.02","173.86","173.86","173.86","2955.53","2955.53","173.86","173.86","2955.53","2955.53","2955.53","173.86","2955.53","173.86","173.86","173.86","173.86","173.86","173.86","173.86","1019.77","1338.53","1920.72","1350.57","703.09","703.09","4033.17","3841.43","2079.31","2079.31","3841.43","3841.43","1352.5","1620.69","715.87","924.5","4033.17","3841.43","4033.17","1038.9000000000001","1920.72","699.9","4033.17","1489.27","703.09","1225","4235.16","1350.57","1920.72","4033.17","699.9","703.09","880.48","1286.27","699.9","3841.43","712.68","1286.27","712.68","924.5","4033.17","1701.71","880.48","3841.43","4033.17","2016.6","3841.43","2016.6","1286.27","699.9","699.9","3841.43","3841.43","3841.43","989.43","699.9","1920.72","1920.72","4033.17","3841.43","3841.43","1286.26"],"CONTRIBUICAO_PREVIDENCIA":["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],"ADICIONAL_TEMPO_SERVICO":["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","797.94","797.94","797.94","4083.8","4410.5","826.43","797.94","3262.65","3262.65","3262.65","797.94","5717.32","535.69000000000005","797.94","797.94","797.94","459.17","797.94","826.44","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],"COMISSAO":["0","0","648.66999999999996","0","0","0","0","480.82","480.82","480.82","708.01","580.95000000000005","0","316.33999999999997","442.87","316.33999999999997","316.33999999999997","0","442.87","0","0","316.33999999999997","1260.26","759.19","0","0","0","0","0","0","0","0","0","0","0","0","316.33999999999997","257.39","0","569.4","0","0","0","0","0","0","0","0","0","0","0","0","842.7","0","0","0","0","0","0","0","0","316.33999999999997","0","0","0","0","0","0","0","316.33999999999997","0","0","0","0","0","0","0","0","0","0","0","0","632.66","0","0","0","0","0","0","0","0","253.06","0","316.33999999999997","0","0","0","0","0","0"],"ABONO_PERMANENCIA":["0","0","0","0","0","0","0","0","0","0","0","0","0","136.86000000000001","0","0","0","0","593.55999999999995","0","0","401.25","0","0","0","0","0","0","0","0","2425.71","0","401.25","0","0","0","0","0","112.17","147.24","0","0","0","0","0","0","228.72","0","0","0","0","0","0","0","0","0","0","0","0","0","0","163.82","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","187.19","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],"DECISAO_JUDICIAL":["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],"DEMAIS_GRATIFICACOES_TRANSITORIAS":["11.32","0","0","0","0","0","166.54","152.27000000000001","0","0","0","0","0","8.1300000000000008","20.91","20.91","8.1300000000000008","225.33","0","0","0","0","0","0","0","0","0","1740.08","0","0","0","0","0","729.54","0","0","0","0","0","0","0","0","20.91","20.91","0","0","100","0","0","0","0","0","8.1300000000000008","308.16000000000003","0","0","0","0","0","24.1","0","0","20.91","0","0","0","0","0","24.1","20.91","0","0","24.1","0","60.64","0","11.32","0","0","0","0","0","0","0","0","0","0","24.1","24.1","0","0","0","0","24.1","0","0","100","0","0","100"],"DEMAIS_GRATIFICACOES_CARREIRA":["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","2675.94","2675.94","2675.94","13379.71","13379.71","2675.94","2675.94","8696.81","8696.81","8696.81","2675.94","13379.71","1739.36","2675.94","2675.94","2675.94","1739.36","2675.94","2675.94","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],"SALARIO_BRUTO":["724","9695.81","4736.54","4736.55","4736.55","4016.04","4663.41","4649.13","4496.8599999999997","4496.8599999999997","5204.88","5785.84","4496.87","1177.2","1166.8699999999999","1040.3399999999999","1040.3399999999999","941.2","6432.45","3647.74","3647.74","4365.33","21679.3","21504.93","3676.23","3647.74","14914.99","16655.07","14914.99","3647.74","24477.66","2448.91","4048.99","4377.28","3647.74","2372.39","3964.08","3933.63","1131.94","2055.17","1920.72","1350.57","724","724","4033.17","3841.43","2408.0300000000002","2079.31","3841.43","3841.43","1352.5","1620.69","1566.7","1232.6600000000001","4033.17","3841.43","4033.17","1038.9000000000001","1920.72","724","4033.17","1969.43","724","1225","4235.16","1350.57","1920.72","4033.17","724","1040.3399999999999","880.48","1286.27","724","3841.43","773.32","1286.27","724","924.5","4033.17","1888.9","880.48","3841.43","4665.83","2016.6","3841.43","2016.6","1286.27","724","724","3841.43","3841.43","4094.49","989.43","1040.3399999999999","1920.72","1920.72","4133.17","3841.43","3841.43","1386.26"],"SALARIO_LIQUIDO":["724","8148.92","4359.6499999999996","4166.9799999999996","4431.46","3922.76","4449.71","4426.74","4304.5","3845.11","4735.72","5405.87","4239.7700000000004","1177.2","1166.8699999999999","1040.3399999999999","1040.3399999999999","941.2","5652.91","3495.8","3495.8","4116.8100000000004","17260.16","17094.21","3526.72","3495.8","12090.7","13500.52","13259.05","3495.8","19338.37","2419.5300000000002","3831.21","4085.64","3495.8","2348.12","3764.69","3793.19","1131.94","2055.17","1920.72","1350.57","724","724","3828.49","3663.63","2378.67","2079.31","3663.63","3663.63","1352.5","1620.69","1566.7","1232.6600000000001","3828.49","3663.63","3828.49","1038.9000000000001","1920.72","724","3905.93","1969.43","724","1225","3990.03","1350.57","1920.72","3828.49","724","1040.3399999999999","880.48","1286.27","724","3744.5","773.32","1286.27","724","924.5","3828.49","1888.9","880.48","3663.63","4318.8","2016.6","3663.63","2016.6","1286.27","724","724","3663.63","3663.63","3871.27","989.43","1040.3399999999999","1920.72","1920.72","3905.99","3663.63","3663.63","1386.26"],"DATA_APOSENTADORIA":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"VALOR_BRUTO":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"VALOR_LIQUIDO":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"TIPO":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"TEMPO DE CONTRIBUIÇÃO":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"columns":[{"id":"ANO_PAGAMENTO","name":"ANO_PAGAMENTO","type":"character"},{"id":"MES_REFERENCIA","name":"MES_REFERENCIA","type":"character"},{"id":"MATRICULA","name":"MATRICULA","type":"character"},{"id":"CPF","name":"CPF","type":"character"},{"id":"DATA_NASCIMENTO","name":"DATA_NASCIMENTO","type":"character"},{"id":"GENERO","name":"GENERO","type":"character"},{"id":"ESCOLARIDADE","name":"ESCOLARIDADE","type":"character"},{"id":"DATA_ADMISSAO","name":"DATA_ADMISSAO","type":"character"},{"id":"ADMINISTRACAO","name":"ADMINISTRACAO","type":"character"},{"id":"TIPO_CONTRATO","name":"TIPO_CONTRATO","type":"character"},{"id":"GRUPO","name":"GRUPO","type":"character"},{"id":"COD_ORGAO","name":"COD_ORGAO","type":"character"},{"id":"ORGAO","name":"ORGAO","type":"character"},{"id":"CARREIRA","name":"CARREIRA","type":"character"},{"id":"CARGO","name":"CARGO","type":"character"},{"id":"JORNADA","name":"JORNADA","type":"character"},{"id":"CLASSE","name":"CLASSE","type":"character"},{"id":"NIVEL","name":"NIVEL","type":"character"},{"id":"DATA_ULT_PROGRESSAO","name":"DATA_ULT_PROGRESSAO","type":"character"},{"id":"SALARIO_BASE","name":"SALARIO_BASE","type":"character"},{"id":"CONTRIBUICAO_PREVIDENCIA","name":"CONTRIBUICAO_PREVIDENCIA","type":"character"},{"id":"ADICIONAL_TEMPO_SERVICO","name":"ADICIONAL_TEMPO_SERVICO","type":"character"},{"id":"COMISSAO","name":"COMISSAO","type":"character"},{"id":"ABONO_PERMANENCIA","name":"ABONO_PERMANENCIA","type":"character"},{"id":"DECISAO_JUDICIAL","name":"DECISAO_JUDICIAL","type":"character"},{"id":"DEMAIS_GRATIFICACOES_TRANSITORIAS","name":"DEMAIS_GRATIFICACOES_TRANSITORIAS","type":"character"},{"id":"DEMAIS_GRATIFICACOES_CARREIRA","name":"DEMAIS_GRATIFICACOES_CARREIRA","type":"character"},{"id":"SALARIO_BRUTO","name":"SALARIO_BRUTO","type":"character"},{"id":"SALARIO_LIQUIDO","name":"SALARIO_LIQUIDO","type":"character"},{"id":"DATA_APOSENTADORIA","name":"DATA_APOSENTADORIA","type":"character"},{"id":"VALOR_BRUTO","name":"VALOR_BRUTO","type":"character"},{"id":"VALOR_LIQUIDO","name":"VALOR_LIQUIDO","type":"character"},{"id":"TIPO","name":"TIPO","type":"character"},{"id":"TEMPO DE CONTRIBUIÇÃO","name":"TEMPO DE CONTRIBUIÇÃO","type":"character"}],"dataKey":"1e77d4c3eed091cb244afb91ae0da88b"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script><p>We illustrate the harmonization workflow using this dataset.
-<code>bra_hrmis</code> contains 12576 rows and 34 columns, covering
-covering demographic, employment, establishmental, and payroll
-information for public sector personnels.</p>
-<p>A quick glimpse of the dataset:</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://wb-pida-data-science-shop.github.io/govhr/">govhr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span></code></pre></div>
+<div class="section level2">
+<h2 id="why-harmonize">Why harmonize?<a class="anchor" aria-label="anchor" href="#why-harmonize"></a>
+</h2>
+<p>Governments collect HR data in their own conventions: column names,
+classifications, and identifiers rarely match a common standard.
+Harmonization re-expresses raw HR data extractions using the
+<code>govhr</code> <a href="https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html">Standard
+Data Dictionary</a>, organized into three modules:
+<strong>Establishment</strong>, <strong>Personnel</strong>, and
+<strong>Contract</strong>. Once harmonized, data becomes comparable
+across countries and over time, and can feed directly into
+<code>govhr</code>’s analytics functions.</p>
+<p>This article walks through harmonizing a synthetic dataset,
+<code>bra_hrmis</code>, built from a contract-level extract from
+Brazil’s HRMIS system in the Alagoas state, using the helper functions
+in <code>govhr</code>. The example focuses primarily on generating one
+module, Personnel, but a similar logic can be applied to the
+Establishment and Contract modules.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Rows: 12,576</span></span>
-<span><span class="co">## Columns: 34</span></span>
-<span><span class="co">## $ ANO_PAGAMENTO                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "2014"<span style="color: #949494;">, </span>"2014"<span style="color: #949494;">, </span>"2014"<span style="color: #949494;">, </span>"2014"<span style="color: #949494;">, </span>"201…</span></span>
-<span><span class="co">## $ MES_REFERENCIA                    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "8"<span style="color: #949494;">, </span>"8"<span style="color: #949494;">, </span>"8"<span style="color: #949494;">, </span>"8"<span style="color: #949494;">, </span>"8"<span style="color: #949494;">, </span>"8"<span style="color: #949494;">, </span>"8"<span style="color: #949494;">, </span>"…</span></span>
-<span><span class="co">## $ MATRICULA                         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "242"<span style="color: #949494;">, </span>"1613"<span style="color: #949494;">, </span>"1691"<span style="color: #949494;">, </span>"1704"<span style="color: #949494;">, </span>"1711…</span></span>
-<span><span class="co">## $ CPF                               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "49670581400"<span style="color: #949494;">, </span>"46895175415"<span style="color: #949494;">, </span>"51663…</span></span>
-<span><span class="co">## $ DATA_NASCIMENTO                   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "23973"<span style="color: #949494;">, </span>"24265"<span style="color: #949494;">, </span>"25050"<span style="color: #949494;">, </span>"27527"<span style="color: #949494;">, </span>…</span></span>
-<span><span class="co">## $ GENERO                            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "FEMININO"<span style="color: #949494;">, </span>"MASCULINO"<span style="color: #949494;">, </span>"MASCULINO"…</span></span>
-<span><span class="co">## $ ESCOLARIDADE                      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "5 A 8 SERIE DO PRIM. GRAU INCOMPLET…</span></span>
-<span><span class="co">## $ DATA_ADMISSAO                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "31564"<span style="color: #949494;">, </span>"32177"<span style="color: #949494;">, </span>"36075"<span style="color: #949494;">, </span>"36075"<span style="color: #949494;">, </span>…</span></span>
-<span><span class="co">## $ ADMINISTRACAO                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "DIRETA"<span style="color: #949494;">, </span>"DIRETA"<span style="color: #949494;">, </span>"DIRETA"<span style="color: #949494;">, </span>"DIRET…</span></span>
-<span><span class="co">## $ TIPO_CONTRATO                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "EFETIVO"<span style="color: #949494;">, </span>"EFETIVO"<span style="color: #949494;">, </span>"EFETIVO"<span style="color: #949494;">, </span>"EF…</span></span>
-<span><span class="co">## $ GRUPO                             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "OUTROS"<span style="color: #949494;">, </span>"OUTROS"<span style="color: #949494;">, </span>"OUTROS"<span style="color: #949494;">, </span>"OUTRO…</span></span>
-<span><span class="co">## $ COD_ORGAO                         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "301101"<span style="color: #949494;">, </span>"301203"<span style="color: #949494;">, </span>"301203"<span style="color: #949494;">, </span>"30120…</span></span>
-<span><span class="co">## $ ORGAO                             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "GABINETE CIVIL"<span style="color: #949494;">, </span>"CORPO DE BOMBEIRO…</span></span>
-<span><span class="co">## $ CARREIRA                          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "AGENTE ADMINISTRATIVO"<span style="color: #949494;">, </span>"CAPITAO"<span style="color: #949494;">, </span>…</span></span>
-<span><span class="co">## $ CARGO                             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "AGENTE ADMINISTRATIVO"<span style="color: #949494;">, </span>"CAPITAO"<span style="color: #949494;">, </span>…</span></span>
-<span><span class="co">## $ JORNADA                           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "30"<span style="color: #949494;">, </span>"40"<span style="color: #949494;">, </span>"40"<span style="color: #949494;">, </span>"40"<span style="color: #949494;">, </span>"40"<span style="color: #949494;">, </span>"40"<span style="color: #949494;">, </span>…</span></span>
-<span><span class="co">## $ CLASSE                            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "C"<span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">,</span>…</span></span>
-<span><span class="co">## $ NIVEL                             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ACMNC30"<span style="color: #949494;">, </span>"TC2"<span style="color: #949494;">, </span>"2SGT2"<span style="color: #949494;">, </span>"ST2"<span style="color: #949494;">, </span>"2…</span></span>
-<span><span class="co">## $ DATA_ULT_PROGRESSAO               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "42941"<span style="color: #949494;">, </span>"43392"<span style="color: #949494;">, </span>"43388"<span style="color: #949494;">, </span>"43381"<span style="color: #949494;">, </span>…</span></span>
-<span><span class="co">## $ SALARIO_BASE                      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "712.68"<span style="color: #949494;">, </span>"9695.81"<span style="color: #949494;">, </span>"4087.87"<span style="color: #949494;">, </span>"473…</span></span>
-<span><span class="co">## $ CONTRIBUICAO_PREVIDENCIA          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"…</span></span>
-<span><span class="co">## $ ADICIONAL_TEMPO_SERVICO           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"…</span></span>
-<span><span class="co">## $ COMISSAO                          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"648.66999999999996"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">,</span>…</span></span>
-<span><span class="co">## $ ABONO_PERMANENCIA                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"…</span></span>
-<span><span class="co">## $ DECISAO_JUDICIAL                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"…</span></span>
-<span><span class="co">## $ DEMAIS_GRATIFICACOES_TRANSITORIAS <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "11.32"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"1…</span></span>
-<span><span class="co">## $ DEMAIS_GRATIFICACOES_CARREIRA     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"0"<span style="color: #949494;">, </span>"…</span></span>
-<span><span class="co">## $ SALARIO_BRUTO                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "724"<span style="color: #949494;">, </span>"9695.81"<span style="color: #949494;">, </span>"4736.54"<span style="color: #949494;">, </span>"4736.5…</span></span>
-<span><span class="co">## $ SALARIO_LIQUIDO                   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "724"<span style="color: #949494;">, </span>"8148.92"<span style="color: #949494;">, </span>"4359.649999999999…</span></span>
-<span><span class="co">## $ DATA_APOSENTADORIA                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span>…</span></span>
-<span><span class="co">## $ VALOR_BRUTO                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span>…</span></span>
-<span><span class="co">## $ VALOR_LIQUIDO                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span>…</span></span>
-<span><span class="co">## $ TIPO                              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span>…</span></span>
-<span><span class="co">## $ `TEMPO DE CONTRIBUIÇÃO`           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span>…</span></span></code></pre>
-<p>This will give you a brief, surface level overview of the dataset.
-You should see the dimensions of the data (i.e. number of rows and
-columns) and variable types and perhaps begin to get a sense for
-completeness (or the lack thereof) for certain variables.</p>
-</div>
+<code class="sourceCode R"><span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis.html">bra_hrmis</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 12576    34</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="the-harmonization-process">The Harmonization Process<a class="anchor" aria-label="anchor" href="#the-harmonization-process"></a>
+<h2 id="step-1-check-column-consistency">Step 1: check column consistency<a class="anchor" aria-label="anchor" href="#step-1-check-column-consistency"></a>
 </h2>
-<div class="section level3">
-<h3 id="introduction-1">Introduction<a class="anchor" aria-label="anchor" href="#introduction-1"></a>
-</h3>
-<p>The goal of the harmonization process is to establish a consistent
-and standardized structure for cleaned HR datasets, ensuring that
-analytics supporting government human resources management from a common
-analytical foundation. In many client countries, HRM analytics are
-conducted in an ad-hoc, highly customized manner that varies by
-consultant, ministry, year, and even dataset. This leads to high
-analytical costs, limited comparability over time or across
-institutions, and significant barriers to scaling evidence-based human
-resource reform.</p>
-<p>The harmonization framework addresses these challenges directly. By
-defining a clear data dictionary and a set of standardized
-transformations, governments can prepare their HRMIS data in a format
-that is analytically ready and fully compatible with the tools provided
-in the <code>govhr</code> package. This ensures:</p>
-<ul>
-<li>
-<strong>Reproducible and transparent workflows</strong><br>
-</li>
-<li>
-<strong>Cross-country and cross-institution
-comparability</strong><br>
-</li>
-<li>
-<strong>Automatic generation of quality checks and
-dashboards</strong><br>
-</li>
-<li><strong>Reduced data preparation cost for each new
-engagement</strong></li>
-</ul>
-<p>The remainder of this section documents the harmonization steps for
-each of the three core modules derived from the data dictionary:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Contract Module</strong><br>
-</li>
-<li><strong>Personnel Module</strong></li>
-<li>
-<strong>Establishment Module</strong> Each module represents a
-specific level of analysis defined by the dictionary and is to be
-constructed directly from the raw HRMIS data.</li>
-</ol>
-<hr>
+<p>Before harmonizing, it’s useful to check whether raw data sources
+(e.g. multiple years or offices) share a consistent column naming (i.e.,
+schema). <code><a href="../reference/find_inconsistent_colnames.html">find_inconsistent_colnames()</a></code> flags columns that
+aren’t shared across all sources.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># simulate two extracts with slightly different schemas</span></span>
+<span><span class="va">extract_2020</span> <span class="op">&lt;-</span> <span class="va">bra_hrmis</span><span class="op">[</span><span class="va">ANO_PAGAMENTO</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">ANO_PAGAMENTO</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">extract_2021</span> <span class="op">&lt;-</span> <span class="va">bra_hrmis</span><span class="op">[</span><span class="va">ANO_PAGAMENTO</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">ANO_PAGAMENTO</span><span class="op">)</span><span class="op">]</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/find_inconsistent_colnames.html">find_inconsistent_colnames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">extract_2020</span>, <span class="va">extract_2021</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 1</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 variable: colnames &lt;chr&gt;</span></span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="harmonizing-the-contract-module">Harmonizing the Contract Module<a class="anchor" aria-label="anchor" href="#harmonizing-the-contract-module"></a>
-</h3>
-<p>The Contract Module is the foundational component of the harmonized
-payroll dataset. The purpose of this module is to extract and structure
-all information that is <strong>unique at a contract, reference date
-level</strong>, as defined in the data dictionary. A “contract record”
-refers to a personnel–contract relationship at a specific reference
-period (usually month–year), capturing the contractual characteristics
-governing the personnel’s employment at that time.</p>
-<p>In practice, the raw HRMIS data typically mixes variables at
-different conceptual levels—personnel attributes, position attributes,
-contract terms, payroll events, and sometimes even one-off
-administrative transactions.</p>
-<p>Working with payroll or HRMIS data in many developing-country
-contexts often involves very large datasets—sometimes millions of
-records spanning multiple years. Such data volumes can quickly overwhelm
-standard analytical workflows if not handled using efficient tools.</p>
-<p>In R, there are several paradigms for manipulating two-dimensional
-data. For the purposes of this tutorial, we rely on the data.table
-package for the tasks that are more computationally intensive. At the
-time of writing, data.table remains the gold standard for
-high-performance data processing in R, offering exceptional speed,
-efficient memory use, and an expressive syntax tailored for large
-datasets.</p>
-<p>Although the dplyr package from the tidyverse ecosystem is widely
-used and favored for its readability and intuitive grammar, operations
-on large payroll datasets can be substantially slower when using dplyr
-alone. To ensure reproducibility, performance, and
-scalability—especially for teams with limited computational resources—we
-adopt data.table as the primary engine for harmonization. However, we
-will also use the dplyr functions where performance is not improved to
-ensure code readability.</p>
-<p>The <code>bra_hrmis</code> data is written in Portuguese which might
-require translation to English to ease understanding. One option is to
-use an LLM like ChatGPT to get a quick as there are only 34 columns.
-Alternatively the <code>polyglotr</code> R package provides a suite
-functions that support translation. This can be applied as follows:</p>
+<div class="section level2">
+<h2 id="step-2-generate-module-identifiers">Step 2: generate module identifiers<a class="anchor" aria-label="anchor" href="#step-2-generate-module-identifiers"></a>
+</h2>
+<p>Harmonization requires knowing which column identifies a contract and
+which identifies a person. These are our primary keys, that is, unique
+identifiers for contracts and personnel, respectively.
+<code><a href="../reference/find_duplicate_ids.html">find_duplicate_ids()</a></code> is a quick way to test whether a
+candidate column is a valid unique key.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">raw_dictionary</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>raw_colnames_pt <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis.html">bra_hrmis</a></span><span class="op">)</span>,</span>
-<span>         raw_colnames_eng <span class="op">=</span> <span class="fu">polyglotr</span><span class="fu">::</span><span class="fu"><a href="https://tomeriko96.github.io/polyglotr/reference/google_translate.html" class="external-link">google_translate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span>, </span>
-<span>                            source_language <span class="op">=</span> <span class="st">"pt"</span>, </span>
-<span>                            target_language <span class="op">=</span> <span class="st">"en"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">kable</span><span class="op">(</span><span class="va">raw_dictionary</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="left">raw_colnames_pt</th>
-<th align="left">raw_colnames_eng</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">ANO_PAGAMENTO</td>
-<td align="left">PAYMENT_YEAR</td>
-</tr>
-<tr class="even">
-<td align="left">MES_REFERENCIA</td>
-<td align="left">MONTH_REFERENCE</td>
-</tr>
-<tr class="odd">
-<td align="left">MATRICULA</td>
-<td align="left">REGISTRATION</td>
-</tr>
-<tr class="even">
-<td align="left">CPF</td>
-<td align="left">CPF</td>
-</tr>
-<tr class="odd">
-<td align="left">DATA_NASCIMENTO</td>
-<td align="left">BIRTH_DATE</td>
-</tr>
-<tr class="even">
-<td align="left">GENERO</td>
-<td align="left">GENDER</td>
-</tr>
-<tr class="odd">
-<td align="left">ESCOLARIDADE</td>
-<td align="left">EDUCATION</td>
-</tr>
-<tr class="even">
-<td align="left">DATA_ADMISSAO</td>
-<td align="left">ADMISSION_DATE</td>
-</tr>
-<tr class="odd">
-<td align="left">ADMINISTRACAO</td>
-<td align="left">ADMINISTRATION</td>
-</tr>
-<tr class="even">
-<td align="left">TIPO_CONTRATO</td>
-<td align="left">CONTRACT_TYPE</td>
-</tr>
-<tr class="odd">
-<td align="left">GRUPO</td>
-<td align="left">GROUP</td>
-</tr>
-<tr class="even">
-<td align="left">COD_ORGAO</td>
-<td align="left">COD_ORGAO</td>
-</tr>
-<tr class="odd">
-<td align="left">ORGAO</td>
-<td align="left">ORGAN</td>
-</tr>
-<tr class="even">
-<td align="left">CARREIRA</td>
-<td align="left">CAREER</td>
-</tr>
-<tr class="odd">
-<td align="left">CARGO</td>
-<td align="left">POSITION</td>
-</tr>
-<tr class="even">
-<td align="left">JORNADA</td>
-<td align="left">JOURNEY</td>
-</tr>
-<tr class="odd">
-<td align="left">CLASSE</td>
-<td align="left">CLASS</td>
-</tr>
-<tr class="even">
-<td align="left">NIVEL</td>
-<td align="left">LEVEL</td>
-</tr>
-<tr class="odd">
-<td align="left">DATA_ULT_PROGRESSAO</td>
-<td align="left">DATA_ULT_PROGRESSAO</td>
-</tr>
-<tr class="even">
-<td align="left">SALARIO_BASE</td>
-<td align="left">BASE_SALARY</td>
-</tr>
-<tr class="odd">
-<td align="left">CONTRIBUICAO_PREVIDENCIA</td>
-<td align="left">CONTRIBUICAO_PREVIDENCIA</td>
-</tr>
-<tr class="even">
-<td align="left">ADICIONAL_TEMPO_SERVICO</td>
-<td align="left">ADDITIONAL_TIME_SERVICE</td>
-</tr>
-<tr class="odd">
-<td align="left">COMISSAO</td>
-<td align="left">COMMISSION</td>
-</tr>
-<tr class="even">
-<td align="left">ABONO_PERMANENCIA</td>
-<td align="left">ALLOWANCE_PERMANENCE</td>
-</tr>
-<tr class="odd">
-<td align="left">DECISAO_JUDICIAL</td>
-<td align="left">JUDICIAL_DECISION</td>
-</tr>
-<tr class="even">
-<td align="left">DEMAIS_GRATIFICACOES_TRANSITORIAS</td>
-<td align="left">OTHER_TRANSIT_GRATIFICATIONS</td>
-</tr>
-<tr class="odd">
-<td align="left">DEMAIS_GRATIFICACOES_CARREIRA</td>
-<td align="left">OTHER_GRATIFICATIONS_CARREIRA</td>
-</tr>
-<tr class="even">
-<td align="left">SALARIO_BRUTO</td>
-<td align="left">GROSS_SALARY</td>
-</tr>
-<tr class="odd">
-<td align="left">SALARIO_LIQUIDO</td>
-<td align="left">NET_SALARY</td>
-</tr>
-<tr class="even">
-<td align="left">DATA_APOSENTADORIA</td>
-<td align="left">RETIREMENT_DATE</td>
-</tr>
-<tr class="odd">
-<td align="left">VALOR_BRUTO</td>
-<td align="left">GROSS_VALUE</td>
-</tr>
-<tr class="even">
-<td align="left">VALOR_LIQUIDO</td>
-<td align="left">NET_VALUE</td>
-</tr>
-<tr class="odd">
-<td align="left">TIPO</td>
-<td align="left">TYPE</td>
-</tr>
-<tr class="even">
-<td align="left">TEMPO DE CONTRIBUIÇÃO</td>
-<td align="left">CONTRIBUTION TIME</td>
-</tr>
-</tbody>
-</table>
-<p>The first step when handling any raw payroll dataset is to find the
-individual to identifies each countract for each time period unique. We
-begin by looking through the <code>bra_hrmis</code> object for this.
-From the above table and the previous glimpse(), we can see that the
-<code>CPF</code> and <code>MATRICULA</code> variables are the most
-likely candidates to identify contracts uniquely. We do a quick check
-for this as follows:</p>
+<code class="sourceCode R"><span><span class="va">bra_hrmis</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_duplicate_ids.html">find_duplicate_ids</a></span><span class="op">(</span><span class="va">MATRICULA</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Index: &lt;ANO_PAGAMENTO&gt;</span></span>
+<span><span class="co">#&gt;       MATRICULA     n</span></span>
+<span><span class="co">#&gt;          &lt;char&gt; &lt;int&gt;</span></span>
+<span><span class="co">#&gt;    1:    100025    10</span></span>
+<span><span class="co">#&gt;    2:    100030     2</span></span>
+<span><span class="co">#&gt;    3:    100070    10</span></span>
+<span><span class="co">#&gt;    4:    100094    10</span></span>
+<span><span class="co">#&gt;    5:    100096    10</span></span>
+<span><span class="co">#&gt;   ---                </span></span>
+<span><span class="co">#&gt; 1961:     99772    10</span></span>
+<span><span class="co">#&gt; 1962:      9979     5</span></span>
+<span><span class="co">#&gt; 1963:     99851    10</span></span>
+<span><span class="co">#&gt; 1964:     99962    10</span></span>
+<span><span class="co">#&gt; 1965:     99990    10</span></span></code></pre></div>
+<p><code>MATRICULA</code> uniquely identifies a contract for a given
+reference date, so it becomes the <strong>contract identifier</strong>,
+or <code>contract_id</code> in our standard data dictionary.
+<code>CPF</code> will serve as the <strong>personnel
+identifier</strong>, the <code>personnel_id</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="step-3-map-raw-columns-to-standardized-names">Step 3: map raw columns to standardized names<a class="anchor" aria-label="anchor" href="#step-3-map-raw-columns-to-standardized-names"></a>
+</h2>
+<p>Raw data columns rarely match the naming conventions of the
+<code>govhr</code> standard dictionary. <code><a href="../reference/harmonize_columns.html">harmonize_columns()</a></code>
+renames the data with a key-value dictionary, keeping only the desired
+columns.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">### first let us convert the data to a data.table object to speed up our computations</span></span>
-<span></span>
-<span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Unique CPF per year</span></span>
-<span><span class="va">cpf_summary</span> <span class="op">&lt;-</span> <span class="va">bra_hrmis</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>unique_cpf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/duplicated.html" class="external-link">uniqueN</a></span><span class="op">(</span><span class="va">CPF</span><span class="op">)</span>,</span>
-<span>                             nobs       <span class="op">=</span> <span class="va">.N</span><span class="op">)</span>,</span>
-<span>                         by <span class="op">=</span> <span class="va">ANO_PAGAMENTO</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># Unique Matricula per year</span></span>
-<span><span class="va">mtr_summary</span> <span class="op">&lt;-</span> <span class="va">bra_hrmis</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>unique_mtr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/duplicated.html" class="external-link">uniqueN</a></span><span class="op">(</span><span class="va">MATRICULA</span><span class="op">)</span>,</span>
-<span>                             nobs       <span class="op">=</span> <span class="va">.N</span><span class="op">)</span>, </span>
-<span>                         by <span class="op">=</span> <span class="va">ANO_PAGAMENTO</span><span class="op">]</span></span>
-<span></span>
-<span><span class="fu">kable</span><span class="op">(</span><span class="va">cpf_summary</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="left">ANO_PAGAMENTO</th>
-<th align="right">unique_cpf</th>
-<th align="right">nobs</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">2014</td>
-<td align="right">1277</td>
-<td align="right">2302</td>
-</tr>
-<tr class="even">
-<td align="left">2015</td>
-<td align="right">1341</td>
-<td align="right">2423</td>
-</tr>
-<tr class="odd">
-<td align="left">2016</td>
-<td align="right">1573</td>
-<td align="right">2660</td>
-</tr>
-<tr class="even">
-<td align="left">2017</td>
-<td align="right">1545</td>
-<td align="right">2609</td>
-</tr>
-<tr class="odd">
-<td align="left">2018</td>
-<td align="right">1575</td>
-<td align="right">1661</td>
-</tr>
-<tr class="even">
-<td align="left">2019</td>
-<td align="right">880</td>
-<td align="right">921</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">kable</span><span class="op">(</span><span class="va">mtr_summary</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="left">ANO_PAGAMENTO</th>
-<th align="right">unique_mtr</th>
-<th align="right">nobs</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">2014</td>
-<td align="right">1335</td>
-<td align="right">2302</td>
-</tr>
-<tr class="even">
-<td align="left">2015</td>
-<td align="right">1436</td>
-<td align="right">2423</td>
-</tr>
-<tr class="odd">
-<td align="left">2016</td>
-<td align="right">1659</td>
-<td align="right">2660</td>
-</tr>
-<tr class="even">
-<td align="left">2017</td>
-<td align="right">1641</td>
-<td align="right">2609</td>
-</tr>
-<tr class="odd">
-<td align="left">2018</td>
-<td align="right">1661</td>
-<td align="right">1661</td>
-</tr>
-<tr class="even">
-<td align="left">2019</td>
-<td align="right">921</td>
-<td align="right">921</td>
-</tr>
-</tbody>
-</table>
-<p>This clearly shows that <code>MATRICULA</code> is the contract ID
-while <code>CPF</code> is possibly the identifier for the personnel, the
-latter will come in handy during the harmonization of the personnel
-module.</p>
-<p>Now, we can begin creating the set of variables as defined by the
-<code>standard_dictionary</code> vignette. It is often useful to begin
-by creating the derived variables. There are four sets of derived
-variables within the dictionary:</p>
-<ul>
-<li><ol style="list-style-type: decimal">
-<li>the Industrial Standard Classification of Occupation (ISCO)
-variables, i.e. <code>occupation_isconame</code>,
-<code>occupation_iscocode</code> are derived from the original
-occupation variables <code>occupation_native</code>,
-<code>occupation_english</code>. We apply the
-<code><a href="https://tomeriko96.github.io/polyglotr/reference/google_translate.html" class="external-link">polyglotr::google_translate()</a></code> function to convert
-Portuguese named occupations to English as well as use the
-<code>LabourR::classify_occupation()</code> function to classify these
-occupations to the level-4 isco names.</li>
-</ol></li>
-</ul>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#-----------------------------</span></span>
-<span><span class="co"># 2. Build occupation table (active + inactive)</span></span>
-<span><span class="co">#-----------------------------</span></span>
-<span></span>
-<span><span class="va">occup_df</span> <span class="op">&lt;-</span> <span class="va">bra_hrmis</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CARREIRA"</span>, <span class="st">"CARGO"</span><span class="op">)</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># distinct CARREIRA/CARGO/status</span></span>
-<span><span class="va">occup_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">occup_df</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Add translated vars</span></span>
-<span><span class="va">occup_df</span><span class="op">[</span>, <span class="va">occupation_native</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">tolower</a></span><span class="op">(</span><span class="va">CARREIRA</span><span class="op">)</span><span class="op">]</span></span>
-<span></span>
-<span><span class="va">occup_df</span><span class="op">[</span>, <span class="va">occupation_english</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">tolower</a></span><span class="op">(</span><span class="fu">polyglotr</span><span class="fu">::</span><span class="fu"><a href="https://tomeriko96.github.io/polyglotr/reference/google_translate.html" class="external-link">google_translate</a></span><span class="op">(</span>text <span class="op">=</span> <span class="va">occupation_native</span>,</span>
-<span>                                                                     source_language <span class="op">=</span> <span class="st">"pt"</span>,</span>
-<span>                                                                     target_language <span class="op">=</span> <span class="st">"en"</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">class_occup_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/copy.html" class="external-link">copy</a></span><span class="op">(</span><span class="va">occup_df</span><span class="op">)</span><span class="op">[</span>,</span>
-<span>  <span class="fu">.</span><span class="op">(</span>id <span class="op">=</span> <span class="va">.I</span>, text <span class="op">=</span> <span class="va">occupation_english</span><span class="op">)</span></span>
-<span><span class="op">]</span></span>
-<span></span>
-<span><span class="va">class_occup_df</span> <span class="op">&lt;-</span> <span class="fu">classify_occupation</span><span class="op">(</span></span>
-<span>  <span class="va">class_occup_df</span>,</span>
-<span>  isco_level <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>  lang <span class="op">=</span> <span class="st">"en"</span>,</span>
-<span>  num_leaves <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<div class="reactable html-widget html-fill-item" id="htmlwidget-e5c8c404fe174e4c81bd" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-e5c8c404fe174e4c81bd">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"id":["1","10","100","1000","1001","1002","1003","1004","1005","1006","1007","1008","1009","101","1010","1011","1012","1013","1014","1015","1016","1017","1018","1019","102","1020","1021","1022","1023","1024","1025","1026","1027","1028","1029","103","1030","1031","1032","1033","1034","1035","1036","1037","1038","1039","104","1040","1041","1042","1043","1044","1045","1046","1047","1048","1049","105","1050","1051","1052","1053","1054","1055","1056","1057","1058","1059","106","1060","1061","1062","1063","1064","1065","1066","1067","1068","1069","107","1070","1071","1072","1073","1074","1075","1076","1077","1078","1079","108","1080","1081","1082","1083","1084","1085","1086","1087","1088"],"iscoGroup":["0110","0110","1219","3112","3112","3112","3112","3112","3112","3112","3112","3112","3112","1219","3112","3112","3112","3112","3112","3112","3112","3112","3112","3112","1219","3112","3112","3112","3112","3112","3112","3112","3112","3112","3112","1219","3112","3112","3112","3112","3112","3112","3112","3112","3112","3112","1219","3112","3112","3112","3112","3112","3112","3112","3112","3112","3113","1219","3114","3114","3115","3115","3118","3118","3118","3118","3118","3118","1219","3119","3119","3119","3119","3119","3119","3119","3119","3119","3119","1219","3119","3119","3119","3119","3119","3119","3119","3119","3119","3119","1219","3119","3119","3119","3119","3119","3119","3119","3119","3119"],"preferredLabel":["Commissioned armed forces officers","Commissioned armed forces officers","Business services and administration managers not elsewhere classified","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Business services and administration managers not elsewhere classified","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Business services and administration managers not elsewhere classified","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Business services and administration managers not elsewhere classified","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Business services and administration managers not elsewhere classified","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Civil engineering technicians","Electrical engineering technicians","Business services and administration managers not elsewhere classified","Electronics engineering technicians","Electronics engineering technicians","Mechanical engineering technicians","Mechanical engineering technicians","Draughtspersons","Draughtspersons","Draughtspersons","Draughtspersons","Draughtspersons","Draughtspersons","Business services and administration managers not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Business services and administration managers not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Business services and administration managers not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified","Physical and engineering science technicians not elsewhere classified"]},"columns":[{"id":"id","name":"id","type":"character"},{"id":"iscoGroup","name":"iscoGroup","type":"character"},{"id":"preferredLabel","name":"preferredLabel","type":"character"}],"dataKey":"d86771e820df287d5dd2e28d99f0ca6a"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#-----------------------------</span></span>
-<span><span class="co"># 4. Merge classification back into occup_df</span></span>
-<span><span class="co">#-----------------------------</span></span>
-<span><span class="va">occup_df</span><span class="op">[</span>, <span class="va">id</span> <span class="op">:=</span> <span class="va">.I</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># merge iscoGroup</span></span>
-<span><span class="va">occup_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span></span>
-<span>  <span class="va">occup_df</span>,</span>
-<span>  <span class="va">class_occup_df</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span>, <span class="va">iscoGroup</span><span class="op">)</span><span class="op">]</span>,</span>
-<span>  by <span class="op">=</span> <span class="st">"id"</span>,</span>
-<span>  all.x <span class="op">=</span> <span class="cn">TRUE</span></span>
+<code class="sourceCode R"><span><span class="va">column_dictionary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  contract_id  <span class="op">=</span> <span class="st">"MATRICULA"</span>,</span>
+<span>  personnel_id <span class="op">=</span> <span class="st">"CPF"</span>,</span>
+<span>  est_id       <span class="op">=</span> <span class="st">"ORGAO"</span>,</span>
+<span>  paygrade     <span class="op">=</span> <span class="st">"CLASSE"</span>,</span>
+<span>  seniority    <span class="op">=</span> <span class="st">"NIVEL"</span>,</span>
+<span>  gender       <span class="op">=</span> <span class="st">"GENERO"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">occup_df</span>, <span class="st">"iscoGroup"</span>, <span class="st">"occupation_iscocode"</span><span class="op">)</span></span>
+<span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_columns.html">harmonize_columns</a></span><span class="op">(</span><span class="va">bra_hrmis</span>, <span class="va">column_dictionary</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">column_dictionary</span><span class="op">)</span>, with <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">[</span></span>
+<span>    ,</span>
+<span>    <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">column_dictionary</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    with <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">]</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="building-reference-dates">Building reference dates<a class="anchor" aria-label="anchor" href="#building-reference-dates"></a>
+</h2>
+<p>Dates are often stored as serial numbers or split across year/month
+columns. Once a <code>ref_date</code> column is built,
+<code><a href="../reference/guess_date_frequency.html">guess_date_frequency()</a></code> confirms the reporting interval —
+useful for choosing the right window when computing growth or turnover
+indicators later.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">ref_date</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">ANO_PAGAMENTO</span>, <span class="va">MES_REFERENCIA</span>, <span class="st">"01"</span>, sep <span class="op">=</span> <span class="st">"-"</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
-<span><span class="co"># merge ISCO descriptions</span></span>
-<span><span class="va">occup_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">occup_df</span>,</span>
-<span>                  <span class="va">isco</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"unit"</span>, <span class="st">"description"</span><span class="op">)</span><span class="op">]</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                  by.x <span class="op">=</span> <span class="st">"occupation_iscocode"</span>,</span>
-<span>                  by.y <span class="op">=</span> <span class="st">"unit"</span>,</span>
-<span>                  all.x <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">occup_df</span>, <span class="st">"description"</span>, <span class="st">"occupation_isconame"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">#-----------------------------</span></span>
-<span><span class="co"># 5. Bring classified occupations back to bra_hrmis (active only)</span></span>
-<span><span class="co">#-----------------------------</span></span>
-<span></span>
-<span><span class="co">## Remove duplicates from occup_df before merging</span></span>
-<span><span class="va">occup_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">occup_df</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CARREIRA"</span>, <span class="st">"CARGO"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">## we perform a left join with data.table syntax for speed as the merging into </span></span>
-<span><span class="co">## the hrmis dataset could be computationally intensive</span></span>
-<span></span>
-<span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="va">occup_df</span><span class="op">[</span><span class="va">bra_hrmis</span>, on <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CARREIRA"</span>, <span class="st">"CARGO"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
-<ul>
-<li><ol start="2" style="list-style-type: decimal">
-<li>the date variables (<code>ref_date</code>, <code>start_date</code>,
-<code>end_date</code>) are often in the serial 5-digit format and need
-to be standardized as they will be used in preparing the compensation
-variables which are time-variant. Below, we create the date
-variables:</li>
-</ol></li>
-</ul>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">### lets include the dates</span></span>
-<span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">ref_date</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">ANO_PAGAMENTO</span>, <span class="va">MES_REFERENCIA</span>, <span class="st">"01"</span>, sep <span class="op">=</span> <span class="st">"-"</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">bra_hrmis</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DATA_ADMISSAO"</span>, <span class="st">"DATA_APOSENTADORIA"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"start_date"</span>, <span class="st">"end_date"</span><span class="op">)</span>, skip_absent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">start_date</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">start_date</span><span class="op">)</span>, origin <span class="op">=</span> <span class="st">"1899-12-30"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">end_date</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">end_date</span><span class="op">)</span>, origin <span class="op">=</span> <span class="st">"1899-12-30"</span><span class="op">)</span><span class="op">]</span></span>
-<span></span>
-<span></span>
-<span><span class="co">### lets include the country code and admin identifier</span></span>
+<span><span class="va">bra_hrmis</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/guess_date_frequency.html">guess_date_frequency</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "quarter"</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="deduping-values">Deduping values<a class="anchor" aria-label="anchor" href="#deduping-values"></a>
+</h2>
+<p>Attributes like education and gender should be constant for a given
+personnel-period, but raw data sometimes disagrees across rows for the
+same <code>personnel_id</code>/<code>ref_date</code> (e.g. due to
+concurrent contracts). <code><a href="../reference/dedup_values.html">dedup_values()</a></code> resolves this using a
+chosen strategy — here, the modal value.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup_values.html">dedup_values</a></span><span class="op">(</span></span>
+<span>  <span class="va">bra_hrmis</span>,</span>
+<span>  id_col <span class="op">=</span> <span class="va">personnel_id</span>,</span>
+<span>  date_col <span class="op">=</span> <span class="va">ref_date</span>,</span>
+<span>  value_col <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"mode"</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">personnel_id</span>, <span class="va">ref_date</span>, <span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">right_join</a></span><span class="op">(</span></span>
+<span>    <span class="va">bra_hrmis</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">gender</span><span class="op">)</span>,</span>
+<span>    by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"personnel_id"</span>, <span class="st">"ref_date"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="deflating-wages">Deflating wages<a class="anchor" aria-label="anchor" href="#deflating-wages"></a>
+</h2>
+<p>Nominal wages in local currency aren’t comparable across time or
+countries. <code><a href="../reference/convert_constant_ppp.html">convert_constant_ppp()</a></code> uses the bundled
+<code>macro_indicators</code> dataset (with CPI and PPP conversion
+factors) to convert local currency units into international dollars.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span></span>
+<span>  <span class="va">bra_hrmis</span>,</span>
+<span>  old <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SALARIO_BASE"</span>, <span class="st">"SALARIO_BRUTO"</span>, <span class="st">"SALARIO_LIQUIDO"</span><span class="op">)</span>,</span>
+<span>  new <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"base_salary_lcu"</span>, <span class="st">"gross_salary_lcu"</span>, <span class="st">"net_salary_lcu"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">country_code</span> <span class="op">:=</span> <span class="st">"BRA"</span><span class="op">]</span></span>
-<span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">country_name</span> <span class="op">:=</span> <span class="st">"Brazil"</span><span class="op">]</span></span>
-<span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">adm1_name</span> <span class="op">:=</span> <span class="st">"Alagoas"</span><span class="op">]</span></span>
-<span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">adm1_code</span> <span class="op">:=</span> <span class="st">"AL"</span><span class="op">]</span></span></code></pre></div>
-<ul>
-<li><ol start="3" style="list-style-type: decimal">
-<li>the compensation variables i.e. <code>gross_salary_ppp</code>,
-<code>base_salary_ppp</code>, <code>net_salary_ppp</code> which are all
-derived from the local currency equivalents
-<code>gross_salary_lcu</code>, <code>base_salary_lcu</code>,
-<code>net_salary_lcu</code>. We provide a function called
-<code><a href="../reference/convert_constant_ppp.html">convert_constant_ppp()</a></code> as well as a
-<code>macro_indicators</code> dataset with this package to perform these
-transformations between the nominal variables (i.e. _lcu) and their real
-equivalents (_ppp).</li>
-</ol></li>
-</ul>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">### lets convert the nominal compensation variables to real (_ppp) values</span></span>
-<span><span class="co"># Step 1: Create the _lcu salary variables (in-place, no copy)</span></span>
 <span></span>
-<span><span class="co">### lets rename the raw variables here to their actual names</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">bra_hrmis</span>, </span>
-<span>         old <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SALARIO_BASE"</span>, <span class="st">"SALARIO_BRUTO"</span>, <span class="st">"SALARIO_LIQUIDO"</span>, <span class="st">"ABONO_PERMANENCIA"</span><span class="op">)</span>,</span>
-<span>         new <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"base_salary_lcu"</span>, <span class="st">"gross_salary_lcu"</span>, <span class="st">"net_salary_lcu"</span>, <span class="st">"allowance_lcu"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">salary_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"_lcu$"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="op">(</span><span class="va">salary_cols</span><span class="op">)</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">.SD</span>, <span class="va">as.numeric</span><span class="op">)</span>, .SDcols <span class="op">=</span> <span class="va">salary_cols</span><span class="op">]</span></span>
 <span></span>
+<span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/convert_constant_ppp.html">convert_constant_ppp</a></span><span class="op">(</span><span class="va">bra_hrmis</span>, cols <span class="op">=</span> <span class="va">salary_cols</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Step 2: Identify all *_lcu columns to convert</span></span>
-<span><span class="va">cols_to_convert</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"_lcu$"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Step 3: Apply PPP conversion using your convert_constant_ppp function</span></span>
-<span><span class="va">pfw_df</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="va">macro_indicators</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">country_code</span> <span class="op">==</span> <span class="st">"BRA"</span>, </span>
-<span>                <span class="va">year</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">$</span><span class="va">ANO_PAGAMENTO</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"country_code"</span>, <span class="st">"year"</span>, <span class="st">"cpi"</span>, <span class="st">"ppp"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span></span>
-<span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="op">(</span><span class="va">cols_to_convert</span><span class="op">)</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">.SD</span>, <span class="va">as.numeric</span><span class="op">)</span>, .SDcols <span class="op">=</span> <span class="va">cols_to_convert</span><span class="op">]</span></span>
-<span></span>
-<span></span>
-<span><span class="co">### apply the convert_constant_ppp function to produce those estimates</span></span>
-<span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/convert_constant_ppp.html">convert_constant_ppp</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">bra_hrmis</span>, cols <span class="op">=</span> <span class="va">cols_to_convert</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">### while we are at this lets include the working hour variable as well</span></span>
-<span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">whours</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">JORNADA</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
-<ul>
-<li><ol start="4" style="list-style-type: decimal">
-<li>the contract type variable <code>TIPO_CONTRATO</code> needs to be
-reclassified according to the dictionary, <code>contract_type</code>. We
-do so as follows:</li>
-</ol></li>
-</ul>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">### create a little dictionary mapping all the raw classes into a contract type in a data.table</span></span>
-<span><span class="va">contract_dict</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table</a></span><span class="op">(</span>TIPO_CONTRATO <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">$</span><span class="va">TIPO_CONTRATO</span><span class="op">)</span>,</span>
-<span>             contract_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"short-term"</span>, <span class="st">"permanent"</span>, <span class="st">"permanent"</span>, <span class="st">"open-term"</span>,</span>
-<span>                               <span class="st">"short-term"</span>, <span class="st">"inactive"</span>, <span class="st">"retired"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">kable</span><span class="op">(</span><span class="va">contract_dict</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="left">TIPO_CONTRATO</th>
-<th align="left">contract_type</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">EFETIVO</td>
-<td align="left">short-term</td>
-</tr>
-<tr class="even">
-<td align="left">EFETIVO COMISSIONADO</td>
-<td align="left">permanent</td>
-</tr>
-<tr class="odd">
-<td align="left">TEMPORÁRIO</td>
-<td align="left">permanent</td>
-</tr>
-<tr class="even">
-<td align="left">EXCLUSIVAMENTE COMISSIONADO</td>
-<td align="left">open-term</td>
-</tr>
-<tr class="odd">
-<td align="left">TEMPOR¡RIO</td>
-<td align="left">short-term</td>
-</tr>
-<tr class="even">
-<td align="left">INATIVO</td>
-<td align="left">inactive</td>
-</tr>
-<tr class="odd">
-<td align="left">PENSIONISTA</td>
-<td align="left">retired</td>
-</tr>
-</tbody>
-</table>
-<p>Let’s do a data.table join of the <code>contract_dict</code> into the
-<code>bra_hrmis</code></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="va">contract_dict</span><span class="op">[</span><span class="va">bra_hrmis</span>, on <span class="op">=</span> <span class="st">"TIPO_CONTRATO"</span><span class="op">]</span></span></code></pre></div>
-<p>Now that the derived variables in this contract module have been
-created, we are ready to create the rest of the variables all at once to
-finalize the module.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">bra_hrmis</span>,</span>
-<span>         old <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MATRICULA"</span>, <span class="st">"CPF"</span>, <span class="st">"ORGAO"</span>, <span class="st">"CLASSE"</span>, <span class="st">"NIVEL"</span><span class="op">)</span>,</span>
-<span>         new <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contract_id"</span>, <span class="st">"personnel_id"</span>, <span class="st">"est_id"</span>, <span class="st">"paygrade"</span>, <span class="st">"seniority"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span></span>
-<span><span class="co">### now let us select the final set of dictionary variables to complete the module</span></span>
-<span><span class="co">### lets use dplyr::select() function since this will not add any computational time</span></span>
-<span><span class="va">bra_hrmis_contract</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="va">bra_hrmis</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span></span>
-<span>    <span class="va">contract_id</span>, <span class="va">personnel_id</span>, <span class="va">est_id</span>,</span>
-<span>    <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">ends_with</a></span><span class="op">(</span><span class="st">"_date"</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">contains</a></span><span class="op">(</span><span class="st">"_salary_"</span><span class="op">)</span>,</span>
-<span>    <span class="va">contract_type</span>, </span>
-<span>    <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"occupation_"</span><span class="op">)</span>,</span>
-<span>    <span class="va">country_code</span>, <span class="va">country_name</span>,</span>
-<span>    <span class="va">adm1_name</span>, <span class="va">adm1_code</span>,</span>
-<span>    <span class="va">whours</span>, <span class="va">paygrade</span>, <span class="va">seniority</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-<p>Here is what our final data looks like:</p>
-<div class="reactable html-widget html-fill-item" id="htmlwidget-36aa3d2a04d42bbc2145" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-36aa3d2a04d42bbc2145">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"contract_id":["242","1613","1691","1704","1711","1754","1757","1760","1766","1796","1797","1819","1929","1993","2477","2655","3414","3415","3494","3931","3939","3950","3987","4018","4046","4067","4181","4227","4255","4278","4296","4337","4493","4603","4608","4611","4651","4673","5217","5220","5869","5937","5961","5965","6176","6617","6653","7100","7153","8431","8552","8637","8657","8849","9026","9590","9761","9805","10079","10844","11033","11821","11845","11963","13780","13932","15291","15635","16191","16436","16492","17225","17419","17733","18401","19023","19131","19683","19814","20789","21075","21287","21297","21464","21516","21649","21817","21878","21998","22479","22996","23023","23684","24307","24904","24998","25282","25462","25758","25943"],"personnel_id":["49670581400","46895175415","51663961468","2107011451","82801525472","2275616438","105271411","52936961491","74131591472","95437304404","1844533484","78636736404","2048711405","31006906487","20858272415","30706114434","30180333453","11091304491","20997205415","17747252404","38280647449","22299386491","47235870478","20962924415","9950516404","9717650497","20909241449","15165256472","9787615534","16260490410","11113812400","19073739420","30824729404","34857265400","44481098449","14434180487","34633405420","41115597434","14000385453","20919492487","22314679415","38245680478","16389492472","34834710491","22317066449","22795685434","16338693420","15381161468","22302743415","33149640482","22918140449","27199541449","20903111420","47358831420","22749519420","8740224449","16442962415","27065561453","13992139468","46883177434","51620057468","20874812453","28019164472","20909640491","8769613400","31344305415","14325730478","34918809472","15396134453","46881905491","37625314472","46902538468","48385794468","44923163453","35061529472","38413990459","34858059472","13369091453","20944853404","12397903415","45374562487","35221275449","45555680449","34907653468","33211906487","30435650459","36436879404","47005920449","24101150478","41163451487","44510063415","34843108472","51161362487","38241030444","7896905434","11109637420","45346704434","16408985491","39688445487","38262924487"],"est_id":["GABINETE CIVIL","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","PROCURADORIA GERAL DO ESTADO","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA MULHER CIDADANIA DIREITOS HUMANOS","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO"],"start_date":["1986-06-01","1988-02-04","1998-10-07","1998-10-07","1998-10-07","1994-04-20","1994-04-20","1994-04-20","1994-04-20","1994-04-20","1994-04-20","1994-04-20","1994-04-20","1982-02-11","1985-07-12","1982-03-01","1981-09-10","1981-09-10","1982-03-13","1982-02-16","1982-03-12","1982-03-09","1984-11-05","1984-11-05","1981-07-01","1981-07-01","1982-02-17","1982-02-17","1982-02-17","1982-02-15","1984-11-05","1982-01-01","1985-07-09","1985-07-09","1985-07-09","1985-07-09","1985-07-09","1985-07-09","1982-08-02","1980-11-01","1989-11-14","1982-07-13","1982-08-12","1982-08-13","1983-01-28","1982-08-11","1982-08-13","1982-08-06","1982-08-13","1981-05-19","1982-03-30","1982-04-12","1982-03-23","1985-06-26","1981-05-21","1976-05-14","1976-04-14","1982-03-26","1984-04-12","1984-10-03","1985-06-01","1982-08-12","1982-03-26","1982-04-16","1980-05-28","1980-07-15","1985-05-14","1984-12-11","1985-01-02","1984-08-09","1984-08-10","1984-07-31","1985-07-12","1985-02-04","1985-07-12","1985-07-12","1985-07-10","1985-07-02","1985-07-03","1979-02-02","1985-03-15","1985-02-04","1985-02-04","1985-02-04","1985-02-04","1985-02-04","1985-03-21","1985-04-11","1985-03-21","1985-03-01","1985-03-01","1985-03-05","1985-07-12","1985-07-12","1985-10-03","1985-09-30","1985-12-31","1986-03-03","1986-03-03","1986-05-31"],"end_date":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"ref_date":["2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01"],"base_salary_lcu":[712.68,9695.81,4087.87,4736.55,4736.55,4016.04,4496.87,4016.04,4016.04,4016.04,4496.87,5204.89,4496.87,715.87,703.09,703.09,715.87,715.87,5396.02,173.86,173.86,173.86,2955.53,2955.53,173.86,173.86,2955.53,2955.53,2955.53,173.86,2955.53,173.86,173.86,173.86,173.86,173.86,173.86,173.86,1019.77,1338.53,1920.72,1350.57,703.09,703.09,4033.17,3841.43,2079.31,2079.31,3841.43,3841.43,1352.5,1620.69,715.87,924.5,4033.17,3841.43,4033.17,1038.9,1920.72,699.9,4033.17,1489.27,703.09,1225,4235.16,1350.57,1920.72,4033.17,699.9,703.09,880.48,1286.27,699.9,3841.43,712.68,1286.27,712.68,924.5,4033.17,1701.71,880.48,3841.43,4033.17,2016.6,3841.43,2016.6,1286.27,699.9,699.9,3841.43,3841.43,3841.43,989.43,699.9,1920.72,1920.72,4033.17,3841.43,3841.43,1286.26],"gross_salary_lcu":[724,9695.81,4736.54,4736.55,4736.55,4016.04,4663.41,4649.13,4496.86,4496.86,5204.88,5785.84,4496.87,1177.2,1166.87,1040.34,1040.34,941.2,6432.45,3647.74,3647.74,4365.33,21679.3,21504.93,3676.23,3647.74,14914.99,16655.07,14914.99,3647.74,24477.66,2448.91,4048.99,4377.28,3647.74,2372.39,3964.08,3933.63,1131.94,2055.17,1920.72,1350.57,724,724,4033.17,3841.43,2408.03,2079.31,3841.43,3841.43,1352.5,1620.69,1566.7,1232.66,4033.17,3841.43,4033.17,1038.9,1920.72,724,4033.17,1969.43,724,1225,4235.16,1350.57,1920.72,4033.17,724,1040.34,880.48,1286.27,724,3841.43,773.32,1286.27,724,924.5,4033.17,1888.9,880.48,3841.43,4665.83,2016.6,3841.43,2016.6,1286.27,724,724,3841.43,3841.43,4094.49,989.43,1040.34,1920.72,1920.72,4133.17,3841.43,3841.43,1386.26],"net_salary_lcu":[724,8148.92,4359.65,4166.98,4431.46,3922.76,4449.71,4426.74,4304.5,3845.11,4735.72,5405.87,4239.77,1177.2,1166.87,1040.34,1040.34,941.2,5652.91,3495.8,3495.8,4116.81,17260.16,17094.21,3526.72,3495.8,12090.7,13500.52,13259.05,3495.8,19338.37,2419.53,3831.21,4085.64,3495.8,2348.12,3764.69,3793.19,1131.94,2055.17,1920.72,1350.57,724,724,3828.49,3663.63,2378.67,2079.31,3663.63,3663.63,1352.5,1620.69,1566.7,1232.66,3828.49,3663.63,3828.49,1038.9,1920.72,724,3905.93,1969.43,724,1225,3990.03,1350.57,1920.72,3828.49,724,1040.34,880.48,1286.27,724,3744.5,773.32,1286.27,724,924.5,3828.49,1888.9,880.48,3663.63,4318.8,2016.6,3663.63,2016.6,1286.27,724,724,3663.63,3663.63,3871.27,989.43,1040.34,1920.72,1920.72,3905.99,3663.63,3663.63,1386.26],"base_salary_ppp":[197.33,2684.62,1131.87,1311.48,1311.48,1111.98,1245.11,1111.98,1111.98,1111.98,1245.11,1441.15,1245.11,198.21,194.67,194.67,198.21,198.21,1494.07,48.14,48.14,48.14,818.34,818.34,48.14,48.14,818.34,818.34,818.34,48.14,818.34,48.14,48.14,48.14,48.14,48.14,48.14,48.14,282.36,370.62,531.82,373.95,194.67,194.67,1116.72,1063.63,575.73,575.73,1063.63,1063.63,374.49,448.74,198.21,255.98,1116.72,1063.63,1116.72,287.66,531.82,193.79,1116.72,412.36,194.67,339.18,1172.65,373.95,531.82,1116.72,193.79,194.67,243.79,356.15,193.79,1063.63,197.33,356.15,197.33,255.98,1116.72,471.18,243.79,1063.63,1116.72,558.37,1063.63,558.37,356.15,193.79,193.79,1063.63,1063.63,1063.63,273.96,193.79,531.82,531.82,1116.72,1063.63,1063.63,356.15],"gross_salary_ppp":[200.46,2684.62,1311.47,1311.48,1311.48,1111.98,1291.23,1287.27,1245.11,1245.11,1441.15,1602.01,1245.11,325.95,323.09,288.05,288.05,260.6,1781.05,1010,1010,1208.69,6002.66,5954.38,1017.89,1010,4129.73,4611.53,4129.73,1010,6777.49,678.07,1121.1,1212,1010,656.88,1097.59,1089.16,313.42,569.04,531.82,373.95,200.46,200.46,1116.72,1063.63,666.75,575.73,1063.63,1063.63,374.49,448.74,433.8,341.3,1116.72,1063.63,1116.72,287.66,531.82,200.46,1116.72,545.3,200.46,339.18,1172.65,373.95,531.82,1116.72,200.46,288.05,243.79,356.15,200.46,1063.63,214.12,356.15,200.46,255.98,1116.72,523.01,243.79,1063.63,1291.9,558.37,1063.63,558.37,356.15,200.46,200.46,1063.63,1063.63,1133.7,273.96,288.05,531.82,531.82,1144.41,1063.63,1063.63,383.83],"net_salary_ppp":[200.46,2256.31,1207.12,1153.77,1227,1086.15,1232.06,1225.7,1191.85,1064.65,1311.25,1496.8,1173.93,325.95,323.09,288.05,288.05,260.6,1565.2,967.93,967.93,1139.88,4779.07,4733.12,976.49,967.93,3347.73,3738.09,3671.23,967.93,5354.5,669.93,1060.8,1131.25,967.93,650.16,1042.38,1050.28,313.42,569.04,531.82,373.95,200.46,200.46,1060.05,1014.4,658.62,575.73,1014.4,1014.4,374.49,448.74,433.8,341.3,1060.05,1014.4,1060.05,287.66,531.82,200.46,1081.49,545.3,200.46,339.18,1104.78,373.95,531.82,1060.05,200.46,288.05,243.79,356.15,200.46,1036.79,214.12,356.15,200.46,255.98,1060.05,523.01,243.79,1014.4,1195.81,558.37,1014.4,558.37,356.15,200.46,200.46,1014.4,1014.4,1071.89,273.96,288.05,531.82,531.82,1081.51,1014.4,1014.4,383.83],"contract_type":["short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","permanent","permanent","permanent","permanent","short-term","permanent","short-term","short-term","permanent","permanent","permanent","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","permanent","permanent","short-term","permanent","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","permanent","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","permanent","short-term","short-term","short-term","short-term","short-term","short-term","short-term","permanent","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","permanent","short-term","short-term","short-term","short-term","short-term","short-term","short-term","short-term","permanent","short-term","permanent","short-term","short-term","short-term","short-term","short-term","short-term"],"occupation_iscocode":["3341","3152","0210","0210","0210","0210","0210","0210","0210","0210","0210","0210","0210","9311","9311","9311","2149","2149","2635","9311","9311","9311","4312","4312","9311","9311","4221","4221","4221","9311","4312","9311","9311","9311","9311","9311","9311","9311","9311","2635","2310","3341","8332",null,"2310","2310","2310","2310","2310","2310",null,"3341","3341",null,"2310","2310","2511","3341","2310",null,"2310","2422","9311","3341","2310","3341","2310","2310","9311","9311","9311","4323","9311","2310","3341","9311","3119",null,"1345","2422","9311","2310","2310","2310","2310","2310","9311","9311","9311","3423","3423","3423","3341","9311","2310","2310","2310","2310","2310","3341"],"occupation_native":["agente administrativo","capitao","segundo sargento","primeiro sargento","primeiro sargento","terceiro sargento","segundo sargento","terceiro sargento","terceiro sargento","terceiro sargento","segundo sargento","primeiro sargento","segundo sargento","assistente de administrac","auxiliar de servicos dive","auxiliar de servicos dive","tecnico agricola","tecnico agricola","pesq informacoes sociais","assistente fazendario","assistente fazendario","assistente fazendario","fiscal de tributos estadu","fiscal de tributos estadu","assistente fazendario","assistente fazendario","agente controlador de arr","agente controlador de arr","agente controlador de arr","assistente fazendario","fiscal de tributos estadu","auxiliar fazendario","assistente fazendario","assistente fazendario","assistente fazendario","auxiliar fazendario","assistente fazendario","assistente fazendario","auxiliar de servicos dive","educador social","professor","agente administrativo","motorista","vigia","professor","professor","professor","professor","professor","professor","vigia","agente administrativo","agente administrativo","vigia","professor","professor","orientador educacional *","agente administrativo","professor","vigia","professor","oficial de apoio tecnico","auxiliar de servicos dive","agente administrativo","professor","agente administrativo","professor","professor","auxiliar de servicos dive","auxiliar de servicos dive","auxiliar de servicos dive","merendeira","auxiliar de servicos dive","professor","agente administrativo","auxiliar de servicos dive","tecnico de estatistica","vigia","supervisor escolar","oficial de apoio tecnico","auxiliar de servicos dive","professor","professor","professor","professor","professor","auxiliar de servicos dive","auxiliar de servicos dive","auxiliar de servicos dive","professor atividades","professor atividades","professor atividades","agente administrativo","auxiliar de servicos dive","professor","professor","professor","professor","professor","agente administrativo"],"occupation_english":["administrative agent","captain","second sergeant","first sergeant","first sergeant","third sergeant","second sergeant","third sergeant","third sergeant","third sergeant","second sergeant","first sergeant","second sergeant","administrac assistant","dive services assistant","dive services assistant","agricultural technician","agricultural technician","search social information","farmer assistant","farmer assistant","farmer assistant","state tax officer","state tax officer","farmer assistant","farmer assistant","arr controller agent","arr controller agent","arr controller agent","farmer assistant","state tax officer","farmer's assistant","farmer assistant","farmer assistant","farmer assistant","farmer's assistant","farmer assistant","farmer assistant","dive services assistant","social educator","professor","administrative agent","driver","watchman","professor","professor","professor","professor","professor","professor","watchman","administrative agent","administrative agent","watchman","professor","professor","educational advisor*","administrative agent","professor","watchman","professor","technical support officer","dive services assistant","administrative agent","professor","administrative agent","professor","professor","dive services assistant","dive services assistant","dive services assistant","lunch box","dive services assistant","professor","administrative agent","dive services assistant","statistics technician","watchman","school supervisor","technical support officer","dive services assistant","professor","professor","professor","professor","professor","dive services assistant","dive services assistant","dive services assistant","teacher activities","teacher activities","teacher activities","administrative agent","dive services assistant","professor","professor","professor","professor","professor","administrative agent"],"occupation_isconame":["Office Supervisors","Ships Deck Officers and Pilots","Non-commissioned Armed Forces Officers","Non-commissioned Armed Forces Officers","Non-commissioned Armed Forces Officers","Non-commissioned Armed Forces Officers","Non-commissioned Armed Forces Officers","Non-commissioned Armed Forces Officers","Non-commissioned Armed Forces Officers","Non-commissioned Armed Forces Officers","Non-commissioned Armed Forces Officers","Non-commissioned Armed Forces Officers","Non-commissioned Armed Forces Officers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Engineering Professionals Not Elsewhere Classified","Engineering Professionals Not Elsewhere Classified","Social Work and Counselling Professionals","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Statistical, Finance and Insurance Clerks","Statistical, Finance and Insurance Clerks","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Travel Consultants and Clerks","Travel Consultants and Clerks","Travel Consultants and Clerks","Mining and Quarrying Labourers","Statistical, Finance and Insurance Clerks","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Social Work and Counselling Professionals","University and Higher Education Teachers","Office Supervisors","Heavy Truck and Lorry Drivers",null,"University and Higher Education Teachers","University and Higher Education Teachers","University and Higher Education Teachers","University and Higher Education Teachers","University and Higher Education Teachers","University and Higher Education Teachers",null,"Office Supervisors","Office Supervisors",null,"University and Higher Education Teachers","University and Higher Education Teachers","Systems Analysts","Office Supervisors","University and Higher Education Teachers",null,"University and Higher Education Teachers","Policy Administration Professionals","Mining and Quarrying Labourers","Office Supervisors","University and Higher Education Teachers","Office Supervisors","University and Higher Education Teachers","University and Higher Education Teachers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Transport Clerks","Mining and Quarrying Labourers","University and Higher Education Teachers","Office Supervisors","Mining and Quarrying Labourers","Physical and Engineering Science Technicians Not Elsewhere Classified",null,"Education Managers","Policy Administration Professionals","Mining and Quarrying Labourers","University and Higher Education Teachers","University and Higher Education Teachers","University and Higher Education Teachers","University and Higher Education Teachers","University and Higher Education Teachers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Mining and Quarrying Labourers","Fitness and Recreation Instructors and Programme Leaders","Fitness and Recreation Instructors and Programme Leaders","Fitness and Recreation Instructors and Programme Leaders","Office Supervisors","Mining and Quarrying Labourers","University and Higher Education Teachers","University and Higher Education Teachers","University and Higher Education Teachers","University and Higher Education Teachers","University and Higher Education Teachers","Office Supervisors"],"country_code":["BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA"],"country_name":["Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil"],"adm1_name":["Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas"],"adm1_code":["AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL"],"whours":[30,40,40,40,40,40,40,40,40,40,40,40,40,30,40,40,30,30,40,30,30,30,40,40,30,30,40,40,40,30,40,30,30,30,30,30,30,30,40,30,20,30,40,40,40,40,40,40,40,40,30,30,30,30,40,40,40,30,20,40,40,30,40,30,40,30,20,40,40,40,30,30,40,40,30,30,30,30,40,30,30,40,40,20,40,20,30,40,40,40,40,40,30,40,20,20,40,40,40,30],"paygrade":["C",null,null,null,null,null,null,null,null,null,null,null,null,"C","C","C","C","C","D","D","D","D","4","4","D","D","4","4","4","D","4","D","D","D","D","D","D","D","C","C","D","E","C","C","D","D","D","D","D","D","E","E","C","D","D","D","D","E","D","B","D","D","C","C","D","D","D","D","B","C","C","D","B","D","B","D","B","C","D","F","C","D","D","D","D","D","D","B","B","D","D","D","C","B","D","D","D","D","D","D"],"seniority":["ACMNC30","TC2","2SGT2","ST2","2TEN2","2SGT2","1SGT2","1SGT2","2SGT2","2SGT2","1SGT2","2TEN2","1SGT2","ACMNC30","ACENC40","ACENC40","ACMNC30","ACMNC30","ASSND40","ASFD30","ASFD30","ASFD30","GOTF04","GOTF04","ASFD30","ASFD30","GOTF04","GOTF04","GOTF04","ASFD30","GOTF04","AUFD30","ASFD30","ASFD30","ASFD30","AUFD30","ASFD30","ASFD30","ACENC40","ACMNC30","AELPD20","AEM30E4","ACENC40","ACENC40","AEESD40","AELPD40","AEESD40","AEESD40","AELPD40","AELPD40","AEF30E3","AEM30E3","AEM30C1","AEF30D2","AEESD40","AELPD40","AEESD40","AEM30E2","AELPD20","ACENB40","AEESD40","ACMND30","ACENC40","AEM30C2","AEMED40","AEM30D2","AELPD20","AEESD40","ACENB40","ACENC40","AEF30C2","AEF30D3","ACENB40","AEESD40","AEM30B1","AEF30D3","ACMNB30","AEF30C2","AEESD40","AEM30F4","AEF30C2","AELPD40","AEESD40","AEESD20","AELPD40","AEESD20","AEF30D3","ACENB40","ACENB40","AELPD40","AELPD40","AELPD40","AEM30C1","AEF30B1","AELPD20","AELPD20","AEESD40","AELPD40","AELPD40","AEM30D4"]},"columns":[{"id":"contract_id","name":"contract_id","type":"character"},{"id":"personnel_id","name":"personnel_id","type":"character"},{"id":"est_id","name":"est_id","type":"character"},{"id":"start_date","name":"start_date","type":"Date"},{"id":"end_date","name":"end_date","type":"Date"},{"id":"ref_date","name":"ref_date","type":"Date"},{"id":"base_salary_lcu","name":"base_salary_lcu","type":"numeric"},{"id":"gross_salary_lcu","name":"gross_salary_lcu","type":"numeric"},{"id":"net_salary_lcu","name":"net_salary_lcu","type":"numeric"},{"id":"base_salary_ppp","name":"base_salary_ppp","type":"numeric"},{"id":"gross_salary_ppp","name":"gross_salary_ppp","type":"numeric"},{"id":"net_salary_ppp","name":"net_salary_ppp","type":"numeric"},{"id":"contract_type","name":"contract_type","type":"character"},{"id":"occupation_iscocode","name":"occupation_iscocode","type":"character"},{"id":"occupation_native","name":"occupation_native","type":"character"},{"id":"occupation_english","name":"occupation_english","type":"character"},{"id":"occupation_isconame","name":"occupation_isconame","type":"character"},{"id":"country_code","name":"country_code","type":"character"},{"id":"country_name","name":"country_name","type":"character"},{"id":"adm1_name","name":"adm1_name","type":"character"},{"id":"adm1_code","name":"adm1_code","type":"character"},{"id":"whours","name":"whours","type":"numeric"},{"id":"paygrade","name":"paygrade","type":"character"},{"id":"seniority","name":"seniority","type":"character"}],"dataKey":"bb582cb27657d86bf94cb7beda6148ee"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
-</div>
-<div class="section level3">
-<h3 id="harmonizing-the-personnel-module">Harmonizing the Personnel Module<a class="anchor" aria-label="anchor" href="#harmonizing-the-personnel-module"></a>
-</h3>
-<p>The Personnel Module standardizes individual-level information about
-employees with the public sector. This section demonstrates the
-harmonization pipeline using the same contract-level Brazil (Alagoas)
-HRMIS dataset (bra_hrmis) as an example. We will produce a clean,
-harmonized dataset named bra_hrmis_personnel which conforms to the
-Personnel Module dictionary in <code>standard_dictionary.Rmd</code>.</p>
-<p>Let’s start with a little exploration. We need to understand how many
-unique personnel-establishment-refdate combinations are within the
-data:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## how many observations should we expect to have</span></span>
-<span><span class="va">personnel_count</span> <span class="op">&lt;-</span> </span>
 <span><span class="va">bra_hrmis</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">personnel_id</span>, <span class="va">est_id</span>, <span class="va">ref_date</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/duplicated.html" class="external-link">uniqueN</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>This tells us that we have 12145 unique personnel_id-est_id-refdate
-combinations in the entire dataset. The goal is to ensure that once all
-the other variables of the personnel module are added. The size of the
-personnel module remains the same. As we did, in the contract module, we
-now add all the derived variables:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## lets relabel some more variables</span></span>
-<span></span>
-<span></span>
-<span><span class="co"># Create the education harmonization dictionary for educat7</span></span>
-<span><span class="va">education_dictionary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table</a></span><span class="op">(</span></span>
-<span>  ESCOLARIDADE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"ANALFABETO"</span>,</span>
-<span>    <span class="st">"1 A 4 SERIE DO PRIM. GRAU INCOMPLETO"</span>,</span>
-<span>    <span class="st">"5 A 8 SERIE DO PRIM. GRAU INCOMPLETO"</span>,</span>
-<span>    <span class="st">"1 A 4 SERIE DO PRIM. GRAU COMPLETO"</span>,</span>
-<span>    <span class="st">"5 A 8 SERIE DO PRIM. GRAU COMPLETO"</span>,</span>
-<span>    <span class="st">"SEGUNDO GRAU INCOMPLETO"</span>,</span>
-<span>    <span class="st">"SEGUNDO GRAU COMPLETO"</span>,</span>
-<span>    <span class="st">"ESPECIALIZAÇÃO COMPLETO"</span>,</span>
-<span>    <span class="st">"ESPECIALIZAÇÃO INCOMPLETO"</span>,</span>
-<span>    <span class="st">"ESPECIALIZA«√O COMPLETO"</span>,</span>
-<span>    <span class="st">"ESPECIALIZA«√O INCOMPLETO"</span>,</span>
-<span>    <span class="st">"CURSO SUPERIOR COMPLETO"</span>,</span>
-<span>    <span class="st">"CURSO SUPERIOR INCOMPLETO"</span>,</span>
-<span>    <span class="st">"MESTRADO INCOMPLETO"</span>,</span>
-<span>    <span class="cn">NA_character_</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  educat7 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"No education"</span>,</span>
-<span>    <span class="st">"Primary incomplete"</span>,</span>
-<span>    <span class="st">"Primary incomplete"</span>,</span>
-<span>    <span class="st">"Primary complete"</span>,</span>
-<span>    <span class="st">"Primary complete"</span>,</span>
-<span>    <span class="st">"Secondary incomplete"</span>,</span>
-<span>    <span class="st">"Secondary complete"</span>,</span>
-<span>    <span class="st">"Higher than secondary but not university"</span>,</span>
-<span>    <span class="st">"Higher than secondary but not university"</span>,</span>
-<span>    <span class="st">"Higher than secondary but not university"</span>,</span>
-<span>    <span class="st">"Higher than secondary but not university"</span>,</span>
-<span>    <span class="st">"University incomplete or complete"</span>,</span>
-<span>    <span class="st">"University incomplete or complete"</span>,</span>
-<span>    <span class="st">"University incomplete or complete"</span>,</span>
-<span>    <span class="cn">NA_character_</span></span>
-<span>  <span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">personnel_id</span>, <span class="va">ref_date</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="va">salary_cols</span><span class="op">)</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">ends_with</a></span><span class="op">(</span><span class="st">"_ppp"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    personnel_id   ref_date base_salary_lcu gross_salary_lcu net_salary_lcu</span></span>
+<span><span class="co">#&gt;          &lt;char&gt;     &lt;Date&gt;           &lt;num&gt;            &lt;num&gt;          &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:    101237413 2015-08-01          924.49           924.49         850.54</span></span>
+<span><span class="co">#&gt; 2:    101237413 2015-09-01          970.69           970.69         898.02</span></span>
+<span><span class="co">#&gt; 3:  10128158468 2015-09-01              NA               NA             NA</span></span>
+<span><span class="co">#&gt; 4:  10128158468 2016-09-01              NA               NA             NA</span></span>
+<span><span class="co">#&gt; 5:  10128158468 2017-09-01              NA               NA             NA</span></span>
+<span><span class="co">#&gt; 6:  10128158468 2018-09-01              NA               NA             NA</span></span>
+<span><span class="co">#&gt;    base_salary_ppp gross_salary_ppp net_salary_ppp</span></span>
+<span><span class="co">#&gt;              &lt;num&gt;            &lt;num&gt;          &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:          279.09           279.09         256.77</span></span>
+<span><span class="co">#&gt; 2:          293.04           293.04         271.10</span></span>
+<span><span class="co">#&gt; 3:              NA               NA             NA</span></span>
+<span><span class="co">#&gt; 4:              NA               NA             NA</span></span>
+<span><span class="co">#&gt; 5:              NA               NA             NA</span></span>
+<span><span class="co">#&gt; 6:              NA               NA             NA</span></span></code></pre></div>
+<p><code><a href="../reference/deflate_to_real.html">deflate_to_real()</a></code> offers a lighter-weight alternative
+when you only need compensation expressed in constant local currency
+units (rather than constant international dollars):</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">gross_salary_real</span> <span class="op">:=</span> <span class="fu"><a href="../reference/deflate_to_real.html">deflate_to_real</a></span><span class="op">(</span></span>
+<span>  <span class="va">gross_salary_lcu</span>,</span>
+<span>  <span class="va">ref_date</span>,</span>
+<span>  <span class="va">country_code</span>,</span>
+<span>  base_year <span class="op">=</span> <span class="fl">2021</span></span>
+<span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="completing-the-module">Completing the module<a class="anchor" aria-label="anchor" href="#completing-the-module"></a>
+</h2>
+<p>Not every data extraction contains every dictionary column
+(e.g. <code>tribe</code>, <code>race</code> may be unavailable).
+<code><a href="../reference/complete_columns.html">complete_columns()</a></code> adds any missing dictionary columns as
+<code>NA</code>, so the resulting table always matches the expected
+schema — no more, no less.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">personnel_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"personnel_id"</span>, <span class="st">"est_id"</span>, <span class="st">"ref_date"</span>, <span class="st">"gender"</span>,</span>
+<span>  <span class="st">"educat7"</span>, <span class="st">"tribe"</span>, <span class="st">"race"</span>, <span class="st">"country_code"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Merge the dictionary into bra_hrmis</span></span>
-<span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="va">education_dictionary</span><span class="op">[</span><span class="va">bra_hrmis</span>, on <span class="op">=</span> <span class="st">"ESCOLARIDADE"</span><span class="op">]</span></span>
+<span><span class="va">bra_hrmis_personnel</span> <span class="op">&lt;-</span> <span class="va">bra_hrmis</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">any_of</a></span><span class="op">(</span><span class="va">personnel_cols</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/complete_columns.html">complete_columns</a></span><span class="op">(</span><span class="va">personnel_cols</span><span class="op">)</span></span>
 <span></span>
-<span></span>
-<span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> </span>
-<span><span class="va">bra_hrmis</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span>old <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DATA_NASCIMENTO"</span>, <span class="st">"GENERO"</span><span class="op">)</span>,</span>
-<span>           new <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"birth_date"</span>, <span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">### lets prepare the birth date variables</span></span>
-<span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="va">birth_date</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">birth_date</span><span class="op">)</span>, origin <span class="op">=</span> <span class="st">"1899-12-30"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
-<p>The remainder of the variables (<code>tribe</code>,
-<code>race``) appear to be missing from the</code>bra_hrmis<code>raw data. Therefore, we create them as missing variables (</code>NA`).</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bra_hrmis</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tribe"</span>, <span class="st">"race"</span><span class="op">)</span> <span class="op">:=</span> <span class="fu">.</span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">]</span> <span class="co">## lets quickly create the variables that are missing from the raw data</span></span></code></pre></div>
-<p>Finally, we can create the personnel module by taking the set of
-unique values across the set of personnel modules we have now created
-within <code>bra_hrmis</code>. See the implementation below:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bra_hrmis_personnel</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="va">bra_hrmis</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">personnel_id</span>, <span class="va">est_id</span>, <span class="va">ref_date</span>, <span class="va">birth_date</span>, <span class="va">gender</span>, <span class="va">educat7</span>,</span>
-<span>                <span class="va">country_name</span>, <span class="va">country_code</span>, <span class="va">adm1_name</span>, <span class="va">adm1_code</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>Let’s take a look at the <code>bra_hrmis_personnel</code></p>
-<div class="reactable html-widget html-fill-item" id="htmlwidget-febe03efa1a2d8d52a86" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-febe03efa1a2d8d52a86">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"personnel_id":["49670581400","46895175415","51663961468","2107011451","82801525472","2275616438","105271411","52936961491","74131591472","95437304404","1844533484","78636736404","2048711405","31006906487","20858272415","30706114434","30180333453","11091304491","20997205415","17747252404","38280647449","22299386491","47235870478","20962924415","9950516404","9717650497","20909241449","15165256472","9787615534","16260490410","11113812400","19073739420","30824729404","34857265400","44481098449","14434180487","34633405420","41115597434","14000385453","20919492487","22314679415","38245680478","16389492472","34834710491","22317066449","22795685434","16338693420","15381161468","22302743415","33149640482","22918140449","27199541449","20903111420","47358831420","22749519420","8740224449","16442962415","27065561453","13992139468","46883177434","51620057468","20874812453","28019164472","20909640491","8769613400","31344305415","14325730478","34918809472","15396134453","46881905491","37625314472","46902538468","48385794468","44923163453","35061529472","38413990459","34858059472","13369091453","20944853404","12397903415","45374562487","35221275449","45555680449","34907653468","33211906487","30435650459","36436879404","47005920449","24101150478","41163451487","44510063415","34843108472","51161362487","38241030444","7896905434","11109637420","45346704434","16408985491","39688445487","38262924487"],"est_id":["GABINETE CIVIL","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","PROCURADORIA GERAL DO ESTADO","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA MULHER CIDADANIA DIREITOS HUMANOS","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA EDUCACAO"],"ref_date":["2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01"],"birth_date":["1965-08-19","1966-06-07","1968-07-31","1975-05-13","1972-05-16","1974-06-02","1976-01-22","1968-12-13","1972-05-12","1974-11-10","1975-03-31","1972-02-23","1975-07-19","1948-11-11","1959-08-28","1961-09-20","1960-04-03","1956-05-11","1957-05-12","1953-05-23","1949-03-09","1957-03-02","1965-10-30","1958-04-18","1955-09-10","1955-12-16","1960-05-04","1959-08-10","1954-01-21","1958-05-10","1955-11-03","1955-04-06","1961-10-15","1958-10-02","1964-05-01","1949-11-10","1964-04-01","1963-03-20","1947-09-12","1953-09-13","1961-05-25","1963-02-16","1945-12-25","1953-07-14","1953-04-18","1962-03-17","1955-06-08","1952-12-18","1957-02-19","1958-04-11","1962-04-07","1961-10-19","1960-08-06","1966-06-26","1960-05-28","1950-05-15","1957-05-15","1961-08-17","1948-02-21","1965-08-01","1957-11-14","1959-04-07","1961-12-04","1958-12-31","1952-05-06","1959-09-28","1957-04-18","1963-12-13","1957-09-22","1948-08-18","1962-07-29","1954-07-27","1962-10-05","1962-04-13","1963-06-27","1961-05-17","1961-02-28","1953-07-13","1958-04-29","1953-11-25","1966-08-19","1964-08-23","1964-11-16","1964-08-19","1963-03-16","1962-04-14","1959-12-29","1960-08-19","1957-05-26","1963-03-29","1964-01-27","1964-08-25","1960-05-06","1957-09-08","1952-07-07","1951-02-06","1964-05-24","1955-03-03","1964-09-08","1963-12-27"],"gender":["FEMININO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","MASCULINO","FEMININO","FEMININO","MASCULINO","FEMININO","MASCULINO","MASCULINO","MASCULINO","FEMININO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","MASCULINO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","FEMININO","MASCULINO","MASCULINO","MASCULINO","FEMININO","FEMININO","MASCULINO","MASCULINO","MASCULINO","FEMININO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","FEMININO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO","MASCULINO","MASCULINO","FEMININO","FEMININO","FEMININO","FEMININO"],"educat7":["Primary incomplete","Primary complete","Secondary incomplete","Secondary incomplete","University incomplete or complete","Secondary incomplete","Secondary incomplete","Secondary incomplete","Secondary incomplete","Primary incomplete","Secondary incomplete","Secondary incomplete","Secondary incomplete","Secondary incomplete","University incomplete or complete","Primary complete","Secondary incomplete","Secondary incomplete","University incomplete or complete","University incomplete or complete","University incomplete or complete","University incomplete or complete","University incomplete or complete","University incomplete or complete","Primary incomplete","University incomplete or complete","Higher than secondary but not university","Secondary complete","Secondary incomplete","Secondary incomplete","University incomplete or complete","Primary complete","University incomplete or complete","University incomplete or complete","University incomplete or complete","Primary complete","University incomplete or complete","University incomplete or complete","Primary incomplete","Secondary incomplete","Higher than secondary but not university","Higher than secondary but not university","Primary incomplete","Primary incomplete","Secondary complete","Primary complete","Higher than secondary but not university","University incomplete or complete","University incomplete or complete","Primary complete","Secondary incomplete","University incomplete or complete","Secondary complete","Secondary incomplete","Primary complete","Secondary incomplete","Higher than secondary but not university","Secondary incomplete","University incomplete or complete","Primary incomplete","Primary complete","University incomplete or complete","Primary incomplete","Primary complete","Higher than secondary but not university","Primary complete","University incomplete or complete","Primary complete","Primary incomplete","Primary complete","Primary complete","Secondary incomplete","Primary complete","Higher than secondary but not university","Secondary incomplete","Primary complete","University incomplete or complete","Primary incomplete","Secondary complete","Higher than secondary but not university","Secondary incomplete","University incomplete or complete","Secondary incomplete","Secondary complete","Primary complete","Higher than secondary but not university","Primary complete","Primary complete","Primary complete","Higher than secondary but not university","Primary complete","Secondary complete","Secondary incomplete","Secondary incomplete","Secondary complete","Secondary complete","Higher than secondary but not university","Primary complete","Secondary complete","Higher than secondary but not university"],"country_name":["Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil"],"country_code":["BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA"],"adm1_name":["Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas"],"adm1_code":["AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL","AL"]},"columns":[{"id":"personnel_id","name":"personnel_id","type":"character"},{"id":"est_id","name":"est_id","type":"character"},{"id":"ref_date","name":"ref_date","type":"Date"},{"id":"birth_date","name":"birth_date","type":"Date"},{"id":"gender","name":"gender","type":"character"},{"id":"educat7","name":"educat7","type":"character"},{"id":"country_name","name":"country_name","type":"character"},{"id":"country_code","name":"country_code","type":"character"},{"id":"adm1_name","name":"adm1_name","type":"character"},{"id":"adm1_code","name":"adm1_code","type":"character"}],"dataKey":"e34c63aebc631d5d3de7dd975a46b5cb"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+<span><span class="va">bra_hrmis_personnel</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    personnel_id                                                est_id</span></span>
+<span><span class="co">#&gt;          &lt;char&gt;                                                &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1:    101237413 UNIVERSIDADE ESTADUAL DE CIENCIAS DA SAUDE DE ALAGOAS</span></span>
+<span><span class="co">#&gt; 2:    101237413 UNIVERSIDADE ESTADUAL DE CIENCIAS DA SAUDE DE ALAGOAS</span></span>
+<span><span class="co">#&gt; 3:  10128158468                                   ALAGOAS PREVIDENCIA</span></span>
+<span><span class="co">#&gt; 4:  10128158468                                   ALAGOAS PREVIDENCIA</span></span>
+<span><span class="co">#&gt; 5:  10128158468                                   ALAGOAS PREVIDENCIA</span></span>
+<span><span class="co">#&gt; 6:  10128158468                                   ALAGOAS PREVIDENCIA</span></span>
+<span><span class="co">#&gt;      ref_date    gender educat7  tribe   race country_code</span></span>
+<span><span class="co">#&gt;        &lt;Date&gt;    &lt;char&gt;  &lt;lgcl&gt; &lt;lgcl&gt; &lt;lgcl&gt;       &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1: 2015-08-01 MASCULINO      NA     NA     NA          BRA</span></span>
+<span><span class="co">#&gt; 2: 2015-09-01 MASCULINO      NA     NA     NA          BRA</span></span>
+<span><span class="co">#&gt; 3: 2015-09-01  FEMININO      NA     NA     NA          BRA</span></span>
+<span><span class="co">#&gt; 4: 2016-09-01  FEMININO      NA     NA     NA          BRA</span></span>
+<span><span class="co">#&gt; 5: 2017-09-01  FEMININO      NA     NA     NA          BRA</span></span>
+<span><span class="co">#&gt; 6: 2018-09-01  FEMININO      NA     NA     NA          BRA</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="harmonizing-the-establishment-module">Harmonizing the Establishment Module<a class="anchor" aria-label="anchor" href="#harmonizing-the-establishment-module"></a>
-</h3>
-<p>The Establishment Module extracts, standardizes, and structures
-information on public-sector establishments from the HRMIS records,
-<code>bra_hrmis</code>. The steps below convert the raw establishment
-identifiers into a canonical, well-structured establishment register
-according the harmonization dictionary. See below:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">### get the set of variables according to the dictionary</span></span>
-<span><span class="va">bra_hrmis_est</span> <span class="op">&lt;-</span> </span>
-<span>  <span class="va">bra_hrmis</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>est_name_native <span class="op">=</span> <span class="va">est_id</span>,</span>
-<span>         est_type <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>         est_parent <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>         est_child <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span></span>
-<span>    <span class="va">est_id</span>, <span class="va">est_name_native</span>, <span class="va">ref_date</span>, <span class="va">est_type</span>, <span class="va">est_parent</span>, <span class="va">est_child</span>,</span>
-<span>    <span class="va">country_code</span>, <span class="va">country_name</span>, <span class="va">adm1_name</span>, <span class="va">adm1_code</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>est_name_en <span class="op">=</span> <span class="fu">polyglotr</span><span class="fu">::</span><span class="fu"><a href="https://tomeriko96.github.io/polyglotr/reference/google_translate.html" class="external-link">google_translate</a></span><span class="op">(</span><span class="va">est_name_native</span>, target_language <span class="op">=</span> <span class="st">"en"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="reactable html-widget html-fill-item" id="htmlwidget-1fb4450895fe099f74a1" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-1fb4450895fe099f74a1">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"est_id":["GABINETE CIVIL","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","PROCURADORIA GERAL DO ESTADO","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA MULHER CIDADANIA DIREITOS HUMANOS","SECRETARIA DE ESTADO DA SAUDE"],"est_name_native":["GABINETE CIVIL","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","PROCURADORIA GERAL DO ESTADO","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DA MULHER CIDADANIA DIREITOS HUMANOS","SECRETARIA DE ESTADO DA SAUDE"],"ref_date":["2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01","2014-08-01"],"est_type":[null,null,null,null,null,null,null,null,null,null],"est_parent":[null,null,null,null,null,null,null,null,null,null],"est_child":[null,null,null,null,null,null,null,null,null,null],"country_code":["BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA","BRA"],"country_name":["Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil","Brazil"],"adm1_name":["Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas","Alagoas"],"adm1_code":["AL","AL","AL","AL","AL","AL","AL","AL","AL","AL"],"est_name_en":["CIVIL OFFICE","ALAGOAS MILITARY FIRE DEPARTMENT","STATE ATTORNEY GENERAL OFFICE","STATE SECRETARY OF LABOR AND EMPLOYMENT","SEC OF STATE OF AGRICULTURE LIVESTOCK FISHING AND AQUACULTURE","STATE SECRETARIAT OF FINANCE","STATE SECRETARY OF PLANNING, MANAGEMENT AND HERITAGE","STATE SECRETARY OF EDUCATION","SECRETARIAT OF STATE FOR WOMEN CITIZENSHIP HUMAN RIGHTS","STATE SECRETARIAT OF HEALTH"]},"columns":[{"id":"est_id","name":"est_id","type":"character"},{"id":"est_name_native","name":"est_name_native","type":"character"},{"id":"ref_date","name":"ref_date","type":"Date"},{"id":"est_type","name":"est_type","type":"logical"},{"id":"est_parent","name":"est_parent","type":"logical"},{"id":"est_child","name":"est_child","type":"logical"},{"id":"country_code","name":"country_code","type":"character"},{"id":"country_name","name":"country_name","type":"character"},{"id":"adm1_name","name":"adm1_name","type":"character"},{"id":"adm1_code","name":"adm1_code","type":"character"},{"id":"est_name_en","name":"est_name_en","type":"character"}],"dataKey":"390d36bbbd7bbc56566286a83772f9ce"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
-</div>
+<div class="section level2">
+<h2 id="validating-the-harmonized-data">Validating the harmonized data<a class="anchor" aria-label="anchor" href="#validating-the-harmonized-data"></a>
+</h2>
+<p>Once harmonized, <code><a href="../reference/validate_data.html">validate_data()</a></code> checks the harmonized
+dataset against a set of validation rules. It then reports both a
+pass-rate summary and the specific records that violate each rule. This
+helps you identify negative salaries, missing keys, or out-of-range
+dates before analytics are run.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate_data.html">validate_data</a></span><span class="op">(</span></span>
+<span>  data        <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_contract.html">bra_hrmis_contract</a></span>,</span>
+<span>  input_rules <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/contract_rules.html">contract_rules</a></span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">report</span></span></code></pre></div>
+<p>You can inspect the specific records that violate a given rule, for
+example, the <code>salary_non_negative</code> rule:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span><span class="op">$</span><span class="va">violations</span><span class="op">[[</span><span class="st">"salary_non_negative"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<p>Informed by this validation, you might want to revisit your
+harmonization process and address lingering data quality issues.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

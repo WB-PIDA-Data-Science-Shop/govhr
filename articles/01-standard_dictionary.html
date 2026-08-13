@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>HR Standard Data Dictionary • govhr</title>
+<title>Standard dictionary for `govhr` • govhr</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="HR Standard Data Dictionary">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Standard dictionary for `govhr`">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/govhr.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -54,7 +55,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>HR Standard Data Dictionary</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Standard dictionary for `govhr`</h1>
             
       
 
@@ -66,17 +67,19 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>This article describes a standard dictionary for human resource
-management information system (HRMIS) data, organized into three main
-modules: Establishment, Personnel, and Contract. These modules are
-designed to organize and standardize information about public sector
-personnel across different countries and administrative levels.</p>
+<p>This article describes the standard dictionary for
+<code>govhr</code>, organized into four main modules: Establishment,
+Personnel, Contract, and Allowance. These modules are designed to
+organize and standardize information about public sector personnel
+across different countries and administrative levels.</p>
 </div>
 <div class="section level2">
 <h2 id="module-1-establishment">Module 1: Establishment<a class="anchor" aria-label="anchor" href="#module-1-establishment"></a>
 </h2>
 <p>The Establishment module captures information about public sector
-institutions, including ministries, departments, and agencies.</p>
+institutions, including ministries, departments, and agencies, along
+with their sector classification and geographic/administrative
+location.</p>
 <div class="section level3">
 <h3 id="fields">Fields<a class="anchor" aria-label="anchor" href="#fields"></a>
 </h3>
@@ -95,57 +98,83 @@ institutions, including ministries, departments, and agencies.</p>
 <tr class="odd">
 <td>Establishment ID</td>
 <td><code>est_id</code></td>
-<td>Unique identifier for the establishment</td>
+<td>Unique identifier assigned to each establishment.</td>
 </tr>
 <tr class="even">
 <td>Establishment Name (Native)</td>
 <td><code>est_name_native</code></td>
-<td>Official establishment name in local language</td>
+<td>Official Establishment name in the country’s native language.</td>
 </tr>
 <tr class="odd">
 <td>Establishment Name (English)</td>
-<td><code>est_name_en</code></td>
-<td>Establishment name translated to English</td>
+<td><code>est_name_english</code></td>
+<td>Official Establishment name translated into English.</td>
 </tr>
 <tr class="even">
+<td>Sector</td>
+<td><code>sector</code></td>
+<td>The COFOG sector classification an establishment belongs to at the
+adm1 level.</td>
+</tr>
+<tr class="odd">
 <td>Reference Date</td>
 <td><code>ref_date</code></td>
-<td>Latest date when the establishment had that name</td>
-</tr>
-<tr class="odd">
-<td>Establishment Type</td>
-<td><code>est_type</code></td>
-<td>Type of establishment (Ministry/Department/Agency)</td>
-</tr>
-<tr class="even">
-<td>Parent Establishment</td>
-<td><code>est_parent</code></td>
-<td>Identifier for parent establishment in hierarchy</td>
-</tr>
-<tr class="odd">
-<td>Child Establishment</td>
-<td><code>est_child</code></td>
-<td>Identifier for child establishments in hierarchy</td>
-</tr>
-<tr class="even">
-<td>Country Code</td>
-<td><code>country_code</code></td>
-<td>Official World Bank ISO-3 country code</td>
-</tr>
-<tr class="odd">
-<td>Country Name</td>
-<td><code>country_name</code></td>
-<td>Official World Bank country name</td>
+<td>Date of the HRMIS record.</td>
 </tr>
 <tr class="even">
 <td>Administration 1 Name</td>
-<td><code>adm1_name</code></td>
-<td>First-level administrative division name</td>
+<td><code>adm1</code></td>
+<td>First-level administrative division. For example, a Ministry or
+Secretariat.</td>
 </tr>
 <tr class="odd">
 <td>Administration 1 Code</td>
 <td><code>adm1_code</code></td>
-<td>First-level administrative division code</td>
+<td>First-level administrative division code, if available.</td>
+</tr>
+<tr class="even">
+<td>Administration 2 Name</td>
+<td><code>adm2</code></td>
+<td>Second-level administrative division. For example, a Department or
+Division.</td>
+</tr>
+<tr class="odd">
+<td>Administration 2 Code</td>
+<td><code>adm2_code</code></td>
+<td>Second-level administrative division code, if available.</td>
+</tr>
+<tr class="even">
+<td>Administration 3 Name</td>
+<td><code>adm3</code></td>
+<td>Third-level administrative division. For example, an Agency or
+Unit.</td>
+</tr>
+<tr class="odd">
+<td>Administration 3 Code</td>
+<td><code>adm3_code</code></td>
+<td>Third-level administrative division code, if available.</td>
+</tr>
+<tr class="even">
+<td>Geography 1 Name</td>
+<td><code>geo1</code></td>
+<td>First-level geographic division. For example, a state or
+region.</td>
+</tr>
+<tr class="odd">
+<td>Geography 2 Name</td>
+<td><code>geo2</code></td>
+<td>Second-level geographic division. For example, a municipality or
+county.</td>
+</tr>
+<tr class="even">
+<td>Country Code</td>
+<td><code>country_code</code></td>
+<td>Official World Bank ISO 3-letter country code.</td>
+</tr>
+<tr class="odd">
+<td>Country Name</td>
+<td><code>country_name</code></td>
+<td>Official World Bank country name.</td>
 </tr>
 </tbody>
 </table>
@@ -155,17 +184,16 @@ institutions, including ministries, departments, and agencies.</p>
 </h3>
 <ul>
 <li>
-<strong>Establishment Type</strong>: Indicates the hierarchical
-level of the institution within the government structure. Ideally, this
-would support parent-child relationships, though such data may be rare
-in practice.</li>
+<strong>Sector</strong>: Uses the COFOG (Classification of the
+Functions of Government) classification to categorize
+establishments.</li>
 <li>
-<strong>Administration Level</strong>: Refers to the
-geographic/administrative level of government (e.g., national,
-state/provincial, local).</li>
-<li>
-<strong>Reference Date</strong>: Critical for tracking
-establishmental changes, mergers, or renaming over time.</li>
+<strong>Administration vs. Geography</strong>: Administration levels
+(<code>adm1</code>/<code>adm2</code>/<code>adm3</code>) refer to
+institutional/administrative divisions (e.g., Ministry, Department,
+Agency), while geography levels (<code>geo1</code>/<code>geo2</code>)
+refer to physical location (e.g., state/region,
+municipality/county).</li>
 </ul>
 </div>
 </div>
@@ -192,67 +220,63 @@ about individual public sector employees.</p>
 <tr class="odd">
 <td>Personnel ID</td>
 <td><code>personnel_id</code></td>
-<td>Unique identifier for the personnel</td>
-</tr>
-<tr class="even">
-<td>Establishment ID</td>
-<td><code>est_id</code></td>
-<td>Foreign key linking to Establishment module</td>
-</tr>
-<tr class="odd">
-<td>Establishment Name</td>
-<td><code>est_name_native</code></td>
-<td>Foreign key linking to the Establishment module</td>
+<td>Unique identifier assigned to each worker.</td>
 </tr>
 <tr class="even">
 <td>Reference Date</td>
 <td><code>ref_date</code></td>
-<td>Timestamp for the personnel record</td>
+<td>Date of the HRMIS record.</td>
 </tr>
 <tr class="odd">
 <td>Date of Birth</td>
 <td><code>birth_date</code></td>
-<td>Personnel’s date of birth</td>
+<td>The date of birth of a person.</td>
 </tr>
 <tr class="even">
+<td>Age</td>
+<td><code>age</code></td>
+<td>The age of the person.</td>
+</tr>
+<tr class="odd">
 <td>Gender</td>
 <td><code>gender</code></td>
-<td>Personnel’s gender</td>
-</tr>
-<tr class="odd">
-<td>Education Attainment (7 categories)</td>
-<td><code>educat7</code></td>
-<td>Education level using 10-category classification</td>
+<td>Gender of the person.</td>
 </tr>
 <tr class="even">
+<td>Educational Attainment</td>
+<td><code>educat7</code></td>
+<td>Educational attainment in 7-level classification, following the
+World Bank’s GLD convention.</td>
+</tr>
+<tr class="odd">
 <td>Tribe</td>
 <td><code>tribe</code></td>
-<td>Tribal affiliation</td>
+<td>Person’s ethnic or tribal affiliation.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Race</td>
 <td><code>race</code></td>
-<td>Racial/ethnic classification</td>
-</tr>
-<tr class="even">
-<td>Country Code</td>
-<td><code>country_code</code></td>
-<td>Official World Bank ISO-3 country code</td>
+<td>Person’s race or broad ethnic classification.</td>
 </tr>
 <tr class="odd">
-<td>Country Name</td>
-<td><code>country_name</code></td>
-<td>Official World Bank country name</td>
+<td>Employment Status</td>
+<td><code>employment_status</code></td>
+<td>Employment status of the person (active or retired).</td>
 </tr>
 <tr class="even">
-<td>Administration 1 Name</td>
-<td><code>adm1_name</code></td>
-<td>First-level administrative division name</td>
+<td>Person Tenure</td>
+<td><code>personnel_tenure</code></td>
+<td>How much time a person has worked in the public sector.</td>
 </tr>
 <tr class="odd">
-<td>Administration 1 Code</td>
-<td><code>adm1_code</code></td>
-<td>First-level administrative division code</td>
+<td>Type of Service</td>
+<td><code>service_type</code></td>
+<td>The type of service of a person: civilian or military.</td>
+</tr>
+<tr class="even">
+<td>First Employment Date</td>
+<td><code>first_employment_date</code></td>
+<td>Date personnel enter the public service for the first time.</td>
 </tr>
 </tbody>
 </table>
@@ -262,13 +286,17 @@ about individual public sector employees.</p>
 </h3>
 <ul>
 <li>
-<strong>Education Categories</strong>: Multiple classification
-systems are provided to allow for cross-country comparisons and mapping
-to international standards.</li>
+<strong>Employment Status</strong>: Used together with
+<code>ref_date</code> to detect movement events such as hires, fires,
+and retirements (see <code><a href="../reference/classify_personnel_event.html">classify_personnel_event()</a></code>).</li>
 <li>
-<strong>Geographic Information</strong>: While personnels are linked
-to establishments, separate geographic fields allow for tracking
-mobility and remote work arrangements.</li>
+<strong>Educational Attainment</strong>: Follows the World Bank’s <a href="https://worldbank.github.io/gld/Support/A%20-%20Guides%20and%20Documentation/GLD%20Manual%20Files/Education.html" class="external-link">Global
+Labor Database</a> (GLD) 7-level classification convention.</li>
+<li>
+<strong>Tenure Fields</strong>: <code>personnel_tenure</code> tracks
+overall public sector tenure, distinct from <code>contract_tenure</code>
+in the Contract module, which tracks tenure within a specific
+contract.</li>
 <li>
 <strong>Privacy Considerations</strong>: This module contains
 sensitive personal information and should be handled according to
@@ -299,142 +327,103 @@ compensation, and job characteristics.</p>
 <tr class="odd">
 <td>Contract ID</td>
 <td><code>contract_id</code></td>
-<td>Unique identifier for the contract</td>
+<td>Unique identifier assigned to each contract.</td>
 </tr>
 <tr class="even">
 <td>Personnel ID</td>
 <td><code>personnel_id</code></td>
-<td>Foreign key linking to Personnel module</td>
+<td>Unique identifier assigned to each worker.</td>
 </tr>
 <tr class="odd">
 <td>Establishment ID</td>
 <td><code>est_id</code></td>
-<td>Foreign key linking to Establishment module</td>
+<td>Unique identifier assigned to each establishment.</td>
 </tr>
 <tr class="even">
-<td>Establishment Name</td>
-<td><code>est_name_native</code></td>
-<td>Foreign key linking to Establishment module</td>
-</tr>
-<tr class="odd">
 <td>Reference Date</td>
 <td><code>ref_date</code></td>
-<td>Timestamp for the contract record</td>
+<td>Date of the HRMIS record.</td>
 </tr>
-<tr class="even">
-<td>Base Salary (LCU)</td>
+<tr class="odd">
+<td>Base Salary (Local Currency)</td>
 <td><code>base_salary_lcu</code></td>
-<td>Base compensation in local currency units</td>
-</tr>
-<tr class="odd">
-<td>Base Salary (PPP)</td>
-<td><code>base_salary_ppp</code></td>
-<td>Base compensation in constant 2021 international dollars</td>
+<td>Basic pay before allowances and deductions.</td>
 </tr>
 <tr class="even">
-<td>Gross Salary (LCU)</td>
+<td>Gross Salary (Local Currency)</td>
 <td><code>gross_salary_lcu</code></td>
-<td>Total compensation before deductions in local currency units</td>
+<td>Total compensation before taxes and deductions.</td>
 </tr>
 <tr class="odd">
-<td>Gross Salary (PPP)</td>
-<td><code>gross_salary_ppp</code></td>
-<td>Total compensation before deductions in constant 2021 international
-dollars</td>
-</tr>
-<tr class="even">
-<td>Net Salary (LCU)</td>
+<td>Net Salary (Local Currency)</td>
 <td><code>net_salary_lcu</code></td>
-<td>Compensation after deductions in local currency units</td>
-</tr>
-<tr class="odd">
-<td>Net Salary (PPP)</td>
-<td><code>net_salary_ppp</code></td>
-<td>Compensation after deductions in constant 2021 international
-dollars</td>
+<td>Take-home pay after taxes and deductions.</td>
 </tr>
 <tr class="even">
-<td>Allowances (LCU)</td>
+<td>Allowance (Local Currency)</td>
 <td><code>allowance_lcu</code></td>
-<td>Allowances in local currency units</td>
+<td>Allowances after salary has been paid.</td>
 </tr>
 <tr class="odd">
-<td>Allowances (PPP)</td>
-<td>
-<code>allowance_ppp</code> Allowances in constant 2021 international
-dollars</td>
-<td></td>
+<td>Contract Type (International)</td>
+<td><code>contract_type_international</code></td>
+<td>Type of employment contract following ILO standard ICSE-18
+classifications. For example: permanent (e.g., civil servant), etc.</td>
 </tr>
 <tr class="even">
-<td>Contract Type</td>
-<td><code>contract_type</code></td>
-<td>Contract modality
-(short-term/open-term/permanent/inactive/retired)</td>
+<td>Contract Type (Native)</td>
+<td><code>contract_type_native</code></td>
+<td>Type of employment contract in native language.</td>
 </tr>
 <tr class="odd">
 <td>Occupation (Native)</td>
 <td><code>occupation_native</code></td>
-<td>Job title in local language</td>
+<td>Worker’s occupation title in the native language.</td>
 </tr>
 <tr class="even">
 <td>Occupation (English)</td>
 <td><code>occupation_english</code></td>
-<td>Job title translated to English</td>
+<td>Worker’s occupation title in English.</td>
 </tr>
 <tr class="odd">
-<td>Occupation (ISCO Name)</td>
+<td>ISCO Occupation Name</td>
 <td><code>occupation_isconame</code></td>
-<td>ISCO standard occupation name</td>
+<td>Occupation mapped to ISCO-08 classification.</td>
 </tr>
 <tr class="even">
-<td>Occupation (ISCO Code)</td>
+<td>ISCO Code</td>
 <td><code>occupation_iscocode</code></td>
-<td>ISCO standard occupation code</td>
+<td>ISCO-08 occupation code.</td>
 </tr>
 <tr class="odd">
 <td>Start Date</td>
 <td><code>start_date</code></td>
-<td>Contract start date</td>
+<td>Start date of the employment contract.</td>
 </tr>
 <tr class="even">
 <td>End Date</td>
 <td><code>end_date</code></td>
-<td>Contract end date (if applicable)</td>
+<td>End date of the employment contract, if applicable.</td>
 </tr>
 <tr class="odd">
-<td>Country Code</td>
-<td><code>country_code</code></td>
-<td>Official World Bank ISO-3 country code</td>
-</tr>
-<tr class="even">
-<td>Country Name</td>
-<td><code>country_name</code></td>
-<td>Official World Bank country name</td>
-</tr>
-<tr class="odd">
-<td>Administration 1 Name</td>
-<td><code>adm1_name</code></td>
-<td>First-level administrative division name</td>
-</tr>
-<tr class="even">
-<td>Administration 1 Code</td>
-<td><code>adm1_code</code></td>
-<td>First-level administrative division code</td>
-</tr>
-<tr class="odd">
-<td>Hours Worked</td>
+<td>Working Hours</td>
 <td><code>whours</code></td>
-<td>Standard or actual hours worked</td>
+<td>Total weekly or monthly working hours as per contract.</td>
 </tr>
 <tr class="even">
 <td>Pay Grade</td>
 <td><code>paygrade</code></td>
-<td>Salary scale or grade level</td>
+<td>Pay grade or salary scale classification of a contract.</td>
 </tr>
 <tr class="odd">
 <td>Seniority</td>
 <td><code>seniority</code></td>
-<td>Years of service or seniority level</td>
+<td>The level within the paygrade of a specific contract.</td>
+</tr>
+<tr class="even">
+<td>Contract Tenure</td>
+<td><code>contract_tenure</code></td>
+<td>How much time a person has worked in a given contract.</td>
 </tr>
 </tbody>
 </table>
@@ -444,56 +433,102 @@ dollars</td>
 </h3>
 <ul>
 <li>
-<strong>Compensation Fields</strong>: Multiple salary measures allow
-for analysis of gross-to-net ratios, taxation effects, and
-allowances.</li>
+<strong>Compensation Fields</strong>: Base, gross, and net salary
+fields (local currency only) allow analysis of gross-to-net ratios and
+the effect of deductions and allowances. Itemized allowance amounts are
+tracked separately in the Allowance module.</li>
+<li>
+<strong>Contract Type (International)</strong>: Follows the ILO’s
+ICSE-18 (International Classification of Status in Employment) standard
+for cross-country comparability, while <code>contract_type_native</code>
+preserves local terminology.</li>
 <li>
 <strong>Occupation Coding</strong>: Both native and standardized
-(ISCO) classifications enable within-country detail and cross-country
+(ISCO-08) classifications enable within-country detail and cross-country
 comparability.</li>
 <li>
-<strong>Contract Duration</strong>: The combination of
-<code>contract_type</code>, <code>start_date</code>, and
-<code>end_date</code> provides comprehensive information about
-employment stability and temporary arrangements.</li>
+<strong>Tenure vs. Seniority</strong>: <code>contract_tenure</code>
+tracks time worked in the current contract, while <code>seniority</code>
+tracks the level within the paygrade.</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="module-4-allowance">Module 4: Allowance<a class="anchor" aria-label="anchor" href="#module-4-allowance"></a>
+</h2>
+<p>The Allowance module captures detailed, itemized allowance payments
+associated with a contract, allowing analysis of allowance composition
+beyond the aggregate <code>allowance_lcu</code> figure in the Contract
+module.</p>
+<div class="section level3">
+<h3 id="fields-3">Fields<a class="anchor" aria-label="anchor" href="#fields-3"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="30%">
+<col width="37%">
+<col width="32%">
+</colgroup>
+<thead><tr class="header">
+<th>Field Name</th>
+<th>Variable Name</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Personnel ID</td>
+<td><code>personnel_id</code></td>
+<td>Identifier assigned to each person.</td>
+</tr>
+<tr class="even">
+<td>Contract ID</td>
+<td><code>contract_id</code></td>
+<td>Unique identifier assigned to each contract.</td>
+</tr>
+<tr class="odd">
+<td>Reference Date</td>
+<td><code>ref_date</code></td>
+<td>Date of the HRMIS record.</td>
+</tr>
+<tr class="even">
+<td>Allowance Type</td>
+<td><code>allowance_type</code></td>
+<td>The allowance type.</td>
+</tr>
+<tr class="odd">
+<td>Allowance Value</td>
+<td><code>allowance_value</code></td>
+<td>Allowance value for the specific allowance type in local currency
+units.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="notes-3">Notes<a class="anchor" aria-label="anchor" href="#notes-3"></a>
+</h3>
+<ul>
+<li>
+<strong>Granularity</strong>: Unlike the aggregate
+<code>allowance_lcu</code> field in the Contract module, this module
+stores one row per allowance type per contract per reference date,
+enabling detailed breakdowns of allowance composition.</li>
 </ul>
 </div>
 </div>
 <div class="section level2">
 <h2 id="relationship-between-modules">Relationship between modules<a class="anchor" aria-label="anchor" href="#relationship-between-modules"></a>
 </h2>
-<p>The three modules are related as follows:</p>
-<pre><code>Establishment (1) ←→ (N) Personnel
-Establishment (1) ←→ (N) Contract
-Personnel (1) ←→ (N) Contract</code></pre>
+<p>The four modules are related as follows:</p>
+<pre><code>Establishment (1) ←→ (N) Contract
+Personnel (1) ←→ (N) Contract
+Contract (1) ←→ (N) Allowance</code></pre>
 <ul>
-<li>One establishment can have many workers</li>
-<li>One establishment can have many contracts</li>
-<li>One worker can have multiple contracts (over time or
-concurrent)</li>
-<li>One worker can have multiple establishments</li>
+<li>One establishment can have many contracts.</li>
+<li>One person can have multiple contracts (over time or
+concurrent).</li>
+<li>One contract can have multiple itemized allowances.</li>
 </ul>
-</div>
-<div class="section level2">
-<h2 id="data-quality-considerations">Data Quality Considerations<a class="anchor" aria-label="anchor" href="#data-quality-considerations"></a>
-</h2>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Temporal Consistency</strong>: Ensure <code>ref_date</code>
-fields are properly maintained across all modules</li>
-<li>
-<strong>Geographic Consistency</strong>: Country and administration
-codes should be consistent across all modules</li>
-<li>
-<strong>Unique Identifiers</strong>: All ID fields should be
-globally unique and persistent</li>
-<li>
-<strong>Missing Data</strong>: Document conventions for handling
-missing or unavailable data</li>
-<li>
-<strong>Historical Records</strong>: Consider versioning strategy
-for tracking changes over time</li>
-</ol>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

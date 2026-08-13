@@ -72,7 +72,7 @@ estimate_exit_rates(
 
 - status_col:
 
-  Character. Default `"status"`.
+  Character. Default `"employment_status"`.
 
 ## Value
 

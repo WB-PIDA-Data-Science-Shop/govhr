@@ -1,5 +1,11 @@
 # Changelog
 
+## govhr 0.3.4
+
+This release: - Improves the documentation of functions and articles
+associated with `govhr`. - Adds more indicators to `wwbi`, including the
+wagebill as a share of GDP.
+
 ## govhr 0.3.3
 
 This release: - Ports a set of functionalities from `govhrapp` into

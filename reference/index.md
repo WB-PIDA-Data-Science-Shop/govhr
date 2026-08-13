@@ -14,10 +14,6 @@
   : HRMIS Establishment Dataset
 - [`bra_hrmis_personnel`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_personnel.md)
   : HRMIS Personnel Dataset
-- [`calculate_date_intervals()`](https://wb-pida-data-science-shop.github.io/govhr/reference/calculate_date_intervals.md)
-  : Calculate time intervals between reference dates
-- [`check_orphan_id()`](https://wb-pida-data-science-shop.github.io/govhr/reference/check_orphan_id.md)
-  : Detect Orphan Records Between Parent and Child Modules
 - [`classify_personnel_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/classify_personnel_event.md)
   : Classify Personnel Movement Events
 - [`classify_text()`](https://wb-pida-data-science-shop.github.io/govhr/reference/classify_text.md)
@@ -27,10 +23,6 @@
   : Apply Standard HR Data Cleaning Pipeline
 - [`cofog_taxonomy`](https://wb-pida-data-science-shop.github.io/govhr/reference/cofog_taxonomy.md)
   : COFOG Functional Classification Taxonomy
-- [`compare_names_qc()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compare_names_qc.md)
-  : Compare the contents of two character vectors
-- [`compare_to_dictionary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compare_to_dictionary.md)
-  : Compare Dataset Variable Names Against a Dictionary
 - [`complete_columns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/complete_columns.md)
   : Complete columns in a dataframe
 - [`complete_dates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/complete_dates.md)
@@ -39,8 +31,13 @@
   : Compute index values relative to base year
 - [`compute_compression_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_compression_ratio.md)
   : Function to compute the compression ratio
+- [`compute_coverage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_coverage.md)
+  : Compute coverage of non-missing values in a dataset.
 - [`compute_cross_section()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_cross_section.md)
   : Compute Cross-Section Summary Table
+- [`compute_decile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_decile.md)
+  : Function to compute deciles of a measure column within groups and
+  reference dates.
 - [`compute_density()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_density.md)
   : Function to compute the distribution function of a variable.
 - [`compute_fastchange()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastchange.md)
@@ -50,27 +47,35 @@
   indicators
 - [`compute_fastsummary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastsummary.md)
   : Compute Fast Summary Statistics by Group
+- [`compute_global_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_global_consistency.md)
+  : Compute the proportion of consistent records and values in a data
+  frame.
+- [`compute_global_coverage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_global_coverage.md)
+  : a function to compute the proportion of missing values in a data
+  frame
 - [`compute_growth()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_growth.md)
   : Compute Growth Rate Summary Table
-- [`compute_hrmreport_stats()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_hrmreport_stats.md)
-  : Compute Core HRMIS Analytical Tables
 - [`compute_movement_cost()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement_cost.md)
   : Function to compute the total cost associated with personnel
   movements.
 - [`compute_pension_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_pension_ratio.md)
   : Compute Ratio of Last Salary to First Pension for Retired Workers
-- [`compute_qualitycontrol()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_qualitycontrol.md)
-  : Compute Comprehensive Quality Control Checks for Harmonized HRMIS
-  Data
+- [`compute_percentile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_percentile.md)
+  : Function to compute the percentile values
 - [`compute_quantile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_quantile.md)
   : Function to compute quantiles of a measure column within groups and
   reference dates.
+- [`compute_record_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_record_consistency.md)
+  : Compute the proportion of consistent records in a data frame.
 - [`compute_time_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_time_trend.md)
   : Compute time trend
-- [`compute_volatility()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_volatility.md)
-  : Compute Volatility Measures Over Time
+- [`compute_value_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_value_consistency.md)
+  : Compute the proportion of consistent values in a data frame.
 - [`compute_wagebill()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wagebill.md)
   : Compute wage bill aggregates with optional macro-fiscal shares
+- [`compute_workforce_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_workforce_movement.md)
+  : Function to compute workforce movement for hires, fires, retirement,
+  or turnover
 - [`contract_rules`](https://wb-pida-data-science-shop.github.io/govhr/reference/contract_rules.md)
   : Contract Validation Rules
 - [`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.md)
@@ -85,9 +90,6 @@
   : Compute a Compression Ratio Between Two Percentiles
 - [`cv()`](https://wb-pida-data-science-shop.github.io/govhr/reference/cv.md)
   : Compute the Coefficient of Variation (CV)
-- [`dedup_value_panel()`](https://wb-pida-data-science-shop.github.io/govhr/reference/dedup_value_panel.md)
-  : Deduplicate and disambiguate an attribute using both lag and lead
-  values
 - [`dedup_values()`](https://wb-pida-data-science-shop.github.io/govhr/reference/dedup_values.md)
   : Deduplicate values within grouped data
 - [`deflate_to_real()`](https://wb-pida-data-science-shop.github.io/govhr/reference/deflate_to_real.md)
@@ -130,14 +132,8 @@
   : Flag or Remove Underage Workers
 - [`fix_working_hours()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fix_working_hours.md)
   : Fix Invalid Working Hours
-- [`flag_outlier()`](https://wb-pida-data-science-shop.github.io/govhr/reference/flag_outlier.md)
-  : Flag outliers based on the IQR rule
-- [`flatten_volatility()`](https://wb-pida-data-science-shop.github.io/govhr/reference/flatten_volatility.md)
-  : Flatten a nested volatility list into a single labelled data.table
 - [`generate_hr_report()`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_hr_report.md)
   : Generate Standard HR Analytics Report
-- [`generate_qc_report()`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_qc_report.md)
-  : Generate Quality Control Report for HR Data
 - [`get_data360_api()`](https://wb-pida-data-science-shop.github.io/govhr/reference/get_data360_api.md)
   : This function retrieves data from the Data360 API.
 - [`get_metadata360()`](https://wb-pida-data-science-shop.github.io/govhr/reference/get_metadata360.md)
@@ -160,6 +156,24 @@
   : Personnel Validation Rules
 - [`pivot_data360()`](https://wb-pida-data-science-shop.github.io/govhr/reference/pivot_data360.md)
   : Pivot Data360 dataset to wide format
+- [`plot_bar_growth()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_bar_growth.md)
+  : Plot Horizontal Bar Chart of Growth Rates by Group
+- [`plot_bar_total()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_bar_total.md)
+  : Plot Horizontal Bar Chart of Totals by Group
+- [`plot_compression_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_compression_ratio.md)
+  : Plot Compression Ratio
+- [`plot_decile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_decile.md)
+  : Plot Decile Summary
+- [`plot_histogram()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_histogram.md)
+  : Plot Density as Percentage Share
+- [`plot_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_movement.md)
+  : Plot Personnel Movement Over Time
+- [`plot_movement_cost()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_movement_cost.md)
+  : Plot Movement Cost
+- [`plot_segment()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_segment.md)
+  : Create a Segment Plot with Jittered Points
+- [`plot_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_trend.md)
+  : Plot Time Trend
 - [`project_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/project_retirement.md)
   : Project Retirement Dates
 - [`remove_duplicate_contracts()`](https://wb-pida-data-science-shop.github.io/govhr/reference/remove_duplicate_contracts.md)

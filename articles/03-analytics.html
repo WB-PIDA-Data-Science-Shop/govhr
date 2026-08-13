@@ -5,17 +5,17 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>HR Analytics • govhr</title>
+<title>Analytics on the workforce and wagebill • govhr</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="HR Analytics">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Analytics on the workforce and wagebill">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,17 +34,10 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/govhr.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/01-standard_dictionary.html">HR Standard Data Dictionary</a></li>
-    <li><a class="dropdown-item" href="../articles/02-harmonization.html">HR Data Harmonization</a></li>
-    <li><a class="dropdown-item" href="../articles/03-analytics.html">HR Analytics</a></li>
-    <li><a class="dropdown-item" href="../articles/04-standard_report.html">HR Analytics Standard Report</a></li>
-    <li><a class="dropdown-item" href="../articles/05-standard_hrmis_assessment.html">HR Analytics: Standard Report Prototype</a></li>
-  </ul>
-</li>
+<li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -59,11 +52,10 @@
 
 
 
-<script src="03-analytics_files/core-js-2.5.3/shim.min.js"></script><script src="03-analytics_files/react-18.2.0/react.min.js"></script><script src="03-analytics_files/react-18.2.0/react-dom.min.js"></script><script src="03-analytics_files/reactwidget-2.0.0/react-tools.js"></script><link href="03-analytics_files/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
-<script src="03-analytics_files/htmlwidgets-1.6.4/htmlwidgets.js"></script><link href="03-analytics_files/reactable-0.4.5/reactable.css" rel="stylesheet">
-<script src="03-analytics_files/reactable-binding-0.4.5/reactable.js"></script><div class="row">
+
+<div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>HR Analytics</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Analytics on the workforce and wagebill</h1>
             
       
 
@@ -72,105 +64,163 @@
 
     
     
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://wb-pida-data-science-shop.github.io/govhr/">govhr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## Attaching package: 'dplyr'</span></span></code></pre>
+<pre><code><span><span class="co">## The following objects are masked from 'package:stats':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     filter, lag</span></span></code></pre>
+<pre><code><span><span class="co">## The following objects are masked from 'package:base':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     intersect, setdiff, setequal, union</span></span></code></pre>
 <div class="section level2">
-<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+<h2 id="analytics">Analytics<a class="anchor" aria-label="anchor" href="#analytics"></a>
 </h2>
-<p>This article shows examples for how to analyze harmonized human
-resource management information system (HRMIS) data, organized into
-three main modules: Establishment, Personnel, and Contract. The contents
-of each module are described in
-<code>vignette("standard_dictionary")</code></p>
+<p>Once data are harmonized, analytics helps governments answer specific
+policy questions: How compressed is the wage structure? Is the workforce
+growing or shrinking? How is headcount distributed across groups?</p>
+<p><code>govhr</code> provides functionalities that enable users to
+generate analytics, along with companion plotting functions to visualize
+them. Broadly speaking, we differentiate between analytics on the
+workforce and the wagebill. Workforce analytics focus on the
+composition, growth, and distribution of personnel, while wagebill
+analytics examine patterns and trends in compensation (e.g., base
+salaries, allowances).</p>
+<p>The following examples illustrate how to leverage <code>govhr</code>
+to generate analytics.</p>
 </div>
 <div class="section level2">
-<h2 id="building-analytics-on-harmonized-data">Building analytics on harmonized data<a class="anchor" aria-label="anchor" href="#building-analytics-on-harmonized-data"></a>
+<h2 id="workforce-analytics">Workforce analytics<a class="anchor" aria-label="anchor" href="#workforce-analytics"></a>
 </h2>
-<p>Because we have already cleaned and harmonized the HRMIS data shared
-by the Government of Brazil, we can use standard functions to produce
-analytical outputs. This is fast and reliable because the function knows
-what to data formats to expect and produces summary statistics in a
-consistent way.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://wb-pida-data-science-shop.github.io/govhr/">govhr</a></span><span class="op">)</span></span></code></pre></div>
-<p>Let’s start with the contract module. Suppose we are interested in
-computing the overall wage bill and its evolution over time. We can do
-it quickly with this convenient function:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">wagebill_annual</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">bra_hrmis_contract</span> <span class="op">|&gt;</span> </span>
-<span>    <span class="fu"><a href="../reference/compute_fastsummary.html">compute_fastsummary</a></span><span class="op">(</span></span>
-<span>      cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"net_salary_ppp"</span><span class="op">)</span>, </span>
-<span>      fns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sum"</span><span class="op">)</span>, </span>
-<span>      groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"year"</span><span class="op">)</span>, </span>
-<span>      output <span class="op">=</span> <span class="st">"long"</span></span>
-<span>    <span class="op">)</span></span>
-<span></span>
-<span><span class="fu">reactable</span><span class="op">(</span></span>
-<span>  <span class="va">wagebill_annual</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<div class="reactable html-widget html-fill-item" id="htmlwidget-ac96cb3ee4656e2e9ec3" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"year":[2016,2014,2015,2017,2018],"indicator":["net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum"],"value":[79119180.7181475,49702412.0808347,60017995.0676927,83700195.9122722,0]},"columns":[{"id":"year","name":"year","type":"numeric"},{"id":"indicator","name":"indicator","type":"factor"},{"id":"value","name":"value","type":"numeric"}],"dataKey":"c05d1462430ee25254a58a9818dc83c5"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script><p>There is no salary data for the year of 2018, therefore we can’t
-compute the wage bill for that year.</p>
-<p>We can quickly visualize the annual wage bill.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">wagebill_annual</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
-<span>    <span class="va">year</span> <span class="op">!=</span> <span class="fl">2018</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/ggplot_point_line.html">ggplot_point_line</a></span><span class="op">(</span></span>
-<span>    <span class="va">year</span>,</span>
-<span>    <span class="va">value</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span></span>
-<span>    labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html" class="external-link">label_number</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span></span>
-<span>    x <span class="op">=</span> <span class="st">"Year"</span>,</span>
-<span>    y <span class="op">=</span> <span class="st">"Wage Bill \n(Constant International Dollars)"</span>,</span>
-<span>    title <span class="op">=</span> <span class="st">"Wage Bill: Annual"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="03-analytics_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="Plot of wage bill at the annual level." width="2187.5"></p>
-<p>Now imagine you want to unpack the wage bill. Suppose you are
-interested in a decomposition by establishment. You can quickly do that
-with our function, like this:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">wagebill_annual_est</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">bra_hrmis_contract</span> <span class="op">|&gt;</span> </span>
-<span>    <span class="fu"><a href="../reference/compute_fastsummary.html">compute_fastsummary</a></span><span class="op">(</span></span>
-<span>      cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"net_salary_ppp"</span><span class="op">)</span>, </span>
-<span>      fns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sum"</span><span class="op">)</span>, </span>
-<span>      groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"est_id"</span>, <span class="st">"year"</span><span class="op">)</span>, </span>
-<span>      output <span class="op">=</span> <span class="st">"long"</span></span>
-<span>    <span class="op">)</span></span>
-<span></span>
-<span><span class="fu">reactable</span><span class="op">(</span></span>
-<span>  <span class="va">wagebill_annual_est</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<div class="reactable html-widget html-fill-item" id="htmlwidget-e5c8c404fe174e4c81bd" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-e5c8c404fe174e4c81bd">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"est_id":["SECRETARIA DE ESTADO DA SEGURANCA PUBLICA","DEPARTAMENTO DE ESTRADAS DE RODAGEM","DEPARTAMENTO DE ESTRADAS DE RODAGEM","SECRETARIA DE ESTADO DA MULHER CIDADANIA DIREITOS HUMANOS","SECRETARIA DE ESTADO DA SEGURANCA PUBLICA","SECRETARIA DE ESTADO DA SEGURANCA PUBLICA","SECRETARIA DE ESTADO DA SEGURANCA PUBLICA","SECRETARIA DE ESTADO DA MULHER CIDADANIA DIREITOS HUMANOS","SECRETARIA DE ESTADO DA MULHER CIDADANIA DIREITOS HUMANOS","SECRETARIA DE ESTADO DA MULHER CIDADANIA DIREITOS HUMANOS","DEPARTAMENTO DE ESTRADAS DE RODAGEM","SECRETARIA DE ESTADO DA SEGURANCA PUBLICA","COMPANHIA ALAGOANA DE RECURSOS HUMANOS E PATRIMONIAIS","COMPANHIA ALAGOANA DE RECURSOS HUMANOS E PATRIMONIAIS","COMPANHIA ALAGOANA DE RECURSOS HUMANOS E PATRIMONIAIS","INSTITUTO DE METROLOGIA E QUALIDADE DE ALAGOAS","DEPARTAMENTO ESTADUAL DE TRANSITO DE ALAGOAS","INSTITUTO DE METROLOGIA E QUALIDADE DE ALAGOAS","INSTITUTO DE METROLOGIA E QUALIDADE DE ALAGOAS","INSTITUTO DE METROLOGIA E QUALIDADE DE ALAGOAS","DEPARTAMENTO ESTADUAL DE TRANSITO DE ALAGOAS","SECRETARIA DE ESTADO DA SAUDE","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SECRETARIA DE ESTADO DA SAUDE","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","SERVICOS DE ENGENHARIA DE ALAGOAS S/A","SECRETARIA DE ESTADO DA SAUDE","SECRETARIA DE ESTADO DA EDUCACAO","UNIVERSIDADE ESTADUAL DE CIENCIAS DA SAUDE DE ALAGOAS","SECRETARIA DE ESTADO DA SAUDE","SERVICOS DE ENGENHARIA DE ALAGOAS S/A","SECRETARIA DE ESTADO DA EDUCACAO","UNIVERSIDADE ESTADUAL DE CIENCIAS DA SAUDE DE ALAGOAS","DEPARTAMENTO DE ESTRADAS DE RODAGEM","SECRETARIA DE ESTADO DO PLANEJAMENTO E DESENVOLV ECONOMICO","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DO MEIO AMBIENTE E RECURSOS HIDRICOS","INSTITUTO DO MEIO AMBIENTE DO ESTADO DE ALAGOAS","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","SECRETARIA DE ESTADO DA SAUDE","INSTITUTO DO MEIO AMBIENTE DO ESTADO DE ALAGOAS","INSTITUTO DE TECNOLOGIA EM INFORMATICA E INF DE ALAGOAS","INSTITUTO DE ASSISTENCIA A SAUDE DOS SERVIDORES DO ESTADO DE","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","UNIVERSIDADE ESTADUAL DE CIENCIAS DA SAUDE DE ALAGOAS","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DO MEIO AMBIENTE E RECURSOS HIDRICOS","INSTITUTO DE TECNOLOGIA EM INFORMATICA E INF DE ALAGOAS","SECRETARIA DE ESTADO DA EDUCACAO","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","SECRETARIA DE ESTADO DO MEIO AMBIENTE E RECURSOS HIDRICOS","SECRETARIA DE ESTADO DO PLANEJAMENTO GESTAO E PATRIMONIO","INSTITUTO DE TECNOLOGIA EM INFORMATICA E INF DE ALAGOAS","DEPARTAMENTO DE ESTRADAS DE RODAGEM","INSTITUTO DE TECNOLOGIA EM INFORMATICA E INF DE ALAGOAS","COMPANHIA ALAGOANA DE RECURSOS HUMANOS E PATRIMONIAIS","SECRETARIA DE ESTADO DO MEIO AMBIENTE E RECURSOS HIDRICOS","UNIVERSIDADE ESTADUAL DE ALAGOAS","INSTITUTO DE METROLOGIA E QUALIDADE DE ALAGOAS","UNIVERSIDADE ESTADUAL DE CIENCIAS DA SAUDE DE ALAGOAS","INSTITUTO DE TECNOLOGIA EM INFORMATICA E INF DE ALAGOAS","SERVICOS DE ENGENHARIA DE ALAGOAS S/A","UNIVERSIDADE ESTADUAL DE ALAGOAS","COMPANHIA ALAGOANA DE RECURSOS HUMANOS E PATRIMONIAIS","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","UNIVERSIDADE ESTADUAL DE CIENCIAS DA SAUDE DE ALAGOAS","SECRETARIA DE ESTADO DO MEIO AMBIENTE E RECURSOS HIDRICOS","GABINETE CIVIL","INSTITUTO DO MEIO AMBIENTE DO ESTADO DE ALAGOAS","INSTITUTO DE ASSISTENCIA A SAUDE DOS SERVIDORES DO ESTADO DE","INSTITUTO DO MEIO AMBIENTE DO ESTADO DE ALAGOAS","UNIVERSIDADE ESTADUAL DE ALAGOAS","SERVICOS DE ENGENHARIA DE ALAGOAS S/A","SERVICOS DE ENGENHARIA DE ALAGOAS S/A","INSTITUTO DE ASSISTENCIA A SAUDE DOS SERVIDORES DO ESTADO DE","INSTITUTO DO MEIO AMBIENTE DO ESTADO DE ALAGOAS","UNIVERSIDADE ESTADUAL DE ALAGOAS","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","UNIVERSIDADE ESTADUAL DE ALAGOAS","DEPARTAMENTO ESTADUAL DE TRANSITO DE ALAGOAS","DEPARTAMENTO ESTADUAL DE TRANSITO DE ALAGOAS","DEPARTAMENTO ESTADUAL DE TRANSITO DE ALAGOAS","INSTITUTO DE ASSISTENCIA A SAUDE DOS SERVIDORES DO ESTADO DE","INSTITUTO DE ASSISTENCIA A SAUDE DOS SERVIDORES DO ESTADO DE","AGENCIA DE FOMENTO DE ALAGOAS","AGENCIA DE FOMENTO DE ALAGOAS","AGENCIA DE FOMENTO DE ALAGOAS","AGENCIA DE FOMENTO DE ALAGOAS","AGENCIA DE FOMENTO DE ALAGOAS","GABINETE CIVIL","GABINETE CIVIL","GABINETE CIVIL","GABINETE CIVIL","INSTITUTO DE TERRAS E REFORMA AGRARIA DE ALAGOAS","PERICIA OFICIAL DO ESTADO DE ALAGOAS","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","INSTITUTO DE TERRAS E REFORMA AGRARIA DE ALAGOAS","SECRETARIA DE ESTADO DO DESENVOLVIMENTO ECONOMICO E TURISMO","SECRETARIA DE ESTADO DA INFRA ESTRUTURA","PROCURADORIA GERAL DO ESTADO","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","PERICIA OFICIAL DO ESTADO DE ALAGOAS","SEC DE ESTADO DA AGRICULTURA PECUARIA PESCA E AQUICULTURA","INSTITUTO DE TERRAS E REFORMA AGRARIA DE ALAGOAS","SECRETARIA DE ESTADO DA COMUNICACAO","CONTROLADORIA GERAL DO ESTADO","INSTITUTO ZUMBI DOS PALMARES","PERICIA OFICIAL DO ESTADO DE ALAGOAS","INSTITUTO ZUMBI DOS PALMARES","SECRETARIA DE ESTADO DE RESSOCIALIZACAO E INCLUSAO SOCIAL","INSTITUTO DE TERRAS E REFORMA AGRARIA DE ALAGOAS","POLICIA CIVIL DO ESTADO DE ALAGOAS","AGENCIA DE MODERNIZACAO DA GESTAO DE PROCESSOS","PROCURADORIA GERAL DO ESTADO","ALAGOAS PREVIDENCIA ATIVOS","POLICIA MILITAR PESSOAL CIVIL","AGENCIA DE MODERNIZACAO DA GESTAO DE PROCESSOS","SECRETARIA DE ESTADO DE RESSOCIALIZACAO E INCLUSAO SOCIAL","POLICIA MILITAR PESSOAL CIVIL","SECRETARIA DE ESTADO DA ASSISTENCIA E DESENVOLVIMENTO SOCIAL","INSTITUTO ZUMBI DOS PALMARES","INSTITUTO DE TERRAS E REFORMA AGRARIA DE ALAGOAS","SECRETARIA DE ESTADO DA ASSISTENCIA E DESENVOLVIMENTO SOCIAL","SECRETARIA DE ESTADO DE RESSOCIALIZACAO E INCLUSAO SOCIAL","GABINETE DO VICE GOVERNADOR","SECRETARIA DE ESTADO DA CIENCIA DA TECNOLOGIA E DA INOVACAO","SECRETARIA DE ESTADO DO DESENVOLVIMENTO ECONOMICO E TURISMO","SECRETARIA DE ESTADO DO DESENVOLVIMENTO ECONOMICO E TURISMO","PERICIA OFICIAL DO ESTADO DE ALAGOAS","SECRETARIA DE ESTADO DA CIENCIA DA TECNOLOGIA E DA INOVACAO","SECRETARIA DE ESTADO DA INFRA ESTRUTURA","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","PROCURADORIA GERAL DO ESTADO","SECRETARIA DE ESTADO DA ARTICULACAO SOCIAL","SECRETARIA DE ESTADO DA CULTURA","GABINETE DO GOVERNADOR","AGENCIA DE MODERNIZACAO DA GESTAO DE PROCESSOS","POLICIA MILITAR PESSOAL CIVIL","PROCURADORIA GERAL DO ESTADO","PROCURADORIA GERAL DO ESTADO","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","SECRETARIA DE ESTADO DA COMUNICACAO","SECRETARIA DE ESTADO DE RESSOCIALIZACAO E INCLUSAO SOCIAL","SECRETARIA DE ESTADO DO DESENVOLVIMENTO ECONOMICO E TURISMO","POLICIA CIVIL DO ESTADO DE ALAGOAS","SECRETARIA DE ESTADO DO DESENVOLVIMENTO ECONOMICO E TURISMO","SECRETARIA DE ESTADO DA CIENCIA DA TECNOLOGIA E DA INOVACAO","PERICIA OFICIAL DO ESTADO DE ALAGOAS","INSTITUTO ZUMBI DOS PALMARES","SECRETARIA DE ESTADO DA ASSISTENCIA E DESENVOLVIMENTO SOCIAL","POLICIA CIVIL DO ESTADO DE ALAGOAS","POLICIA MILITAR PESSOAL CIVIL","SECRETARIA DE ESTADO DA CULTURA","SECRETARIA DE ESTADO DA INFRA ESTRUTURA","ALAGOAS PREVIDENCIA ATIVOS","POLICIA CIVIL DO ESTADO DE ALAGOAS","SECRETARIA DE ESTADO DA CULTURA","SECRETARIA DE ESTADO DA ASSISTENCIA E DESENVOLVIMENTO SOCIAL","SECRETARIA DE ESTADO DA CIENCIA DA TECNOLOGIA E DA INOVACAO","GABINETE DO GOVERNADOR","INSTITUTO DE INOVACAO PARA O DESENV RURAL SUSTENTAVEL","ALAGOAS PREVIDENCIA","SECRETARIA DE ESTADO DA CULTURA","SECRETARIA DE ESTADO DA CULTURA","SECRETARIA DE ESTADO DA CIENCIA DA TECNOLOGIA E DA INOVACAO","SECRETARIA DE ESTADO DA MULHER CIDADANIA DIREITOS HUMANOS","CONTROLADORIA GERAL DO ESTADO","AGENCIA DE MODERNIZACAO DA GESTAO DE PROCESSOS","SECRETARIA DE ESTADO DO TRABALHO E EMPREGO","POLICIA CIVIL DO ESTADO DE ALAGOAS","CONTROLADORIA GERAL DO ESTADO","GABINETE DO GOVERNADOR","SECRETARIA DE ESTADO DA ASSISTENCIA E DESENVOLVIMENTO SOCIAL","SECRETARIA DE ESTADO DA INFRA ESTRUTURA","SECRETARIA DE ESTADO DA COMUNICACAO","SECRETARIA DE ESTADO DE RESSOCIALIZACAO E INCLUSAO SOCIAL","POLICIA MILITAR PESSOAL CIVIL","SECRETARIA DE ESTADO DA INFRA ESTRUTURA","SECRETARIA DE ESTADO DA COMUNICACAO","INSTITUTO ZUMBI DOS PALMARES","SECRETARIA DE ESTADO DA COMUNICACAO","AGENCIA DE MODERNIZACAO DA GESTAO DE PROCESSOS","CONTROLADORIA GERAL DO ESTADO","CONTROLADORIA GERAL DO ESTADO","GABINETE DO VICE GOVERNADOR","GABINETE DO VICE GOVERNADOR","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DA FAZENDA","SECRETARIA DE ESTADO DE PREVENCAO A VIOLENCIA","SECRETARIA DE ESTADO DE PREVENCAO A VIOLENCIA","GABINETE DO VICE GOVERNADOR","SECRETARIA DE ESTADO DE PREVENCAO A VIOLENCIA","SECRETARIA DE ESTADO DE PREVENCAO A VIOLENCIA","POLICIA MILITAR DE ALAGOAS","AGENCIA DE DEFESA E INSPECAO AGROPECUARIA ESTADO DE ALAGOAS","AGENCIA DE DEFESA E INSPECAO AGROPECUARIA ESTADO DE ALAGOAS","AGENCIA DE DEFESA E INSPECAO AGROPECUARIA ESTADO DE ALAGOAS","AGENCIA DE DEFESA E INSPECAO AGROPECUARIA ESTADO DE ALAGOAS","AGENCIA DE DEFESA E INSPECAO AGROPECUARIA ESTADO DE ALAGOAS","INSTITUTO DE INOVACAO PARA O DESENV RURAL SUSTENTAVEL","POLICIA MILITAR DE ALAGOAS","POLICIA MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","POLICIA MILITAR DE ALAGOAS","POLICIA MILITAR DE ALAGOAS","SECRETARIA DE ESTADO DA FAZENDA","DIRETORIA DE TEATROS DO ESTADO DE ALAGOAS","DIRETORIA DE TEATROS DO ESTADO DE ALAGOAS","DIRETORIA DE TEATROS DO ESTADO DE ALAGOAS","DIRETORIA DE TEATROS DO ESTADO DE ALAGOAS","SECRETARIA DE ESTADO DO ESPORTE LAZER E JUVENTUDE","DIRETORIA DE TEATROS DO ESTADO DE ALAGOAS","SECRETARIA DE ESTADO DO ESPORTE LAZER E JUVENTUDE","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","FUNDACAO DE AMPARO A PESQUISA DE ALAGOAS","FUNDACAO DE AMPARO A PESQUISA DE ALAGOAS","FUNDACAO DE AMPARO A PESQUISA DE ALAGOAS","FUNDACAO DE AMPARO A PESQUISA DE ALAGOAS","GABINETE DO VICE GOVERNADOR","GABINETE DO GOVERNADOR","AGENCIA REGULADORA DE SERVICOS PUBLICOS DO ESTADO DE ALAGOAS","AGENCIA REGULADORA DE SERVICOS PUBLICOS DO ESTADO DE ALAGOAS","INSTITUTO DE PROTECAO E DEFESA DO CONSUMIDOR DE ALAGOAS","SECRETARIA DE ESTADO DE TRANSPORTE E DESENVOLVIMENTO URBANO","AGENCIA REGULADORA DE SERVICOS PUBLICOS DO ESTADO DE ALAGOAS","SECRETARIA DE ESTADO DE TRANSPORTE E DESENVOLVIMENTO URBANO","INSTITUTO DE INOVACAO PARA O DESENV RURAL SUSTENTAVEL","INSTITUTO DE INOVACAO PARA O DESENV RURAL SUSTENTAVEL","SECRETARIA DE ESTADO DE TRANSPORTE E DESENVOLVIMENTO URBANO","AGENCIA REGULADORA DE SERVICOS PUBLICOS DO ESTADO DE ALAGOAS","SECRETARIA DE ESTADO DO ESPORTE LAZER E JUVENTUDE","SECRETARIA DE ESTADO DE TRANSPORTE E DESENVOLVIMENTO URBANO","SECRETARIA DE ESTADO DA PESCA E AQUICULTURA","AGENCIA REGULADORA DE SERVICOS PUBLICOS DO ESTADO DE ALAGOAS","SECRETARIA DE ESTADO DA ARTICULACAO POLITICA","SECRETARIA DE ESTADO DE PREVENCAO A VIOLENCIA","INSTITUTO DE DESENVOLVIMENTO RURAL E ABASTECIMENTO DE ALAGOA","INSTITUTO DE DESENVOLVIMENTO RURAL E ABASTECIMENTO DE ALAGOA","INSTITUTO DE DESENVOLVIMENTO RURAL E ABASTECIMENTO DE ALAGOA","SECRETARIA DE ESTADO DO ESPORTE LAZER E JUVENTUDE","GABINETE DO GOVERNADOR","INSTITUTO DE INOVACAO PARA O DESENV RURAL SUSTENTAVEL","INSTITUTO DE DESENVOLVIMENTO RURAL E ABASTECIMENTO DE ALAGOA","FUNDACAO DE AMPARO A PESQUISA DE ALAGOAS","INSTITUTO DE DESENVOLVIMENTO RURAL E ABASTECIMENTO DE ALAGOA","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","GABINETE MILITAR DO GOVERNO","CORPO DE BOMBEIROS MILITAR DE ALAGOAS","ALAGOAS PREVIDENCIA","ALAGOAS PREVIDENCIA","ALAGOAS PREVIDENCIA","ALAGOAS PREVIDENCIA"],"year":[2016,2014,2015,2017,2015,2017,2014,2015,2016,2014,2016,2018,2014,2015,2016,2016,2015,2015,2018,2017,2014,2018,2015,2015,2016,2014,2017,2018,2016,2014,2017,2015,2014,2017,2014,2016,2015,2014,2018,2016,2015,2016,2016,2016,2017,2015,2017,2017,2015,2014,2014,2014,2015,2014,2018,2017,2017,2018,2018,2014,2018,2018,2016,2016,2018,2017,2017,2016,2018,2017,2015,2016,2017,2018,2015,2017,2018,2015,2014,2014,2017,2016,2018,2018,2014,2014,2016,2015,2017,2018,2017,2014,2016,2015,2016,2016,2017,2015,2016,2015,2018,2018,2015,2018,2014,2015,2015,2015,2014,2014,2018,2017,2015,2016,2017,2017,2017,2014,2015,2018,2018,2018,2018,2017,2016,2017,2014,2018,2015,2017,2015,2014,2014,2016,2014,2015,2016,2015,2015,2014,2015,2015,2014,2014,2014,2014,2017,2017,2018,2017,2014,2016,2014,2017,2018,2018,2017,2014,2016,2018,2018,2014,2016,2016,2018,2016,2018,2017,2017,2016,2018,2014,2017,2015,2016,2017,2017,2016,2017,2018,2016,2016,2018,2016,2018,2016,2018,2014,2015,2017,2016,2018,2016,2014,2015,2017,2014,2014,2018,2016,2017,2015,2015,2018,2016,2018,2017,2015,2018,2016,2014,2017,2015,2017,2018,2018,2014,2015,2016,2018,2015,2017,2015,2014,2018,2017,2018,2017,2016,2016,2017,2016,2015,2015,2016,2018,2014,2014,2014,2014,2018,2017,2016,2015,2015,2018,2015,2014,2014,2017,2014,2016,2014,2015,2017,2018],"indicator":["net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum","net_salary_ppp_sum"],"value":[415196.68589987,252556.46759461,275003.081626213,57321.883353324,356623.236669155,483320.759255028,242477.087680752,46233.1165637173,55184.1141750445,57627.888245604,265230.990148924,0,537540.465912205,573674.969807836,287519.702767506,28343.5489005898,530523.184329843,26911.0021283157,0,31137.0971178421,520208.325850787,0,574855.143849304,4810651.1880075,268959.272460254,151785.140446444,4738095.87009237,0,2633809.29206276,4198814.2218453,178152.315969866,8674500.61610438,2357041.36093453,279859.074851828,188896.702283475,9828536.60322097,49403.2995727738,101780.825109906,0,4593769.23861634,113536.785080809,66484.2762547122,50955.9009207134,534450.821395843,580983.106296532,2544937.77252706,9729415.21024751,56747.1572748075,75879.4398840088,6464873.16928696,422619.471131335,51101.5526319751,350347.499013869,73097.0931025864,0,69351.0566571272,145776.938229806,0,0,19815.3808366679,0,0,174847.764847182,423000.935797508,0,259672.998003588,2888455.04434465,53184.9878568221,0,115561.388047497,69259.6576313215,108944.413915719,482407.416676551,0,182643.101294837,44853.3422790665,0,400733.534307987,181825.307379407,361360.534530059,620040.844567313,537090.201511121,0,0,63165.0714107465,12534.7577468275,11685.1521062832,14722.2583343277,16792.6787027226,0,100455.849119059,83958.2164139174,98884.3131220913,83823.9496113304,193026.218658443,426171.462174628,51165.3215929775,210927.054621059,122448.651940408,105373.070848013,0,0,434198.274467505,0,116209.349211154,28689.5470202825,36567.3483706713,87615.9813659574,315553.037841149,81310.3425585664,0,163881.570371942,3438593.46333115,37240.4793970545,723394.77075381,50356.2110242262,19411.6106713317,29890.2669062131,848522.971137039,0,0,0,0,105140.075163738,851086.08839929,34841.6529755882,22593.5124935339,0,104940.388668356,415750.068454253,21573.0097005766,141675.92063107,44488.7984263242,672509.824581714,28183.2179832435,44060.2354125259,99059.6132841959,33243.7786609959,19120.7092959225,584162.494725855,673632.671099578,48254.9536716867,31835.7664628163,766062.962551273,33787.0196906964,2918995.27152805,127489.324475235,23013.798837243,0,82587.7442441863,92286.1571940694,3716618.91704567,16997.8345933603,51511.0320092835,0,0,4006329.27967268,47956.1744930087,98847.6583476478,0,0,26310.7523954898,36999107.7828462,48031.3383878281,0,24708.6794731546,0,48436.7038905399,37639.9601712032,47764.3454834921,0,42463.0132814902,110075.797352298,93760.1105815288,118270.985902348,32617.790003508,1041577.38560761,18233.6657628423,126282.669340297,0,81044.7633282748,30579.713366136,0,44395.8124177735,0,32110.7313621213,0,2541533.87151442,2957688.77701465,2943828.25027161,2688370.71823853,0,66875.8087285305,50689.2071134178,39861.8854306222,64411.5548951386,8297996.88061224,146097.655771234,0,175547.590038813,201706.060660057,256329.548193147,25150.9328333454,0,9989489.35587637,0,10387084.6626824,9595650.98997635,0,18781.146805057,15545.3897776669,19783.0479953617,17612.919447716,42810.783372903,0,0,1533944.45625199,1831851.728956,29864.2066540402,0,24445.2767269553,30253.6006048334,29202.2720069269,59193.3658440378,0,21425.4679111696,0,50837.3952072616,21158.8388803637,47952.3169181519,34881.3130277673,33171.0247135311,41426.8198173164,20546.394436366,40782.8649484017,0,32812.0132992616,17369.4918542595,22069.8314975743,27941.4613421485,0,13238.4907797732,11148.5663888382,29243.3168135875,81141.3744374462,0,9366.69597611172,30083.0647332959,9997.48562350422,1978876.97873232,160477.885582582,1898703.33181736,15072819.0866757,19075139.7310287,39781155.5084332,0]},"columns":[{"id":"est_id","name":"est_id","type":"character"},{"id":"year","name":"year","type":"numeric"},{"id":"indicator","name":"indicator","type":"factor"},{"id":"value","name":"value","type":"numeric"}],"dataKey":"bb9aa4e2eb5362c529202985ca20e56d"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script><p>We just have to add <code>"est_id"</code> to the groups argument. We
-can quickly plot this new object:</p>
+<p>When analyzing the workforce, a first order concern is understanding
+time trends in headcount. One way to do this is to compute the total
+headcount by reference date, allowing the user to visualize the
+trajectory of the public sector workforce over time.</p>
+<p>The function <code>compute_time_trend</code> and its companion
+plotting function <code>plot_trend</code> allow users to quickly
+generate this type of analysis.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">wagebill_annual_est</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
-<span>    <span class="va">year</span> <span class="op">!=</span> <span class="fl">2018</span> <span class="op">&amp;</span></span>
-<span>      <span class="va">est_id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">wagebill_annual_est</span><span class="op">$</span><span class="va">est_id</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/ggplot_point_line.html">ggplot_point_line</a></span><span class="op">(</span></span>
-<span>    <span class="va">year</span>,</span>
-<span>    <span class="va">value</span>,</span>
-<span>    group <span class="op">=</span> <span class="va">est_id</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span></span>
-<span>    labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html" class="external-link">label_number</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">facet_wrap</span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">est_id</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span></span>
-<span>    x <span class="op">=</span> <span class="st">"Year"</span>,</span>
-<span>    y <span class="op">=</span> <span class="st">"Wage Bill \n(Constant International Dollars)"</span>,</span>
-<span>    title <span class="op">=</span> <span class="st">"Wage Bill: Annual, by Establishment"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="03-analytics_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="Plot of wage bill at the annual level and establishmental level." width="2187.5"></p>
+<code class="sourceCode R"><span><span class="co"># total headcount by reference date</span></span>
+<span><span class="va">headcount_trend</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
+<span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
+<span>  group <span class="op">=</span> <span class="st">"ref_date"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">headcount_trend</span>, group <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-1-1.png" class="r-plt" alt="" width="700"></p>
+<p>You might also be curious about how time trends for headcount varies
+across groups, such as gender. Modifying the <code>group</code> argument
+makes that possible. Note that implicitly the function will still take
+the reference date into account.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># total headcount by reference date and gender</span></span>
+<span><span class="va">headcount_trend_gender</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
+<span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
+<span>  group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gender"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">headcount_trend_gender</span>, group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="700"></p>
+</div>
+<div class="section level2">
+<h2 id="movement">Movement<a class="anchor" aria-label="anchor" href="#movement"></a>
+</h2>
+<p>Beyond the stock of personnel, governments are often interested in
+the flows of personnel into and out of the public sector. The
+<code>compute_workforce_movement</code> function allows users to compute
+the number of new hires and separations by reference date, while the
+companion plotting function <code>plot_movement</code> visualizes these
+flows.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">movement_hire_count</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_workforce_movement.html">compute_workforce_movement</a></span><span class="op">(</span></span>
+<span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
+<span>  movement_type <span class="op">=</span> <span class="st">"hire"</span>,</span>
+<span>  measurement_type <span class="op">=</span> <span class="st">"count"</span>,</span>
+<span>  group_cols <span class="op">=</span> <span class="st">"ref_date"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot_movement.html">plot_movement</a></span><span class="op">(</span></span>
+<span>    <span class="va">movement_hire_count</span>,</span>
+<span>    movement_type <span class="op">=</span> <span class="st">"hire"</span>,</span>
+<span>    measurement_type <span class="op">=</span> <span class="st">"count"</span>,</span>
+<span>    group <span class="op">=</span> <span class="st">"ref_date"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="700">
+Again, if you are interested in how these flows vary across groups, you
+can modify the <code>group_cols</code> argument to include additional
+grouping variables.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">movement_hire_gender_count</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_workforce_movement.html">compute_workforce_movement</a></span><span class="op">(</span></span>
+<span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
+<span>  movement_type <span class="op">=</span> <span class="st">"hire"</span>,</span>
+<span>  measurement_type <span class="op">=</span> <span class="st">"count"</span>,</span>
+<span>  group_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ref_date"</span>, <span class="st">"gender"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot_movement.html">plot_movement</a></span><span class="op">(</span></span>
+<span>    <span class="va">movement_hire_gender_count</span>,</span>
+<span>    movement_type <span class="op">=</span> <span class="st">"hire"</span>,</span>
+<span>    measurement_type <span class="op">=</span> <span class="st">"count"</span>,</span>
+<span>    group <span class="op">=</span> <span class="st">"gender"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="700"></p>
+</div>
+<div class="section level2">
+<h2 id="wagebill-analytics">Wagebill analytics<a class="anchor" aria-label="anchor" href="#wagebill-analytics"></a>
+</h2>
+<p>Most of the analysis presented in the workforce analytics section can
+be replicated for the wagebill. For example, the
+<code>compute_time_trend</code> function can be used to compute the
+total wagebill by reference date, while the <code>plot_trend</code>
+function can visualize that trend.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># total wagebill by reference date</span></span>
+<span><span class="va">wagebill_trend</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
+<span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_contract.html">bra_hrmis_contract</a></span>,</span>
+<span>  group <span class="op">=</span> <span class="st">"ref_date"</span>,</span>
+<span>  measure_col <span class="op">=</span> <span class="st">"gross_salary_lcu"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">wagebill_trend</span>, group <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="700"></p>
+<p>A similar differentiation by group is possible, using the same
+grammar for the <code>group</code> argument.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># total wagebill by reference date</span></span>
+<span><span class="va">wagebill_paygrade_trend</span> <span class="op">&lt;-</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_contract.html">bra_hrmis_contract</a></span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">paygrade</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
+<span>        group <span class="op">=</span> <span class="st">"paygrade"</span>,</span>
+<span>        measure_col <span class="op">=</span> <span class="st">"gross_salary_lcu"</span></span>
+<span>    <span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">wagebill_paygrade_trend</span>, group <span class="op">=</span> <span class="st">"paygrade"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
+</div>
+<div class="section level2">
+<h2 id="equity">Equity<a class="anchor" aria-label="anchor" href="#equity"></a>
+</h2>
+<p>Generally, equity analyses focus on whether different groups of
+personnel are compensated fairly. It also includes analyses of whether
+the wage structure is compressed, meaning that the gap between the
+highest and lowest earners within a group is small.</p>
+<p>A compressed wage structure can indicate that the government is
+paying its employees more equitably, but it can also suggest that there
+is little differentiation in pay based on experience or performance. How
+to interpret the findings of this equity analysis depends on the policy
+preferences of governments and their public sector workers.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># wage compression: ratio between the 90th and 10th percentile of gross salary,</span></span>
+<span><span class="co"># tracked over time</span></span>
+<span><span class="va">compression_ratio</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_compression_ratio.html">compute_compression_ratio</a></span><span class="op">(</span></span>
+<span>  <span class="va">bra_hrmis_contract</span>,</span>
+<span>  measure_col <span class="op">=</span> <span class="st">"gross_salary_lcu"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot_compression_ratio.html">plot_compression_ratio</a></span><span class="op">(</span><span class="va">compression_ratio</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -183,7 +233,7 @@ can quickly plot this new object:</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

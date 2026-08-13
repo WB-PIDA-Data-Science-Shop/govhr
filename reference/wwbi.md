@@ -132,6 +132,15 @@ A data frame with 993 rows and 11 variables:
   associate professional occupations, compared to formal wage employees
   in the private sector.
 
+- `ps_wagebill_share_gdp`:
+
+  double Public sector wage bill, as a share of GDP.
+
+- `ps_wagebill_share_expenditure`:
+
+  double Public sector wage bill, as a share of total government
+  expenditure.
+
 ## Source
 
 World Bank <https://data360.worldbank.org/en/int/dataset/WB_WWBI>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -15,7 +15,8 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/govhr.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -84,20 +85,6 @@
 
         <dt>
 
-          <code><a href="calculate_date_intervals.html">calculate_date_intervals()</a></code>
-
-        </dt>
-        <dd>Calculate time intervals between reference dates</dd>
-
-        <dt>
-
-          <code><a href="check_orphan_id.html">check_orphan_id()</a></code>
-
-        </dt>
-        <dd>Detect Orphan Records Between Parent and Child Modules</dd>
-
-        <dt>
-
           <code><a href="classify_personnel_event.html">classify_personnel_event()</a></code>
 
         </dt>
@@ -123,20 +110,6 @@
 
         </dt>
         <dd>COFOG Functional Classification Taxonomy</dd>
-
-        <dt>
-
-          <code><a href="compare_names_qc.html">compare_names_qc()</a></code>
-
-        </dt>
-        <dd>Compare the contents of two character vectors</dd>
-
-        <dt>
-
-          <code><a href="compare_to_dictionary.html">compare_to_dictionary()</a></code>
-
-        </dt>
-        <dd>Compare Dataset Variable Names Against a Dictionary</dd>
 
         <dt>
 
@@ -168,10 +141,24 @@
 
         <dt>
 
+          <code><a href="compute_coverage.html">compute_coverage()</a></code>
+
+        </dt>
+        <dd>Compute coverage of non-missing values in a dataset.</dd>
+
+        <dt>
+
           <code><a href="compute_cross_section.html">compute_cross_section()</a></code>
 
         </dt>
         <dd>Compute Cross-Section Summary Table</dd>
+
+        <dt>
+
+          <code><a href="compute_decile.html">compute_decile()</a></code>
+
+        </dt>
+        <dd>Function to compute deciles of a measure column within groups and reference dates.</dd>
 
         <dt>
 
@@ -203,17 +190,24 @@
 
         <dt>
 
+          <code><a href="compute_global_consistency.html">compute_global_consistency()</a></code>
+
+        </dt>
+        <dd>Compute the proportion of consistent records and values in a data frame.</dd>
+
+        <dt>
+
+          <code><a href="compute_global_coverage.html">compute_global_coverage()</a></code>
+
+        </dt>
+        <dd>a function to compute the proportion of missing values in a data frame</dd>
+
+        <dt>
+
           <code><a href="compute_growth.html">compute_growth()</a></code>
 
         </dt>
         <dd>Compute Growth Rate Summary Table</dd>
-
-        <dt>
-
-          <code><a href="compute_hrmreport_stats.html">compute_hrmreport_stats()</a></code>
-
-        </dt>
-        <dd>Compute Core HRMIS Analytical Tables</dd>
 
         <dt>
 
@@ -231,10 +225,10 @@
 
         <dt>
 
-          <code><a href="compute_qualitycontrol.html">compute_qualitycontrol()</a></code>
+          <code><a href="compute_percentile.html">compute_percentile()</a></code>
 
         </dt>
-        <dd>Compute Comprehensive Quality Control Checks for Harmonized HRMIS Data</dd>
+        <dd>Function to compute the percentile values</dd>
 
         <dt>
 
@@ -245,6 +239,13 @@
 
         <dt>
 
+          <code><a href="compute_record_consistency.html">compute_record_consistency()</a></code>
+
+        </dt>
+        <dd>Compute the proportion of consistent records in a data frame.</dd>
+
+        <dt>
+
           <code><a href="compute_time_trend.html">compute_time_trend()</a></code>
 
         </dt>
@@ -252,10 +253,10 @@
 
         <dt>
 
-          <code><a href="compute_volatility.html">compute_volatility()</a></code>
+          <code><a href="compute_value_consistency.html">compute_value_consistency()</a></code>
 
         </dt>
-        <dd>Compute Volatility Measures Over Time</dd>
+        <dd>Compute the proportion of consistent values in a data frame.</dd>
 
         <dt>
 
@@ -263,6 +264,13 @@
 
         </dt>
         <dd>Compute wage bill aggregates with optional macro-fiscal shares</dd>
+
+        <dt>
+
+          <code><a href="compute_workforce_movement.html">compute_workforce_movement()</a></code>
+
+        </dt>
+        <dd>Function to compute workforce movement for hires, fires, retirement, or turnover</dd>
 
         <dt>
 
@@ -312,13 +320,6 @@
 
         </dt>
         <dd>Compute the Coefficient of Variation (CV)</dd>
-
-        <dt>
-
-          <code><a href="dedup_value_panel.html">dedup_value_panel()</a></code>
-
-        </dt>
-        <dd>Deduplicate and disambiguate an attribute using both lag and lead values</dd>
 
         <dt>
 
@@ -469,31 +470,10 @@
 
         <dt>
 
-          <code><a href="flag_outlier.html">flag_outlier()</a></code>
-
-        </dt>
-        <dd>Flag outliers based on the IQR rule</dd>
-
-        <dt>
-
-          <code><a href="flatten_volatility.html">flatten_volatility()</a></code>
-
-        </dt>
-        <dd>Flatten a nested volatility list into a single labelled data.table</dd>
-
-        <dt>
-
           <code><a href="generate_hr_report.html">generate_hr_report()</a></code>
 
         </dt>
         <dd>Generate Standard HR Analytics Report</dd>
-
-        <dt>
-
-          <code><a href="generate_qc_report.html">generate_qc_report()</a></code>
-
-        </dt>
-        <dd>Generate Quality Control Report for HR Data</dd>
 
         <dt>
 
@@ -571,6 +551,69 @@
 
         </dt>
         <dd>Pivot Data360 dataset to wide format</dd>
+
+        <dt>
+
+          <code><a href="plot_bar_growth.html">plot_bar_growth()</a></code>
+
+        </dt>
+        <dd>Plot Horizontal Bar Chart of Growth Rates by Group</dd>
+
+        <dt>
+
+          <code><a href="plot_bar_total.html">plot_bar_total()</a></code>
+
+        </dt>
+        <dd>Plot Horizontal Bar Chart of Totals by Group</dd>
+
+        <dt>
+
+          <code><a href="plot_compression_ratio.html">plot_compression_ratio()</a></code>
+
+        </dt>
+        <dd>Plot Compression Ratio</dd>
+
+        <dt>
+
+          <code><a href="plot_decile.html">plot_decile()</a></code>
+
+        </dt>
+        <dd>Plot Decile Summary</dd>
+
+        <dt>
+
+          <code><a href="plot_histogram.html">plot_histogram()</a></code>
+
+        </dt>
+        <dd>Plot Density as Percentage Share</dd>
+
+        <dt>
+
+          <code><a href="plot_movement.html">plot_movement()</a></code>
+
+        </dt>
+        <dd>Plot Personnel Movement Over Time</dd>
+
+        <dt>
+
+          <code><a href="plot_movement_cost.html">plot_movement_cost()</a></code>
+
+        </dt>
+        <dd>Plot Movement Cost</dd>
+
+        <dt>
+
+          <code><a href="plot_segment.html">plot_segment()</a></code>
+
+        </dt>
+        <dd>Create a Segment Plot with Jittered Points</dd>
+
+        <dt>
+
+          <code><a href="plot_trend.html">plot_trend()</a></code>
+
+        </dt>
+        <dd>Plot Time Trend</dd>
 
         <dt>
 

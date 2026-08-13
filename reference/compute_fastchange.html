@@ -13,7 +13,7 @@ using lagged values."><meta property="og:image" content="https://wb-pida-data-sc
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,7 +21,8 @@ using lagged values."><meta property="og:image" content="https://wb-pida-data-sc
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/govhr.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -78,9 +79,7 @@ used to order the data and define the time sequence (typically a year column).</
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>- Missing years in the sequence are added automatically.
 - Missing values in `col` result in `NA` for the corresponding growth rate.
-- The first observation (or any row where the lag is missing) will have `NA`.
-- The function can accept both unquoted column names or strings.
-- To compute growth rates by group (e.g., country), use `group_by()` from `dplyr`.</p>
+- The first observation (or any row where the lag is missing) will have `NA`.</p>
     </div>
 
     <div class="section level2">

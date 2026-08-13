@@ -1,655 +1,282 @@
-# HR Data Harmonization
-
-## Introduction
-
-Across many countries—especially in low- and middle-income
-settings—governments are increasingly seeking to adopt analytics-driven
-approaches to public sector human resource (HR) management and civil
-service reform. Yet most government offices and our World Bank regional
-counterparts often lack standardized tools for transforming raw HRMIS
-data into formats suitable for rigorous analysis. As a result, each new
-diagnostic requires bespoke data cleaning, ad hoc coding decisions, and
-country-specific scripts that are costly to maintain and difficult to
-replicate.
-
-This fragmentation makes HRM analytics expensive, slow, and
-inconsistent. It also limits the ability of governments and development
-partners—including the World Bank—to compare results across time,
-sectors, or countries, or to build reusable analytics pipelines.
-
-This article describes the standard approach for harmonizing human
-resource management information system (HRMIS) data, organized into
-three main modules: Establishment, Personnel, and Contract. The contents
-of each module are described in `vignette("standard_dictionary")`. In
-this article, we provide a set of helper functions to support the
-harmonization process across the modules. When users prepare their HRMIS
-data according to this standard, teams can immediately apply automated
-tools for data quality control as well as dynamic and reproducible
-reports on workforce structure dynamics, pay and compensation analytics,
-establishment control monitoring, staffing distribution analysis.
-
-This vignette, harmonization.Rmd, presents the practical workflow for
-transforming raw HRMIS extracts into these standardized modules. It
-provides governments with a clear, repeatable procedure for preparing
-their data so that advanced analytics can be deployed rapidly and
-consistently—reducing costs, increasing comparability, and strengthening
-evidence-based HR decision making.
-
-The harmonization workflow demonstrated here shows how to:
-
-- map raw administrative HR variables into a standardized public sector
-  schema,
-
-- recode local classifications (education, occupation, contract type)
-  into cross-country taxonomies,
-
-- generate unique and persistent identifiers for personnels,
-  establishments, and contracts,
-
-- attach missing metadata such as country codes, administrative
-  hierarchies, or reference dates,
-
-- structure the cleaned data into the three standard HRMIS modules, and
-
-- validate the outputs against the HRMIS Standard Data Dictionary.
-
-By following this procedure, governments and World Bank teams can unlock
-a common analytics ecosystem in which standardized public sector HR data
-feeds directly into automated dashboards, diagnostic tools, and
-monitoring systems—enabling faster, cheaper, and more consistent
-evidence-based HR reform.
-
-### The Raw Data
-
-For this vignette, we apply our tools to data provided by Brazil HRMIS
-system provided at the contract level. We randomly sample 5 percent of
-the original data. See the data below:
+# Data harmonization
 
 ``` r
 
-# bra_hrmis <- govhr::bra_hrmis |> 
-#   sample_n(1e3)
-bra_hrmis_display <- data.table::as.data.table(bra_hrmis)
-char_cols <- names(bra_hrmis_display)[sapply(bra_hrmis_display, is.character)]
-bra_hrmis_display[, (char_cols) := lapply(.SD, function(x) {
-  iconv(x, from = "latin1", to = "UTF-8", sub = "")
-}), .SDcols = char_cols]
-
-reactable(head(bra_hrmis_display, 100))
+library(govhr)
+library(dplyr)
+library(data.table)
 ```
 
-We illustrate the harmonization workflow using this dataset. `bra_hrmis`
-contains 12576 rows and 34 columns, covering covering demographic,
-employment, establishmental, and payroll information for public sector
-personnels.
+## Why harmonize?
 
-A quick glimpse of the dataset:
+Governments collect HR data in their own conventions: column names,
+classifications, and identifiers rarely match a common standard.
+Harmonization re-expresses raw HR data extractions using the `govhr`
+[Standard Data
+Dictionary](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html),
+organized into three modules: **Establishment**, **Personnel**, and
+**Contract**. Once harmonized, data becomes comparable across countries
+and over time, and can feed directly into `govhr`’s analytics functions.
+
+This article walks through harmonizing a synthetic dataset, `bra_hrmis`,
+built from a contract-level extract from Brazil’s HRMIS system in the
+Alagoas state, using the helper functions in `govhr`. The example
+focuses primarily on generating one module, Personnel, but a similar
+logic can be applied to the Establishment and Contract modules.
 
 ``` r
 
-glimpse(bra_hrmis)
+bra_hrmis <- as.data.table(govhr::bra_hrmis)
+dim(bra_hrmis)
+#> [1] 12576    34
 ```
 
-    ## Rows: 12,576
-    ## Columns: 34
-    ## $ ANO_PAGAMENTO                     <chr> "2014", "2014", "2014", "2014", "201…
-    ## $ MES_REFERENCIA                    <chr> "8", "8", "8", "8", "8", "8", "8", "…
-    ## $ MATRICULA                         <chr> "242", "1613", "1691", "1704", "1711…
-    ## $ CPF                               <chr> "49670581400", "46895175415", "51663…
-    ## $ DATA_NASCIMENTO                   <chr> "23973", "24265", "25050", "27527", …
-    ## $ GENERO                            <chr> "FEMININO", "MASCULINO", "MASCULINO"…
-    ## $ ESCOLARIDADE                      <chr> "5 A 8 SERIE DO PRIM. GRAU INCOMPLET…
-    ## $ DATA_ADMISSAO                     <chr> "31564", "32177", "36075", "36075", …
-    ## $ ADMINISTRACAO                     <chr> "DIRETA", "DIRETA", "DIRETA", "DIRET…
-    ## $ TIPO_CONTRATO                     <chr> "EFETIVO", "EFETIVO", "EFETIVO", "EF…
-    ## $ GRUPO                             <chr> "OUTROS", "OUTROS", "OUTROS", "OUTRO…
-    ## $ COD_ORGAO                         <chr> "301101", "301203", "301203", "30120…
-    ## $ ORGAO                             <chr> "GABINETE CIVIL", "CORPO DE BOMBEIRO…
-    ## $ CARREIRA                          <chr> "AGENTE ADMINISTRATIVO", "CAPITAO", …
-    ## $ CARGO                             <chr> "AGENTE ADMINISTRATIVO", "CAPITAO", …
-    ## $ JORNADA                           <chr> "30", "40", "40", "40", "40", "40", …
-    ## $ CLASSE                            <chr> "C", NA, NA, NA, NA, NA, NA, NA, NA,…
-    ## $ NIVEL                             <chr> "ACMNC30", "TC2", "2SGT2", "ST2", "2…
-    ## $ DATA_ULT_PROGRESSAO               <chr> "42941", "43392", "43388", "43381", …
-    ## $ SALARIO_BASE                      <chr> "712.68", "9695.81", "4087.87", "473…
-    ## $ CONTRIBUICAO_PREVIDENCIA          <chr> "0", "0", "0", "0", "0", "0", "0", "…
-    ## $ ADICIONAL_TEMPO_SERVICO           <chr> "0", "0", "0", "0", "0", "0", "0", "…
-    ## $ COMISSAO                          <chr> "0", "0", "648.66999999999996", "0",…
-    ## $ ABONO_PERMANENCIA                 <chr> "0", "0", "0", "0", "0", "0", "0", "…
-    ## $ DECISAO_JUDICIAL                  <chr> "0", "0", "0", "0", "0", "0", "0", "…
-    ## $ DEMAIS_GRATIFICACOES_TRANSITORIAS <chr> "11.32", "0", "0", "0", "0", "0", "1…
-    ## $ DEMAIS_GRATIFICACOES_CARREIRA     <chr> "0", "0", "0", "0", "0", "0", "0", "…
-    ## $ SALARIO_BRUTO                     <chr> "724", "9695.81", "4736.54", "4736.5…
-    ## $ SALARIO_LIQUIDO                   <chr> "724", "8148.92", "4359.649999999999…
-    ## $ DATA_APOSENTADORIA                <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-    ## $ VALOR_BRUTO                       <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-    ## $ VALOR_LIQUIDO                     <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-    ## $ TIPO                              <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-    ## $ `TEMPO DE CONTRIBUIÇÃO`           <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+## Step 1: check column consistency
 
-This will give you a brief, surface level overview of the dataset. You
-should see the dimensions of the data (i.e. number of rows and columns)
-and variable types and perhaps begin to get a sense for completeness (or
-the lack thereof) for certain variables.
-
-## The Harmonization Process
-
-### Introduction
-
-The goal of the harmonization process is to establish a consistent and
-standardized structure for cleaned HR datasets, ensuring that analytics
-supporting government human resources management from a common
-analytical foundation. In many client countries, HRM analytics are
-conducted in an ad-hoc, highly customized manner that varies by
-consultant, ministry, year, and even dataset. This leads to high
-analytical costs, limited comparability over time or across
-institutions, and significant barriers to scaling evidence-based human
-resource reform.
-
-The harmonization framework addresses these challenges directly. By
-defining a clear data dictionary and a set of standardized
-transformations, governments can prepare their HRMIS data in a format
-that is analytically ready and fully compatible with the tools provided
-in the `govhr` package. This ensures:
-
-- **Reproducible and transparent workflows**  
-- **Cross-country and cross-institution comparability**  
-- **Automatic generation of quality checks and dashboards**  
-- **Reduced data preparation cost for each new engagement**
-
-The remainder of this section documents the harmonization steps for each
-of the three core modules derived from the data dictionary:
-
-1.  **Contract Module**  
-2.  **Personnel Module**
-3.  **Establishment Module** Each module represents a specific level of
-    analysis defined by the dictionary and is to be constructed directly
-    from the raw HRMIS data.
-
-------------------------------------------------------------------------
-
-### Harmonizing the Contract Module
-
-The Contract Module is the foundational component of the harmonized
-payroll dataset. The purpose of this module is to extract and structure
-all information that is **unique at a contract, reference date level**,
-as defined in the data dictionary. A “contract record” refers to a
-personnel–contract relationship at a specific reference period (usually
-month–year), capturing the contractual characteristics governing the
-personnel’s employment at that time.
-
-In practice, the raw HRMIS data typically mixes variables at different
-conceptual levels—personnel attributes, position attributes, contract
-terms, payroll events, and sometimes even one-off administrative
-transactions.
-
-Working with payroll or HRMIS data in many developing-country contexts
-often involves very large datasets—sometimes millions of records
-spanning multiple years. Such data volumes can quickly overwhelm
-standard analytical workflows if not handled using efficient tools.
-
-In R, there are several paradigms for manipulating two-dimensional data.
-For the purposes of this tutorial, we rely on the data.table package for
-the tasks that are more computationally intensive. At the time of
-writing, data.table remains the gold standard for high-performance data
-processing in R, offering exceptional speed, efficient memory use, and
-an expressive syntax tailored for large datasets.
-
-Although the dplyr package from the tidyverse ecosystem is widely used
-and favored for its readability and intuitive grammar, operations on
-large payroll datasets can be substantially slower when using dplyr
-alone. To ensure reproducibility, performance, and
-scalability—especially for teams with limited computational resources—we
-adopt data.table as the primary engine for harmonization. However, we
-will also use the dplyr functions where performance is not improved to
-ensure code readability.
-
-The `bra_hrmis` data is written in Portuguese which might require
-translation to English to ease understanding. One option is to use an
-LLM like ChatGPT to get a quick as there are only 34 columns.
-Alternatively the `polyglotr` R package provides a suite functions that
-support translation. This can be applied as follows:
+Before harmonizing, it’s useful to check whether raw data sources
+(e.g. multiple years or offices) share a consistent column naming (i.e.,
+schema).
+[`find_inconsistent_colnames()`](https://wb-pida-data-science-shop.github.io/govhr/reference/find_inconsistent_colnames.md)
+flags columns that aren’t shared across all sources.
 
 ``` r
 
-raw_dictionary <- 
-  tibble(raw_colnames_pt = colnames(govhr::bra_hrmis),
-         raw_colnames_eng = polyglotr::google_translate(colnames(bra_hrmis), 
-                            source_language = "pt", 
-                            target_language = "en"))
+# simulate two extracts with slightly different schemas
+extract_2020 <- bra_hrmis[ANO_PAGAMENTO == min(ANO_PAGAMENTO)]
+extract_2021 <- bra_hrmis[ANO_PAGAMENTO == max(ANO_PAGAMENTO)]
 
-kable(raw_dictionary)
+find_inconsistent_colnames(list(extract_2020, extract_2021))
+#> # A tibble: 0 × 1
+#> # ℹ 1 variable: colnames <chr>
 ```
 
-| raw_colnames_pt                   | raw_colnames_eng              |
-|:----------------------------------|:------------------------------|
-| ANO_PAGAMENTO                     | PAYMENT_YEAR                  |
-| MES_REFERENCIA                    | MONTH_REFERENCE               |
-| MATRICULA                         | REGISTRATION                  |
-| CPF                               | CPF                           |
-| DATA_NASCIMENTO                   | BIRTH_DATE                    |
-| GENERO                            | GENDER                        |
-| ESCOLARIDADE                      | EDUCATION                     |
-| DATA_ADMISSAO                     | ADMISSION_DATE                |
-| ADMINISTRACAO                     | ADMINISTRATION                |
-| TIPO_CONTRATO                     | CONTRACT_TYPE                 |
-| GRUPO                             | GROUP                         |
-| COD_ORGAO                         | COD_ORGAO                     |
-| ORGAO                             | ORGAN                         |
-| CARREIRA                          | CAREER                        |
-| CARGO                             | POSITION                      |
-| JORNADA                           | JOURNEY                       |
-| CLASSE                            | CLASS                         |
-| NIVEL                             | LEVEL                         |
-| DATA_ULT_PROGRESSAO               | DATA_ULT_PROGRESSAO           |
-| SALARIO_BASE                      | BASE_SALARY                   |
-| CONTRIBUICAO_PREVIDENCIA          | CONTRIBUICAO_PREVIDENCIA      |
-| ADICIONAL_TEMPO_SERVICO           | ADDITIONAL_TIME_SERVICE       |
-| COMISSAO                          | COMMISSION                    |
-| ABONO_PERMANENCIA                 | ALLOWANCE_PERMANENCE          |
-| DECISAO_JUDICIAL                  | JUDICIAL_DECISION             |
-| DEMAIS_GRATIFICACOES_TRANSITORIAS | OTHER_TRANSIT_GRATIFICATIONS  |
-| DEMAIS_GRATIFICACOES_CARREIRA     | OTHER_GRATIFICATIONS_CARREIRA |
-| SALARIO_BRUTO                     | GROSS_SALARY                  |
-| SALARIO_LIQUIDO                   | NET_SALARY                    |
-| DATA_APOSENTADORIA                | RETIREMENT_DATE               |
-| VALOR_BRUTO                       | GROSS_VALUE                   |
-| VALOR_LIQUIDO                     | NET_VALUE                     |
-| TIPO                              | TYPE                          |
-| TEMPO DE CONTRIBUIÇÃO             | CONTRIBUTION TIME             |
+## Step 2: generate module identifiers
 
-The first step when handling any raw payroll dataset is to find the
-individual to identifies each countract for each time period unique. We
-begin by looking through the `bra_hrmis` object for this. From the above
-table and the previous glimpse(), we can see that the `CPF` and
-`MATRICULA` variables are the most likely candidates to identify
-contracts uniquely. We do a quick check for this as follows:
+Harmonization requires knowing which column identifies a contract and
+which identifies a person. These are our primary keys, that is, unique
+identifiers for contracts and personnel, respectively.
+[`find_duplicate_ids()`](https://wb-pida-data-science-shop.github.io/govhr/reference/find_duplicate_ids.md)
+is a quick way to test whether a candidate column is a valid unique key.
 
 ``` r
 
-### first let us convert the data to a data.table object to speed up our computations
-
-bra_hrmis <- as.data.table(bra_hrmis)
-
-# Unique CPF per year
-cpf_summary <- bra_hrmis[, .(unique_cpf = uniqueN(CPF),
-                             nobs       = .N),
-                         by = ANO_PAGAMENTO]
-
-# Unique Matricula per year
-mtr_summary <- bra_hrmis[, .(unique_mtr = uniqueN(MATRICULA),
-                             nobs       = .N), 
-                         by = ANO_PAGAMENTO]
-
-kable(cpf_summary)
+bra_hrmis |> find_duplicate_ids(MATRICULA)
+#> Index: <ANO_PAGAMENTO>
+#>       MATRICULA     n
+#>          <char> <int>
+#>    1:    100025    10
+#>    2:    100030     2
+#>    3:    100070    10
+#>    4:    100094    10
+#>    5:    100096    10
+#>   ---                
+#> 1961:     99772    10
+#> 1962:      9979     5
+#> 1963:     99851    10
+#> 1964:     99962    10
+#> 1965:     99990    10
 ```
 
-| ANO_PAGAMENTO | unique_cpf | nobs |
-|:--------------|-----------:|-----:|
-| 2014          |       1277 | 2302 |
-| 2015          |       1341 | 2423 |
-| 2016          |       1573 | 2660 |
-| 2017          |       1545 | 2609 |
-| 2018          |       1575 | 1661 |
-| 2019          |        880 |  921 |
+`MATRICULA` uniquely identifies a contract for a given reference date,
+so it becomes the **contract identifier**, or `contract_id` in our
+standard data dictionary. `CPF` will serve as the **personnel
+identifier**, the `personnel_id`.
+
+## Step 3: map raw columns to standardized names
+
+Raw data columns rarely match the naming conventions of the `govhr`
+standard dictionary.
+[`harmonize_columns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/harmonize_columns.md)
+renames the data with a key-value dictionary, keeping only the desired
+columns.
 
 ``` r
 
-kable(mtr_summary)
-```
-
-| ANO_PAGAMENTO | unique_mtr | nobs |
-|:--------------|-----------:|-----:|
-| 2014          |       1335 | 2302 |
-| 2015          |       1436 | 2423 |
-| 2016          |       1659 | 2660 |
-| 2017          |       1641 | 2609 |
-| 2018          |       1661 | 1661 |
-| 2019          |        921 |  921 |
-
-This clearly shows that `MATRICULA` is the contract ID while `CPF` is
-possibly the identifier for the personnel, the latter will come in handy
-during the harmonization of the personnel module.
-
-Now, we can begin creating the set of variables as defined by the
-`standard_dictionary` vignette. It is often useful to begin by creating
-the derived variables. There are four sets of derived variables within
-the dictionary:
-
-- 1.  the Industrial Standard Classification of Occupation (ISCO)
-      variables, i.e. `occupation_isconame`, `occupation_iscocode` are
-      derived from the original occupation variables
-      `occupation_native`, `occupation_english`. We apply the
-      [`polyglotr::google_translate()`](https://tomeriko96.github.io/polyglotr/reference/google_translate.html)
-      function to convert Portuguese named occupations to English as
-      well as use the `LabourR::classify_occupation()` function to
-      classify these occupations to the level-4 isco names.
-
-``` r
-
-#-----------------------------
-# 2. Build occupation table (active + inactive)
-#-----------------------------
-
-occup_df <- bra_hrmis[, c("CARREIRA", "CARGO")]
-
-# distinct CARREIRA/CARGO/status
-occup_df <- unique(occup_df)
-
-# Add translated vars
-occup_df[, occupation_native := tolower(CARREIRA)]
-
-occup_df[, occupation_english := tolower(polyglotr::google_translate(text = occupation_native,
-                                                                     source_language = "pt",
-                                                                     target_language = "en"))]
-```
-
-``` r
-
-class_occup_df <- copy(occup_df)[,
-  .(id = .I, text = occupation_english)
-]
-
-class_occup_df <- classify_occupation(
-  class_occup_df,
-  isco_level = 4,
-  lang = "en",
-  num_leaves = 1
-)
-```
-
-``` r
-
-#-----------------------------
-# 4. Merge classification back into occup_df
-#-----------------------------
-occup_df[, id := .I]
-
-# merge iscoGroup
-occup_df <- merge(
-  occup_df,
-  class_occup_df[, .(id = as.integer(id), iscoGroup)],
-  by = "id",
-  all.x = TRUE
+column_dictionary <- c(
+  contract_id  = "MATRICULA",
+  personnel_id = "CPF",
+  est_id       = "ORGAO",
+  paygrade     = "CLASSE",
+  seniority    = "NIVEL",
+  gender       = "GENERO"
 )
 
-setnames(occup_df, "iscoGroup", "occupation_iscocode")
-
-# merge ISCO descriptions
-occup_df <- merge(occup_df,
-                  isco[, c("unit", "description")] |> as.data.table(),
-                  by.x = "occupation_iscocode",
-                  by.y = "unit",
-                  all.x = TRUE)
-
-setnames(occup_df, "description", "occupation_isconame")
-
-#-----------------------------
-# 5. Bring classified occupations back to bra_hrmis (active only)
-#-----------------------------
-
-## Remove duplicates from occup_df before merging
-occup_df <- unique(occup_df, by = c("CARREIRA", "CARGO"))
-
-## we perform a left join with data.table syntax for speed as the merging into 
-## the hrmis dataset could be computationally intensive
-
-bra_hrmis <- occup_df[bra_hrmis, on = c("CARREIRA", "CARGO")]
+bra_hrmis <- harmonize_columns(bra_hrmis, column_dictionary) |>
+  cbind(bra_hrmis[, !names(column_dictionary), with = FALSE][
+    ,
+    setdiff(names(bra_hrmis), names(column_dictionary)),
+    with = FALSE
+  ])
 ```
 
-- 2.  the date variables (`ref_date`, `start_date`, `end_date`) are
-      often in the serial 5-digit format and need to be standardized as
-      they will be used in preparing the compensation variables which
-      are time-variant. Below, we create the date variables:
+## Building reference dates
+
+Dates are often stored as serial numbers or split across year/month
+columns. Once a `ref_date` column is built,
+[`guess_date_frequency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/guess_date_frequency.md)
+confirms the reporting interval — useful for choosing the right window
+when computing growth or turnover indicators later.
 
 ``` r
 
-### lets include the dates
 bra_hrmis[, ref_date := as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-"))]
 
-setnames(bra_hrmis, c("DATA_ADMISSAO", "DATA_APOSENTADORIA"), c("start_date", "end_date"), skip_absent = TRUE)
-bra_hrmis[, start_date := as.Date(as.integer(start_date), origin = "1899-12-30")]
-bra_hrmis[, end_date := as.Date(as.integer(end_date), origin = "1899-12-30")]
-
-
-### lets include the country code and admin identifier
-
-bra_hrmis[, country_code := "BRA"]
-bra_hrmis[, country_name := "Brazil"]
-bra_hrmis[, adm1_name := "Alagoas"]
-bra_hrmis[, adm1_code := "AL"]
-```
-
-- 3.  the compensation variables i.e. `gross_salary_ppp`,
-      `base_salary_ppp`, `net_salary_ppp` which are all derived from the
-      local currency equivalents `gross_salary_lcu`, `base_salary_lcu`,
-      `net_salary_lcu`. We provide a function called
-      [`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.md)
-      as well as a `macro_indicators` dataset with this package to
-      perform these transformations between the nominal variables
-      (i.e. \_lcu) and their real equivalents (\_ppp).
-
-``` r
-
-### lets convert the nominal compensation variables to real (_ppp) values
-# Step 1: Create the _lcu salary variables (in-place, no copy)
-
-### lets rename the raw variables here to their actual names
-setnames(bra_hrmis, 
-         old = c("SALARIO_BASE", "SALARIO_BRUTO", "SALARIO_LIQUIDO", "ABONO_PERMANENCIA"),
-         new = c("base_salary_lcu", "gross_salary_lcu", "net_salary_lcu", "allowance_lcu"))
-
-
-# Step 2: Identify all *_lcu columns to convert
-cols_to_convert <- grep("_lcu$", names(bra_hrmis), value = TRUE)
-
-# Step 3: Apply PPP conversion using your convert_constant_ppp function
-pfw_df <- 
-  macro_indicators |>
-  dplyr::filter(country_code == "BRA", 
-                year %in% as.integer(unique(bra_hrmis$ANO_PAGAMENTO))) |>
-  dplyr::select(all_of(c("country_code", "year", "cpi", "ppp")))
-
-
-bra_hrmis[, (cols_to_convert) := lapply(.SD, as.numeric), .SDcols = cols_to_convert]
-
-
-### apply the convert_constant_ppp function to produce those estimates
-bra_hrmis <- convert_constant_ppp(data = bra_hrmis, cols = cols_to_convert)
-
-### while we are at this lets include the working hour variable as well
-bra_hrmis[, whours := as.numeric(JORNADA)]
-```
-
-- 4.  the contract type variable `TIPO_CONTRATO` needs to be
-      reclassified according to the dictionary, `contract_type`. We do
-      so as follows:
-
-``` r
-
-### create a little dictionary mapping all the raw classes into a contract type in a data.table
-contract_dict <- 
-  data.table(TIPO_CONTRATO = unique(bra_hrmis$TIPO_CONTRATO),
-             contract_type = c("short-term", "permanent", "permanent", "open-term",
-                               "short-term", "inactive", "retired"))
-
-kable(contract_dict)
-```
-
-| TIPO_CONTRATO               | contract_type |
-|:----------------------------|:--------------|
-| EFETIVO                     | short-term    |
-| EFETIVO COMISSIONADO        | permanent     |
-| TEMPORÁRIO                  | permanent     |
-| EXCLUSIVAMENTE COMISSIONADO | open-term     |
-| TEMPOR¡RIO                  | short-term    |
-| INATIVO                     | inactive      |
-| PENSIONISTA                 | retired       |
-
-Let’s do a data.table join of the `contract_dict` into the `bra_hrmis`
-
-``` r
-
-bra_hrmis <- contract_dict[bra_hrmis, on = "TIPO_CONTRATO"]
-```
-
-Now that the derived variables in this contract module have been
-created, we are ready to create the rest of the variables all at once to
-finalize the module.
-
-``` r
-
-setnames(bra_hrmis,
-         old = c("MATRICULA", "CPF", "ORGAO", "CLASSE", "NIVEL"),
-         new = c("contract_id", "personnel_id", "est_id", "paygrade", "seniority"))
-
-
-### now let us select the final set of dictionary variables to complete the module
-### lets use dplyr::select() function since this will not add any computational time
-bra_hrmis_contract <- 
-  bra_hrmis |>
-  dplyr::select(
-    contract_id, personnel_id, est_id,
-    ends_with("_date"),
-    contains("_salary_"),
-    contract_type, 
-    starts_with("occupation_"),
-    country_code, country_name,
-    adm1_name, adm1_code,
-    whours, paygrade, seniority
-  )
-```
-
-Here is what our final data looks like:
-
-### Harmonizing the Personnel Module
-
-The Personnel Module standardizes individual-level information about
-employees with the public sector. This section demonstrates the
-harmonization pipeline using the same contract-level Brazil (Alagoas)
-HRMIS dataset (bra_hrmis) as an example. We will produce a clean,
-harmonized dataset named bra_hrmis_personnel which conforms to the
-Personnel Module dictionary in `standard_dictionary.Rmd`.
-
-Let’s start with a little exploration. We need to understand how many
-unique personnel-establishment-refdate combinations are within the data:
-
-``` r
-
-## how many observations should we expect to have
-personnel_count <- 
 bra_hrmis |>
-  dplyr::select(personnel_id, est_id, ref_date) |>
-  uniqueN()
+  as.data.frame() |>
+  guess_date_frequency()
+#> [1] "quarter"
 ```
 
-This tells us that we have 12145 unique personnel_id-est_id-refdate
-combinations in the entire dataset. The goal is to ensure that once all
-the other variables of the personnel module are added. The size of the
-personnel module remains the same. As we did, in the contract module, we
-now add all the derived variables:
+## Deduping values
+
+Attributes like education and gender should be constant for a given
+personnel-period, but raw data sometimes disagrees across rows for the
+same `personnel_id`/`ref_date` (e.g. due to concurrent contracts).
+[`dedup_values()`](https://wb-pida-data-science-shop.github.io/govhr/reference/dedup_values.md)
+resolves this using a chosen strategy — here, the modal value.
 
 ``` r
 
-## lets relabel some more variables
+bra_hrmis <- dedup_values(
+  bra_hrmis,
+  id_col = personnel_id,
+  date_col = ref_date,
+  value_col = gender,
+  method = "mode"
+) |>
+  select(personnel_id, ref_date, gender) |>
+  right_join(
+    bra_hrmis |> select(-gender),
+    by = c("personnel_id", "ref_date")
+  ) |>
+  as.data.table()
+```
 
+## Deflating wages
 
-# Create the education harmonization dictionary for educat7
-education_dictionary <- data.table(
-  ESCOLARIDADE = c(
-    "ANALFABETO",
-    "1 A 4 SERIE DO PRIM. GRAU INCOMPLETO",
-    "5 A 8 SERIE DO PRIM. GRAU INCOMPLETO",
-    "1 A 4 SERIE DO PRIM. GRAU COMPLETO",
-    "5 A 8 SERIE DO PRIM. GRAU COMPLETO",
-    "SEGUNDO GRAU INCOMPLETO",
-    "SEGUNDO GRAU COMPLETO",
-    "ESPECIALIZAÇÃO COMPLETO",
-    "ESPECIALIZAÇÃO INCOMPLETO",
-    "ESPECIALIZA«√O COMPLETO",
-    "ESPECIALIZA«√O INCOMPLETO",
-    "CURSO SUPERIOR COMPLETO",
-    "CURSO SUPERIOR INCOMPLETO",
-    "MESTRADO INCOMPLETO",
-    NA_character_
-  ),
-  educat7 = c(
-    "No education",
-    "Primary incomplete",
-    "Primary incomplete",
-    "Primary complete",
-    "Primary complete",
-    "Secondary incomplete",
-    "Secondary complete",
-    "Higher than secondary but not university",
-    "Higher than secondary but not university",
-    "Higher than secondary but not university",
-    "Higher than secondary but not university",
-    "University incomplete or complete",
-    "University incomplete or complete",
-    "University incomplete or complete",
-    NA_character_
-  )
+Nominal wages in local currency aren’t comparable across time or
+countries.
+[`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.md)
+uses the bundled `macro_indicators` dataset (with CPI and PPP conversion
+factors) to convert local currency units into international dollars.
+
+``` r
+
+setnames(
+  bra_hrmis,
+  old = c("SALARIO_BASE", "SALARIO_BRUTO", "SALARIO_LIQUIDO"),
+  new = c("base_salary_lcu", "gross_salary_lcu", "net_salary_lcu")
 )
 
-# Merge the dictionary into bra_hrmis
-bra_hrmis <- education_dictionary[bra_hrmis, on = "ESCOLARIDADE"]
+bra_hrmis[, country_code := "BRA"]
 
+salary_cols <- grep("_lcu$", names(bra_hrmis), value = TRUE)
+bra_hrmis[, (salary_cols) := lapply(.SD, as.numeric), .SDcols = salary_cols]
 
-bra_hrmis <- 
+bra_hrmis <- convert_constant_ppp(bra_hrmis, cols = salary_cols)
+
 bra_hrmis |>
-  setnames(old = c("DATA_NASCIMENTO", "GENERO"),
-           new = c("birth_date", "gender"))
-
-### lets prepare the birth date variables
-bra_hrmis[, birth_date := as.Date(as.integer(birth_date), origin = "1899-12-30")]
+  select(personnel_id, ref_date, all_of(salary_cols), ends_with("_ppp")) |>
+  head()
+#>    personnel_id   ref_date base_salary_lcu gross_salary_lcu net_salary_lcu
+#>          <char>     <Date>           <num>            <num>          <num>
+#> 1:    101237413 2015-08-01          924.49           924.49         850.54
+#> 2:    101237413 2015-09-01          970.69           970.69         898.02
+#> 3:  10128158468 2015-09-01              NA               NA             NA
+#> 4:  10128158468 2016-09-01              NA               NA             NA
+#> 5:  10128158468 2017-09-01              NA               NA             NA
+#> 6:  10128158468 2018-09-01              NA               NA             NA
+#>    base_salary_ppp gross_salary_ppp net_salary_ppp
+#>              <num>            <num>          <num>
+#> 1:          279.09           279.09         256.77
+#> 2:          293.04           293.04         271.10
+#> 3:              NA               NA             NA
+#> 4:              NA               NA             NA
+#> 5:              NA               NA             NA
+#> 6:              NA               NA             NA
 ```
 
-The remainder of the variables (`tribe`,
-``` race``) appear to be missing from the ```bra_hrmis`raw data. Therefore, we create them as missing variables (`NA\`).
+[`deflate_to_real()`](https://wb-pida-data-science-shop.github.io/govhr/reference/deflate_to_real.md)
+offers a lighter-weight alternative when you only need compensation
+expressed in constant local currency units (rather than constant
+international dollars):
 
 ``` r
 
-bra_hrmis[, c("tribe", "race") := .(NA, NA)] ## lets quickly create the variables that are missing from the raw data
+bra_hrmis[, gross_salary_real := deflate_to_real(
+  gross_salary_lcu,
+  ref_date,
+  country_code,
+  base_year = 2021
+)]
 ```
 
-Finally, we can create the personnel module by taking the set of unique
-values across the set of personnel modules we have now created within
-`bra_hrmis`. See the implementation below:
+## Completing the module
+
+Not every data extraction contains every dictionary column
+(e.g. `tribe`, `race` may be unavailable).
+[`complete_columns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/complete_columns.md)
+adds any missing dictionary columns as `NA`, so the resulting table
+always matches the expected schema — no more, no less.
 
 ``` r
 
-bra_hrmis_personnel <- 
-  bra_hrmis |>
-  dplyr::select(personnel_id, est_id, ref_date, birth_date, gender, educat7,
-                country_name, country_code, adm1_name, adm1_code) |>
-  unique()
+personnel_cols <- c(
+  "personnel_id", "est_id", "ref_date", "gender",
+  "educat7", "tribe", "race", "country_code"
+)
+
+bra_hrmis_personnel <- bra_hrmis |>
+  select(any_of(personnel_cols)) |>
+  distinct() |>
+  complete_columns(personnel_cols)
+
+bra_hrmis_personnel |> head()
+#>    personnel_id                                                est_id
+#>          <char>                                                <char>
+#> 1:    101237413 UNIVERSIDADE ESTADUAL DE CIENCIAS DA SAUDE DE ALAGOAS
+#> 2:    101237413 UNIVERSIDADE ESTADUAL DE CIENCIAS DA SAUDE DE ALAGOAS
+#> 3:  10128158468                                   ALAGOAS PREVIDENCIA
+#> 4:  10128158468                                   ALAGOAS PREVIDENCIA
+#> 5:  10128158468                                   ALAGOAS PREVIDENCIA
+#> 6:  10128158468                                   ALAGOAS PREVIDENCIA
+#>      ref_date    gender educat7  tribe   race country_code
+#>        <Date>    <char>  <lgcl> <lgcl> <lgcl>       <char>
+#> 1: 2015-08-01 MASCULINO      NA     NA     NA          BRA
+#> 2: 2015-09-01 MASCULINO      NA     NA     NA          BRA
+#> 3: 2015-09-01  FEMININO      NA     NA     NA          BRA
+#> 4: 2016-09-01  FEMININO      NA     NA     NA          BRA
+#> 5: 2017-09-01  FEMININO      NA     NA     NA          BRA
+#> 6: 2018-09-01  FEMININO      NA     NA     NA          BRA
 ```
 
-Let’s take a look at the `bra_hrmis_personnel`
+## Validating the harmonized data
 
-### Harmonizing the Establishment Module
-
-The Establishment Module extracts, standardizes, and structures
-information on public-sector establishments from the HRMIS records,
-`bra_hrmis`. The steps below convert the raw establishment identifiers
-into a canonical, well-structured establishment register according the
-harmonization dictionary. See below:
+Once harmonized,
+[`validate_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/validate_data.md)
+checks the harmonized dataset against a set of validation rules. It then
+reports both a pass-rate summary and the specific records that violate
+each rule. This helps you identify negative salaries, missing keys, or
+out-of-range dates before analytics are run.
 
 ``` r
 
-### get the set of variables according to the dictionary
-bra_hrmis_est <- 
-  bra_hrmis |>
-  mutate(est_name_native = est_id,
-         est_type = NA,
-         est_parent = NA,
-         est_child = NA) |>
-  dplyr::select(
-    est_id, est_name_native, ref_date, est_type, est_parent, est_child,
-    country_code, country_name, adm1_name, adm1_code
-  ) |>
-  unique() |>
-  head(10) |> 
-  mutate(est_name_en = polyglotr::google_translate(est_name_native, target_language = "en"))
+result <- validate_data(
+  data        = govhr::bra_hrmis_contract,
+  input_rules = govhr::contract_rules
+)
+
+result$report
 ```
+
+You can inspect the specific records that violate a given rule, for
+example, the `salary_non_negative` rule:
+
+``` r
+
+result$violations[["salary_non_negative"]]
+#> NULL
+```
+
+Informed by this validation, you might want to revisit your
+harmonization process and address lingering data quality issues.

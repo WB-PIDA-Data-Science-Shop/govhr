@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +37,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/govhr.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -61,10 +62,11 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <!-- badges: start -->
 
-<p>The goal of <code>govhr</code> is to provide a set of open-source tools that:</p>
+<p>Governments generate large amounts of data on their public sector workforce and payroll. However, leveraging those data to generate actionable analytics is challenging. <code>govhr</code> is here to help.</p>
+<p>The goals of <code>govhr</code> is to provide a set of open-source tools that:</p>
 <ol style="list-style-type: decimal">
-<li>Standardize and efficiently clean human resource management information system (HRMIS) data.</li>
-<li>Produce analytical insights in a standard, but customizable, format.</li>
+<li>Provide a standard approach to harmonizing human resources data.</li>
+<li>Produce workforce and wagebill analytics in a standard, but customizable, format.</li>
 </ol>
 <p><code>govhr</code> is based on the <a href="https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf#page=37.23" class="external-link">Public Sector Employment and Compensation Assessment Framework</a> developed by the World Bank.</p>
 <div class="section level2">
@@ -74,7 +76,10 @@
 <p>You can install the development version of <code>govhr</code> from <a href="https://github.com/WB-PIDA-Data-Science-Shop/govhr" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"WB-PIDA-Data-Science-Shop/govhr"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"WB-PIDA-Data-Science-Shop/govhr"</span><span class="op">)</span></span>
+<span><span class="co"># or</span></span>
+<span><span class="co"># install.packages("remotes")</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"WB-PIDA-Data-Science-Shop/govhr"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="link-get-started">
@@ -83,9 +88,13 @@
 <ol style="list-style-type: decimal">
 <li><a href="https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html">Standard dictionary for human resources (HR) data.</a></li>
 <li><a href="https://wb-pida-data-science-shop.github.io/govhr/articles/02-harmonization.html">How to harmonize your HR data.</a></li>
-<li><a href="https://wb-pida-data-science-shop.github.io/govhr/articles/03-quality_control.html">How to generate a data quality assessment.</a></li>
-<li><a href="https://wb-pida-data-science-shop.github.io/govhr/articles/04-standard_hrmis_assessment.html">How to generate a standard HR analytics report</a></li>
+<li><a href="https://wb-pida-data-science-shop.github.io/govhr/articles/03-analytics.html">How to generate analytics.</a></li>
 </ol>
+</div>
+<div class="section level2">
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
+<p><code>govhr</code> is licensed under the MIT License. However, it comes with no guarantees and the package developers cannot be held responsible for any issues arising from its use.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">

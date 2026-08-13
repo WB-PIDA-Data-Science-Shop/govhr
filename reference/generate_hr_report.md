@@ -54,8 +54,6 @@ An HR report, in HTML.
 
 ## See also
 
-[`generate_qc_report`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_qc_report.md)
-for the data quality assessment report.
 [`dictionary`](https://wb-pida-data-science-shop.github.io/govhr/reference/dictionary.md)
 for the harmonization dictionary.
 

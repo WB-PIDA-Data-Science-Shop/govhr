@@ -1,10 +1,14 @@
 # govhr
 
-The goal of `govhr` is to provide a set of open-source tools that:
+Governments generate large amounts of data on their public sector
+workforce and payroll. However, leveraging those data to generate
+actionable analytics is challenging. `govhr` is here to help.
 
-1.  Standardize and efficiently clean human resource management
-    information system (HRMIS) data.
-2.  Produce analytical insights in a standard, but customizable, format.
+The goals of `govhr` is to provide a set of open-source tools that:
+
+1.  Provide a standard approach to harmonizing human resources data.
+2.  Produce workforce and wagebill analytics in a standard, but
+    customizable, format.
 
 `govhr` is based on the [Public Sector Employment and Compensation
 Assessment
@@ -20,6 +24,9 @@ You can install the development version of `govhr` from
 
 # install.packages("pak")
 pak::pak("WB-PIDA-Data-Science-Shop/govhr")
+# or
+# install.packages("remotes")
+remotes::install_github("WB-PIDA-Data-Science-Shop/govhr")
 ```
 
 ## 🔗 Get started:
@@ -28,7 +35,11 @@ pak::pak("WB-PIDA-Data-Science-Shop/govhr")
     data.](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html)
 2.  [How to harmonize your HR
     data.](https://wb-pida-data-science-shop.github.io/govhr/articles/02-harmonization.html)
-3.  [How to generate a data quality
-    assessment.](https://wb-pida-data-science-shop.github.io/govhr/articles/03-quality_control.html)
-4.  [How to generate a standard HR analytics
-    report](https://wb-pida-data-science-shop.github.io/govhr/articles/04-standard_hrmis_assessment.html)
+3.  [How to generate
+    analytics.](https://wb-pida-data-science-shop.github.io/govhr/articles/03-analytics.html)
+
+## License
+
+`govhr` is licensed under the MIT License. However, it comes with no
+guarantees and the package developers cannot be held responsible for any
+issues arising from its use.
