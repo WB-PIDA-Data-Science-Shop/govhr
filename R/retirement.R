@@ -12,6 +12,7 @@
 #' @return A data frame with projected retirement dates and counts of staff eligible for retirement at each reference date.
 #'
 #' @importFrom data.table as.data.table
+#' @importFrom lubridate years
 #'
 #' @export
 project_retirement <- function(
@@ -33,12 +34,7 @@ project_retirement <- function(
   data_dt <- data_dt[, .SD[.N], by = "personnel_id"]
 
   # project retirement date for each staff member based on threshold_age
-  data_dt[,
-    retirement_date := as.Date(paste0(
-      as.integer(format(get(birth_col), "%Y")) + threshold_age,
-      format(get(birth_col), "-%m-%d")
-    ))
-  ]
+  data_dt[, retirement_date := get(birth_col) + lubridate::years(threshold_age)]
 
   # retain only projected retirements after last reference date in the data
   data_dt <- data_dt[
@@ -47,10 +43,9 @@ project_retirement <- function(
 
   if (simplify_retirement_date) {
     data_dt[,
-      retirement_date := as.Date(paste0(
-        as.integer(format(retirement_date, "%Y")),
-        "-12-31"
-      ))
+      retirement_date := update(
+        retirement_date, months = 12, mday = 31
+      )
     ]
   }
 
