@@ -465,7 +465,7 @@ plot_histogram <- function(.data, plot_type = "histogram", group_col = NULL) {
     ggplot2::scale_y_continuous(labels = scales::label_percent()) +
     ggplot2::labs(x = "", y = "Percentage Share")
 
-  if (!is.null(group_col)) {
+  if (!(is.null(group_col) || group_col == "ref_date")) {
     plot <- plot +
       ggplot2::facet_wrap(
         ggplot2::vars(.data[[group_col]]),
