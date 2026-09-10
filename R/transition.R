@@ -391,9 +391,7 @@ plot_transition_network <- function(.data) {
   orange_palette <- grDevices::colorRampPalette(c("#C34729", "#F5C6A0"))(n_nodes)
 
   graph_data <- graph_data |>
-    tidygraph::activate(
-      .data[["nodes"]]
-    ) |>
+    tidygraph::activate(nodes) |>
     tidygraph::mutate(
       node_id = as.character(dplyr::row_number()),
       node_id = factor(
@@ -405,7 +403,7 @@ plot_transition_network <- function(.data) {
     )
 
   point_size <- scales::rescale(
-    graph_data |> tidygraph::activate(.data[["nodes"]]) |> dplyr::pull(.data[["degree"]]),
+    graph_data |> tidygraph::activate(nodes) |> dplyr::pull(.data[["degree"]]),
     to = if (many_nodes) c(6, 14) else c(20, 30)
   )
 
