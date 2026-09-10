@@ -30,7 +30,12 @@ Imports:
     rmarkdown,
     tidyselect,
     stringdist,
-    collapse
+    collapse,
+    plotly,
+    tidygraph,
+    ggraph,
+    ggiraph,
+    igraph
 Suggests: 
     forcats,
     readr,

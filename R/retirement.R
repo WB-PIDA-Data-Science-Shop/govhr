@@ -13,6 +13,7 @@
 #'
 #' @importFrom data.table as.data.table
 #' @importFrom lubridate years
+#' @importFrom stats update
 #'
 #' @export
 project_retirement <- function(
@@ -43,7 +44,7 @@ project_retirement <- function(
 
   if (simplify_retirement_date) {
     data_dt[,
-      retirement_date := update(
+      retirement_date := stats::update(
         retirement_date, months = 12, mday = 31
       )
     ]

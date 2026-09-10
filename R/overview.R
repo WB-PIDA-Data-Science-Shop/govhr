@@ -181,6 +181,28 @@ compute_growth_summary <- function(.data, group_col, measure_col = NULL) {
 }
 
 
+#' Orange Gradient Colour Scale for Grouped Series
+#'
+#' Builds the package's standard sequential orange scale, sized to the number
+#' of distinct groups present in the data.
+#'
+#' @param values Vector of group values. Distinct non-missing values determine
+#'   the number of colours.
+#'
+#' @return A ggplot2 manual colour scale.
+#'
+#' @importFrom dplyr n_distinct
+#' @importFrom ggplot2 scale_color_manual
+#' @importFrom grDevices colorRampPalette
+#' @keywords internal
+group_color_scale <- function(values) {
+  n_groups <- dplyr::n_distinct(values, na.rm = TRUE)
+
+  ggplot2::scale_color_manual(
+    values = grDevices::colorRampPalette(c("#C34729", "#F5C6A0"))(n_groups)
+  )
+}
+
 #' Plot Time Trend
 #'
 #' Draws a line-and-point chart of the measure over `ref_date`, one coloured

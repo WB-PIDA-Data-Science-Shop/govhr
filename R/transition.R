@@ -281,12 +281,12 @@ detect_career_transition <- function(
   # date the transition by the destination spell, not the origin one: dating it
   # by the start of the `from` spell backdates every move to the period the
   # entity entered its previous group, which piles all first moves onto the
-  # earliest date in the panel and starves the latest one
+  # earliest date in the panel
   spells[
     ,
     c("to", "ref_date") := list(
-      data.table::shift(from, type = "lead"),
-      data.table::shift(from_date, type = "lead")
+      data.table::shift(get("from"), type = "lead"),
+      data.table::shift(get("from_date"), type = "lead")
     ),
     by = id_col
   ]
@@ -299,7 +299,7 @@ detect_career_transition <- function(
 
   # if return_all is FALSE, remove non-transitions
   if (!return_all) {
-    out <- out[!is.na(to)]
+    out <- out[!is.na(get("to"))]
   }
 
   out[]
@@ -367,7 +367,13 @@ plot_transfer_heatmap <- function(.data) {
 #' @importFrom govhr fastcount
 #' @importFrom grDevices colorRampPalette
 #' @importFrom tidygraph as_tbl_graph
+#' @importFrom igraph gorder
+#' @importFrom ggraph ggraph geom_edge_arc geom_node_point geom_node_text scale_edge_alpha_identity
+#'   scale_edge_width_continuous
+#' @importFrom ggiraph geom_point_interactive girafe opts_hover opts_sizing
+#' 
 #' @keywords internal
+#' @export
 plot_transition_network <- function(.data) {
   edges <- govhr::fastcount(.data, .data[["from"]], .data[["to"]], name = "weight") |>
     # coerce to character to ensure that as_tble_graph produces a `name` column
@@ -385,25 +391,27 @@ plot_transition_network <- function(.data) {
   orange_palette <- grDevices::colorRampPalette(c("#C34729", "#F5C6A0"))(n_nodes)
 
   graph_data <- graph_data |>
-    tidygraph::activate(nodes) |>
+    tidygraph::activate(
+      .data[["nodes"]]
+    ) |>
     tidygraph::mutate(
       node_id = as.character(dplyr::row_number()),
       node_id = factor(
-        node_id,
-        levels = as.character(sort(as.integer(node_id)))
+        .data[["node_id"]],
+        levels = as.character(sort(as.integer(.data[["node_id"]])))
       ),
-      label = if (many_nodes) node_id else .data[["name"]],
+      label = if (many_nodes) .data[["node_id"]] else .data[["name"]],
       degree = tidygraph::centrality_degree(mode = "all")
     )
 
   point_size <- scales::rescale(
-    graph_data |> tidygraph::activate(nodes) |> dplyr::pull(degree),
+    graph_data |> tidygraph::activate(.data[["nodes"]]) |> dplyr::pull(.data[["degree"]]),
     to = if (many_nodes) c(6, 14) else c(20, 30)
   )
 
   plot <- ggraph::ggraph(graph_data, layout = "stress") +
     ggraph::geom_edge_arc(
-      ggplot2::aes(edge_width = weight, edge_alpha = 0.5),
+      ggplot2::aes(edge_width = .data[["weight"]], edge_alpha = 0.5),
       color = "#4a5568",
       arrow = grid::arrow(length = grid::unit(3, "mm"), type = "closed"),
       end_cap = ggraph::circle(4, "mm"),
@@ -412,22 +420,22 @@ plot_transition_network <- function(.data) {
     ggraph::geom_node_point(
       ggplot2::aes(
         size = point_size,
-        color = if (many_nodes) node_id else "#C34729"
+        color = if (many_nodes) .data[["node_id"]] else "#C34729"
       )
     ) +
     ggraph::geom_node_text(
-      ggplot2::aes(label = if (many_nodes) node_id else .data[["name"]]),
+      ggplot2::aes(label = if (many_nodes) .data[["node_id"]] else .data[["name"]]),
       color = if (many_nodes) "white" else "#2d224e",
       size = if (many_nodes) 3 else 8,
       fontface = "bold"
     ) +
     ggiraph::geom_point_interactive(
       ggplot2::aes(
-        x = x,
-        y = y,
+        x = .data[["x"]],
+        y = .data[["y"]],
         size = point_size,
         tooltip = .data[["name"]],
-        data_id = node_id
+        data_id = .data[["node_id"]]
       ),
       alpha = 0.01
     ) +

@@ -69,6 +69,7 @@ compute_decile <- function(
 #'
 #' @importFrom data.table CJ as.data.table data.table setnames setorderv
 #' @keywords internal
+#' @export
 compute_percentile <- function(
   .data,
   group_col = NULL,

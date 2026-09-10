@@ -1,4 +1,16 @@
 
+# ---- scale_plot_height --------------------------------------------------------
+
+test_that("scale_plot_height grows with the number of rows", {
+  expect_equal(scale_plot_height(data.frame(x = 1:10)), 450)
+  expect_equal(scale_plot_height(data.frame(x = 1:20)), 800)
+})
+
+test_that("scale_plot_height never drops below 350", {
+  expect_equal(scale_plot_height(data.frame(x = integer(0))), 350)
+  expect_equal(scale_plot_height(data.frame(x = 1)), 350)
+})
+
 # ---- "no grouping" convention ------------------------------------------------
 # Module sidebars pass input$group_filter straight through, and its "All" option
 # is the string "ref_date", never NULL. Every plot helper must therefore treat

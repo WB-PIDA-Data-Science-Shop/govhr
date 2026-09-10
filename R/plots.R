@@ -1,3 +1,16 @@
+#' Plot Height for a Grouped Bar Chart
+#'
+#' Scales chart height with the number of bars so category labels stay legible.
+#'
+#' @param .data Data frame in which each row becomes one bar.
+#'
+#' @return Numeric height in pixels, never below 350.
+#'
+#' @export
+scale_plot_height <- function(.data) {
+  max(350, nrow(.data) * 35 + 100)
+}
+
 #' Plot grouped line chart with labeled points
 #'
 #' This function creates a line plot with labeled points, showing how a variable
@@ -191,163 +204,6 @@ ggplot_coef <- function(model, coef) {
     ggplot2::theme_minimal()
 }
 
-
-#' Plot Time Trend
-#'
-#' Produces a ggplot2 line and point chart of `value` over `ref_date`. When a
-#' grouping variable is present, each group receives its own line coloured with
-#' an orange palette. When `toggle_growth` is `TRUE`, the y-axis is formatted
-#' for a baseline index (first period = 100) with a reference line at 100;
-#' otherwise raw values are shown with short-scale labels.
-#'
-#' @param data A data frame with columns `ref_date` and `value`, as returned by
-#'   [compute_trend_summary()] and optionally [apply_baseline_index()].
-#' @param group Character string naming the grouping column, or `"ref_date"` for
-#'   no grouping.
-#' @param toggle_growth Logical. If `TRUE`, format the y-axis as a baseline
-#'   index and add a dashed reference line at 100. Default `FALSE`.
-#' @param y_col Character string of the column to plot on the y-axis. Default `"value"`.
-#' @param y_label Character string for the y-axis label used when
-#'   `toggle_growth` is `FALSE`. Default `"Value"`.
-#'
-#' @return A ggplot2 object.
-#'
-#' @importFrom ggplot2 ggplot aes geom_point geom_line xlab ylab scale_y_continuous geom_hline scale_color_manual
-#' @importFrom dplyr n_distinct ungroup
-#' @importFrom grDevices colorRampPalette
-#' @importFrom scales label_number cut_short_scale
-#' @export
-plot_trend <- function(
-  data,
-  group,
-  toggle_growth = FALSE,
-  y_col = "value",
-  y_label = "Value"
-) {
-  plot <- data |>
-    ggplot2::ggplot(
-      ggplot2::aes(x = .data[["ref_date"]], y = .data[[y_col]])
-    ) +
-    ggplot2::geom_point() +
-    ggplot2::geom_line() +
-    ggplot2::xlab("Time")
-
-  if (group != "ref_date") {
-    n_groups <- dplyr::n_distinct(data[[group]], na.rm = TRUE)
-    orange_palette <- grDevices::colorRampPalette(c("#C34729", "#F5C6A0"))(
-      n_groups
-    )
-    plot <- plot +
-      ggplot2::aes(
-        color = .data[[group]],
-        group = .data[[group]]
-      ) +
-      ggplot2::scale_color_manual(values = orange_palette)
-  }
-
-  if (toggle_growth) {
-    plot <- plot +
-      ggplot2::scale_y_continuous(
-        labels = scales::label_number(accuracy = 0.1)
-      ) +
-      ggplot2::ylab("Baseline index (first period = 100)") +
-      ggplot2::geom_hline(yintercept = 100, linetype = "dashed", color = "red3")
-  } else {
-    plot <- plot +
-      ggplot2::scale_y_continuous(
-        labels = scales::label_number(scale_cut = scales::cut_short_scale())
-      ) +
-      ggplot2::ylab(y_label)
-  }
-
-  plot
-}
-
-#' Plot Horizontal Bar Chart of Totals by Group
-#'
-#' Produces a ggplot2 horizontal bar chart with groups ordered by `value`.
-#' Missing values in either `value` or the group column are dropped. The x-axis
-#' uses short-scale number formatting (e.g. 1K, 1M) and the y-axis uses
-#' `guide_axis(n.dodge = 2)` to prevent overlapping labels.
-#'
-#' @param data A data frame with the grouping column and a `value` column, as
-#'   returned by [compute_cross_section_summary()].
-#' @param group Character string naming the grouping column.
-#' @param x_col Character string of the column to plot on the x-axis. Default `"value"`.
-#' @param x_label Character string for the x-axis label. Default `"Value"`.
-#'
-#' @return A ggplot2 object.
-#'
-#' @importFrom ggplot2 ggplot aes geom_col scale_x_continuous scale_y_discrete guide_axis labs
-#' @importFrom dplyr filter
-#' @importFrom stats reorder
-#' @importFrom stringr str_wrap
-#' @importFrom scales label_number cut_short_scale
-#' @export
-plot_bar_total <- function(data, group, x_col = "value", x_label = "Value") {
-  data |>
-    dplyr::filter(
-      !is.na(.data[[x_col]]) & !is.na(.data[[group]])
-    ) |>
-    ggplot2::ggplot(
-      ggplot2::aes(
-        x = .data[[x_col]],
-        y = stats::reorder(
-          stringr::str_wrap(.data[[group]], width = 30),
-          .data[[x_col]]
-        )
-      )
-    ) +
-    ggplot2::geom_col() +
-    ggplot2::scale_x_continuous(
-      labels = scales::label_number(scale_cut = scales::cut_short_scale())
-    ) +
-    ggplot2::scale_y_discrete(guide = ggplot2::guide_axis(n.dodge = 2)) +
-    ggplot2::labs(x = x_label, y = "")
-}
-
-#' Plot Horizontal Bar Chart of Growth Rates by Group
-#'
-#' Produces a ggplot2 horizontal bar chart with groups ordered by `growth_rate`.
-#' A dashed vertical line is drawn at zero to distinguish positive from negative
-#' growth. The x-axis uses short-scale number formatting and the y-axis uses
-#' `guide_axis(n.dodge = 2)`.
-#'
-#' @param data A data frame with the grouping column and a `growth_rate` column,
-#'   as returned by [compute_growth_summary()].
-#' @param group Character string naming the grouping column.
-#'
-#' @return A ggplot2 object.
-#'
-#' @importFrom ggplot2 ggplot aes geom_col geom_vline scale_x_continuous scale_y_discrete guide_axis labs
-#' @importFrom stats reorder
-#' @importFrom stringr str_wrap
-#' @importFrom scales label_number cut_short_scale
-#' @export
-plot_bar_growth <- function(data, group) {
-  data |>
-    ggplot2::ggplot(
-      ggplot2::aes(
-        x = .data[["growth_rate"]],
-        y = stats::reorder(
-          stringr::str_wrap(.data[[group]], width = 30),
-          .data[["growth_rate"]]
-        )
-      )
-    ) +
-    ggplot2::geom_col() +
-    ggplot2::geom_vline(
-      xintercept = 0,
-      linewidth = 1.25,
-      linetype = "dashed",
-      color = "#2958c3"
-    ) +
-    ggplot2::scale_x_continuous(
-      labels = scales::label_number(scale_cut = scales::cut_short_scale())
-    ) +
-    ggplot2::scale_y_discrete(guide = ggplot2::guide_axis(n.dodge = 2)) +
-    ggplot2::labs(x = "Growth rate", y = "")
-}
 
 #' Create a Segment Plot with Jittered Points
 #'
@@ -593,6 +449,7 @@ plot_decile <- function(.data, group_cols) {
 #' @importFrom grDevices colorRampPalette
 #'
 #' @return A ggplot2 object.
+#' @export
 plot_histogram <- function(.data, plot_type = "histogram", group_col = NULL) {
   plot_type <- match.arg(plot_type, c("histogram", "cumulative"))
 

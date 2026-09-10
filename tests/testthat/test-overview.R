@@ -107,6 +107,14 @@ test_that("plot_bar_growth returns a ggplot with a GeomVline layer at 0", {
 # Shared by the wage bill overview, workforce overview and movement panels.
 # Guards the aggregate-first rewrite: endpoints are each group's own first and
 # last reference date, independent of the order rows arrive in.
+panel <- tibble::tibble(
+  ref_date = as.Date(c(
+    "2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01",
+    "2022-01-01", "2022-01-01"
+  )),
+  paygrade = c("G1", "G2", "G1", "G2", "G1", "G2"),
+  gross_salary_lcu = c(100, 200, 150, 250, 120, 300)
+)
 
 test_that("compute_growth_summary is invariant to input row order", {
   shuffled <- panel[c(4, 1, 6, 3, 2, 5), ]
