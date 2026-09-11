@@ -1,3 +1,8 @@
+# govhr 0.3.5
+This release:
+- Ports data transformation and plotting functions from govhrapp to govhr.
+- Introduces additional tests.
+
 # govhr 0.3.4
 This release:
 - Improves the documentation of functions and articles associated with `govhr`.
