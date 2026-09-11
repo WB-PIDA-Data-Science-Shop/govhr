@@ -50,6 +50,8 @@ issues arising from its use.
 
 - [`add_contract_to_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/add_contract_to_event.md)
   : Add Contract Information to Event Records
+- [`apply_baseline_index()`](https://wb-pida-data-science-shop.github.io/govhr/reference/apply_baseline_index.md)
+  : Apply Baseline Index to a Trend Summary
 - [`bra_hrmis`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis.md)
   : Brazilian Public Employee Payroll Data
 - [`bra_hrmis_allowance`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_allowance.md)
@@ -81,9 +83,10 @@ issues arising from its use.
   : Compute coverage of non-missing values in a dataset.
 - [`compute_cross_section()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_cross_section.md)
   : Compute Cross-Section Summary Table
+- [`compute_cross_section_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_cross_section_summary.md)
+  : Compute Cross-Section Summary
 - [`compute_decile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_decile.md)
-  : Function to compute deciles of a measure column within groups and
-  reference dates.
+  : Compute Deciles of a Measure
 - [`compute_density()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_density.md)
   : Function to compute the distribution function of a variable.
 - [`compute_fastchange()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastchange.md)
@@ -101,13 +104,13 @@ issues arising from its use.
   frame
 - [`compute_growth()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_growth.md)
   : Compute Growth Rate Summary Table
+- [`compute_growth_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_growth_summary.md)
+  : Compute Growth Rate Summary
 - [`compute_movement_cost()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement_cost.md)
   : Function to compute the total cost associated with personnel
   movements.
 - [`compute_pension_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_pension_ratio.md)
   : Compute Ratio of Last Salary to First Pension for Retired Workers
-- [`compute_percentile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_percentile.md)
-  : Function to compute the percentile values
 - [`compute_quantile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_quantile.md)
   : Function to compute quantiles of a measure column within groups and
   reference dates.
@@ -115,6 +118,8 @@ issues arising from its use.
   : Compute the proportion of consistent records in a data frame.
 - [`compute_time_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_time_trend.md)
   : Compute time trend
+- [`compute_trend_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_trend_summary.md)
+  : Compute Trend Summary
 - [`compute_value_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_value_consistency.md)
   : Compute the proportion of consistent values in a data frame.
 - [`compute_wagebill()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wagebill.md)
@@ -128,6 +133,8 @@ issues arising from its use.
   : Convert nominal wages to real PPP-adjusted wages (2021 base year)
 - [`convert_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_data.md)
   : Convert Data to Match Original Class
+- [`count_entity()`](https://wb-pida-data-science-shop.github.io/govhr/reference/count_entity.md)
+  : Count Unique Entities by Group
 - [`count_unique()`](https://wb-pida-data-science-shop.github.io/govhr/reference/count_unique.md)
   : Count Unique Non-Missing Values
 - [`countryclass`](https://wb-pida-data-science-shop.github.io/govhr/reference/countryclass.md)
@@ -140,6 +147,8 @@ issues arising from its use.
   : Deduplicate values within grouped data
 - [`deflate_to_real()`](https://wb-pida-data-science-shop.github.io/govhr/reference/deflate_to_real.md)
   : Deflate a nominal LCU column to real values
+- [`detect_career_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_career_transition.md)
+  : Detect Career Transitions
 - [`detect_career_transitions()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_career_transitions.md)
   : Detect Career Transitions Based on Contract Attributes
 - [`detect_inconsistent_cols()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_inconsistent_cols.md)
@@ -203,11 +212,21 @@ issues arising from its use.
 - [`pivot_data360()`](https://wb-pida-data-science-shop.github.io/govhr/reference/pivot_data360.md)
   : Pivot Data360 dataset to wide format
 - [`plot_bar_growth()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_bar_growth.md)
-  : Plot Horizontal Bar Chart of Growth Rates by Group
+  : Plot Growth Rates by Group
 - [`plot_bar_total()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_bar_total.md)
-  : Plot Horizontal Bar Chart of Totals by Group
+  : Plot Totals by Group
 - [`plot_compression_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_compression_ratio.md)
   : Plot Compression Ratio
+- [`plot_consistency_heatmap()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_consistency_heatmap.md)
+  : Plot Consistency Heatmap by Group
+- [`plot_consistency_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_consistency_trend.md)
+  : Plot Consistency Over Time
+- [`plot_coverage_bar()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_coverage_bar.md)
+  : Plot Coverage by Group (Coloured Bar Chart)
+- [`plot_coverage_heatmap()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_coverage_heatmap.md)
+  : Plot Coverage Heatmap by Group
+- [`plot_coverage_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_coverage_trend.md)
+  : Plot Coverage Over Time
 - [`plot_decile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_decile.md)
   : Plot Decile Summary
 - [`plot_histogram()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_histogram.md)
@@ -230,6 +249,8 @@ issues arising from its use.
   : Rescale to Baseline Index
 - [`sample_group()`](https://wb-pida-data-science-shop.github.io/govhr/reference/sample_group.md)
   : Sample groups and return all rows for those groups
+- [`scale_plot_height()`](https://wb-pida-data-science-shop.github.io/govhr/reference/scale_plot_height.md)
+  : Plot Height for a Grouped Bar Chart
 - [`social_sustainability`](https://wb-pida-data-science-shop.github.io/govhr/reference/social_sustainability.md)
   : Social Sustainability Global Database
 - [`validate_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/validate_data.md)

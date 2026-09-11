@@ -1,7 +1,8 @@
-# Function to compute deciles of a measure column within groups and reference dates.
+# Compute Deciles of a Measure
 
-Function to compute deciles of a measure column within groups and
-reference dates.
+Assigns rows to deciles of \`measure_col\` within each group and
+reference date, then reports the median and mean of the measure in each
+decile.
 
 ## Usage
 
@@ -13,23 +14,22 @@ compute_decile(.data, group_cols = NULL, measure_col, latest_measure = FALSE)
 
 - .data:
 
-  A data frame containing the data to be processed.
+  Data frame containing a \`ref_date\` column and the measure.
 
 - group_cols:
 
-  A character vector of column names to group the data by.
+  Character vector of columns to group by, or \`NULL\` for no grouping.
 
 - measure_col:
 
-  The name of the column for which deciles will be computed.
+  Character. Numeric column to rank into deciles.
 
 - latest_measure:
 
-  A logical value indicating whether to return only the measures for the
-  latest reference date's deciles (default is FALSE).
+  Logical. Restrict to the latest reference date and drop \`ref_date\`
+  from the grouping. Default \`FALSE\`.
 
 ## Value
 
-A data frame containing the deciles, median values, and mean values for
-the specified measure column within the specified groups and reference
-dates.
+A data frame with the grouping columns, \`decile\`, \`median_value\` and
+\`mean_value\`.

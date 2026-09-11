@@ -1,26 +1,24 @@
-# Plot Horizontal Bar Chart of Growth Rates by Group
+# Plot Growth Rates by Group
 
-Produces a ggplot2 horizontal bar chart with groups ordered by
-\`growth_rate\`. A dashed vertical line is drawn at zero to distinguish
-positive from negative growth. The x-axis uses short-scale number
-formatting and the y-axis uses \`guide_axis(n.dodge = 2)\`.
+Draws a horizontal bar chart with groups ordered by \`growth_rate\`,
+with a dashed reference line at zero separating growth from decline.
 
 ## Usage
 
 ``` r
-plot_bar_growth(data, group)
+plot_bar_growth(.data, group_col)
 ```
 
 ## Arguments
 
-- data:
+- .data:
 
-  A data frame with the grouping column and a \`growth_rate\` column, as
+  Data frame with the grouping column and a \`growth_rate\` column, as
   returned by \[compute_growth_summary()\].
 
-- group:
+- group_col:
 
-  Character string naming the grouping column.
+  Character. Column to group by.
 
 ## Value
 

@@ -1,6 +1,8 @@
-# Function to compute the percentile values
+# Bin a Measure into a Share Distribution
 
-Function to compute the percentile values
+Bins \`measure_col\` at a fixed width and reports each bin's share and
+cumulative share of observations, filling empty bins with zero so the
+distribution is gap-free.
 
 ## Usage
 
@@ -18,28 +20,25 @@ compute_percentile(
 
 - .data:
 
-  A data frame.
+  Data frame containing a \`ref_date\` column and the measure.
 
 - group_col:
 
-  A character vector of column names to group the data by.
+  Character. Column to group by, or \`NULL\` for no grouping.
 
 - measure_col:
 
-  The name of the column for which the percentile values will be
-  computed.
+  Character. Numeric column to bin.
 
 - binwidth:
 
-  The width of the bins for grouping the measure values (default is 1).
+  Numeric. Width of each bin. Default \`1\`.
 
 - latest_measure:
 
-  A logical value indicating whether to return only the measures for the
-  latest reference date.
+  Logical. Restrict to the latest reference date. Default \`FALSE\`.
 
 ## Value
 
-A data frame containing the 90th, 50th, and 10th percentiles for the
-specified measure column within the specified groups and reference
-dates.
+A data frame with the grouping column, \`bin\`, \`count\`, \`pct\` and
+\`cum_pct\`.
