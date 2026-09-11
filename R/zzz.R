@@ -206,7 +206,9 @@ if (getRversion() >= "2.15.1") {
     "term",
     "estimate",
     "conf.low",
-    "conf.high"
+    "conf.high",
+    # transition network
+    "nodes"
   ))
 }
 
