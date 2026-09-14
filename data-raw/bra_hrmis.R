@@ -195,6 +195,83 @@ bra_hrmis_est <- est_tbl
 #     CPF = purrr::map_chr(CPF, digest, algo = "sha256")
 #   )
 
+### add retirement ages to the personnel data
+### start by adding the latest reference date to all those pensioners who we see make the transition from active/inactive to pensioner
+### in the time frame of the dataset
+
+pensioner_ids <- 
+  personnel_tbl |>
+  filter(employment_status == "pensioner") |>
+  pull(personnel_id) |>
+  unique()
+
+
+### add the latest reference date to all those pensioners who we see make the transition from active/inactive to pensioner
+personnel_tbl <- 
+  personnel_tbl |>
+    left_join(personnel_tbl |>
+    filter(personnel_id %in% pensioner_ids) |>
+    filter(employment_status !=  "pensioner") |>
+    group_by(personnel_id) |>
+    filter(ref_date == max(ref_date)) |>
+    select(personnel_id, ref_date) |>
+    rename(retirement_date = "ref_date") |>
+    distinct(), by = "personnel_id") 
+  
+## make sure all non-pensioners have NA for retirement date and the new retirement date is a date object
+personnel_tbl <- 
+  personnel_tbl |>
+  mutate(
+    retirement_date = ifelse(employment_status != "pensioner", NA, retirement_date),
+    retirement_date = as.Date(retirement_date)
+  )
+
+# personnel_tbl |>
+#   filter(employment_status == "pensioner" & is.na(retirement_date)) |>
+#   group_by(personnel_id) |>
+#   filter(ref_date == min(ref_date)) |>
+#   select(personnel_id, ref_date, first_employment_date) |>
+#   mutate(retirement_date = sample(seq(first_employment_date, min(ref_date), by = "day"), 1)) 
+
+
+retirement_fill_tbl <-
+  personnel_tbl |>
+  filter(employment_status == "pensioner" & is.na(retirement_date)) |>
+  group_by(personnel_id) |>
+  filter(ref_date == min(ref_date)) |>
+  select(personnel_id, ref_date, first_employment_date) |>
+  filter(!is.na(first_employment_date)) |>
+  mutate(
+    retirement_date = sample(
+      seq(min(first_employment_date, ref_date), max(first_employment_date, ref_date), by = "day"),
+      1
+    )
+  ) |>
+  ungroup() |>
+  select(personnel_id, retirement_date)
+
+personnel_tbl <-
+  personnel_tbl |>
+  left_join(retirement_fill_tbl, by = "personnel_id", suffix = c("", "_sim")) |>
+  mutate(
+    retirement_date = coalesce(retirement_date, retirement_date_sim)
+  ) |>
+  select(-retirement_date_sim)
+
+
+### lets see the time between first employment and retirement for those with a retirement date
+personnel_tbl |>
+  filter(!is.na(retirement_date)) |>
+  mutate(time_to_retirement = retirement_date - first_employment_date) |>
+  summarise(
+    min_time = min(time_to_retirement),
+    max_time = max(time_to_retirement),
+    mean_time = mean(time_to_retirement),
+    median_time = median(time_to_retirement)
+  )
+
+### simulate retirement dates before the earliest reference dates the rest of the retirees
+#### assign a date between first_employment_date and min(ref_date) for each pensioner with NA retirement_date
 set.seed(123)
 
 personnel_list <- 
