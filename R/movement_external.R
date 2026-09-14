@@ -624,7 +624,7 @@ estimate_exit_rates <- function(
 #' )
 #' }
 #' @export
-complete_dates <- function(data, id_col, start_date, end_date, freq = "year") {
+complete_dates <- function(data, id_col, start_date = NULL, end_date = NULL, freq = "year") {
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
@@ -633,8 +633,17 @@ complete_dates <- function(data, id_col, start_date, end_date, freq = "year") {
   ]
 
   # Build full date range and unique identifiers
+  if(is.null(start_date)) {
+    start_date <- as.character(min(dt[["ref_date"]]))
+  }
+
+  if(is.null(end_date)) {
+    end_date <- as.character(max(dt[["ref_date"]]))
+  }
+
   full_dates <- lubridate::ymd(start_date) %>%
     seq(lubridate::ymd(end_date), by = freq)
+
   unique_id <- unique(dt[[id_col]])
 
   # Create complete identifier–date grid

@@ -4,7 +4,7 @@
 \alias{complete_dates}
 \title{Complete Panel Data by Identifier and Reference Dates}
 \usage{
-complete_dates(data, id_col, start_date, end_date, freq = "year")
+complete_dates(data, id_col, start_date = NULL, end_date = NULL, freq = "year")
 }
 \arguments{
 \item{data}{A data.frame or data.table containing at least an identifier column.}
