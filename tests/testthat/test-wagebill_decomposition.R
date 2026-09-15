@@ -6,14 +6,14 @@ test_that("mid-panel gap produces exit then entry, not a fabricated collapse", {
   )
   res <- compute_growth_decomposition(d, group_cols = "dept")
 
-  expect_equal(res[res$ref_date == as.Date("2021-01-01"), "transition_type"], "exit")
-  expect_equal(res[res$ref_date == as.Date("2022-01-01"), "transition_type"], "gap")
-  expect_equal(res[res$ref_date == as.Date("2023-01-01"), "transition_type"], "entry")
+  expect_equal(res[res$ref_date == as.Date("2021-01-01"), "transition_type"] |> dplyr::pull(), "exit")
+  expect_equal(res[res$ref_date == as.Date("2022-01-01"), "transition_type"] |> dplyr::pull(), "gap")
+  expect_equal(res[res$ref_date == as.Date("2023-01-01"), "transition_type"] |> dplyr::pull(), "entry")
 
-  expect_equal(res[res$ref_date == as.Date("2021-01-01"), "exit_effect"], -100000)
-  expect_equal(res[res$ref_date == as.Date("2023-01-01"), "entry_effect"], 130000)
+  expect_equal(res[res$ref_date == as.Date("2021-01-01"), "exit_effect"] |> dplyr::pull(), -100000)
+  expect_equal(res[res$ref_date == as.Date("2023-01-01"), "entry_effect"] |> dplyr::pull(), 130000)
   # nothing should look like an ordinary continuing-period effect across the gap
-  expect_true(is.na(res[res$ref_date == as.Date("2021-01-01"), "total_effect"]) == FALSE)
+  expect_true(is.na(res[res$ref_date == as.Date("2021-01-01"), "total_effect"] |> dplyr::pull()) == FALSE)
 })
 
 test_that("entry/exit effects telescope to the correct total wagebill change", {

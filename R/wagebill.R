@@ -43,6 +43,10 @@ compute_growth_decomposition <- function(
 
   summary_table[, is_observed := TRUE]
 
+  min_ref_date <- min(.data$ref_date)
+  max_ref_date <- max(.data$ref_date)
+  date_interval <- guess_date_frequency(.data)
+
   # nesting() preserves only observed group_cols combinations, so a group
   # that starts reporting mid-panel gets real "entry" rows, not fabricated
   # combinations that never existed
@@ -50,7 +54,7 @@ compute_growth_decomposition <- function(
     summary_table <- summary_table |>
       tidyr::complete(
         tidyr::nesting(!!!rlang::syms(group_cols)),
-        ref_date,
+        ref_date = seq(min_ref_date, max_ref_date, by = date_interval),
         fill = list(headcount = 0, compensation = NA_real_)
       )
   } else {
@@ -122,7 +126,9 @@ compute_growth_decomposition <- function(
     group_cols, "ref_date", "transition_type", "headcount", "headcount_lag",
     "compensation", "compensation_lag", "employment_effect",
     "compensation_effect", "interaction_effect", "entry_effect",
-    "exit_effect", "total_effect", "wagebill", "is_observed"
+    "exit_effect", "total_effect", "wagebill", "transition_type"
   )
-  summary_table[, ..out_cols]
+
+  summary_table[, ..out_cols] |>
+    data.table::as.data.table()
 }

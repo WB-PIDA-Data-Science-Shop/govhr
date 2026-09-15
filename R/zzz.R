@@ -208,7 +208,29 @@ if (getRversion() >= "2.15.1") {
     "conf.low",
     "conf.high",
     # transition network
-    "nodes"
+    "nodes",
+    # compute growth decomposition
+    "ref_date",
+    "transition_type",
+    "headcount",
+    "headcount_lag",
+    "compensation",
+    "compensation_lag",
+    "employment_effect",
+    "compensation_effect",
+    "interaction_effect",
+    "entry_effect",
+    "exit_effect",
+    "total_effect",
+    "wagebill",
+    "transition_type",
+    "..out_cols",
+    "..group_cols",
+    "delta_compensation",
+    "delta_headcount",
+    "is_observed",
+    "observed_lag",
+    "wagebill_lag"
   ))
 }
 
