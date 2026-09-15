@@ -3,17 +3,20 @@
 #' @param .data A data frame containing the data to be analyzed. It should include columns for the grouping variables, a column for the reference date, and a column for the measure of interest (e.g., gross salary).
 #' @param group_cols A character vector specifying the names of the columns to group by.
 #' @param measure_col A character string specifying the name of the column containing the measure of interest (default is "gross_salary_lcu").
-#' 
-#' @return A data.table with headcount, compensation, wagebill, the
-#'   continuing-period decomposition (employment/compensation/interaction
-#'   effects), entry/exit effects for panel gaps, and a `transition_type`
-#'   label for each row: "start" (first period observed, no baseline),
-#'   "continuing" (both this period and the prior period observed),
-#'   "entry" (reappears after a gap, or a genuinely new group_cols
-#'   combination), "exit" (last observed period before a gap begins), or
-#'   "gap" (an unobserved period that is not itself a boundary).
 #'
-#' @importFrom data.table .N .SD := shift setorderv fcase
+#' @return A data.table with headcount, compensation, wagebill, wagebill_lag,
+#'   the continuing-period decomposition (employment/compensation/interaction
+#'   effects), entry/exit effects, is_observed, and a `transition_type` label
+#'   for each row: "start" (panel's first period for this group -- left-
+#'   censored, no baseline available), "continuing" (observed this period
+#'   and last), "entry" (observed now, not last period -- a genuinely new
+#'   group_cols combination, or a reappearance after any length of absence),
+#'   or "exit" (not observed now -- covers both the period a group first
+#'   disappears, which carries the real dollar effect, and every subsequent
+#'   period it remains absent, which correctly carries a zero effect since
+#'   nothing further changed).
+#'
+#' @importFrom data.table .N .SD := shift setorderv fcase fifelse
 #' @importFrom dplyr all_of select
 #' @importFrom tidyr complete nesting
 #' @export
@@ -43,27 +46,30 @@ compute_growth_decomposition <- function(
 
   summary_table[, is_observed := TRUE]
 
-  min_ref_date <- min(.data$ref_date)
-  max_ref_date <- max(.data$ref_date)
+  min_date <- min(.data$ref_date)
+  max_date <- max(.data$ref_date)
   date_interval <- guess_date_frequency(.data)
 
-  # nesting() preserves only observed group_cols combinations, so a group
-  # that starts reporting mid-panel gets real "entry" rows, not fabricated
-  # combinations that never existed
+  # explicit date sequence (not just observed dates) so a period missing
+  # for EVERY group still gets a row, rather than silently vanishing
   if (!is.null(group_cols)) {
     summary_table <- summary_table |>
       tidyr::complete(
         tidyr::nesting(!!!rlang::syms(group_cols)),
-        ref_date = seq(min_ref_date, max_ref_date, by = date_interval),
+        ref_date = seq(min_date, max_date, by = date_interval),
         fill = list(headcount = 0, compensation = NA_real_)
       )
   } else {
     summary_table <- summary_table |>
-      tidyr::complete(ref_date, fill = list(headcount = 0, compensation = NA_real_))
+      tidyr::complete(
+        ref_date = seq(min_date, max_date, by = date_interval),
+        fill = list(headcount = 0, compensation = NA_real_)
+      )
   }
 
   summary_table <- data.table::as.data.table(summary_table)
   summary_table[is.na(is_observed), is_observed := FALSE]
+  summary_table[is.na(wagebill), wagebill := 0]  # unobserved periods contribute $0
 
   data.table::setorderv(summary_table, by_cols)
 
@@ -77,14 +83,17 @@ compute_growth_decomposition <- function(
     by = group_cols
   ]
 
-  # classify every row's relationship to the prior period
+  # only two non-continuing states now: entry and exit. Every unobserved
+  # row is "exit" -- the boundary row and every row of continued absence
+  # after it both get the label; they're distinguished below by whether
+  # exit_effect is zero or not, not by a separate transition_type.
   summary_table[, transition_type := data.table::fcase(
     is.na(observed_lag) & is_observed,   "start",
-    is.na(observed_lag) & !is_observed,  "gap",
-    observed_lag & is_observed,          "continuing",
-    observed_lag & !is_observed,         "exit",
     !observed_lag & is_observed,         "entry",
-    !observed_lag & !is_observed,        "gap"
+    is.na(observed_lag) & !is_observed,  "exit",
+    observed_lag & !is_observed,         "exit",
+    !observed_lag & !is_observed,        "exit",
+    observed_lag & is_observed,          "continuing"
   )]
 
   summary_table[, `:=`(
@@ -98,9 +107,6 @@ compute_growth_decomposition <- function(
     interaction_effect  = delta_headcount * delta_compensation
   )]
 
-  # these three effects only mean something when comparing two real
-  # observations -- null them out everywhere else so an entry/exit/gap
-  # row can't masquerade as ordinary continuing-period growth
   summary_table[
     transition_type != "continuing",
     `:=`(
@@ -112,23 +118,119 @@ compute_growth_decomposition <- function(
 
   summary_table[, `:=`(entry_effect = NA_real_, exit_effect = NA_real_)]
   summary_table[transition_type == "entry", entry_effect := wagebill]
-  summary_table[transition_type == "exit", exit_effect := -wagebill_lag]
+  # nonzero only at the true boundary (observed last period, not this one);
+  # every subsequent absent period gets 0 -- it was already gone
+  summary_table[
+    transition_type == "exit",
+    exit_effect := data.table::fifelse(observed_lag %in% TRUE, -wagebill_lag, 0)
+  ]
 
   summary_table[, total_effect := data.table::fcase(
     transition_type == "continuing",
     employment_effect + compensation_effect + interaction_effect,
     transition_type == "entry", entry_effect,
     transition_type == "exit", exit_effect,
-    default = NA_real_
+    default = NA_real_  # "start": genuinely unknown baseline
   )]
 
   out_cols <- c(
     group_cols, "ref_date", "transition_type", "headcount", "headcount_lag",
     "compensation", "compensation_lag", "employment_effect",
-    "compensation_effect", "interaction_effect", "entry_effect",
-    "exit_effect", "total_effect", "wagebill", "transition_type"
+    "compensation_effect", "interaction_effect", "entry_effect", "delta_compensation",
+    "exit_effect", "total_effect", "wagebill", "wagebill_lag", "is_observed", "observed_lag"
   )
 
-  summary_table[, ..out_cols] |>
-    data.table::as.data.table()
+  summary_table[, ..out_cols]
+}
+
+#' Decompose aggregate average-compensation growth into within, between,
+#' cross, entry, and exit effects (Foster-Haltiwanger-Krizan style)
+#'
+#' Takes the per-group output of compute_growth_decomposition() and answers
+#' a different question than that function does: not "why did group i's own
+#' wagebill change" but "why did average compensation across ALL groups
+#' combined change" -- specifically, how much is pay growth within groups
+#' versus a shift in headcount share toward higher- or lower-paid groups.
+#'
+#' @param growth_decomp output of compute_growth_decomposition()
+#' @param group_cols optional character vector of columns identifying a higher-level
+#'   unit (e.g. "country_code") within which shares/composition are computed
+#'   separately. NULL pools all rows into one global composition per ref_date.
+#'
+#' @return A data.table, one row per ref_date (or per ref_date x `group_cols`),
+#'   with avg_compensation, avg_compensation_lag, within_effect,
+#'   between_effect, cross_effect, entry_effect, exit_effect, and total_effect
+#'   (which equals avg_compensation - avg_compensation_lag by construction,
+#'   except at the panel's first period, which is NA -- no lagged baseline).
+#'
+#' @importFrom data.table := fifelse
+#' @export
+compute_wage_decomposition <- function(growth_decomp, group_cols = NULL) {
+
+  dt <- data.table::copy(data.table::as.data.table(growth_decomp))
+  agg_by <- c(group_cols, "ref_date")
+
+  # totals at t and t-1, computed within `by` x ref_date. Summing headcount_lag
+  # across this period's rows correctly reconstructs total headcount at t-1,
+  # since every group has a row for every ref_date (from the nesting-complete
+  # grid upstream) -- the roster is stable even though membership isn't.
+  dt[, `:=`(
+    total_headcount      = sum(headcount),
+    total_headcount_prev = sum(headcount_lag, na.rm = TRUE),
+    total_wagebill       = sum(wagebill),
+    total_wagebill_prev  = sum(wagebill_lag, na.rm = TRUE)
+  ), by = agg_by]
+
+  dt[, `:=`(
+    avg_compensation     = total_wagebill / total_headcount,
+    avg_compensation_lag = data.table::fifelse(
+      total_headcount_prev > 0, total_wagebill_prev / total_headcount_prev, NA_real_
+    )
+  )]
+
+  dt[, `:=`(
+    share     = headcount / total_headcount,
+    share_lag = data.table::fifelse(
+      total_headcount_prev > 0, headcount_lag / total_headcount_prev, NA_real_
+    )
+  )]
+  dt[, delta_share := share - share_lag]
+
+  # row-level terms; 0 wherever the transition type doesn't apply, rather
+  # than NA, so they sum cleanly without na.rm masking real problems
+  dt[, `:=`(
+    within_term  = data.table::fifelse(
+      transition_type == "continuing", share_lag * delta_compensation, 0
+    ),
+    between_term = data.table::fifelse(
+      transition_type == "continuing", delta_share * (compensation_lag - avg_compensation_lag), 0
+    ),
+    cross_term   = data.table::fifelse(
+      transition_type == "continuing", delta_share * delta_compensation, 0
+    ),
+    entry_term   = data.table::fifelse(
+      transition_type == "entry", share * (compensation - avg_compensation_lag), 0
+    ),
+    exit_term    = data.table::fifelse(
+      transition_type == "exit" & observed_lag %in% TRUE,
+      -share_lag * (compensation_lag - avg_compensation_lag), 0
+    )
+  )]
+
+  period_decomp <- dt[, .(
+    avg_compensation     = avg_compensation[1],
+    avg_compensation_lag = avg_compensation_lag[1],
+    within_effect  = sum(within_term),
+    between_effect = sum(between_term),
+    cross_effect   = sum(cross_term),
+    entry_effect   = sum(entry_term),
+    exit_effect    = sum(exit_term)
+  ), by = agg_by]
+
+  period_decomp[, total_effect := data.table::fifelse(
+    is.na(avg_compensation_lag), NA_real_,
+    within_effect + between_effect + cross_effect + entry_effect + exit_effect
+  )]
+
+  period_decomp[]
 }

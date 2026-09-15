@@ -18,14 +18,17 @@ compute_growth_decomposition(
 \item{measure_col}{A character string specifying the name of the column containing the measure of interest (default is "gross_salary_lcu").}
 }
 \value{
-A data.table with headcount, compensation, wagebill, the
-  continuing-period decomposition (employment/compensation/interaction
-  effects), entry/exit effects for panel gaps, and a `transition_type`
-  label for each row: "start" (first period observed, no baseline),
-  "continuing" (both this period and the prior period observed),
-  "entry" (reappears after a gap, or a genuinely new group_cols
-  combination), "exit" (last observed period before a gap begins), or
-  "gap" (an unobserved period that is not itself a boundary).
+A data.table with headcount, compensation, wagebill, wagebill_lag,
+  the continuing-period decomposition (employment/compensation/interaction
+  effects), entry/exit effects, is_observed, and a `transition_type` label
+  for each row: "start" (panel's first period for this group -- left-
+  censored, no baseline available), "continuing" (observed this period
+  and last), "entry" (observed now, not last period -- a genuinely new
+  group_cols combination, or a reappearance after any length of absence),
+  or "exit" (not observed now -- covers both the period a group first
+  disappears, which carries the real dollar effect, and every subsequent
+  period it remains absent, which correctly carries a zero effect since
+  nothing further changed).
 }
 \description{
 Compute growth decomposition of wagebill

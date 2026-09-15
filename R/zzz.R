@@ -230,7 +230,25 @@ if (getRversion() >= "2.15.1") {
     "delta_headcount",
     "is_observed",
     "observed_lag",
-    "wagebill_lag"
+    "wagebill_lag",
+    # compute_wage_decomposition
+    "total_headcount",
+    "total_headcount_prev",
+    "total_wagebill",
+    "total_wagebill_prev",
+    "avg_compensation",
+    "avg_compensation_lag",
+    "share",
+    "share_lag",
+    "delta_share",
+    "within_term",
+    "between_term",
+    "cross_term",
+    "entry_term",
+    "exit_term",
+    "within_effect",
+    "between_effect",
+    "cross_effect"
   ))
 }
 
