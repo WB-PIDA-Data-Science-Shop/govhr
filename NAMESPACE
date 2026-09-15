@@ -19,6 +19,7 @@ export(compute_fastsummary)
 export(compute_global_consistency)
 export(compute_global_coverage)
 export(compute_growth)
+export(compute_growth_decomposition)
 export(compute_growth_summary)
 export(compute_movement_cost)
 export(compute_pension_ratio)
@@ -29,7 +30,6 @@ export(compute_time_trend)
 export(compute_trend_summary)
 export(compute_value_consistency)
 export(compute_wagebill)
-export(compute_wagebill_decomposition)
 export(compute_workforce_movement)
 export(convert_constant_ppp)
 export(count_entity)
@@ -95,6 +95,9 @@ import(httr)
 importFrom(broom,tidy)
 importFrom(collapse,fquantile)
 importFrom(data.table,
+  ":=",
+  .N,
+  .SD,
   CJ,
   as.data.table,
   copy,
@@ -263,7 +266,9 @@ importFrom(tibble,
 )
 importFrom(tidygraph,as_tbl_graph)
 importFrom(tidyr,
+  complete,
   nest,
+  nesting,
   pivot_longer,
   pivot_wider
 )
