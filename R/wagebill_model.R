@@ -130,15 +130,17 @@ plot_model_wage_fes <- function(
     id = names(fes[[fixed_effects_var]]),
     premium = fes[[fixed_effects_var]]
   ) |>
-    dplyr::arrange(dplyr::desc(premium)) |>
+    dplyr::arrange(
+      dplyr::desc(.data[["premium"]])
+    ) |>
     dplyr::mutate(
-      id = forcats::fct_reorder(id, premium)
+      id = forcats::fct_reorder(.data[["id"]], .data[["premium"]])
     )
 
   average_premium <- mean(fes_df[["premium"]], na.rm = TRUE)
 
   fes_df |>
-    ggplot2::ggplot(ggplot2::aes(x = id, y = premium)) +
+    ggplot2::ggplot(ggplot2::aes(x = .data[["id"]], y = .data[["premium"]])) +
     ggplot2::geom_point() +
     ggplot2::labs(
       title = paste("Fixed Effects for", fixed_effects_var),
