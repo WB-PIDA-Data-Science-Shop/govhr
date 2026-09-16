@@ -20,7 +20,7 @@ The goals of `govhr` is to provide a set of open-source tools that:
 `govhr` is based on the [Public Sector Employment and Compensation
 Assessment
 Framework](https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf#page=37.23)
-developed by the World Bank.
+developed by the Governance Global Practice at the World Bank.
 
 ## :hammer: Installation
 

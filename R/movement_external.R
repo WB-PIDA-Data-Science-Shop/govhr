@@ -158,7 +158,6 @@ detect_retirement <- function(data) {
   return(retire_dt)
 }
 
-
 #' Classify Personnel Movement Events
 #'
 #' This function classifies the personnel module into three types of movements: hires, fires, or retirements.
