@@ -209,6 +209,24 @@ if (getRversion() >= "2.15.1") {
     "conf.high",
     # transition network
     "nodes",
+    # .compute_decrement_pair
+    "pop",
+    "exits",
+    "decrement_rate",
+    "t1_date",
+    ".status_t1",
+    # compute_service_table
+    "px",
+    "lx",
+    "lx_next",
+    "Lx",
+    "Tx",
+    "ex",
+    # smooth_decrement_rates
+    "min_age",
+    "max_age",
+    "has_gap"
+    "nodes",
     # compute growth decomposition
     "ref_date",
     "transition_type",
