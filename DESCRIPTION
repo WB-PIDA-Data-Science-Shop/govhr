@@ -35,9 +35,11 @@ Imports:
     tidygraph,
     ggraph,
     ggiraph,
-    igraph
-Suggests: 
+    igraph,
+    fixest,
     forcats,
+    ggstats
+Suggests: 
     readr,
     testthat (>= 3.0.0),
     reactable

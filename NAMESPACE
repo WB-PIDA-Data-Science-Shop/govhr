@@ -66,6 +66,7 @@ export(ggplot_point_line)
 export(ggplot_segment)
 export(guess_date_frequency)
 export(harmonize_columns)
+export(model_wage)
 export(pivot_data360)
 export(plot_bar_growth)
 export(plot_bar_total)
@@ -77,6 +78,8 @@ export(plot_coverage_heatmap)
 export(plot_coverage_trend)
 export(plot_decile)
 export(plot_histogram)
+export(plot_model_wage)
+export(plot_model_wage_fes)
 export(plot_movement)
 export(plot_movement_cost)
 export(plot_segment)
@@ -155,6 +158,8 @@ importFrom(dplyr,
   union
 )
 importFrom(dtplyr,lazy_dt)
+importFrom(fixest,fixef)
+importFrom(forcats,fct_reorder)
 importFrom(ggiraph,
   geom_point_interactive,
   girafe,
@@ -165,6 +170,7 @@ importFrom(ggplot2,
   aes,
   arrow,
   coord_cartesian,
+  element_text,
   expansion,
   facet_wrap,
   geom_col,
@@ -177,6 +183,7 @@ importFrom(ggplot2,
   geom_vline,
   ggplot,
   guide_axis,
+  label_wrap_gen,
   labs,
   margin,
   position_jitter,
@@ -200,6 +207,7 @@ importFrom(ggraph,
   scale_edge_width_continuous
 )
 importFrom(ggrepel,geom_text_repel)
+importFrom(ggstats,ggcoef_model)
 importFrom(ggthemes,scale_color_few)
 importFrom(glue,glue)
 importFrom(grDevices,colorRampPalette)
