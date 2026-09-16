@@ -225,8 +225,7 @@ if (getRversion() >= "2.15.1") {
     # smooth_decrement_rates
     "min_age",
     "max_age",
-    "has_gap"
-    "nodes",
+    "has_gap",
     # compute growth decomposition
     "ref_date",
     "transition_type",
