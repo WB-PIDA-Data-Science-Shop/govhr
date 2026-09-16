@@ -42,10 +42,13 @@ of \code{ex} and does not represent real people. Defaults to
 \code{100000}.}
 
 \item{smooth}{Logical. Whether to graduate the decrement rates via
-  \code{smooth_decrement_rates()} before chaining. Defaults to \code{TRUE};
-  set to \code{FALSE} to chain the raw pooled rates directly 
-\code{compute_service_table()} will call \code{smooth_decrement_rates()} internally, 
-if any \code{group_cols} stratum has an age gap).}
+\code{smooth_decrement_rates()} before chaining. Defaults to
+\code{FALSE}: the raw pooled rates are chained directly, \emph{unless}
+a \code{group_cols} stratum has an age gap, in which case
+\code{compute_service_table()} smooths reactively (with a warning)
+regardless of this setting, since the chain cannot run on a gappy
+age sequence. Set to \code{TRUE} to always smooth up front, including
+for noise reduction on strata that have no gap at all.}
 
 \item{span}{Numeric. Forwarded to \code{smooth_decrement_rates()} when
 \code{smooth = TRUE}. Defaults to \code{0.75}.}
@@ -63,7 +66,7 @@ A data.table with one row per age / \code{group_cols}:
       exits are spread uniformly across the year).}
     \item{Tx}{Total remaining person-years of service from age x onward:
       \eqn{\sum_{y \ge x} L(y)}.}
-    \item{exp}{Expected remaining years of service at age x:
+    \item{ex}{Expected remaining years of service at age x:
       \eqn{T(x) / l(x)}.}
   }
 }
@@ -122,4 +125,3 @@ compute_service_table(
 \seealso{
 \code{\link{estimate_decrement_rates}}, \code{\link{smooth_decrement_rates}}
 }
-\keyword{internal}

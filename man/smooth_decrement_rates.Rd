@@ -80,4 +80,3 @@ that is not further corrected.
 \code{\link{.smooth_rate_curve}}, \code{\link{estimate_decrement_rates}},
   \code{\link{compute_service_table}}
 }
-\keyword{internal}

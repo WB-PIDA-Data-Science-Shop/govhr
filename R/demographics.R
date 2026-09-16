@@ -494,7 +494,7 @@ estimate_decrement_rates <- function(personnel_dt,
 #'
 #' @seealso \code{\link{.smooth_rate_curve}}, \code{\link{estimate_decrement_rates}},
 #'   \code{\link{compute_service_table}}
-#' @keywords internal
+#' @export
 smooth_decrement_rates <- function(decrement_dt,
                                    age_col,
                                    status_col,
@@ -592,10 +592,13 @@ smooth_decrement_rates <- function(decrement_dt,
 #'   of \code{ex} and does not represent real people. Defaults to
 #'   \code{100000}.
 #' @param smooth Logical. Whether to graduate the decrement rates via
-#'   \code{smooth_decrement_rates()} before chaining. Defaults to \code{TRUE};
-#'   set to \code{FALSE} to chain the raw pooled rates directly 
-#' \code{compute_service_table()} will call \code{smooth_decrement_rates()} internally, 
-#' if any \code{group_cols} stratum has an age gap).
+#'   \code{smooth_decrement_rates()} before chaining. Defaults to
+#'   \code{FALSE}: the raw pooled rates are chained directly, \emph{unless}
+#'   a \code{group_cols} stratum has an age gap, in which case
+#'   \code{compute_service_table()} smooths reactively (with a warning)
+#'   regardless of this setting, since the chain cannot run on a gappy
+#'   age sequence. Set to \code{TRUE} to always smooth up front, including
+#'   for noise reduction on strata that have no gap at all.
 #' @param span Numeric. Forwarded to \code{smooth_decrement_rates()} when
 #'   \code{smooth = TRUE}. Defaults to \code{0.75}.
 #'
@@ -611,7 +614,7 @@ smooth_decrement_rates <- function(decrement_dt,
 #'       exits are spread uniformly across the year).}
 #'     \item{Tx}{Total remaining person-years of service from age x onward:
 #'       \eqn{\sum_{y \ge x} L(y)}.}
-#'     \item{exp}{Expected remaining years of service at age x:
+#'     \item{ex}{Expected remaining years of service at age x:
 #'       \eqn{T(x) / l(x)}.}
 #'   }
 #'
@@ -653,7 +656,7 @@ smooth_decrement_rates <- function(decrement_dt,
 #' }
 #'
 #' @seealso \code{\link{estimate_decrement_rates}}, \code{\link{smooth_decrement_rates}}
-#' @keywords internal
+#' @export
 compute_service_table <- function(personnel_dt,
                                   age_col,
                                   status_col,
@@ -753,7 +756,7 @@ compute_service_table <- function(personnel_dt,
   survival_dt[, Tx := rev(cumsum(rev(Lx))), by = group_cols]
 
   ### ex = expected remaining years of service for someone currently age x
-  survival_dt[, exp := Tx / lx]
+  survival_dt[, ex := Tx / lx]
 
   return(survival_dt[])
 }
