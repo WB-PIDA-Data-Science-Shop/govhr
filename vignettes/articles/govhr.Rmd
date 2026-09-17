@@ -85,7 +85,7 @@ compression_ratio <- compute_compression_ratio(
 plot_compression_ratio(compression_ratio)
 ```
 
-Another government want to know whether there was an increase in the number of personnel with higher education. The `compute_growth` function quickly computes that growth rate, by group.
+Another government may want to know whether there was an increase in the number of personnel with higher education. The `compute_growth` function quickly computes that growth rate, by group.
 
 ```{r}
 # growth in headcount from the first to the last reference date, by service type
