@@ -1,3 +1,38 @@
+# govhr 0.4.0
+
+Standardises argument names and fixes documentation rendering. Renamed
+arguments still work but warn; they will be removed in a future release.
+
+## Breaking changes
+
+- The data argument is now `data` everywhere. Only functions that also take
+  `...` keep `.data` (`compute_baseline_index()`, `fastprop()`,
+  `ggplot_point_line()`).
+- Grouping arguments now carry their arity: `group_col` (one column) or
+  `group_cols` (a vector). `group` and `groups` are deprecated.
+- Arguments no longer name a storage type: `personnel_dt` becomes `personnel`,
+  `contract_dt`/`contract_df` become `contracts`, `event_dt` becomes `events`,
+  `decrement_dt` becomes `decrements`, `est_dt` becomes `establishments`. All
+  already accepted a plain `data.frame` or tibble.
+- `group` on `ggplot_point_line()`, `ggplot_segment()` and `sample_group()` was
+  renamed with no deprecation warning: those arguments are evaluated lazily, so
+  a shim cannot forward them.
+
+## Documentation
+
+- Roxygen markdown is enabled, so backticks, bullet lists and `*emphasis*` now
+  render as code, lists and italics rather than literal characters.
+- Titles use sentence case; `@return` is now `@returns`.
+- Fixed six `@param` entries that documented the wrong arity, including
+  `group_cols` described as a single string on `compute_workforce_movement()`
+  and `group_col` as a vector on `compute_density()`.
+
+## Internal
+
+- Removed invalid `@importFrom govhr` self-imports and several dead import
+  tags. Dropping the unused `validate::summary` import also stops `validate`
+  masking `base::summary` in the package namespace.
+
 # govhr 0.3.5
 This release:
 - Ports data transformation and plotting functions from govhrapp to govhr.
