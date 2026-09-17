@@ -1,37 +1,11 @@
 # govhr 0.4.0
-
-Standardises argument names and fixes documentation rendering. Renamed
-arguments still work but warn; they will be removed in a future release.
-
-## Breaking changes
-
-- The data argument is now `data` everywhere. Only functions that also take
-  `...` keep `.data` (`compute_baseline_index()`, `fastprop()`,
-  `ggplot_point_line()`).
-- Grouping arguments now carry their arity: `group_col` (one column) or
-  `group_cols` (a vector). `group` and `groups` are deprecated.
-- Arguments no longer name a storage type: `personnel_dt` becomes `personnel`,
-  `contract_dt`/`contract_df` become `contracts`, `event_dt` becomes `events`,
-  `decrement_dt` becomes `decrements`, `est_dt` becomes `establishments`. All
-  already accepted a plain `data.frame` or tibble.
-- `group` on `ggplot_point_line()`, `ggplot_segment()` and `sample_group()` was
-  renamed with no deprecation warning: those arguments are evaluated lazily, so
-  a shim cannot forward them.
-
-## Documentation
-
-- Roxygen markdown is enabled, so backticks, bullet lists and `*emphasis*` now
-  render as code, lists and italics rather than literal characters.
-- Titles use sentence case; `@return` is now `@returns`.
-- Fixed six `@param` entries that documented the wrong arity, including
-  `group_cols` described as a single string on `compute_workforce_movement()`
-  and `group_col` as a vector on `compute_density()`.
-
-## Internal
-
-- Removed invalid `@importFrom govhr` self-imports and several dead import
-  tags. Dropping the unused `validate::summary` import also stops `validate`
-  masking `base::summary` in the package namespace.
+This release:
+- Renames the data argument to `data`, keeping `.data` only for functions that take `...`.
+- Renames grouping arguments to `group_col` or `group_cols` to match their arity, deprecating `group` and `groups`.
+- Drops storage-type suffixes from argument names, such as `personnel_dt` to `personnel` and `contract_dt` to `contracts`.
+- Warns on deprecated argument names, except in `ggplot_point_line`, `ggplot_segment` and `sample_group`, where they are removed outright.
+- Enables roxygen markdown, so code, lists and emphasis render correctly in the help pages.
+- Fixes invalid and unused imports, including one that masked `base::summary`.
 
 # govhr 0.3.5
 This release:
