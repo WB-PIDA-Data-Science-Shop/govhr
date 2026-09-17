@@ -3,7 +3,7 @@
 #' Assigns rows to deciles of `measure_col` within each group and reference
 #' date, then reports the median and mean of the measure in each decile.
 #'
-#' @param .data Data frame containing a `ref_date` column and the measure.
+#' @param data Data frame containing a `ref_date` column and the measure.
 #' @param group_cols Character vector of columns to group by, or `NULL` for no
 #'   grouping.
 #' @param measure_col Character. Numeric column to rank into deciles.
@@ -18,12 +18,12 @@
 #' @importFrom stats median
 #' @export
 compute_decile <- function(
-  .data,
+  data,
   group_cols = NULL,
   measure_col,
   latest_measure = FALSE
 ) {
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
 
   by_cols <- if (latest_measure) {
     group_cols
@@ -57,7 +57,7 @@ compute_decile <- function(
 #' cumulative share of observations, filling empty bins with zero so the
 #' distribution is gap-free.
 #'
-#' @param .data Data frame containing a `ref_date` column and the measure.
+#' @param data Data frame containing a `ref_date` column and the measure.
 #' @param group_col Character. Column to group by, or `NULL` for no grouping.
 #' @param measure_col Character. Numeric column to bin.
 #' @param binwidth Numeric. Width of each bin. Default `1`.
@@ -71,17 +71,17 @@ compute_decile <- function(
 #' @keywords internal
 #' @export
 compute_percentile <- function(
-  .data,
+  data,
   group_col = NULL,
   measure_col,
   binwidth = 1,
   latest_measure = FALSE
 ) {
   if (latest_measure) {
-    .data <- .data[.data[["ref_date"]] == max(.data[["ref_date"]]), ]
+    data <- data[data[["ref_date"]] == max(data[["ref_date"]]), ]
   }
 
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
   dt[, bin := floor(get(measure_col) / binwidth) * binwidth]
   dt <- dt[!is.na(bin)]
 
@@ -122,13 +122,13 @@ compute_percentile <- function(
 
 
 compute_compression_ratio <- function(
-  .data,
+  data,
   group_cols = NULL,
   percentiles = c(0.9, 0.5, 0.1),
   measure_col
 ) {
   # consider generalizing this function to compute any percentile, not just 90th, 50th, and 10th
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
 
   by_cols <- group_cols
 

@@ -4,10 +4,10 @@
 \alias{ggplot_point_line}
 \title{Plot grouped line chart with labeled points}
 \usage{
-ggplot_point_line(data, x, y, group = NULL, label = NULL, ...)
+ggplot_point_line(.data, x, y, group = NULL, label = NULL, ...)
 }
 \arguments{
-\item{data}{A data frame or tibble containing the variables to plot.}
+\item{.data}{A data frame or tibble containing the variables to plot.}
 
 \item{x}{Column to be mapped to the x-axis.}
 

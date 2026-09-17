@@ -5,14 +5,14 @@
 \title{Compute coverage of non-missing values in a dataset.}
 \usage{
 compute_coverage(
-  .data,
+  data,
   group = NULL,
   include_ref_date = FALSE,
   aggregate = FALSE
 )
 }
 \arguments{
-\item{.data}{A data frame.}
+\item{data}{A data frame.}
 
 \item{group}{A character string specifying the column name to group by. If NULL, coverage is computed for the entire data set.}
 

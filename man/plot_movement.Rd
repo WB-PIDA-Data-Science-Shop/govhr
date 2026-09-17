@@ -4,10 +4,10 @@
 \alias{plot_movement}
 \title{Plot Personnel Movement Over Time}
 \usage{
-plot_movement(.data, movement_type, measurement_type, group_cols)
+plot_movement(data, movement_type, measurement_type, group_cols)
 }
 \arguments{
-\item{.data}{A data frame containing the movement data with columns \code{ref_date}, \code{indicator}, and optionally a grouping column.}
+\item{data}{A data frame containing the movement data with columns \code{ref_date}, \code{indicator}, and optionally a grouping column.}
 
 \item{movement_type}{A character string indicating the type of movement: "hire", "fire", or "turnover".}
 

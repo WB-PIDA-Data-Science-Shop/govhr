@@ -162,7 +162,7 @@ detect_retirement <- function(data) {
 #'
 #' This function classifies the personnel module into three types of movements: hires, fires, or retirements.
 #'
-#' @param .data A data frame containing personnel data.
+#' @param data A data frame containing personnel data.
 #' @param id_col The name of the column representing personnel IDs.
 #' @param event_type The type of movement to classify (e.g., "hire", "fire", and "retirement").
 #' @param start_date The start date for the classification period.
@@ -177,7 +177,7 @@ detect_retirement <- function(data) {
 #'
 #' @export
 classify_personnel_event <- function(
-  .data,
+  data,
   id_col,
   event_type,
   start_date,
@@ -187,7 +187,7 @@ classify_personnel_event <- function(
 ) {
   if (event_type %in% c("hire", "fire")) {
     personnel_event <- detect_personnel_event(
-      data = .data,
+      data = data,
       event_type = event_type,
       id_col = id_col,
       start_date = start_date,
@@ -196,15 +196,15 @@ classify_personnel_event <- function(
       freq = freq
     )
   } else if (event_type == "retirement") {
-    personnel_event <- detect_retirement(.data)
+    personnel_event <- detect_retirement(data)
   }
 
-  .data <- data.table::copy(setDT(.data))
+  data <- data.table::copy(setDT(data))
   personnel_event <- data.table::setDT(personnel_event)
 
-  .data[personnel_event, on = c(id_col, "ref_date"), type_event := i.type_event]
+  data[personnel_event, on = c(id_col, "ref_date"), type_event := i.type_event]
 
-  .data[,
+  data[,
     type_event := fcase(
       type_event == "hire"   , "hire"       ,
       type_event == "fire"   , "fire"       ,
@@ -219,17 +219,17 @@ classify_personnel_event <- function(
   end_ref_date <- lubridate::ymd(end_date)
 
   if (event_type == "hire") {
-    .data <- .data[ref_date > start_ref_date]
+    data <- data[ref_date > start_ref_date]
   } else if (event_type == "fire") {
-    .data <- .data[ref_date < end_ref_date]
+    data <- data[ref_date < end_ref_date]
   }
 
-  .data[]
+  data[]
 }
 
 #' Function to compute the total cost associated with personnel movements.
 #'
-#' @param .data A data frame containing the data to be processed.
+#' @param data A data frame containing the data to be processed.
 #' @param id_col The name of the column representing personnel IDs (default is "personnel_id").
 #' @param event_type A character vector indicating which movement event(s) to include (e.g., "hire", "fire", "retirement"). Multiple types can be supplied to compute costs for each type.
 #' @param start_date The start date for the classification period. Defaults to the minimum reference date found in `.data`.
@@ -245,7 +245,7 @@ classify_personnel_event <- function(
 #' @export
 #' @return A data frame containing the movement cost for each requested event type within the specified groups and reference dates.
 compute_movement_cost <- function(
-  .data,
+  data,
   id_col = "personnel_id",
   event_type,
   start_date = NULL,
@@ -256,7 +256,7 @@ compute_movement_cost <- function(
   group_cols = NULL,
   latest_measure = FALSE
 ) {
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
 
   if (is.null(start_date)) {
     start_date <- as.character(min(dt[["ref_date"]]))
@@ -274,7 +274,7 @@ compute_movement_cost <- function(
     lapply(event_type, function(type) {
       # classify personnel events
       classified <- classify_personnel_event(
-        .data = dt,
+        data = dt,
         id_col = id_col,
         event_type = type,
         start_date = start_date,
@@ -309,7 +309,7 @@ compute_movement_cost <- function(
 
 #' Function to compute workforce movement for hires, fires, retirement, or turnover
 #'
-#' @param .data A data frame containing personnel data.
+#' @param data A data frame containing personnel data.
 #' @param movement_type A character string indicating the type of movement: "hire", "fire", "retirement", or "turnover".
 #' @param measurement_type A character string indicating the measurement type: "count" or "rate". Ignored for turnover, which is a ratio.
 #' @param group_cols A character vector of columns to group by, or `"ref_date"` for no grouping.
@@ -321,12 +321,12 @@ compute_movement_cost <- function(
 #' @details The function computes workforce movement counts or rates, based on the specified movement type. For hires, fires, and retirements, it calculates either the count or rate of events. For turnover, it calculates the ratio of hires to separations (including retirements). The data is grouped by the specified columns.
 #' @export
 compute_workforce_movement <- function(
-  .data,
+  data,
   movement_type,
   measurement_type,
   group_cols
 ) {
-  dt <- as.data.table(.data)
+  dt <- as.data.table(data)
 
   min_date <- as.character(min(dt[["ref_date"]]))
   max_date <- as.character(max(dt[["ref_date"]]))

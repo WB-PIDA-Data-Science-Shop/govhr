@@ -4,10 +4,10 @@
 \alias{plot_movement_cost}
 \title{Plot Movement Cost}
 \usage{
-plot_movement_cost(.data, group_cols)
+plot_movement_cost(data, group_cols)
 }
 \arguments{
-\item{.data}{A data frame containing the movement cost data with columns \code{movement_cost} and optionally a grouping column.}
+\item{data}{A data frame containing the movement cost data with columns \code{movement_cost} and optionally a grouping column.}
 
 \item{group_cols}{A character vector of columns to group by, or \code{"ref_date"} for no grouping.}
 }

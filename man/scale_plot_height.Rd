@@ -4,10 +4,10 @@
 \alias{scale_plot_height}
 \title{Plot Height for a Grouped Bar Chart}
 \usage{
-scale_plot_height(.data)
+scale_plot_height(data)
 }
 \arguments{
-\item{.data}{Data frame in which each row becomes one bar.}
+\item{data}{Data frame in which each row becomes one bar.}
 }
 \value{
 Numeric height in pixels, never below 350.

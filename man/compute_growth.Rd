@@ -4,10 +4,10 @@
 \alias{compute_growth}
 \title{Compute Growth Rate Summary Table}
 \usage{
-compute_growth(.data, group, measure_col = NULL)
+compute_growth(data, group, measure_col = NULL)
 }
 \arguments{
-\item{.data}{A data frame with \code{ref_date} and the grouping column.}
+\item{data}{A data frame with \code{ref_date} and the grouping column.}
 
 \item{group}{Character string naming the grouping column.}
 

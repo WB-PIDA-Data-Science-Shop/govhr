@@ -1,6 +1,6 @@
 #' Compute coverage of non-missing values in a dataset.
 #'
-#' @param .data A data frame.
+#' @param data A data frame.
 #' @param group A character string specifying the column name to group by. If NULL, coverage is computed for the entire data set.
 #' @param include_ref_date A logical value indicating whether to include the `ref_date` column in the grouping.
 #' @param aggregate A logical value indicating whether to aggregate coverage values by the `group`.
@@ -12,12 +12,12 @@
 #' 
 #' @export
 compute_coverage <- function(
-  .data,
+  data,
   group = NULL,
   include_ref_date = FALSE,
   aggregate = FALSE
 ) {
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
   data_cols <- colnames(dt)
 
   if (include_ref_date) {

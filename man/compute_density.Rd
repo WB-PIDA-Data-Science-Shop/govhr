@@ -5,7 +5,7 @@
 \title{Function to compute the distribution function of a variable.}
 \usage{
 compute_density(
-  .data,
+  data,
   group_col = NULL,
   measure_col,
   binwidth = 1,
@@ -13,7 +13,7 @@ compute_density(
 )
 }
 \arguments{
-\item{.data}{A data frame.}
+\item{data}{A data frame.}
 
 \item{group_col}{A string naming a single column to group by, or \code{NULL} for no grouping.}
 

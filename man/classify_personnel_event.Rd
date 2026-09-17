@@ -5,7 +5,7 @@
 \title{Classify Personnel Movement Events}
 \usage{
 classify_personnel_event(
-  .data,
+  data,
   id_col,
   event_type,
   start_date,
@@ -15,7 +15,7 @@ classify_personnel_event(
 )
 }
 \arguments{
-\item{.data}{A data frame containing personnel data.}
+\item{data}{A data frame containing personnel data.}
 
 \item{id_col}{The name of the column representing personnel IDs.}
 

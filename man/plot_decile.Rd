@@ -4,10 +4,10 @@
 \alias{plot_decile}
 \title{Plot Decile Summary}
 \usage{
-plot_decile(.data, group_cols)
+plot_decile(data, group_cols)
 }
 \arguments{
-\item{.data}{A data frame produced by \code{compute_decile()}, containing columns \code{decile}, \code{mean_value}, and optionally a grouping column.}
+\item{data}{A data frame produced by \code{compute_decile()}, containing columns \code{decile}, \code{mean_value}, and optionally a grouping column.}
 
 \item{group_cols}{A character vector of columns to group by, or \code{"ref_date"} for no grouping.}
 }

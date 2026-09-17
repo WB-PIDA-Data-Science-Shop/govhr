@@ -1,7 +1,7 @@
 
 #' Count Unique Entities by Group
 #' 
-#' @param .data Data frame containing the data.
+#' @param data Data frame containing the data.
 #' @param id_col Character. Column name of the unique identifier for the entity.
 #' @param group_cols Character vector of column names to group by, or `NULL` for no grouping.
 #' 
@@ -9,8 +9,8 @@
 #' 
 #' @importFrom data.table as.data.table uniqueN setorderv
 #' @export
-count_entity <- function(.data, id_col, group_cols = NULL){
-  dt <- data.table::as.data.table(.data)
+count_entity <- function(data, id_col, group_cols = NULL){
+  dt <- data.table::as.data.table(data)
 
   out <- dt[
     !is.na(get(id_col)),
@@ -32,7 +32,7 @@ count_entity <- function(.data, id_col, group_cols = NULL){
 #' grouping column, and `value`. Counts rows when `measure_col` is `NULL`
 #' (headcount) and sums the column otherwise (wage bill).
 #'
-#' @param .data Data frame containing at least a `ref_date` column.
+#' @param data Data frame containing at least a `ref_date` column.
 #' @param group_col Character. Column to group by, or `"ref_date"` for no
 #'   grouping.
 #' @param measure_col Character. Numeric column to sum, or `NULL` to count rows.
@@ -41,14 +41,14 @@ count_entity <- function(.data, id_col, group_cols = NULL){
 #'
 #' @importFrom dplyr across all_of
 #' @export
-compute_trend_summary <- function(.data, group_col, measure_col = NULL) {
+compute_trend_summary <- function(data, group_col, measure_col = NULL) {
   groups <- if (group_col == "ref_date") "ref_date" else c("ref_date", group_col)
 
   if (is.null(measure_col)) {
-    fastcount(.data, dplyr::across(dplyr::all_of(groups)), name = "value")
+    fastcount(data, dplyr::across(dplyr::all_of(groups)), name = "value")
   } else {
     compute_fastsummary(
-      .data,
+      data,
       cols = measure_col,
       fns = "sum",
       groups = groups
@@ -61,7 +61,7 @@ compute_trend_summary <- function(.data, group_col, measure_col = NULL) {
 #' Rescales `value` so the earliest observation equals 100. When a grouping
 #' column is supplied the rescaling is applied independently within each group.
 #'
-#' @param .data Data frame with `ref_date` and `value`, as returned by
+#' @param data Data frame with `ref_date` and `value`, as returned by
 #'   [compute_trend_summary()].
 #' @param group_col Character. Column to group by, or `"ref_date"` for no
 #'   grouping.
@@ -70,8 +70,8 @@ compute_trend_summary <- function(.data, group_col, measure_col = NULL) {
 #'
 #' @importFrom dplyr arrange mutate all_of first
 #' @export
-apply_baseline_index <- function(.data, group_col) {
-  indexed <- dplyr::arrange(.data, .data[["ref_date"]])
+apply_baseline_index <- function(data, group_col) {
+  indexed <- dplyr::arrange(data, .data[["ref_date"]])
 
   if (group_col == "ref_date") {
     dplyr::mutate(
@@ -93,7 +93,7 @@ apply_baseline_index <- function(.data, group_col) {
 #' `value` per group. Counts rows when `measure_col` is `NULL` (headcount) and
 #' sums the column otherwise (wage bill).
 #'
-#' @param .data Data frame containing `ref_date` and the grouping column.
+#' @param data Data frame containing `ref_date` and the grouping column.
 #' @param group_col Character. Column to group by.
 #' @param measure_col Character. Numeric column to sum, or `NULL` to count rows.
 #'
@@ -101,10 +101,10 @@ apply_baseline_index <- function(.data, group_col) {
 #'
 #' @importFrom dplyr all_of filter n summarise
 #' @export
-compute_cross_section_summary <- function(.data, group_col, measure_col = NULL) {
+compute_cross_section_summary <- function(data, group_col, measure_col = NULL) {
   # only consider each group's latest reference date
   data_latest <- dplyr::filter(
-    .data,
+    data,
     .data[["ref_date"]] == max(.data[["ref_date"]]),
     .by = dplyr::all_of(group_col)
   )
@@ -131,7 +131,7 @@ compute_cross_section_summary <- function(.data, group_col, measure_col = NULL) 
 #' change between them. Counts rows when `measure_col` is `NULL` (headcount) and
 #' sums the column otherwise (wage bill).
 #'
-#' @param .data Data frame containing `ref_date` and the grouping column.
+#' @param data Data frame containing `ref_date` and the grouping column.
 #' @param group_col Character. Column to group by.
 #' @param measure_col Character. Numeric column to sum, or `NULL` to count rows.
 #'
@@ -140,8 +140,8 @@ compute_cross_section_summary <- function(.data, group_col, measure_col = NULL) 
 #'
 #' @importFrom dplyr all_of arrange filter first last n summarise
 #' @export
-compute_growth_summary <- function(.data, group_col, measure_col = NULL) {
-  labelled <- dplyr::filter(.data, !is.na(.data[[group_col]]))
+compute_growth_summary <- function(data, group_col, measure_col = NULL) {
+  labelled <- dplyr::filter(data, !is.na(.data[[group_col]]))
 
   # aggregate every period once; picking endpoints out of the (small) aggregate
   # is cheaper than scanning the raw rows for each group's first and last date
@@ -206,7 +206,7 @@ group_color_scale <- function(values) {
 #' series per group. When `toggle_growth` is `TRUE` the y-axis is formatted as a
 #' baseline index with a dashed reference line at 100.
 #'
-#' @param .data Data frame with `ref_date` and the y-axis column, as returned by
+#' @param data Data frame with `ref_date` and the y-axis column, as returned by
 #'   [compute_trend_summary()] and optionally [govhr::apply_baseline_index()].
 #' @param group_col Character. Column to group by, or `"ref_date"` for no
 #'   grouping.
@@ -222,13 +222,13 @@ group_color_scale <- function(values) {
 #' @importFrom scales cut_short_scale label_number
 #' @export
 plot_trend <- function(
-  .data,
+  data,
   group_col,
   toggle_growth = FALSE,
   y_col = "value",
   y_label = "Value"
 ) {
-  plot <- .data |>
+  plot <- data |>
     ggplot2::ggplot(
       ggplot2::aes(x = .data[["ref_date"]], y = .data[[y_col]])
     ) +
@@ -242,7 +242,7 @@ plot_trend <- function(
         color = .data[[group_col]],
         group = .data[[group_col]]
       ) +
-      group_color_scale(.data[[group_col]])
+      group_color_scale(data[[group_col]])
   }
 
   if (toggle_growth) {
@@ -266,7 +266,7 @@ plot_trend <- function(
 #' Draws a horizontal bar chart with groups ordered by the plotted value. Rows
 #' missing either the value or the group label are dropped.
 #'
-#' @param .data Data frame with the grouping column and the x-axis column, as
+#' @param data Data frame with the grouping column and the x-axis column, as
 #'   returned by [compute_cross_section_summary()].
 #' @param group_col Character. Column to group by.
 #' @param x_col Character. Column to plot on the x-axis. Default `"value"`.
@@ -280,8 +280,8 @@ plot_trend <- function(
 #' @importFrom stats reorder
 #' @importFrom stringr str_wrap
 #' @export
-plot_bar_total <- function(.data, group_col, x_col = "value", x_label = "Value") {
-  .data |>
+plot_bar_total <- function(data, group_col, x_col = "value", x_label = "Value") {
+  data |>
     dplyr::filter(
       !is.na(.data[[x_col]]) & !is.na(.data[[group_col]])
     ) |>
@@ -307,7 +307,7 @@ plot_bar_total <- function(.data, group_col, x_col = "value", x_label = "Value")
 #' Draws a horizontal bar chart with groups ordered by `growth_rate`, with a
 #' dashed reference line at zero separating growth from decline.
 #'
-#' @param .data Data frame with the grouping column and a `growth_rate` column,
+#' @param data Data frame with the grouping column and a `growth_rate` column,
 #'   as returned by [compute_growth_summary()].
 #' @param group_col Character. Column to group by.
 #'
@@ -318,8 +318,8 @@ plot_bar_total <- function(.data, group_col, x_col = "value", x_label = "Value")
 #' @importFrom stats reorder
 #' @importFrom stringr str_wrap
 #' @export
-plot_bar_growth <- function(.data, group_col) {
-  .data |>
+plot_bar_growth <- function(data, group_col) {
+  data |>
     ggplot2::ggplot(
       ggplot2::aes(
         x = .data[["growth_rate"]],

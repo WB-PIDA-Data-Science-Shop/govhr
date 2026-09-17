@@ -8,7 +8,7 @@ test_that("classify_personnel_event('hire') flags a genuine mid-panel hire and e
   )
 
   out <- classify_personnel_event(
-    .data = df,
+    data = df,
     id_col = "personnel_id",
     event_type = "hire",
     start_date = "2019-01-01",
@@ -36,7 +36,7 @@ test_that("classify_personnel_event('retirement') flags the active->pensioner tr
   )
 
   out <- classify_personnel_event(
-    .data = df,
+    data = df,
     id_col = "personnel_id",
     event_type = "retirement",
     start_date = "2019-01-01",
@@ -62,7 +62,7 @@ test_that("compute_movement_cost sums wage only for personnel with a genuine hir
   )
 
   out <- compute_movement_cost(
-    .data = df,
+    data = df,
     event_type = "hire",
     start_date = "2019-01-01",
     end_date = "2021-01-01",
@@ -85,7 +85,7 @@ test_that("compute_movement_cost with latest_measure = TRUE keeps only the max r
   )
 
   out <- compute_movement_cost(
-    .data = df,
+    data = df,
     event_type = "retirement",
     start_date = "2020-01-01",
     end_date = "2021-01-01",

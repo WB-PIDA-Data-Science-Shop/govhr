@@ -645,7 +645,7 @@ classify_text <- function(
 #' sample_group() randomly samples a specified number of unique values from a
 #' grouping column and returns all rows belonging to the sampled groups.
 #'
-#' @param .data A data.frame, tibble, or data.table.
+#' @param data A data.frame, tibble, or data.table.
 #' @param group Unquoted column name used to define groups.
 #' @param n Integer; number of distinct groups to sample. If greater than the
 #'   number of available groups, all groups are returned.
@@ -662,8 +662,8 @@ classify_text <- function(
 #' @importFrom data.table as.data.table is.data.table
 #' @importFrom rlang ensym as_string
 #' @importFrom tibble is_tibble as_tibble
-sample_group <- function(.data, group, n) {
-  dt <- data.table::as.data.table(.data)
+sample_group <- function(data, group, n) {
+  dt <- data.table::as.data.table(data)
   group_sym <- rlang::ensym(group)
   group_col <- rlang::as_string(group_sym)
 
@@ -678,9 +678,9 @@ sample_group <- function(.data, group, n) {
   res_dt <- dt[get(group_col) %in% sampled_vals]
 
   # return in same "type" the user passed: tibble -> tibble, data.frame -> data.frame, data.table -> data.table
-  if (tibble::is_tibble(.data)) {
+  if (tibble::is_tibble(data)) {
     tibble::as_tibble(res_dt)
-  } else if (data.table::is.data.table(.data)) {
+  } else if (data.table::is.data.table(data)) {
     res_dt
   } else {
     as.data.frame(res_dt)
@@ -742,7 +742,7 @@ convert_data <- function(data, data_original) {
 #' string representing the data's reporting interval (e.g., "year", "month").
 #' The function calculates the median day difference between consecutive dates.
 #'
-#' @param .data A dataset containing a column named \code{ref_date} with date values.
+#' @param data A dataset containing a column named \code{ref_date} with date values.
 #'
 #' @return A single character scalar: \code{"year"}, \code{"quarter"},
 #'   \code{"month"}, \code{"week"}, or \code{"day"}.
@@ -758,8 +758,8 @@ convert_data <- function(data, data_original) {
 #' guess_date_frequency(data)
 #' #> [1] "month"
 #' @importFrom stats median
-guess_date_frequency <- function(.data) {
-  ref_date <- .data[["ref_date"]] |>
+guess_date_frequency <- function(data) {
+  ref_date <- data[["ref_date"]] |>
     unique() |>
     sort()
 

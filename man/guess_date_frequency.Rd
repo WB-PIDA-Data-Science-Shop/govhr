@@ -4,10 +4,10 @@
 \alias{guess_date_frequency}
 \title{Guess the Reporting Frequency of the Reference Dates}
 \usage{
-guess_date_frequency(.data)
+guess_date_frequency(data)
 }
 \arguments{
-\item{.data}{A dataset containing a column named \code{ref_date} with date values.}
+\item{data}{A dataset containing a column named \code{ref_date} with date values.}
 }
 \value{
 A single character scalar: \code{"year"}, \code{"quarter"},

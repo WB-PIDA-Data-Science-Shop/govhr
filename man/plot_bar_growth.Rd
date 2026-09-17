@@ -4,10 +4,10 @@
 \alias{plot_bar_growth}
 \title{Plot Growth Rates by Group}
 \usage{
-plot_bar_growth(.data, group_col)
+plot_bar_growth(data, group_col)
 }
 \arguments{
-\item{.data}{Data frame with the grouping column and a \code{growth_rate} column,
+\item{data}{Data frame with the grouping column and a \code{growth_rate} column,
 as returned by \code{\link[=compute_growth_summary]{compute_growth_summary()}}.}
 
 \item{group_col}{Character. Column to group by.}

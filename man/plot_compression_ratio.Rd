@@ -4,10 +4,10 @@
 \alias{plot_compression_ratio}
 \title{Plot Compression Ratio}
 \usage{
-plot_compression_ratio(.data, group_cols = NULL)
+plot_compression_ratio(data, group_cols = NULL)
 }
 \arguments{
-\item{.data}{A data frame containing the compression ratio data produced by \code{compute_compression_ratio()}.}
+\item{data}{A data frame containing the compression ratio data produced by \code{compute_compression_ratio()}.}
 
 \item{group_cols}{A character vector of columns to group by, or \code{"ref_date"}
 for no grouping.}

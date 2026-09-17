@@ -4,10 +4,10 @@
 \alias{sample_group}
 \title{Sample groups and return all rows for those groups}
 \usage{
-sample_group(.data, group, n)
+sample_group(data, group, n)
 }
 \arguments{
-\item{.data}{A data.frame, tibble, or data.table.}
+\item{data}{A data.frame, tibble, or data.table.}
 
 \item{group}{Unquoted column name used to define groups.}
 

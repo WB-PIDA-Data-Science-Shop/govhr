@@ -80,7 +80,7 @@ detect_reallocation <- function(data, personnel_hire) {
 #' holding more than one record in the same period has no well-defined position,
 #' so every record for that entity is dropped with a warning reporting how many.
 #'
-#' @param .data Data frame containing a `ref_date` column, the identifier and
+#' @param data Data frame containing a `ref_date` column, the identifier and
 #'   the grouping columns.
 #' @param id_col Character. Column identifying the entity whose career is
 #'   tracked. Default `"contract_id"`.
@@ -96,10 +96,10 @@ detect_reallocation <- function(data, personnel_hire) {
 #' @importFrom stats complete.cases
 #' @export
 detect_career_transition <- function(
-  .data, id_col = "contract_id", group_cols,
+  data, id_col = "contract_id", group_cols,
   return_all = FALSE
 ) {
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
 
   dt <- dt[
     stats::complete.cases(dt[, c(id_col, group_cols), with = FALSE])
@@ -190,21 +190,21 @@ detect_career_transition <- function(
 #' Draws transfers between groups as a heatmap, origin groups on the y-axis and
 #' destination groups on the x-axis.
 #'
-#' @param .data Data frame with `from`, `to` and `transfer` columns.
+#' @param data Data frame with `from`, `to` and `transfer` columns.
 #'
 #' @return A plotly object.
 #'
 #' @importFrom plotly layout plot_ly
 #' @importFrom stats median
 #' @keywords internal
-plot_transfer_heatmap <- function(.data) {
-  transfer <- .data[["transfer"]]
+plot_transfer_heatmap <- function(data) {
+  transfer <- data[["transfer"]]
 
   plotly::plot_ly(
-    data = .data,
-    x = ~ .data[["to"]],
-    y = ~ .data[["from"]],
-    z = ~ .data[["transfer"]],
+    data = data,
+    x = ~ data[["to"]],
+    y = ~ data[["from"]],
+    z = ~ data[["transfer"]],
     type = "heatmap",
     colorscale = list(
       c(min(transfer, na.rm = TRUE), "#d32f2f"),
@@ -235,7 +235,7 @@ plot_transfer_heatmap <- function(.data) {
 #' the number of transitions and node size to degree centrality. Networks of ten
 #' or more nodes are labelled by index rather than by name.
 #'
-#' @param .data Data frame with `from` and `to` columns, as returned by
+#' @param data Data frame with `from` and `to` columns, as returned by
 #'   [detect_career_transition()].
 #'
 #' @return A ggiraph girafe object.
@@ -252,8 +252,8 @@ plot_transfer_heatmap <- function(.data) {
 #' 
 #' @keywords internal
 #' @export
-plot_transition_network <- function(.data) {
-  edges <- govhr::fastcount(.data, .data[["from"]], .data[["to"]], name = "weight") |>
+plot_transition_network <- function(data) {
+  edges <- govhr::fastcount(data, .data[["from"]], .data[["to"]], name = "weight") |>
     # coerce to character to ensure that as_tble_graph produces a `name` column
     dplyr::mutate(
       dplyr::across(

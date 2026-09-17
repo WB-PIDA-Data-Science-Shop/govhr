@@ -7,12 +7,12 @@
 compute_baseline_index(.data, date_col, ...)
 }
 \arguments{
-\item{.data}{A data.frame or tibble containing the time series data.}
-
 \item{date_col}{Unquoted column name containing the time/year variable.}
 
 \item{...}{Unquoted column names to compute indices for. Each selected
 column must be numeric.}
+
+\item{data}{A data.frame or tibble containing the time series data.}
 }
 \value{
 A tibble with the date column and computed index columns. Index

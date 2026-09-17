@@ -5,7 +5,7 @@
 \title{Function to compute quantiles of a measure column within groups and reference dates.}
 \usage{
 compute_quantile(
-  .data,
+  data,
   group_cols = NULL,
   measure_col,
   latest_measure = FALSE,
@@ -13,7 +13,7 @@ compute_quantile(
 )
 }
 \arguments{
-\item{.data}{A data frame containing the data to be processed.}
+\item{data}{A data frame containing the data to be processed.}
 
 \item{group_cols}{A character vector of column names to group the data by.}
 

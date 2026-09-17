@@ -4,10 +4,10 @@
 \alias{compute_decile}
 \title{Compute Deciles of a Measure}
 \usage{
-compute_decile(.data, group_cols = NULL, measure_col, latest_measure = FALSE)
+compute_decile(data, group_cols = NULL, measure_col, latest_measure = FALSE)
 }
 \arguments{
-\item{.data}{Data frame containing a \code{ref_date} column and the measure.}
+\item{data}{Data frame containing a \code{ref_date} column and the measure.}
 
 \item{group_cols}{Character vector of columns to group by, or \code{NULL} for no
 grouping.}

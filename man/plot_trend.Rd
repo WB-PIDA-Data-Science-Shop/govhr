@@ -5,7 +5,7 @@
 \title{Plot Time Trend}
 \usage{
 plot_trend(
-  .data,
+  data,
   group_col,
   toggle_growth = FALSE,
   y_col = "value",
@@ -13,7 +13,7 @@ plot_trend(
 )
 }
 \arguments{
-\item{.data}{Data frame with \code{ref_date} and the y-axis column, as returned by
+\item{data}{Data frame with \code{ref_date} and the y-axis column, as returned by
 \code{\link[=compute_trend_summary]{compute_trend_summary()}} and optionally \code{\link[=apply_baseline_index]{apply_baseline_index()}}.}
 
 \item{group_col}{Character. Column to group by, or \code{"ref_date"} for no

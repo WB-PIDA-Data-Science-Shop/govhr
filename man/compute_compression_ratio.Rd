@@ -5,7 +5,7 @@
 \title{Function to compute the compression ratio}
 \usage{
 compute_compression_ratio(
-  .data,
+  data,
   group_cols = NULL,
   percentiles = c(0.9, 0.5, 0.1),
   measure_col,
@@ -13,7 +13,7 @@ compute_compression_ratio(
 )
 }
 \arguments{
-\item{.data}{A data frame.}
+\item{data}{A data frame.}
 
 \item{group_cols}{A character vector of column names to group the data by.}
 

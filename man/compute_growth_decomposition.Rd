@@ -5,13 +5,13 @@
 \title{Compute growth decomposition of wagebill}
 \usage{
 compute_growth_decomposition(
-  .data,
+  data,
   group_cols = NULL,
   measure_col = "gross_salary_lcu"
 )
 }
 \arguments{
-\item{.data}{A data frame containing the data to be analyzed. It should include columns for the grouping variables, a column for the reference date, and a column for the measure of interest (e.g., gross salary).}
+\item{data}{A data frame containing the data to be analyzed. It should include columns for the grouping variables, a column for the reference date, and a column for the measure of interest (e.g., gross salary).}
 
 \item{group_cols}{A character vector specifying the names of the columns to group by.}
 

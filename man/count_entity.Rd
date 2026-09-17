@@ -4,10 +4,10 @@
 \alias{count_entity}
 \title{Count Unique Entities by Group}
 \usage{
-count_entity(.data, id_col, group_cols = NULL)
+count_entity(data, id_col, group_cols = NULL)
 }
 \arguments{
-\item{.data}{Data frame containing the data.}
+\item{data}{Data frame containing the data.}
 
 \item{id_col}{Character. Column name of the unique identifier for the entity.}
 

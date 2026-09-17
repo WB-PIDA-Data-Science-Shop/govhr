@@ -4,10 +4,10 @@
 \alias{compute_workforce_movement}
 \title{Function to compute workforce movement for hires, fires, retirement, or turnover}
 \usage{
-compute_workforce_movement(.data, movement_type, measurement_type, group_cols)
+compute_workforce_movement(data, movement_type, measurement_type, group_cols)
 }
 \arguments{
-\item{.data}{A data frame containing personnel data.}
+\item{data}{A data frame containing personnel data.}
 
 \item{movement_type}{A character string indicating the type of movement: "hire", "fire", "retirement", or "turnover".}
 

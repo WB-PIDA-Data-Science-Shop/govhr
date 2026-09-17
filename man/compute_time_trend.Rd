@@ -4,10 +4,10 @@
 \alias{compute_time_trend}
 \title{Compute time trend}
 \usage{
-compute_time_trend(.data, group, measure_col = NULL)
+compute_time_trend(data, group, measure_col = NULL)
 }
 \arguments{
-\item{.data}{A data frame containing at least a \code{ref_date} column.}
+\item{data}{A data frame containing at least a \code{ref_date} column.}
 
 \item{group}{Character string naming the grouping column, or \code{"ref_date"} for
 no grouping.}

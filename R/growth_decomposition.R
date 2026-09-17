@@ -1,6 +1,6 @@
 #' Compute growth decomposition of wagebill
 #'
-#' @param .data A data frame containing the data to be analyzed. It should include columns for the grouping variables, a column for the reference date, and a column for the measure of interest (e.g., gross salary).
+#' @param data A data frame containing the data to be analyzed. It should include columns for the grouping variables, a column for the reference date, and a column for the measure of interest (e.g., gross salary).
 #' @param group_cols A character vector specifying the names of the columns to group by.
 #' @param measure_col A character string specifying the name of the column containing the measure of interest (default is "gross_salary_lcu").
 #'
@@ -20,11 +20,11 @@
 #' @importFrom tidyr complete nesting
 #' @export
 compute_growth_decomposition <- function(
-  .data,
+  data,
   group_cols = NULL,
   measure_col = "gross_salary_lcu"
 ) {
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
 
   if (!is.null(group_cols)) {
     keep <- rowSums(is.na(dt[, ..group_cols])) == 0
@@ -45,9 +45,9 @@ compute_growth_decomposition <- function(
 
   summary_table[, is_observed := TRUE]
 
-  min_date <- min(.data$ref_date)
-  max_date <- max(.data$ref_date)
-  date_interval <- guess_date_frequency(.data)
+  min_date <- min(data$ref_date)
+  max_date <- max(data$ref_date)
+  date_interval <- guess_date_frequency(data)
 
   # explicit date sequence (not just observed dates) so a period missing
   # for EVERY group still gets a row, rather than silently vanishing

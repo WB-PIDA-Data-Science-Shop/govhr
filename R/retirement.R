@@ -1,6 +1,6 @@
 #' Project Retirement Dates
 #' @details The function takes a data frame containing personnel data with birth dates and reference dates. It only considers the last reference date in the data. It then calculates the projected retirement date for each staff member based on the specified threshold age, and counts the number of staff eligible for retirement at each future reference date.
-#' @param .data A data frame, either the workforce or wage bill data.
+#' @param data A data frame, either the workforce or wage bill data.
 #' @param threshold_age The age at which personnel are considered eligible for retirement (default is 60).
 #' @param birth_col The name of the column representing birth dates (default is "birth_date").
 #' @param group_cols A character vector of column names to group the data by when counting eligible retirees (default is NULL, meaning no grouping).
@@ -17,7 +17,7 @@
 #'
 #' @export
 project_retirement <- function(
-  .data,
+  data,
   threshold_age = 60,
   birth_col = "birth_date",
   group_cols = NULL,
@@ -26,7 +26,7 @@ project_retirement <- function(
   simplify_retirement_date = TRUE,
   cutoff_date = 10
 ) {
-  data_dt <- as.data.table(.data)
+  data_dt <- as.data.table(data)
 
   # future extension: (a) incorporate threshold_tenure (b) enable user to choose which reference date to use as a baseline for projection.
 
@@ -39,7 +39,7 @@ project_retirement <- function(
 
   # retain only projected retirements after last reference date in the data
   data_dt <- data_dt[
-    retirement_date > max(.data[["ref_date"]])
+    retirement_date > max(data[["ref_date"]])
   ]
 
   if (simplify_retirement_date) {
@@ -87,7 +87,7 @@ project_retirement <- function(
   # cut-off date
   projected_retirement_data <- projected_retirement_data[
     retirement_date <=
-      (max(.data[["ref_date"]]) + lubridate::years(cutoff_date))
+      (max(data[["ref_date"]]) + lubridate::years(cutoff_date))
   ]
 
   projected_retirement_data[]

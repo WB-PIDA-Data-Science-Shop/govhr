@@ -4,10 +4,10 @@
 \alias{plot_bar_total}
 \title{Plot Totals by Group}
 \usage{
-plot_bar_total(.data, group_col, x_col = "value", x_label = "Value")
+plot_bar_total(data, group_col, x_col = "value", x_label = "Value")
 }
 \arguments{
-\item{.data}{Data frame with the grouping column and the x-axis column, as
+\item{data}{Data frame with the grouping column and the x-axis column, as
 returned by \code{\link[=compute_cross_section_summary]{compute_cross_section_summary()}}.}
 
 \item{group_col}{Character. Column to group by.}

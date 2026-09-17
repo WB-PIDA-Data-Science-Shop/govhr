@@ -441,7 +441,7 @@ fastcount <- function(x, ..., wt = NULL, sort = FALSE, name = NULL) {
 #' It expects the input to already contain a count column named `n`
 #' (for example the output of `dplyr::count()` or `fastcount()`).
 #'
-#' @param .data A data frame or tibble containing a count column `n`.
+#' @param data A data frame or tibble containing a count column `n`.
 #' @param ... Grouping variables. Proportions are
 #'   computed within the combinations of these variables.
 #'
@@ -477,7 +477,7 @@ fastprop <- function(.data, ...) {
 #' base year value. This is useful for comparing growth trends across multiple
 #' time series on a common scale.
 #'
-#' @param .data A data.frame or tibble containing the time series data.
+#' @param data A data.frame or tibble containing the time series data.
 #' @param date_col Unquoted column name containing the time/year variable.
 #' @param ... Unquoted column names to compute indices for. Each selected
 #'   column must be numeric.
@@ -537,7 +537,7 @@ compute_baseline_index <- function(.data, date_col, ...) {
 
 #' Function to compute quantiles of a measure column within groups and reference dates.
 #'
-#' @param .data A data frame containing the data to be processed.
+#' @param data A data frame containing the data to be processed.
 #' @param group_cols A character vector of column names to group the data by.
 #' @param measure_col The name of the column for which quantiles will be computed.
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date's quantiles (default is FALSE).
@@ -550,13 +550,13 @@ compute_baseline_index <- function(.data, date_col, ...) {
 #'
 #' @export
 compute_quantile <- function(
-  .data,
+  data,
   group_cols = NULL,
   measure_col,
   latest_measure = FALSE,
   n_quantiles = 10
 ) {
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
 
   # change group_cols based on the choice of latest measure
   if (latest_measure) {
@@ -586,7 +586,7 @@ compute_quantile <- function(
 
 #' Function to compute the compression ratio
 #'
-#' @param .data A data frame.
+#' @param data A data frame.
 #' @param group_cols A character vector of column names to group the data by.
 #' @param percentiles A numeric vector of length 3 indicating the upper, middle, and lower percentiles to compute (default is c(0.9, 0.5, 0.1)).
 #' @param measure_col The name of the column for which the compression ratio will be computed.
@@ -599,14 +599,14 @@ compute_quantile <- function(
 #'
 #' @export
 compute_compression_ratio <- function(
-  .data,
+  data,
   group_cols = NULL,
   percentiles = c(0.9, 0.5, 0.1),
   measure_col,
   latest_measure = FALSE
 ) {
   # consider generalizing this function to compute any percentile, not just 90th, 50th, and 10th
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
 
   by_cols <- c(group_cols, "ref_date")
 
@@ -643,7 +643,7 @@ compute_compression_ratio <- function(
 
 #' Function to compute the distribution function of a variable.
 #'
-#' @param .data A data frame.
+#' @param data A data frame.
 #' @param group_col A string naming a single column to group by, or `NULL` for no grouping.
 #' @param measure_col The name of the column for which the percentile values will be computed.
 #' @param binwidth The width of the bins for grouping the measure values (default is 1).
@@ -656,17 +656,17 @@ compute_compression_ratio <- function(
 #'
 #' @export
 compute_density <- function(
-  .data,
+  data,
   group_col = NULL,
   measure_col,
   binwidth = 1,
   latest_measure = FALSE
 ) {
   if (latest_measure) {
-    .data <- .data[.data[["ref_date"]] == max(.data[["ref_date"]]), ]
+    data <- data[data[["ref_date"]] == max(data[["ref_date"]]), ]
   }
 
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
   dt[, bin := floor(get(measure_col) / binwidth) * binwidth]
   dt <- dt[!is.na(bin)]
 
@@ -713,7 +713,7 @@ compute_density <- function(
 #' When `measure_col` is `NULL`, counts rows per period (headcount). When a
 #' column name is supplied, sums that column per period (wage bill).
 #'
-#' @param .data A data frame containing at least a `ref_date` column.
+#' @param data A data frame containing at least a `ref_date` column.
 #' @param group Character string naming the grouping column, or `"ref_date"` for
 #'   no grouping.
 #' @param measure_col Character string naming the numeric column to sum, or
@@ -724,8 +724,8 @@ compute_density <- function(
 #' @importFrom data.table as.data.table
 #'
 #' @export
-compute_time_trend <- function(.data, group, measure_col = NULL) {
-  .data_dt <- data.table::as.data.table(.data)
+compute_time_trend <- function(data, group, measure_col = NULL) {
+  .data_dt <- data.table::as.data.table(data)
 
   groups <- if (group == "ref_date") "ref_date" else c("ref_date", group)
 
@@ -789,7 +789,7 @@ rescale_baseline <- function(data, group) {
 #' When `measure_col` is `NULL`, counts rows (headcount). When a column name is
 #' supplied, sums that column (wage bill).
 #'
-#' @param .data A data frame containing a `ref_date` column and the grouping
+#' @param data A data frame containing a `ref_date` column and the grouping
 #'   column.
 #' @param group Character string naming the grouping column.
 #' @param measure_col Character string naming the numeric column to sum, or
@@ -800,9 +800,9 @@ rescale_baseline <- function(data, group) {
 #' @importFrom dplyr group_by across all_of filter ungroup summarise n
 #'
 #' @export
-compute_cross_section <- function(.data, group, measure_col = NULL) {
+compute_cross_section <- function(data, group, measure_col = NULL) {
   # only consider latest reference date
-  data_latest <- .data |>
+  data_latest <- data |>
     dplyr::filter(
       .data[["ref_date"]] == max(.data[["ref_date"]]),
       .by = dplyr::all_of(group)
@@ -832,7 +832,7 @@ compute_cross_section <- function(.data, group, measure_col = NULL) {
 #' When `measure_col` is `NULL`, counts rows per date-group cell (headcount).
 #' When a column name is supplied, sums that column (wage bill).
 #'
-#' @param .data A data frame with `ref_date` and the grouping column.
+#' @param data A data frame with `ref_date` and the grouping column.
 #' @param group Character string naming the grouping column.
 #' @param measure_col Character string naming the numeric column to sum, or
 #'   `NULL` to count rows.
@@ -843,8 +843,8 @@ compute_cross_section <- function(.data, group, measure_col = NULL) {
 #' @importFrom dplyr filter arrange summarise last first all_of
 #'
 #' @export
-compute_growth <- function(.data, group, measure_col = NULL) {
-  endpoints <- .data |>
+compute_growth <- function(data, group, measure_col = NULL) {
+  endpoints <- data |>
     dplyr::filter(
       .data[["ref_date"]] %in%
         c(max(.data[["ref_date"]]), min(.data[["ref_date"]])),

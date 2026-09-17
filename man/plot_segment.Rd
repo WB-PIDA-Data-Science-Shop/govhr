@@ -4,10 +4,10 @@
 \alias{plot_segment}
 \title{Create a Segment Plot with Jittered Points}
 \usage{
-plot_segment(.data, col, group)
+plot_segment(data, col, group)
 }
 \arguments{
-\item{.data}{A data frame containing the variables to plot.}
+\item{data}{A data frame containing the variables to plot.}
 
 \item{col}{Character string specifying the name of the numeric column to plot
 on the x-axis.}

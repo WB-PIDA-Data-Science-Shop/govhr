@@ -4,10 +4,10 @@
 \alias{compute_trend_summary}
 \title{Compute Trend Summary}
 \usage{
-compute_trend_summary(.data, group_col, measure_col = NULL)
+compute_trend_summary(data, group_col, measure_col = NULL)
 }
 \arguments{
-\item{.data}{Data frame containing at least a \code{ref_date} column.}
+\item{data}{Data frame containing at least a \code{ref_date} column.}
 
 \item{group_col}{Character. Column to group by, or \code{"ref_date"} for no
 grouping.}

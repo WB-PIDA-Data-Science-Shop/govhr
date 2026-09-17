@@ -4,10 +4,10 @@
 \alias{apply_baseline_index}
 \title{Apply Baseline Index to a Trend Summary}
 \usage{
-apply_baseline_index(.data, group_col)
+apply_baseline_index(data, group_col)
 }
 \arguments{
-\item{.data}{Data frame with \code{ref_date} and \code{value}, as returned by
+\item{data}{Data frame with \code{ref_date} and \code{value}, as returned by
 \code{\link[=compute_trend_summary]{compute_trend_summary()}}.}
 
 \item{group_col}{Character. Column to group by, or \code{"ref_date"} for no

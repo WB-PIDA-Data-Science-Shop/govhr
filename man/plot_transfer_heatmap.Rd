@@ -4,10 +4,10 @@
 \alias{plot_transfer_heatmap}
 \title{Plot Transfer Heatmap}
 \usage{
-plot_transfer_heatmap(.data)
+plot_transfer_heatmap(data)
 }
 \arguments{
-\item{.data}{Data frame with \code{from}, \code{to} and \code{transfer} columns.}
+\item{data}{Data frame with \code{from}, \code{to} and \code{transfer} columns.}
 }
 \value{
 A plotly object.

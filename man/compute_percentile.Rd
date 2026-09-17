@@ -5,7 +5,7 @@
 \title{Bin a Measure into a Share Distribution}
 \usage{
 compute_percentile(
-  .data,
+  data,
   group_col = NULL,
   measure_col,
   binwidth = 1,
@@ -13,7 +13,7 @@ compute_percentile(
 )
 }
 \arguments{
-\item{.data}{Data frame containing a \code{ref_date} column and the measure.}
+\item{data}{Data frame containing a \code{ref_date} column and the measure.}
 
 \item{group_col}{Character. Column to group by, or \code{NULL} for no grouping.}
 

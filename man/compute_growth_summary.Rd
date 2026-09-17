@@ -4,10 +4,10 @@
 \alias{compute_growth_summary}
 \title{Compute Growth Rate Summary}
 \usage{
-compute_growth_summary(.data, group_col, measure_col = NULL)
+compute_growth_summary(data, group_col, measure_col = NULL)
 }
 \arguments{
-\item{.data}{Data frame containing \code{ref_date} and the grouping column.}
+\item{data}{Data frame containing \code{ref_date} and the grouping column.}
 
 \item{group_col}{Character. Column to group by.}
 

@@ -5,7 +5,7 @@
 \title{Function to compute the total cost associated with personnel movements.}
 \usage{
 compute_movement_cost(
-  .data,
+  data,
   id_col = "personnel_id",
   event_type,
   start_date = NULL,
@@ -18,7 +18,7 @@ compute_movement_cost(
 )
 }
 \arguments{
-\item{.data}{A data frame containing the data to be processed.}
+\item{data}{A data frame containing the data to be processed.}
 
 \item{id_col}{The name of the column representing personnel IDs (default is "personnel_id").}
 

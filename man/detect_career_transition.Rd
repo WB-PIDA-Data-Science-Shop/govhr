@@ -5,14 +5,14 @@
 \title{Detect Career Transitions}
 \usage{
 detect_career_transition(
-  .data,
+  data,
   id_col = "contract_id",
   group_cols,
   return_all = FALSE
 )
 }
 \arguments{
-\item{.data}{Data frame containing a \code{ref_date} column, the identifier and
+\item{data}{Data frame containing a \code{ref_date} column, the identifier and
 the grouping columns.}
 
 \item{id_col}{Character. Column identifying the entity whose career is
