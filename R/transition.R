@@ -243,7 +243,6 @@ plot_transfer_heatmap <- function(.data) {
 #' @importFrom dplyr across mutate pull row_number
 #' @importFrom ggplot2 aes coord_cartesian expansion margin scale_color_manual
 #'   scale_size_identity scale_x_continuous scale_y_continuous theme theme_void
-#' @importFrom govhr fastcount
 #' @importFrom grDevices colorRampPalette
 #' @importFrom tidygraph as_tbl_graph
 #' @importFrom igraph gorder

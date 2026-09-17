@@ -16,7 +16,7 @@
 #' @import dplyr
 #' @importFrom janitor clean_names
 #' @importFrom jsonlite fromJSON
-#' @importFrom tibble as_tibble tibble
+#' @importFrom tibble tibble
 #' @export
 get_data360_api <- function(dataset_id, indicator_id, pivot = TRUE) {
   base_url <- "https://data360api.worldbank.org/data360/data"

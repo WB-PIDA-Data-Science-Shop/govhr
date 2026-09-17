@@ -270,7 +270,6 @@ complete_columns <- function(data, cols) {
 #' convert_constant_ppp(data, "wage")
 #'
 #' @importFrom dplyr filter select rename left_join mutate
-#' @import glue
 #' @export
 convert_constant_ppp <- function(data, cols) {
   ## Basic input checks

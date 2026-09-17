@@ -42,7 +42,6 @@ plot_coverage_trend <- function(data, group, toggle_growth = FALSE) {
 #'
 #' @return A ggplot2 object.
 #'
-#' @importFrom dplyr collect
 #' @export
 plot_consistency_trend <- function(
   data,
@@ -158,8 +157,7 @@ plot_coverage_bar <- function(data) {
 #' @param group Character string. Grouping variable.
 #'
 #' @importFrom plotly plot_ly layout
-#' @importFrom dplyr across everything summarise mutate
-#' @importFrom tidyr pivot_longer
+#' @importFrom dplyr mutate
 #' @importFrom scales label_percent
 #'
 #' @return A plotly object representing a heatmap of coverage values by group and variable.
@@ -214,8 +212,7 @@ plot_coverage_heatmap <- function(data, group = NULL) {
 #' @param group Character string. The column name of the grouping variable (e.g., "ref_date").
 #'
 #' @importFrom plotly plot_ly layout
-#' @importFrom dplyr across everything summarise mutate
-#' @importFrom tidyr pivot_longer
+#' @importFrom dplyr mutate
 #' @importFrom scales label_percent
 #' @importFrom purrr map_dfr
 #'

@@ -40,7 +40,6 @@ count_entity <- function(.data, id_col, group_cols = NULL){
 #' @return A data frame with `ref_date`, optionally `group_col`, and `value`.
 #'
 #' @importFrom dplyr across all_of
-#' @importFrom govhr compute_fastsummary fastcount
 #' @export
 compute_trend_summary <- function(.data, group_col, measure_col = NULL) {
   groups <- if (group_col == "ref_date") "ref_date" else c("ref_date", group_col)
@@ -101,7 +100,6 @@ apply_baseline_index <- function(.data, group_col) {
 #' @return A data frame with the grouping column and a `value` column.
 #'
 #' @importFrom dplyr all_of filter n summarise
-#' @importFrom govhr compute_fastsummary
 #' @export
 compute_cross_section_summary <- function(.data, group_col, measure_col = NULL) {
   # only consider each group's latest reference date
@@ -141,7 +139,6 @@ compute_cross_section_summary <- function(.data, group_col, measure_col = NULL) 
 #'   percentage points (e.g. `12.5` for +12.5%).
 #'
 #' @importFrom dplyr all_of arrange filter first last n summarise
-#' @importFrom govhr compute_fastsummary
 #' @export
 compute_growth_summary <- function(.data, group_col, measure_col = NULL) {
   labelled <- dplyr::filter(.data, !is.na(.data[[group_col]]))

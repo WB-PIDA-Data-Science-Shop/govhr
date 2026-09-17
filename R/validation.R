@@ -36,7 +36,6 @@
 #' @seealso
 #' \code{\link{personnel_rules}}, \code{\link{contract_rules}}
 #'
-#' @importFrom validate validator confront description label summary values
 #' @importFrom data.table as.data.table
 #' @export
 validate_data <- function(

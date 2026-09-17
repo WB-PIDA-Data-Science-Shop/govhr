@@ -16,8 +16,7 @@
 #'   period it remains absent, which correctly carries a zero effect since
 #'   nothing further changed).
 #'
-#' @importFrom data.table .N .SD := shift setorderv fcase fifelse
-#' @importFrom dplyr all_of select
+#' @importFrom data.table .N := shift setorderv fcase fifelse
 #' @importFrom tidyr complete nesting
 #' @export
 compute_growth_decomposition <- function(

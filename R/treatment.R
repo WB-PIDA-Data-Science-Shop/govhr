@@ -225,7 +225,6 @@ fix_invalid_dates <- function(
 #'
 #' @seealso \code{\link{personnel_rules}}, \code{\link{fix_invalid_dates}}
 #' @importFrom dplyr mutate case_when filter
-#' @importFrom lubridate years
 #' @export
 fix_invalid_birthdates <- function(
   data,

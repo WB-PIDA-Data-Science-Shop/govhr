@@ -38,7 +38,7 @@ scale_plot_height <- function(.data) {
 #'
 #' @import ggplot2
 #' @importFrom ggrepel geom_text_repel
-#' @importFrom ggthemes scale_color_few
+#' @importFrom ggthemes scale_colour_few
 #' @importFrom rlang enquo
 #' @importFrom scales pretty_breaks
 #'
@@ -100,8 +100,7 @@ ggplot_point_line <- function(data, x, y, group = NULL, label = NULL, ...) {
 #' @importFrom dtplyr lazy_dt
 #' @importFrom tibble as_tibble
 #' @importFrom dplyr group_by summarise mutate arrange pull desc
-#' @importFrom ggplot2 ggplot geom_segment geom_point position_jitter scale_y_discrete labs theme_minimal arrow
-#' @importFrom grid unit
+#' @importFrom ggplot2 ggplot geom_segment geom_point scale_y_discrete labs theme_minimal
 #' @importFrom stats median
 ggplot_segment <- function(.data, col, group) {
   colq <- rlang::enquo(col)

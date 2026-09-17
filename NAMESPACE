@@ -96,14 +96,12 @@ export(smooth_decrement_rates)
 export(validate_data)
 import(dplyr)
 import(ggplot2)
-import(glue)
 import(httr)
 importFrom(broom,tidy)
 importFrom(collapse,fquantile)
 importFrom(data.table,
   ":=",
   .N,
-  .SD,
   CJ,
   as.data.table,
   copy,
@@ -130,7 +128,6 @@ importFrom(dplyr,
   any_of,
   arrange,
   case_when,
-  collect,
   count,
   desc,
   distinct,
@@ -170,7 +167,6 @@ importFrom(ggiraph,
 )
 importFrom(ggplot2,
   aes,
-  arrow,
   coord_cartesian,
   element_text,
   expansion,
@@ -188,7 +184,6 @@ importFrom(ggplot2,
   label_wrap_gen,
   labs,
   margin,
-  position_jitter,
   scale_color_manual,
   scale_size_identity,
   scale_x_continuous,
@@ -210,10 +205,9 @@ importFrom(ggraph,
 )
 importFrom(ggrepel,geom_text_repel)
 importFrom(ggstats,ggcoef_model)
-importFrom(ggthemes,scale_color_few)
+importFrom(ggthemes,scale_colour_few)
 importFrom(glue,glue)
 importFrom(grDevices,colorRampPalette)
-importFrom(grid,unit)
 importFrom(httr,
   GET,
   content,
@@ -280,15 +274,6 @@ importFrom(tidyr,
   complete,
   nest,
   nesting,
-  pivot_longer,
   pivot_wider
 )
 importFrom(tidyselect,eval_select)
-importFrom(validate,
-  confront,
-  description,
-  label,
-  summary,
-  validator,
-  values
-)

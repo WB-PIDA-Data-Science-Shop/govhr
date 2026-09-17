@@ -495,7 +495,7 @@ fastprop <- function(.data, ...) {
 #' @importFrom rlang enquo as_name enquos expr
 #' @importFrom tidyselect eval_select
 #' @importFrom tibble as_tibble
-#' @importFrom dplyr select all_of
+#' @importFrom dplyr all_of
 #'
 #' @export
 compute_baseline_index <- function(.data, date_col, ...) {
