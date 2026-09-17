@@ -1,7 +1,7 @@
-# Flag or Adjust Over-Retirement-Age Workers
+# Flag or adjust over-retirement-age workers
 
-Addresses violations of the \`personnel_maximum_age\` rule. Only targets
-workers with \`status == "active"\`; retired or inactive workers are
+Addresses violations of the `personnel_maximum_age` rule. Only targets
+workers with `status == "active"`; retired or inactive workers are
 ignored.
 
 ## Usage
@@ -14,8 +14,7 @@ fix_retirement_age(data, max_age = 65, treatment = c("flag", "adjust_status"))
 
 - data:
 
-  A data.frame with \`birth_date\`, \`ref_date\`, and \`status\`
-  columns.
+  A data.frame with `birth_date`, `ref_date`, and `status` columns.
 
 - max_age:
 
@@ -25,15 +24,14 @@ fix_retirement_age(data, max_age = 65, treatment = c("flag", "adjust_status"))
 
   Handling strategy:
 
-  - \`"flag"\`: Add \`over_retirement_flag\` column
+  - `"flag"`: Add `over_retirement_flag` column
 
-  - \`"adjust_status"\`: Set \`status\` to \`"retired"\` for affected
-    workers
+  - `"adjust_status"`: Set `status` to `"retired"` for affected workers
 
 ## Value
 
 A data.frame with over-retirement-age workers handled according to
-\`treatment\`.
+`treatment`.
 
 ## See also
 

@@ -1,8 +1,8 @@
-# Fix Invalid Working Hours
+# Fix invalid working hours
 
-Corrects \`whours\` values outside the valid range \[0, 168\],
-addressing violations of the \`contract_whours\` rule. The maximum of
-168 reflects 5 days × 8 hours per week.
+Corrects `whours` values outside the valid range \[0, 168\], addressing
+violations of the `contract_whours` rule. The maximum of 168 reflects 5
+days × 8 hours per week.
 
 ## Usage
 
@@ -14,17 +14,17 @@ fix_working_hours(data, treatment = c("na", "clamp", "flag"))
 
 - data:
 
-  A data.frame with a \`whours\` column (numeric).
+  A data.frame with a `whours` column (numeric).
 
 - treatment:
 
   Correction strategy:
 
-  - \`"na"\`: Set invalid hours to \`NA\`
+  - `"na"`: Set invalid hours to `NA`
 
-  - \`"clamp"\`: Clamp to \`\[0, 40\]\`
+  - `"clamp"`: Clamp to `[0, 40]`
 
-  - \`"flag"\`: Add \`invalid_hours_flag\` column (also flags \`NA\`)
+  - `"flag"`: Add `invalid_hours_flag` column (also flags `NA`)
 
 ## Value
 

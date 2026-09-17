@@ -28,27 +28,31 @@ classify_text(
 
 - taxonomy:
 
-  Either: - A named character vector: names = class IDs, values = class
-  labels/descriptions - A data.frame with columns identified by
-  \`class_id_col\` and \`class_label_col\`
+  Either:
+
+  - A named character vector: names = class IDs, values = class
+    labels/descriptions
+
+  - A data.frame with columns identified by `class_id_col` and
+    `class_label_col`
 
 - id_col:
 
-  Name of the id column in \`corpus\`. Default "id".
+  Name of the id column in `corpus`. Default "id".
 
 - text_col:
 
-  Name of the text column in \`corpus\`. Default "text".
+  Name of the text column in `corpus`. Default "text".
 
 - class_id_col:
 
-  Name of the class ID column in \`taxonomy\` (if data.frame). Default
+  Name of the class ID column in `taxonomy` (if data.frame). Default
   "class_id".
 
 - class_label_col:
 
-  Name of the class label column in \`taxonomy\` (if data.frame).
-  Default "class_label".
+  Name of the class label column in `taxonomy` (if data.frame). Default
+  "class_label".
 
 - num_leaves:
 
@@ -62,12 +66,13 @@ classify_text(
 - max_dist:
 
   Maximum string distance for fuzzy token matching (used when
-  \`string_dist\` is set).
+  `string_dist` is set).
 
 - string_dist:
 
-  String distance method passed to \`stringdist::amatch()\`. NULL
-  disables fuzzy matching.
+  String distance method passed to
+  [`stringdist::amatch()`](https://rdrr.io/pkg/stringdist/man/amatch.html).
+  NULL disables fuzzy matching.
 
 - stopwords:
 

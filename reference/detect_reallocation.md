@@ -1,4 +1,4 @@
-# Detect Personnel Reallocation Events
+# Detect personnel reallocation events
 
 Identifies reallocation events when a personnel's set of establishments
 changes between consecutive reference dates. Removes hire events and
@@ -15,21 +15,31 @@ detect_reallocation(data, personnel_hire)
 
 - data:
 
-  A data.frame or tibble containing at least the columns: -
-  \`personnel_id\`: Unique personnel identifier. - \`ref_date\`:
-  Reference date (Date or convertible to Date). - \`est_id\`:
-  Establishment ID.
+  A data.frame or tibble containing at least the columns:
+
+  - `personnel_id`: Unique personnel identifier.
+
+  - `ref_date`: Reference date (Date or convertible to Date).
+
+  - `est_id`: Establishment ID.
 
 - personnel_hire:
 
   A data.frame or tibble containing hire events with columns
-  \`personnel_id\` and \`ref_date\`.
+  `personnel_id` and `ref_date`.
 
 ## Value
 
-A tibble with columns: - \`personnel_id\` - \`ref_date\` -
-\`est_id_nested\`: List-column of establishment IDs for that personnel
-and date. - \`type_event\`: \`"reallocation"\` or \`"no reallocation"\`.
+A tibble with columns:
+
+- `personnel_id`
+
+- `ref_date`
+
+- `est_id_nested`: List-column of establishment IDs for that personnel
+  and date.
+
+- `type_event`: `"reallocation"` or `"no reallocation"`.
 
 ## Examples
 

@@ -1,8 +1,8 @@
-# Fix Invalid Birth Dates
+# Fix invalid birth dates
 
-Corrects \`birth_date\` values outside the valid range, addressing
-violations of the \`personnel_birth_date\` rule. Defaults assume no
-active worker was born before 1920 or in the future.
+Corrects `birth_date` values outside the valid range, addressing
+violations of the `personnel_birth_date` rule. Defaults assume no active
+worker was born before 1920 or in the future.
 
 ## Usage
 
@@ -19,24 +19,25 @@ fix_invalid_birthdates(
 
 - data:
 
-  A data.frame with a \`birth_date\` column (Date class).
+  A data.frame with a `birth_date` column (Date class).
 
 - min_date:
 
-  Minimum valid birth date (default: \`1920-01-01\`).
+  Minimum valid birth date (default: `1920-01-01`).
 
 - max_date:
 
-  Maximum valid birth date (default: \`Sys.Date()\`).
+  Maximum valid birth date (default:
+  [`Sys.Date()`](https://rdrr.io/r/base/Sys.time.html)).
 
 - treatment:
 
-  Correction strategy: \`"na"\`, \`"clamp"\`, or \`"filter"\`. See
+  Correction strategy: `"na"`, `"clamp"`, or `"filter"`. See
   [`fix_invalid_dates`](https://wb-pida-data-science-shop.github.io/govhr/reference/fix_invalid_dates.md).
 
 ## Value
 
-A data.frame with corrected \`birth_date\` values.
+A data.frame with corrected `birth_date` values.
 
 ## See also
 

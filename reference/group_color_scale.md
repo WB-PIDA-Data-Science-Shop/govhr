@@ -1,4 +1,4 @@
-# Orange Gradient Colour Scale for Grouped Series
+# Orange gradient colour scale for grouped series
 
 Builds the package's standard sequential orange scale, sized to the
 number of distinct groups present in the data.

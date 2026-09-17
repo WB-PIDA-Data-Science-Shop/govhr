@@ -1,33 +1,33 @@
-# Plot Personnel Movement Over Time
+# Plot personnel movement over time
 
-Plot Personnel Movement Over Time
+Plot personnel movement over time
 
 ## Usage
 
 ``` r
-plot_movement(.data, movement_type, measurement_type, group_cols)
+plot_movement(data, movement_type, measurement_type, group_cols)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
-  A data frame containing the movement data with columns \`ref_date\`,
-  \`indicator\`, and optionally a grouping column.
+  A data frame containing the movement data with columns `ref_date`,
+  `indicator`, and optionally a grouping column.
 
 - movement_type:
 
-  A character string indicating the type of movement: "hire", "fire", or
+  A string indicating the type of movement: "hire", "fire", or
   "turnover".
 
 - measurement_type:
 
-  A character string indicating the measurement type: "count" or "rate".
+  A string indicating the measurement type: "count" or "rate".
 
 - group_cols:
 
-  A character string indicating the grouping column, or "ref_date" for
-  no grouping.
+  A character vector of columns to group by, or `"ref_date"` for no
+  grouping.
 
 ## Value
 

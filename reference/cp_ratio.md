@@ -1,4 +1,4 @@
-# Compute a Compression Ratio Between Two Percentiles
+# Compute a compression ratio between two percentiles
 
 Calculates a wage (or value) compression ratio by dividing one quantile
 by another, typically the 90th percentile divided by the 10th
@@ -19,30 +19,30 @@ cp_ratio(x, upper = 0.9, lower = 0.1, na.rm = TRUE)
 
 - upper:
 
-  Numeric; the upper percentile to compute (default is \`0.9\` for the
+  Numeric; the upper percentile to compute (default is `0.9` for the
   90th percentile).
 
 - lower:
 
-  Numeric; the lower percentile to compute (default is \`0.1\` for the
+  Numeric; the lower percentile to compute (default is `0.1` for the
   10th percentile).
 
 - na.rm:
 
-  Logical; if \`TRUE\`, missing values (\`NA\`) are removed before
-  computation. Defaults to \`TRUE\`.
+  Logical; if `TRUE`, missing values (`NA`) are removed before
+  computation. Defaults to `TRUE`.
 
 ## Value
 
 A numeric value representing the ratio of the specified upper to lower
-percentile values. Returns \`NA_real\_\` if computation is not possible
+percentile values. Returns `NA_real_` if computation is not possible
 (e.g., due to missing data or zero denominator).
 
 ## Details
 
 The function computes the specified upper and lower quantiles and
-returns their ratio (\`upper / lower\`). If either quantile is \`NA\` or
-the lower quantile is zero, the function returns \`NA_real\_\`.
+returns their ratio (`upper / lower`). If either quantile is `NA` or the
+lower quantile is zero, the function returns `NA_real_`.
 
 ## Examples
 

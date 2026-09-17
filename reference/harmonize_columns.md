@@ -20,7 +20,7 @@ harmonize_columns(data, dictionary)
 
   Either a named character vector (names are the desired standardized
   column names and values are the original column names), or a data
-  frame with two columns: \`from\` (original column names) and \`to\`
+  frame with two columns: `from` (original column names) and `to`
   (standardized names).
 
 ## Value

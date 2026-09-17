@@ -1,6 +1,6 @@
-# Compute the proportion of consistent records in a data frame.
+# Compute the proportion of consistent records in a data frame
 
-Compute the proportion of consistent records in a data frame.
+Compute the proportion of consistent records in a data frame
 
 ## Usage
 
@@ -16,8 +16,8 @@ compute_record_consistency(data, id_col, group_cols = NULL, digits = 2)
 
 - id_col:
 
-  A character string specifying the name of the column that uniquely
-  identifies records (e.g., "personnel_id" or "contract_id").
+  A string specifying the name of the column that uniquely identifies
+  records (e.g., "personnel_id" or "contract_id").
 
 - group_cols:
 

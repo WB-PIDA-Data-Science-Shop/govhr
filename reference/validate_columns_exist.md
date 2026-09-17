@@ -1,6 +1,6 @@
-# Validate Multiple Columns Exist
+# Validate multiple columns exist
 
-Validate Multiple Columns Exist
+Validate multiple columns exist
 
 ## Usage
 
@@ -12,15 +12,15 @@ validate_columns_exist(dt, colnames, varname)
 
 - dt:
 
-  data.table to check
+  Data.table to check.
 
 - colnames:
 
-  Character vector. Column names to validate
+  A character vector. Column names to validate.
 
 - varname:
 
-  Character. Variable name for error messages
+  Character. Variable name for error messages.
 
 ## Value
 

@@ -13,7 +13,7 @@ using lagged values."><meta property="og:image" content="https://wb-pida-data-sc
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,16 +71,17 @@ used to order the data and define the time sequence (typically a year column).</
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A dataset with:</p><ul><li><p>The completed `date_col` sequence.</p></li>
-<li><p>A new column named `"growth_&lt;col&gt;"` containing the year-over-year growth rates.</p></li>
-</ul><p>The returned object will match the class of the input `data`.</p>
+    <p>A dataset with:</p><ul><li><p>The completed <code>date_col</code> sequence.</p></li>
+<li><p>A new column named <code>"growth_&lt;col&gt;"</code> containing the year-over-year growth rates.</p></li>
+</ul><p>The returned object will match the class of the input <code>data</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>- Missing years in the sequence are added automatically.
-- Missing values in `col` result in `NA` for the corresponding growth rate.
-- The first observation (or any row where the lag is missing) will have `NA`.</p>
-    </div>
+
+<ul><li><p>Missing years in the sequence are added automatically.</p></li>
+<li><p>Missing values in <code>col</code> result in <code>NA</code> for the corresponding growth rate.</p></li>
+<li><p>The first observation (or any row where the lag is missing) will have <code>NA</code>.</p></li>
+</ul></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

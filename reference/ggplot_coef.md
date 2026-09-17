@@ -16,8 +16,8 @@ ggplot_coef(model, coef)
 
 - coef:
 
-  A character string of coefficient name to plot. It can be a regular
-  expression (e.g., "^term").
+  A string of coefficient name to plot. It can be a regular expression
+  (e.g., "^term").
 
 ## Value
 

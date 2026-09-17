@@ -9,17 +9,20 @@ Contract, Personnel, and Establishment modules.
 
 ``` r
 generate_hr_report(
-  contract_dt,
-  personnel_dt,
-  est_dt,
+  contracts,
+  personnel,
+  establishments,
   country_code,
-  output = "hr_report.html"
+  output = "hr_report.html",
+  contract_dt = NULL,
+  personnel_dt = NULL,
+  est_dt = NULL
 )
 ```
 
 ## Arguments
 
-- contract_dt:
+- contracts:
 
   A data.table containing the Contract module data with harmonized
   column names according to
@@ -27,12 +30,12 @@ generate_hr_report(
   Should include columns such as contract_id, personnel_id, est_id,
   ref_date, salary fields, and occupation information.
 
-- personnel_dt:
+- personnel:
 
   A data.table containing the Personnel module data with harmonized
   column names. Should include personnel_id and demographic information.
 
-- est_dt:
+- establishments:
 
   A data.table containing the Establishment module data with harmonized
   column names. Should include est_id and establishment characteristics.
@@ -47,6 +50,18 @@ generate_hr_report(
   Character string specifying the output file name. Defaults to
   "hr_report.html". The file will be created in the current working
   directory.
+
+- contract_dt:
+
+  Deprecated. Use `contracts` instead.
+
+- personnel_dt:
+
+  Deprecated. Use `personnel` instead.
+
+- est_dt:
+
+  Deprecated. Use `establishments` instead.
 
 ## Value
 
@@ -65,7 +80,7 @@ if (FALSE) { # \dontrun{
 generate_hr_report(
   contract_dt = bra_hrmis_contract,
   personnel_dt = bra_hrmis_personnel,
-  est_dt = bra_hrmis_est,
+  establishments = bra_hrmis_est,
   country_code = "BRA",
   output = "brazil_hr_report.html"
 )

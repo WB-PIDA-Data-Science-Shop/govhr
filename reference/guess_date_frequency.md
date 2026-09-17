@@ -1,4 +1,4 @@
-# Guess the Reporting Frequency of the Reference Dates
+# Guess the reporting frequency of the reference dates
 
 Evaluates a vector of reference dates and returns a single string
 representing the data's reporting interval (e.g., "year", "month"). The
@@ -7,12 +7,12 @@ function calculates the median day difference between consecutive dates.
 ## Usage
 
 ``` r
-guess_date_frequency(.data)
+guess_date_frequency(data)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
   A dataset containing a column named `ref_date` with date values.
 

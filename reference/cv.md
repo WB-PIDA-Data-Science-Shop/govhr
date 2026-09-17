@@ -1,4 +1,4 @@
-# Compute the Coefficient of Variation (CV)
+# Compute the coefficient of variation (CV)
 
 Calculates the coefficient of variation for a numeric vector, defined as
 the ratio of the standard deviation to the mean. This provides a
@@ -19,20 +19,20 @@ cv(x, na.rm = TRUE)
 
 - na.rm:
 
-  Logical; if \`TRUE\`, missing values (\`NA\`) are removed before
-  computation. Defaults to \`TRUE\`.
+  Logical; if `TRUE`, missing values (`NA`) are removed before
+  computation. Defaults to `TRUE`.
 
 ## Value
 
 A numeric value representing the coefficient of variation (CV). Returns
-\`NA_real\_\` if the computation is not possible (e.g., all values are
+`NA_real_` if the computation is not possible (e.g., all values are
 missing or the mean is zero).
 
 ## Details
 
 The function safely handles missing values and cases where the mean is
 zero (to avoid division by zero). If the input vector is empty or the
-mean equals zero, the function returns \`NA_real\_\`.
+mean equals zero, the function returns `NA_real_`.
 
 ## Examples
 

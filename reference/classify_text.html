@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,25 +63,25 @@
 
 
 <dt id="arg-taxonomy">taxonomy<a class="anchor" aria-label="anchor" href="#arg-taxonomy"></a></dt>
-<dd><p>Either:
-- A named character vector: names = class IDs, values = class labels/descriptions
-- A data.frame with columns identified by `class_id_col` and `class_label_col`</p></dd>
+<dd><p>Either:</p><ul><li><p>A named character vector: names = class IDs, values = class labels/descriptions</p></li>
+<li><p>A data.frame with columns identified by <code>class_id_col</code> and <code>class_label_col</code></p></li>
+</ul></dd>
 
 
 <dt id="arg-id-col">id_col<a class="anchor" aria-label="anchor" href="#arg-id-col"></a></dt>
-<dd><p>Name of the id column in `corpus`. Default "id".</p></dd>
+<dd><p>Name of the id column in <code>corpus</code>. Default "id".</p></dd>
 
 
 <dt id="arg-text-col">text_col<a class="anchor" aria-label="anchor" href="#arg-text-col"></a></dt>
-<dd><p>Name of the text column in `corpus`. Default "text".</p></dd>
+<dd><p>Name of the text column in <code>corpus</code>. Default "text".</p></dd>
 
 
 <dt id="arg-class-id-col">class_id_col<a class="anchor" aria-label="anchor" href="#arg-class-id-col"></a></dt>
-<dd><p>Name of the class ID column in `taxonomy` (if data.frame). Default "class_id".</p></dd>
+<dd><p>Name of the class ID column in <code>taxonomy</code> (if data.frame). Default "class_id".</p></dd>
 
 
 <dt id="arg-class-label-col">class_label_col<a class="anchor" aria-label="anchor" href="#arg-class-label-col"></a></dt>
-<dd><p>Name of the class label column in `taxonomy` (if data.frame). Default "class_label".</p></dd>
+<dd><p>Name of the class label column in <code>taxonomy</code> (if data.frame). Default "class_label".</p></dd>
 
 
 <dt id="arg-num-leaves">num_leaves<a class="anchor" aria-label="anchor" href="#arg-num-leaves"></a></dt>
@@ -93,11 +93,11 @@
 
 
 <dt id="arg-max-dist">max_dist<a class="anchor" aria-label="anchor" href="#arg-max-dist"></a></dt>
-<dd><p>Maximum string distance for fuzzy token matching (used when `string_dist` is set).</p></dd>
+<dd><p>Maximum string distance for fuzzy token matching (used when <code>string_dist</code> is set).</p></dd>
 
 
 <dt id="arg-string-dist">string_dist<a class="anchor" aria-label="anchor" href="#arg-string-dist"></a></dt>
-<dd><p>String distance method passed to `stringdist::amatch()`. NULL disables fuzzy matching.</p></dd>
+<dd><p>String distance method passed to <code><a href="https://rdrr.io/pkg/stringdist/man/amatch.html" class="external-link">stringdist::amatch()</a></code>. NULL disables fuzzy matching.</p></dd>
 
 
 <dt id="arg-stopwords">stopwords<a class="anchor" aria-label="anchor" href="#arg-stopwords"></a></dt>

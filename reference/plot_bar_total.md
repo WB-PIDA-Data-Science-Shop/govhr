@@ -1,4 +1,4 @@
-# Plot Totals by Group
+# Plot totals by group
 
 Draws a horizontal bar chart with groups ordered by the plotted value.
 Rows missing either the value or the group label are dropped.
@@ -6,15 +6,16 @@ Rows missing either the value or the group label are dropped.
 ## Usage
 
 ``` r
-plot_bar_total(.data, group_col, x_col = "value", x_label = "Value")
+plot_bar_total(data, group_col, x_col = "value", x_label = "Value")
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
   Data frame with the grouping column and the x-axis column, as returned
-  by \[compute_cross_section_summary()\].
+  by
+  [`compute_cross_section_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_cross_section_summary.md).
 
 - group_col:
 
@@ -22,11 +23,11 @@ plot_bar_total(.data, group_col, x_col = "value", x_label = "Value")
 
 - x_col:
 
-  Character. Column to plot on the x-axis. Default \`"value"\`.
+  Character. Column to plot on the x-axis. Default `"value"`.
 
 - x_label:
 
-  Character. x-axis label. Default \`"Value"\`.
+  Character. x-axis label. Default `"Value"`.
 
 ## Value
 

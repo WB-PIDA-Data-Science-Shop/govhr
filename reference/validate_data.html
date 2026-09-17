@@ -15,7 +15,7 @@ structure supports both tabular display and row-level drill-down in Shiny."><met
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,13 +76,13 @@ ignored. The function now always returns <code>list(report, violations)</code>.<
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A named list:</p><dl><dt><code>report</code></dt>
 <dd><p>data.table with columns <code>Rule</code>,
-    <code>Description</code>, <code>Total Records</code>, <code>Passes</code>,
-    <code>Pass Rate</code>, <code>Fails</code>, <code>Errors</code>.</p></dd>
+<code>Description</code>, <code>Total Records</code>, <code>Passes</code>,
+<code>Pass Rate</code>, <code>Fails</code>, <code>Errors</code>.</p></dd>
 
-  <dt><code>violations</code></dt>
+<dt><code>violations</code></dt>
 <dd><p>Named list of data.tables, one per rule label.
-    Each element contains the rows of <code>data</code> that failed that rule.
-    Rules with zero failures return a zero-row data.table.</p></dd>
+Each element contains the rows of <code>data</code> that failed that rule.
+Rules with zero failures return a zero-row data.table.</p></dd>
 
 
 </dl></div>

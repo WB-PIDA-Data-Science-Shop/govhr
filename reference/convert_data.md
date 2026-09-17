@@ -1,9 +1,9 @@
-# Convert Data to Match Original Class
+# Convert data to match original class
 
 Converts a dataset to have the same class as another reference dataset.
 This is useful for ensuring consistent output formats when performing
 operations that temporarily convert data structures (e.g., between
-\`data.table\`, \`data.frame\`, or \`tibble\`).
+`data.table`, `data.frame`, or `tibble`).
 
 ## Usage
 
@@ -15,8 +15,7 @@ convert_data(data, data_original)
 
 - data:
 
-  A dataset to be converted. Typically a \`data.table\` or
-  \`data.frame\`.
+  A dataset to be converted. Typically a `data.table` or `data.frame`.
 
 - data_original:
 
@@ -30,7 +29,7 @@ The input `data` converted to the same class as `data_original`.
 
 The function checks the class of `data_original` in the following order:
 
-- If it is a tibble (\`tbl_df\`), `data` is converted using
+- If it is a tibble (`tbl_df`), `data` is converted using
   [`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html).
 
 - If it is a base data frame but not a data.table, `data` is converted

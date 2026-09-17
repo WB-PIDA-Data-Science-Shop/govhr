@@ -31,19 +31,22 @@ compute_fastchange(data, col, date_col)
 
 A dataset with:
 
-- The completed \`date_col\` sequence.
+- The completed `date_col` sequence.
 
-- A new column named \`"growth\_\<col\>"\` containing the year-over-year
+- A new column named `"growth_<col>"` containing the year-over-year
   growth rates.
 
-The returned object will match the class of the input \`data\`.
+The returned object will match the class of the input `data`.
 
 ## Details
 
-\- Missing years in the sequence are added automatically. - Missing
-values in \`col\` result in \`NA\` for the corresponding growth rate. -
-The first observation (or any row where the lag is missing) will have
-\`NA\`.
+- Missing years in the sequence are added automatically.
+
+- Missing values in `col` result in `NA` for the corresponding growth
+  rate.
+
+- The first observation (or any row where the lag is missing) will have
+  `NA`.
 
 ## Examples
 

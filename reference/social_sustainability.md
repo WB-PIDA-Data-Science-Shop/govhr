@@ -2,7 +2,7 @@
 
 The Social Sustainability global database and its visualization
 dashboard
-\<https://public.tableau.com/app/profile/social.sustainability.and.inclusion.world.bank/viz/SocialSustainabilityGlobalDashboard2_0/Historia1?publish=yes/\>
+<https://public.tableau.com/app/profile/social.sustainability.and.inclusion.world.bank/viz/SocialSustainabilityGlobalDashboard2_0/Historia1?publish=yes/>
 are global public goods produced by the Social Development Global
 Practice of The World Bank Group. They feature leading indicators of
 inclusion, resilience, social cohesion, and process legitimacy, for 222

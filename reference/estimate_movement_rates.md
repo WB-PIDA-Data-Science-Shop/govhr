@@ -1,4 +1,4 @@
-# Estimate Movement Baseline from Panel Data
+# Estimate movement baseline from panel data
 
 Analyzes longitudinal panel data to compute empirical transition
 probabilities for promotions and transfers. Compares consecutive
@@ -23,7 +23,7 @@ result:
 
 ``` r
 estimate_movement_rates(
-  contract_dt,
+  contracts,
   group_cols,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
@@ -36,14 +36,14 @@ estimate_movement_rates(
 
 ## Arguments
 
-- contract_dt:
+- contracts:
 
-  data.table. Contract data in long (panel) format. Must contain
+  Data.table. Contract data in long (panel) format. Must contain
   `ref_date_col` for panel snapshot identification.
 
 - group_cols:
 
-  Character vector. One or more columns defining the movement states
+  A character vector. One or more columns defining the movement states
   between which transitions are measured (e.g.,
   `c("est_id", "paygrade")` or `c("paygrade")`). Values are concatenated
   into a single state label when multiple columns are provided.

@@ -6,35 +6,40 @@ Compute coverage of non-missing values in a dataset.
 
 ``` r
 compute_coverage(
-  .data,
-  group = NULL,
+  data,
+  group_cols = NULL,
   include_ref_date = FALSE,
-  aggregate = FALSE
+  aggregate = FALSE,
+  group = NULL
 )
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
   A data frame.
 
-- group:
+- group_cols:
 
-  A character string specifying the column name to group by. If NULL,
-  coverage is computed for the entire data set.
+  A string specifying the column name to group by. If NULL, coverage is
+  computed for the entire data set.
 
 - include_ref_date:
 
-  A logical value indicating whether to include the \`ref_date\` column
-  in the grouping.
+  A logical value indicating whether to include the `ref_date` column in
+  the grouping.
 
 - aggregate:
 
   A logical value indicating whether to aggregate coverage values by the
-  \`group\`.
+  `group`.
+
+- group:
+
+  Deprecated. Use `group_cols` instead.
 
 ## Value
 
 A data frame with coverage values for each column, optionally grouped by
-the specified \`group\`.
+the specified `group`.

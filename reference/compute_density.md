@@ -1,12 +1,12 @@
-# Function to compute the distribution function of a variable.
+# Function to compute the distribution function of a variable
 
-Function to compute the distribution function of a variable.
+Function to compute the distribution function of a variable
 
 ## Usage
 
 ``` r
 compute_density(
-  .data,
+  data,
   group_col = NULL,
   measure_col,
   binwidth = 1,
@@ -16,13 +16,14 @@ compute_density(
 
 ## Arguments
 
-- .data:
+- data:
 
   A data frame.
 
 - group_col:
 
-  A character vector of column names to group the data by.
+  A string naming a single column to group by, or `NULL` for no
+  grouping.
 
 - measure_col:
 
@@ -40,6 +41,6 @@ compute_density(
 
 ## Value
 
-A data frame with the distribution function, where \`pct\` denotes the
-percentage of observations in each bin and \`cum_pct\` denotes the
+A data frame with the distribution function, where `pct` denotes the
+percentage of observations in each bin and `cum_pct` denotes the
 cumulative percentage.

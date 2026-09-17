@@ -1,8 +1,8 @@
-# Remove Duplicate Contract Records
+# Remove duplicate contract records
 
 Removes duplicate contract records, addressing violations of
-\`contract_unique_id\` (contract-level) and
-\`contract_unique_personnel\` (assignment-level) rules.
+`contract_unique_id` (contract-level) and `contract_unique_personnel`
+(assignment-level) rules.
 
 ## Usage
 
@@ -18,21 +18,21 @@ remove_duplicate_contracts(
 
 - data:
 
-  A data.frame with columns \`contract_id\`, \`personnel_id\`, and
-  \`ref_date\`.
+  A data.frame with columns `contract_id`, `personnel_id`, and
+  `ref_date`.
 
 - level:
 
   Deduplication scope:
 
-  - \`"contract"\`: Deduplicate on \`contract_id\` + \`ref_date\`
+  - `"contract"`: Deduplicate on `contract_id` + `ref_date`
 
-  - \`"assignment"\`: Deduplicate on \`contract_id\` +
-    \`personnel_id\` + \`ref_date\`
+  - `"assignment"`: Deduplicate on `contract_id` + `personnel_id` +
+    `ref_date`
 
 - keep:
 
-  Which record to keep: \`"first"\`, \`"last"\`, or \`"none"\`. See
+  Which record to keep: `"first"`, `"last"`, or `"none"`. See
   [`remove_duplicate_personnel`](https://wb-pida-data-science-shop.github.io/govhr/reference/remove_duplicate_personnel.md).
 
 ## Value

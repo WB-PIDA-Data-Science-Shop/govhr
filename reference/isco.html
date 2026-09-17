@@ -11,7 +11,7 @@ International Labour Establishment (ILO)."><meta property="og:image" content="ht
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,34 +51,34 @@ International Labour Establishment (ILO).</p>
     <div class="section level2">
     <h2 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a></h2>
     <p>A data frame with 436 rows and 9 variables:</p><dl><dt>isco_version</dt>
-<dd><p>Character. Version of the ISCO classification (e.g., `"ISCO-08"`).</p></dd>
+<dd><p>Character. Version of the ISCO classification (e.g., <code>"ISCO-08"</code>).</p></dd>
 
-  <dt>major</dt>
+<dt>major</dt>
 <dd><p>Character. One-digit major group code.</p></dd>
 
-  <dt>major_label</dt>
-<dd><p>Character. Title of the major group (e.g., `"Managers"`).</p></dd>
+<dt>major_label</dt>
+<dd><p>Character. Title of the major group (e.g., <code>"Managers"</code>).</p></dd>
 
-  <dt>sub_major</dt>
+<dt>sub_major</dt>
 <dd><p>Character. Two-digit sub-major group code.</p></dd>
 
-  <dt>sub_major_label</dt>
+<dt>sub_major_label</dt>
 <dd><p>Character. Title of the sub-major group (e.g.,
-  `"Chief Executives, Senior Officials and Legislators"`).</p></dd>
+<code>"Chief Executives, Senior Officials and Legislators"</code>).</p></dd>
 
-  <dt>minor</dt>
+<dt>minor</dt>
 <dd><p>Character. Three-digit minor group code.</p></dd>
 
-  <dt>minor_label</dt>
+<dt>minor_label</dt>
 <dd><p>Character. Title of the minor group (e.g.,
-  `"Legislators and Senior Officials"`).</p></dd>
+<code>"Legislators and Senior Officials"</code>).</p></dd>
 
-  <dt>unit</dt>
+<dt>unit</dt>
 <dd><p>Character. Four-digit unit group code.</p></dd>
 
-  <dt>description</dt>
+<dt>description</dt>
 <dd><p>Character. Definition or title of the occupation
-  at the unit group level (e.g., `"Legislators"`, `"Senior Government Officials"`).</p></dd>
+at the unit group level (e.g., <code>"Legislators"</code>, <code>"Senior Government Officials"</code>).</p></dd>
 
 
 </dl></div>
@@ -93,13 +93,11 @@ International Labour Establishment (ILO).</p>
 information to facilitate international comparisons and harmonization of
 occupational statistics. It is widely used in labor statistics, survey design,
 and policy analysis.</p>
-
-<p>ISCO-08 is structured hierarchically:
-- <strong>Major groups</strong> (1 digit) – broad occupational categories
-- <strong>Sub-major groups</strong> (2 digits) – subdivisions of major groups
-- <strong>Minor groups</strong> (3 digits) – subdivisions of sub-major groups
-- <strong>Unit groups</strong> (4 digits) – most detailed level, individual occupations</p>
-<p>Each unit group includes a description outlining the scope of the occupation
+<p>ISCO-08 is structured hierarchically:</p><ul><li><p><strong>Major groups</strong> (1 digit) – broad occupational categories</p></li>
+<li><p><strong>Sub-major groups</strong> (2 digits) – subdivisions of major groups</p></li>
+<li><p><strong>Minor groups</strong> (3 digits) – subdivisions of sub-major groups</p></li>
+<li><p><strong>Unit groups</strong> (4 digits) – most detailed level, individual occupations</p></li>
+</ul><p>Each unit group includes a description outlining the scope of the occupation
 according to ILO’s ISCO-08 documentation.</p>
     </div>
 

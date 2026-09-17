@@ -1,11 +1,11 @@
-# Plot Consistency Heatmap by Group
+# Plot consistency heatmap by group
 
-Plot Consistency Heatmap by Group
+Plot consistency heatmap by group
 
 ## Usage
 
 ``` r
-plot_consistency_heatmap(data, id_col, group)
+plot_consistency_heatmap(data, id_col, group_cols, group = NULL)
 ```
 
 ## Arguments
@@ -16,13 +16,15 @@ plot_consistency_heatmap(data, id_col, group)
 
 - id_col:
 
-  Character string. The column name of the unique identifier for each
-  record.
+  A string. The column name of the unique identifier for each record.
+
+- group_cols:
+
+  A string. The column name of the grouping variable (e.g., "ref_date").
 
 - group:
 
-  Character string. The column name of the grouping variable (e.g.,
-  "ref_date").
+  Deprecated. Use `group_cols` instead.
 
 ## Value
 

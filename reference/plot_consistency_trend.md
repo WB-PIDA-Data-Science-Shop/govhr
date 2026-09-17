@@ -1,6 +1,6 @@
-# Plot Consistency Over Time
+# Plot consistency over time
 
-Plot Consistency Over Time
+Plot consistency over time
 
 ## Usage
 
@@ -8,10 +8,11 @@ Plot Consistency Over Time
 plot_consistency_trend(
   data,
   id_col,
-  group,
+  group_col,
   value_col,
   type_plot,
-  toggle_growth = FALSE
+  toggle_growth = FALSE,
+  group = NULL
 )
 ```
 
@@ -23,27 +24,28 @@ plot_consistency_trend(
 
 - id_col:
 
-  Character string. The column name of the unique identifier for each
-  record.
+  A string. The column name of the unique identifier for each record.
 
-- group:
+- group_col:
 
-  Character string. The column name of the grouping variable (e.g.,
-  "ref_date").
+  A string. The column name of the grouping variable (e.g., "ref_date").
 
 - value_col:
 
-  Character string. The column name of the value to be checked for
-  consistency.
+  A string. The column name of the value to be checked for consistency.
 
 - type_plot:
 
-  Character string. The type of consistency plot ("record" or "value").
+  A string. The type of consistency plot ("record" or "value").
 
 - toggle_growth:
 
-  Logical. When \`TRUE\` the y-axis switches to a baseline-index view
-  (first period = 100). Defaults to \`FALSE\`.
+  Logical. When `TRUE` the y-axis switches to a baseline-index view
+  (first period = 100). Defaults to `FALSE`.
+
+- group:
+
+  Deprecated. Use `group_col` instead.
 
 ## Value
 

@@ -1,4 +1,4 @@
-# Complete Panel Data by Identifier and Reference Dates
+# Complete panel data by identifier and reference dates
 
 Expands a dataset to include all combinations of identifiers and
 reference dates within a specified start–end range. This is useful for
@@ -8,7 +8,7 @@ data are missing.
 ## Usage
 
 ``` r
-complete_dates(data, id_col, start_date, end_date, freq = "year")
+complete_dates(data, id_col, start_date = NULL, end_date = NULL, freq = "year")
 ```
 
 ## Arguments
@@ -19,22 +19,22 @@ complete_dates(data, id_col, start_date, end_date, freq = "year")
 
 - id_col:
 
-  Character. Name of the identifier column (e.g., \`"personnel_id"\`).
+  Character. Name of the identifier column (e.g., `"personnel_id"`).
 
 - start_date:
 
   Character or Date. Start of the full date sequence (e.g.,
-  \`"2007-09-01"\`).
+  `"2007-09-01"`).
 
 - end_date:
 
   Character or Date. End of the full date sequence (e.g.,
-  \`"2018-01-01"\`).
+  `"2018-01-01"`).
 
 - freq:
 
   Character. Interval for date sequence passed to `seq.Date(by = ...)`.
-  Default is \`"year"\`.
+  Default is `"year"`.
 
 ## Value
 

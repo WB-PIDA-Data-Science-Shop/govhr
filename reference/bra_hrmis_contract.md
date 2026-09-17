@@ -2,8 +2,8 @@
 
 Harmonized contract-level human resource management information system
 (HRMIS) data for the State of Alagoas, Brazil. Each observation
-represents a unique contract at a given reference date (\`contract_id\`,
-\`ref_date\`) and contains information on remuneration, contract
+represents a unique contract at a given reference date (`contract_id`,
+`ref_date`) and contains information on remuneration, contract
 characteristics, occupation, and employment details.
 
 ## Usage

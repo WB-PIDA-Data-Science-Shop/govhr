@@ -6,16 +6,16 @@ a grouping column and returns all rows belonging to the sampled groups.
 ## Usage
 
 ``` r
-sample_group(.data, group, n)
+sample_group(data, group_col, n)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
   A data.frame, tibble, or data.table.
 
-- group:
+- group_col:
 
   Unquoted column name used to define groups.
 
@@ -26,7 +26,7 @@ sample_group(.data, group, n)
 
 ## Value
 
-An object of the same class as \`.data\` (tibble -\> tibble, data.table
+An object of the same class as `.data` (tibble -\> tibble, data.table
 -\> data.table, data.frame -\> data.frame) containing only rows whose
 group value was sampled.
 

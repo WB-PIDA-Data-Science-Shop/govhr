@@ -15,7 +15,7 @@ Optionally computes wage bill shares relative to macro-fiscal aggregates
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,12 +52,14 @@ Optionally computes wage bill shares relative to macro-fiscal aggregates
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_wagebill</span><span class="op">(</span></span>
-<span>  <span class="va">contract_df</span>,</span>
+<span>  <span class="va">contracts</span>,</span>
 <span>  wage_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gross_salary_lcu"</span>, <span class="st">"net_salary_lcu"</span>, <span class="st">"base_salary_lcu"</span><span class="op">)</span>,</span>
-<span>  groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"country_code"</span>, <span class="st">"year"</span><span class="op">)</span>,</span>
+<span>  group_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"country_code"</span>, <span class="st">"year"</span><span class="op">)</span>,</span>
 <span>  share_macro <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  macro_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gdp_lcu"</span>, <span class="st">"pexpenditure_lcu"</span>, <span class="st">"prevenue_lcu"</span>, <span class="st">"taxrevenue_lcu"</span><span class="op">)</span>,</span>
-<span>  drop_na <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  drop_na <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  groups <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  contract_df <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -65,49 +67,57 @@ Optionally computes wage bill shares relative to macro-fiscal aggregates
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-contract-df">contract_df<a class="anchor" aria-label="anchor" href="#arg-contract-df"></a></dt>
+<dl><dt id="arg-contracts">contracts<a class="anchor" aria-label="anchor" href="#arg-contracts"></a></dt>
 <dd><p>A data.frame or tibble containing contract-level salary data.
-Must include the columns specified in `wage_vars` and `groups`.</p></dd>
+Must include the columns specified in <code>wage_vars</code> and <code>groups</code>.</p></dd>
 
 
 <dt id="arg-wage-vars">wage_vars<a class="anchor" aria-label="anchor" href="#arg-wage-vars"></a></dt>
 <dd><p>Character vector of salary column names to aggregate.
-Defaults to `c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")`.</p></dd>
+Defaults to <code>c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")</code>.</p></dd>
 
 
-<dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
+<dt id="arg-group-cols">group_cols<a class="anchor" aria-label="anchor" href="#arg-group-cols"></a></dt>
 <dd><p>Character vector of grouping columns for aggregation.
-Defaults to `c("country_code", "year")`.</p></dd>
+Defaults to <code>c("country_code", "year")</code>.</p></dd>
 
 
 <dt id="arg-share-macro">share_macro<a class="anchor" aria-label="anchor" href="#arg-share-macro"></a></dt>
-<dd><p>Logical; if `TRUE`, computes wage bill shares relative
-to macro-fiscal aggregates specified in `macro_vars`. Defaults to `FALSE`.</p></dd>
+<dd><p>Logical; if <code>TRUE</code>, computes wage bill shares relative
+to macro-fiscal aggregates specified in <code>macro_vars</code>. Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-macro-vars">macro_vars<a class="anchor" aria-label="anchor" href="#arg-macro-vars"></a></dt>
 <dd><p>Character vector of macro indicator column names to use
-as denominators when `share_macro = TRUE`. Defaults to
-`c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu")`.</p></dd>
+as denominators when <code>share_macro = TRUE</code>. Defaults to
+<code>c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu")</code>.</p></dd>
 
 
 <dt id="arg-drop-na">drop_na<a class="anchor" aria-label="anchor" href="#arg-drop-na"></a></dt>
-<dd><p>Logical; if `TRUE`, removes `NA` values before aggregation.
-Defaults to `TRUE`.</p></dd>
+<dd><p>Logical; if <code>TRUE</code>, removes <code>NA</code> values before aggregation.
+Defaults to <code>TRUE</code>.</p></dd>
+
+
+<dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
+<dd><p>Deprecated. Use <code>group_cols</code> instead.</p></dd>
+
+
+<dt id="arg-contract-df">contract_df<a class="anchor" aria-label="anchor" href="#arg-contract-df"></a></dt>
+<dd><p>Deprecated. Use <code>contracts</code> instead.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A wage bill table with optional grouping variables,
-  an `indicator` column (describing the wage variable and level of analysis),
-  and a `value` column. When `share_macro = TRUE`, values represent
-  shares (wage bill / macro aggregate).</p>
+an <code>indicator</code> column (describing the wage variable and level of analysis),
+and a <code>value</code> column. When <code>share_macro = TRUE</code>, values represent
+shares (wage bill / macro aggregate).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="convert_constant_ppp.html">convert_constant_ppp</a></code> for PPP conversion
 <code><a href="compute_fastsummary.html">compute_fastsummary</a></code> for general aggregation
-<code><a href="compute_fastshare.html">compute_fastshare</a></code> for share computation (when `share_macro = TRUE`)</p></div>
+<code><a href="compute_fastshare.html">compute_fastshare</a></code> for share computation (when <code>share_macro = TRUE</code>)</p></div>
     </div>
 
     <div class="section level2">

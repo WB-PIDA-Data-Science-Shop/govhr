@@ -14,7 +14,7 @@ this function collapses that panel down to one row per
 
 ``` r
 compute_employment_spells(
-  contract_dt,
+  contracts,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
   contract_id_col = "contract_id",
@@ -27,9 +27,9 @@ compute_employment_spells(
 
 ## Arguments
 
-- contract_dt:
+- contracts:
 
-  data.table. Stacked contract panel, as passed to
+  Data.table. Stacked contract panel, as passed to
   [`compute_tenure_panel`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_tenure_panel.md).
 
 - personnel_id_col:

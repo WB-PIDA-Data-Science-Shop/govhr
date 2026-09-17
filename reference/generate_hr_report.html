@@ -13,7 +13,7 @@ Establishment modules."><meta property="og:image" content="https://wb-pida-data-
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,11 +49,14 @@ Establishment modules.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">generate_hr_report</span><span class="op">(</span></span>
-<span>  <span class="va">contract_dt</span>,</span>
-<span>  <span class="va">personnel_dt</span>,</span>
-<span>  <span class="va">est_dt</span>,</span>
+<span>  <span class="va">contracts</span>,</span>
+<span>  <span class="va">personnel</span>,</span>
+<span>  <span class="va">establishments</span>,</span>
 <span>  <span class="va">country_code</span>,</span>
-<span>  output <span class="op">=</span> <span class="st">"hr_report.html"</span></span>
+<span>  output <span class="op">=</span> <span class="st">"hr_report.html"</span>,</span>
+<span>  contract_dt <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  personnel_dt <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  est_dt <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -61,20 +64,20 @@ Establishment modules.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-contract-dt">contract_dt<a class="anchor" aria-label="anchor" href="#arg-contract-dt"></a></dt>
+<dl><dt id="arg-contracts">contracts<a class="anchor" aria-label="anchor" href="#arg-contracts"></a></dt>
 <dd><p>A data.table containing the Contract module data with
 harmonized column names according to <code><a href="dictionary.html">dictionary</a></code>.
 Should include columns such as contract_id, personnel_id, est_id,
 ref_date, salary fields, and occupation information.</p></dd>
 
 
-<dt id="arg-personnel-dt">personnel_dt<a class="anchor" aria-label="anchor" href="#arg-personnel-dt"></a></dt>
+<dt id="arg-personnel">personnel<a class="anchor" aria-label="anchor" href="#arg-personnel"></a></dt>
 <dd><p>A data.table containing the Personnel module data with
 harmonized column names. Should include personnel_id and demographic
 information.</p></dd>
 
 
-<dt id="arg-est-dt">est_dt<a class="anchor" aria-label="anchor" href="#arg-est-dt"></a></dt>
+<dt id="arg-establishments">establishments<a class="anchor" aria-label="anchor" href="#arg-establishments"></a></dt>
 <dd><p>A data.table containing the Establishment module data with
 harmonized column names. Should include est_id and establishment
 characteristics.</p></dd>
@@ -88,6 +91,18 @@ characteristics.</p></dd>
 <dd><p>Character string specifying the output file name. Defaults to
 "hr_report.html". The file will be created in the current working
 directory.</p></dd>
+
+
+<dt id="arg-contract-dt">contract_dt<a class="anchor" aria-label="anchor" href="#arg-contract-dt"></a></dt>
+<dd><p>Deprecated. Use <code>contracts</code> instead.</p></dd>
+
+
+<dt id="arg-personnel-dt">personnel_dt<a class="anchor" aria-label="anchor" href="#arg-personnel-dt"></a></dt>
+<dd><p>Deprecated. Use <code>personnel</code> instead.</p></dd>
+
+
+<dt id="arg-est-dt">est_dt<a class="anchor" aria-label="anchor" href="#arg-est-dt"></a></dt>
+<dd><p>Deprecated. Use <code>establishments</code> instead.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -106,7 +121,7 @@ directory.</p></dd>
 <span class="r-in"><span><span class="fu">generate_hr_report</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  contract_dt <span class="op">=</span> <span class="va">bra_hrmis_contract</span>,</span></span>
 <span class="r-in"><span>  personnel_dt <span class="op">=</span> <span class="va">bra_hrmis_personnel</span>,</span></span>
-<span class="r-in"><span>  est_dt <span class="op">=</span> <span class="va">bra_hrmis_est</span>,</span></span>
+<span class="r-in"><span>  establishments <span class="op">=</span> <span class="va">bra_hrmis_est</span>,</span></span>
 <span class="r-in"><span>  country_code <span class="op">=</span> <span class="st">"BRA"</span>,</span></span>
 <span class="r-in"><span>  output <span class="op">=</span> <span class="st">"brazil_hr_report.html"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>

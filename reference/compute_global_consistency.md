@@ -16,8 +16,8 @@ compute_global_consistency(data, id_col, value_cols, digits = 2)
 
 - id_col:
 
-  A character string specifying the name of the column that uniquely
-  identifies records.
+  A string specifying the name of the column that uniquely identifies
+  records.
 
 - value_cols:
 

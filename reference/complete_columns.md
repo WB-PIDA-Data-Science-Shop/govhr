@@ -1,7 +1,7 @@
 # Complete columns in a dataframe
 
-If any column in \`cols\` is missing from \`data\`, this function adds
-it and populates it with NA values.
+If any column in `cols` is missing from `data`, this function adds it
+and populates it with NA values.
 
 ## Usage
 

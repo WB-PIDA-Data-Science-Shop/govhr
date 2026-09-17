@@ -6,12 +6,12 @@ legible.
 ## Usage
 
 ``` r
-scale_plot_height(.data)
+scale_plot_height(data)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
   Data frame in which each row becomes one bar.
 

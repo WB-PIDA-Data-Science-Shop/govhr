@@ -1,4 +1,4 @@
-# Detect Personnel Retirement Events
+# Detect personnel retirement events
 
 Identifies personnel who retired, i.e., whose status changed from
 "active" to "inactive".
@@ -13,13 +13,13 @@ detect_retirement(data)
 
 - data:
 
-  A data.frame or data.table with columns \`personnel_id\`,
-  \`ref_date\`, and \`status\`.
+  A data.frame or data.table with columns `personnel_id`, `ref_date`,
+  and `status`.
 
 ## Value
 
-A data.table with \`personnel_id\`, \`ref_date\`, and \`type_event =
-"retire"\`.
+A data.table with `personnel_id`, `ref_date`, and
+`type_event = "retire"`.
 
 ## Examples
 

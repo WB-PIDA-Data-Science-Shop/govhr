@@ -1,16 +1,15 @@
-# Apply Standard HR Data Cleaning Pipeline
+# Apply Standard HR data cleaning pipeline
 
 Chains the treatment functions in a recommended order. Steps applied per
-\`data_type\`:
+`data_type`:
 
-1.  \*\*Both\*\*: Remove duplicates (keep first); fix \`ref_date\` →
-    \`NA\`
+1.  **Both**: Remove duplicates (keep first); fix `ref_date` → `NA`
 
-2.  \*\*Personnel\*\*: Fix \`birth_date\` → \`NA\`; flag underage and
+2.  **Personnel**: Fix `birth_date` → `NA`; flag underage and
     over-retirement-age workers
 
-3.  \*\*Contract\*\*: Clamp \`whours\`; abs(negative salaries);
-    recalculate gross = base + allowance
+3.  **Contract**: Clamp `whours`; abs(negative salaries); recalculate
+    gross = base + allowance
 
 Use individual functions directly when you need custom strategies.
 
@@ -36,27 +35,27 @@ clean_hr_data(
 
 - data_type:
 
-  \`"personnel"\` or \`"contract"\`.
+  `"personnel"` or `"contract"`.
 
 - remove_duplicates:
 
-  Logical (default: \`TRUE\`).
+  Logical (default: `TRUE`).
 
 - fix_dates:
 
-  Logical (default: \`TRUE\`).
+  Logical (default: `TRUE`).
 
 - fix_ages:
 
-  Logical, personnel only (default: \`TRUE\`).
+  Logical, personnel only (default: `TRUE`).
 
 - fix_salaries:
 
-  Logical, contract only (default: \`TRUE\`).
+  Logical, contract only (default: `TRUE`).
 
 - verbose:
 
-  Logical, print step-level messages (default: \`FALSE\`).
+  Logical, print step-level messages (default: `FALSE`).
 
 ## Value
 

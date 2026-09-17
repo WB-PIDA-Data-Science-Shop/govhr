@@ -48,17 +48,17 @@ The function `compute_time_trend` and its companion plotting function
 # total headcount by reference date
 headcount_trend <- compute_time_trend(
   govhr::bra_hrmis_personnel,
-  group = "ref_date"
+  group_col = "ref_date"
 )
 
-plot_trend(headcount_trend, group = "ref_date")
+plot_trend(headcount_trend, group_col = "ref_date")
 ```
 
 ![](03-analytics_files/figure-html/unnamed-chunk-1-1.png)
 
 You might also be curious about how time trends for headcount varies
-across groups, such as gender. Modifying the `group` argument makes that
-possible. Note that implicitly the function will still take the
+across groups, such as gender. Modifying the `group_col` argument makes
+that possible. Note that implicitly the function will still take the
 reference date into account.
 
 ``` r
@@ -66,10 +66,10 @@ reference date into account.
 # total headcount by reference date and gender
 headcount_trend_gender <- compute_time_trend(
   govhr::bra_hrmis_personnel,
-  group = c("gender")
+  group_col = c("gender")
 )
 
-plot_trend(headcount_trend_gender, group = c("gender"))
+plot_trend(headcount_trend_gender, group_col = c("gender"))
 ```
 
 ![](03-analytics_files/figure-html/unnamed-chunk-2-1.png)
@@ -95,7 +95,7 @@ plot_movement(
     movement_hire_count,
     movement_type = "hire",
     measurement_type = "count",
-    group = "ref_date"
+    group_cols = "ref_date"
 )
 ```
 
@@ -116,7 +116,7 @@ plot_movement(
     movement_hire_gender_count,
     movement_type = "hire",
     measurement_type = "count",
-    group = "gender"
+    group_cols = "gender"
 )
 ```
 
@@ -134,17 +134,17 @@ while the `plot_trend` function can visualize that trend.
 # total wagebill by reference date
 wagebill_trend <- compute_time_trend(
   govhr::bra_hrmis_contract,
-  group = "ref_date",
+  group_col = "ref_date",
   measure_col = "gross_salary_lcu"
 )
 
-plot_trend(wagebill_trend, group = "ref_date")
+plot_trend(wagebill_trend, group_col = "ref_date")
 ```
 
 ![](03-analytics_files/figure-html/unnamed-chunk-5-1.png)
 
 A similar differentiation by group is possible, using the same grammar
-for the `group` argument.
+for the `group_col` argument.
 
 ``` r
 
@@ -152,11 +152,11 @@ for the `group` argument.
 wagebill_paygrade_trend <- govhr::bra_hrmis_contract |>
     filter(!is.na(paygrade)) |>
     compute_time_trend(
-        group = "paygrade",
+        group_col = "paygrade",
         measure_col = "gross_salary_lcu"
     )
 
-plot_trend(wagebill_paygrade_trend, group = "paygrade")
+plot_trend(wagebill_paygrade_trend, group_col = "paygrade")
 ```
 
 ![](03-analytics_files/figure-html/unnamed-chunk-6-1.png)

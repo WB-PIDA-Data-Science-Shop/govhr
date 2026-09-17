@@ -1,4 +1,4 @@
-# Plot Transition Network
+# Plot transition network
 
 Draws career transitions as a directed graph, with edge width
 proportional to the number of transitions and node size to degree
@@ -8,15 +8,15 @@ than by name.
 ## Usage
 
 ``` r
-plot_transition_network(.data)
+plot_transition_network(data)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
-  Data frame with \`from\` and \`to\` columns, as returned by
-  \[detect_career_transition()\].
+  Data frame with `from` and `to` columns, as returned by
+  [`detect_career_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_career_transition.md).
 
 ## Value
 

@@ -1,6 +1,6 @@
-# Compute the proportion of consistent values in a data frame.
+# Compute the proportion of consistent values in a data frame
 
-Compute the proportion of consistent values in a data frame.
+Compute the proportion of consistent values in a data frame
 
 ## Usage
 
@@ -22,13 +22,13 @@ compute_value_consistency(
 
 - id_col:
 
-  A character string specifying the name of the column that uniquely
-  identifies records.
+  A string specifying the name of the column that uniquely identifies
+  records.
 
 - value_col:
 
-  A character string specifying the name of the column whose values are
-  to be checked for consistency.
+  A string specifying the name of the column whose values are to be
+  checked for consistency.
 
 - group_cols:
 

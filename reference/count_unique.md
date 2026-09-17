@@ -1,4 +1,4 @@
-# Count Unique Non-Missing Values
+# Count unique non-missing values
 
 Returns the number of unique values in a vector, excluding missing
 values (NA).
@@ -17,7 +17,7 @@ count_unique(x)
 
 ## Value
 
-An integer representing the count of unique non-missing values in \`x\`.
+An integer representing the count of unique non-missing values in `x`.
 
 ## Examples
 

@@ -1,8 +1,7 @@
-# Fix Negative Salary Values
+# Fix negative salary values
 
-Addresses violations of positive salary rules
-(\`wagebill\_\*\_positive\`) by handling negative values across salary
-columns.
+Addresses violations of positive salary rules (`wagebill_*_positive`) by
+handling negative values across salary columns.
 
 ## Usage
 
@@ -22,18 +21,18 @@ fix_negative_salaries(
 
 - columns:
 
-  Salary columns to fix (default: \`gross_salary_lcu\`,
-  \`base_salary_lcu\`, \`net_salary_lcu\`).
+  Salary columns to fix (default: `gross_salary_lcu`, `base_salary_lcu`,
+  `net_salary_lcu`).
 
 - treatment:
 
   Correction strategy:
 
-  - \`"na"\`: Set negative values to \`NA\`
+  - `"na"`: Set negative values to `NA`
 
-  - \`"abs"\`: Take absolute value
+  - `"abs"`: Take absolute value
 
-  - \`"zero"\`: Set negative values to \`0\`
+  - `"zero"`: Set negative values to `0`
 
 ## Value
 

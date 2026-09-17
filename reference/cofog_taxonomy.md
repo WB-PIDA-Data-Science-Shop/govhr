@@ -1,8 +1,8 @@
 # COFOG Functional Classification Taxonomy
 
 A lookup table containing the first-level Classification of the
-Functions of Government (COFOG) taxonomy used by \`govhrcast\` to
-classify government establishments according to their primary functional
+Functions of Government (COFOG) taxonomy used by `govhrcast` to classify
+government establishments according to their primary functional
 responsibilities.
 
 ## Usage
@@ -17,8 +17,7 @@ A data frame with 10 rows and 3 variables:
 
 - class_id:
 
-  Character. Two-digit COFOG class identifier (e.g., \`"01"\`,
-  \`"02"\`).
+  Character. Two-digit COFOG class identifier (e.g., `"01"`, `"02"`).
 
 - class_label:
 
@@ -54,9 +53,9 @@ The ten first-level COFOG functions are:
 
 ## Source
 
-United Nations. \*Classification of the Functions of Government
-(COFOG)\*; International Monetary Fund. \*Government Finance Statistics
-Manual 2014\*.
+United Nations. *Classification of the Functions of Government (COFOG)*;
+International Monetary Fund. *Government Finance Statistics Manual
+2014*.
 
 ## Details
 

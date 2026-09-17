@@ -6,7 +6,7 @@ Project Retirement Dates
 
 ``` r
 project_retirement(
-  .data,
+  data,
   threshold_age = 60,
   birth_col = "birth_date",
   group_cols = NULL,
@@ -19,7 +19,7 @@ project_retirement(
 
 ## Arguments
 
-- .data:
+- data:
 
   A data frame, either the workforce or wage bill data.
 

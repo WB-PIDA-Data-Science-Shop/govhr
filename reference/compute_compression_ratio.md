@@ -6,7 +6,7 @@ Function to compute the compression ratio
 
 ``` r
 compute_compression_ratio(
-  .data,
+  data,
   group_cols = NULL,
   percentiles = c(0.9, 0.5, 0.1),
   measure_col,
@@ -16,7 +16,7 @@ compute_compression_ratio(
 
 ## Arguments
 
-- .data:
+- data:
 
   A data frame.
 

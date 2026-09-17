@@ -1,9 +1,9 @@
 # Compute Fast Summary Statistics by Group
 
-\`compute_fastsummary()\` computes summary statistics for selected
-columns of a dataset, optionally grouped by one or more variables. It
-allows the user to specify a set of functions to apply, either from a
-predefined set or custom formulas/functions.
+`compute_fastsummary()` computes summary statistics for selected columns
+of a dataset, optionally grouped by one or more variables. It allows the
+user to specify a set of functions to apply, either from a predefined
+set or custom formulas/functions.
 
 ## Usage
 
@@ -12,9 +12,10 @@ compute_fastsummary(
   data,
   cols,
   fns = NULL,
-  groups,
+  group_cols,
   output = c("long", "wide"),
-  tbl = FALSE
+  tbl = FALSE,
+  groups = NULL
 )
 ```
 
@@ -22,10 +23,10 @@ compute_fastsummary(
 
 - data:
 
-  A \`data.table\`, \`data.frame\`, or tibble. The dataset on which to
-  compute the summaries. If not a \`data.table\`, it will be converted
+  A `data.table`, `data.frame`, or tibble. The dataset on which to
+  compute the summaries. If not a `data.table`, it will be converted
   internally for computation. The result will be returned in the same
-  class as the input (unless \`tbl = TRUE\`).
+  class as the input (unless `tbl = TRUE`).
 
 - cols:
 
@@ -35,45 +36,52 @@ compute_fastsummary(
 
   Optional. Either:
 
-  - \`NULL\` (default): use all default functions defined by
-    \`define_fns()\`.
+  - `NULL` (default): use all default functions defined by
+    [`define_fns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/define_fns.md).
 
-  - A character vector of function names matching \`define_fns()\`.
+  - A character vector of function names matching
+    [`define_fns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/define_fns.md).
 
   - A list of functions or formulas, possibly mixed with character names
-    referring to \`define_fns()\`.
+    referring to
+    [`define_fns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/define_fns.md).
 
-- groups:
+- group_cols:
 
   A character vector. Column(s) by which to group the data before
   computing the summary statistics.
 
 - output:
 
-  Character. Either \`"long"\` (default) or \`"wide"\` to specify the
-  output format. \`"long"\` returns one row per group per summary
-  statistic, \`"wide"\` returns one row per group with multiple columns
-  for each summary statistic.
+  Character. Either `"long"` (default) or `"wide"` to specify the output
+  format. `"long"` returns one row per group per summary statistic,
+  `"wide"` returns one row per group with multiple columns for each
+  summary statistic.
 
 - tbl:
 
-  Logical. If \`TRUE\`, converts the result to a tibble
-  (\`tibble::as_tibble()\`).
+  Logical. If `TRUE`, converts the result to a tibble
+  ([`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)).
+
+- groups:
+
+  Deprecated. Use `group_cols` instead.
 
 ## Value
 
 A dataset containing the summary statistics for the selected columns.
-The output will be either long or wide depending on the \`output\`
-argument. The returned object will match the class of the input \`data\`
-(unless \`tbl = TRUE\`).
+The output will be either long or wide depending on the `output`
+argument. The returned object will match the class of the input `data`
+(unless `tbl = TRUE`).
 
 ## Details
 
-The function constructs the summary calls efficiently using \`bquote()\`
-and evaluates them within the \`data.table\` environment. This allows
-for fast computation even with large datasets. Custom functions can be
-supplied as formulas (e.g., \`~ mean(.x, na.rm = TRUE)\`) or as
-pre-defined function names from \`define_fns()\`.
+The function constructs the summary calls efficiently using
+[`bquote()`](https://rdrr.io/r/base/bquote.html) and evaluates them
+within the `data.table` environment. This allows for fast computation
+even with large datasets. Custom functions can be supplied as formulas
+(e.g., `~ mean(.x, na.rm = TRUE)`) or as pre-defined function names from
+[`define_fns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/define_fns.md).
 
 ## Examples
 

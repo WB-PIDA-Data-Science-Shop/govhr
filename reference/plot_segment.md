@@ -1,4 +1,4 @@
-# Create a Segment Plot with Jittered Points
+# Create a segment plot with jittered points
 
 Produces a ggplot2 visualization showing the range (min to max) and
 distribution of values for a numeric variable across different groups.
@@ -7,12 +7,12 @@ Groups are ordered by their median values in descending order.
 ## Usage
 
 ``` r
-plot_segment(.data, col, group)
+plot_segment(data, col, group_col, group = NULL)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
   A data frame containing the variables to plot.
 
@@ -21,10 +21,14 @@ plot_segment(.data, col, group)
   Character string specifying the name of the numeric column to plot on
   the x-axis.
 
-- group:
+- group_col:
 
   Character string specifying the name of the grouping column for the
   y-axis.
+
+- group:
+
+  Deprecated. Use `group_col` instead.
 
 ## Value
 
@@ -46,13 +50,13 @@ The function:
 
 - Orders groups by median in descending order
 
-- Uses hollow circles (shape = 1) for points with 70
+- Uses hollow circles (shape = 1) for points with 70% transparency
 
 - Applies minimal theme styling
 
 ## Examples
 
 ``` r
-plot_segment(mtcars, col = "mpg", group = "cyl")
+plot_segment(mtcars, col = "mpg", group_col = "cyl")
 
 ```

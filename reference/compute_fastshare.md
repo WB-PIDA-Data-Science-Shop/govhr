@@ -1,6 +1,6 @@
 # Compute ratio indicators of summarized variables over macro indicators
 
-\`compute_fastshare()\` summarizes selected numeric columns by specified
+`compute_fastshare()` summarizes selected numeric columns by specified
 groups, merges the result with macroeconomic indicators, computes ratios
 of summarized variables per macro variable, and returns either a long or
 wide-format dataset.
@@ -13,9 +13,10 @@ compute_fastshare(
   macro_data = data.table::as.data.table(macro_indicators),
   macro_cols,
   cols,
-  groups,
+  group_cols,
   fns,
-  output = c("long", "wide")
+  output = c("long", "wide"),
+  groups = NULL
 )
 ```
 
@@ -27,56 +28,72 @@ compute_fastshare(
 
 - macro_data:
 
-  A \`data.frame\`, \`data.table\`, or tibble containing macro-level
+  A `data.frame`, `data.table`, or tibble containing macro-level
   indicators. Must share at least one common grouping variable with
-  \`data\`. Default is \`macro_indicators\`. The result will be returned
-  in the same class as the input.
+  `data`. Default is `macro_indicators`. The result will be returned in
+  the same class as the input.
 
 - macro_cols:
 
-  A character vector of column names in \`macro_data\` to use as
+  A character vector of column names in `macro_data` to use as
   denominators for ratio calculations.
 
 - cols:
 
-  A character vector of column names in \`data\` to summarize.
+  A character vector of column names in `data` to summarize.
 
-- groups:
+- group_cols:
 
-  A character vector of column names in \`data\` to group by. Typically
+  A character vector of column names in `data` to group by. Typically
   includes country and date/year variables. Default is
-  \`c("country_code", "year")\`.
+  `c("country_code", "year")`.
 
 - fns:
 
-  A character vector of summary functions to apply to \`cols\`.
-  Examples: \`"sum"\`, \`"mean"\`, \`"median"\`.
+  A character vector of summary functions to apply to `cols`. Examples:
+  `"sum"`, `"mean"`, `"median"`.
 
 - output:
 
-  Either \`"long"\` or \`"wide"\` (default \`"long"\`). - \`"long"\`
-  returns a tidy table with columns: group variables, \`macro_var\`,
-  \`summary_var\`, \`indicator\`, and \`value\`. - \`"wide"\` returns a
-  table with one column per indicator and original macro/summary values.
+  Either `"long"` or `"wide"` (default `"long"`).
+
+  - `"long"` returns a tidy table with columns: group variables,
+    `macro_var`, `summary_var`, `indicator`, and `value`.
+
+  - `"wide"` returns a table with one column per indicator and original
+    macro/summary values.
+
+- groups:
+
+  Deprecated. Use `group_cols` instead.
 
 ## Value
 
-A dataset containing: - In \`"long"\` format: group variables,
-\`macro_var\`, \`macro_value\`, \`summary_var\`, \`summary_value\`,
-\`indicator\`, and \`value\`. - In \`"wide"\` format: group variables,
-one column per indicator (\`summary_var\` per \`macro_var\`), and
-original macro and summary values. The returned object will match the
-class of the input \`data\`.
+A dataset containing:
+
+- In `"long"` format: group variables, `macro_var`, `macro_value`,
+  `summary_var`, `summary_value`, `indicator`, and `value`.
+
+- In `"wide"` format: group variables, one column per indicator
+  (`summary_var` per `macro_var`), and original macro and summary
+  values. The returned object will match the class of the input `data`.
 
 ## Details
 
-The function works as follows: 1. Summarizes \`cols\` by \`groups\`
-using the functions in \`fns\`. 2. Automatically detects common join
-variables between \`summary_dt\` and \`macro_data\`. 3. Merges the
-summarized data with macro indicators. 4. Computes ratio indicators
-(\`summary_value / macro_value\`) for all combinations of summarized
-columns and macro columns. 5. Optionally reshapes the result into wide
-format with one column per indicator.
+The function works as follows:
+
+1.  Summarizes `cols` by `groups` using the functions in `fns`.
+
+2.  Automatically detects common join variables between `summary_dt` and
+    `macro_data`.
+
+3.  Merges the summarized data with macro indicators.
+
+4.  Computes ratio indicators (`summary_value / macro_value`) for all
+    combinations of summarized columns and macro columns.
+
+5.  Optionally reshapes the result into wide format with one column per
+    indicator.
 
 ## Examples
 

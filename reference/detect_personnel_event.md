@@ -22,37 +22,41 @@ detect_personnel_event(
 
 - data:
 
-  A data.table or data.frame containing at least the columns: -
-  \`personnel_id\`: Unique identifier for personnel. - \`ref_date\`:
-  Reference date (must be coercible to Date). - \`employment_status\`:
-  Personnel status (e.g., "active", "pensioner", "inactive").
+  A data.table or data.frame containing at least the columns:
+
+  - `personnel_id`: Unique identifier for personnel.
+
+  - `ref_date`: Reference date (must be coercible to Date).
+
+  - `employment_status`: Personnel status (e.g., "active", "pensioner",
+    "inactive").
 
 - id_col:
 
-  Character. Name of the identifier column (e.g., \`"personnel_id"\`).
+  Character. Name of the identifier column (e.g., `"personnel_id"`).
 
 - event_type:
 
-  Character. Either \`"hire"\` or \`"fire"\`, controlling which event to
+  Character. Either `"hire"` or `"fire"`, controlling which event to
   detect.
 
 - start_date:
 
   Optional start date for the full date sequence (default:
-  \`"2007-09-01"\`).
+  `"2007-09-01"`).
 
 - end_date:
 
   Optional end date for the full date sequence (default:
-  \`"2018-01-01"\`).
+  `"2018-01-01"`).
 
 - status_col:
 
-  a column within \`data\` object for the employment status of personnel
+  A column within `data` object for the employment status of personnel.
 
 - freq:
 
-  Frequency for the sequence of dates (default: \`"year"\`). Can be any
+  Frequency for the sequence of dates (default: `"year"`). Can be any
   valid value for `seq.Date(by = ...)`.
 
 ## Value

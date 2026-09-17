@@ -1,6 +1,6 @@
-# Validate Column Exists in Data Table
+# Validate column exists in data table
 
-Validate Column Exists in Data Table
+Validate column exists in data table
 
 ## Usage
 
@@ -12,15 +12,15 @@ validate_column_exists(dt, colname, varname)
 
 - dt:
 
-  data.table to check
+  Data.table to check.
 
 - colname:
 
-  Character. Column name to validate
+  Character. Column name to validate.
 
 - varname:
 
-  Character. Variable name for error messages
+  Character. Variable name for error messages.
 
 ## Value
 

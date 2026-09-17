@@ -1,4 +1,4 @@
-# Fix Salary Component Inconsistencies
+# Fix salary component inconsistencies
 
 Corrects violations of wage bill consistency rules: gross ≥ base +
 allowance, gross ≥ net, gross ≥ base.
@@ -16,21 +16,21 @@ fix_salary_components(
 
 - data:
 
-  A data.frame with columns \`gross_salary_lcu\`, \`base_salary_lcu\`,
-  \`net_salary_lcu\`, \`allowance_lcu\`.
+  A data.frame with columns `gross_salary_lcu`, `base_salary_lcu`,
+  `net_salary_lcu`, `allowance_lcu`.
 
 - strategy:
 
   Correction strategy:
 
-  - \`"recalculate_gross"\`: Set \`gross = base + allowance\`
+  - `"recalculate_gross"`: Set `gross = base + allowance`
 
-  - \`"cap_net"\`: Cap net at gross
+  - `"cap_net"`: Cap net at gross
 
-  - \`"cap_base"\`: Cap base at gross
+  - `"cap_base"`: Cap base at gross
 
-  - \`"flag"\`: Add flag columns \`gross_composition_flag\`,
-    \`net_exceeds_gross_flag\`, \`base_exceeds_gross_flag\`
+  - `"flag"`: Add flag columns `gross_composition_flag`,
+    `net_exceeds_gross_flag`, `base_exceeds_gross_flag`
 
 ## Value
 

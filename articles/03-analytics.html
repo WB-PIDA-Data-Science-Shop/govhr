@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -105,23 +105,23 @@ generate this type of analysis.</p>
 <code class="sourceCode R"><span><span class="co"># total headcount by reference date</span></span>
 <span><span class="va">headcount_trend</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
 <span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
-<span>  group <span class="op">=</span> <span class="st">"ref_date"</span></span>
+<span>  group_col <span class="op">=</span> <span class="st">"ref_date"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">headcount_trend</span>, group <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">headcount_trend</span>, group_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="03-analytics_files/figure-html/unnamed-chunk-1-1.png" class="r-plt" alt="" width="700"></p>
 <p>You might also be curious about how time trends for headcount varies
-across groups, such as gender. Modifying the <code>group</code> argument
-makes that possible. Note that implicitly the function will still take
-the reference date into account.</p>
+across groups, such as gender. Modifying the <code>group_col</code>
+argument makes that possible. Note that implicitly the function will
+still take the reference date into account.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># total headcount by reference date and gender</span></span>
 <span><span class="va">headcount_trend_gender</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
 <span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
-<span>  group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gender"</span><span class="op">)</span></span>
+<span>  group_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gender"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">headcount_trend_gender</span>, group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">headcount_trend_gender</span>, group_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="03-analytics_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
@@ -145,7 +145,7 @@ flows.</p>
 <span>    <span class="va">movement_hire_count</span>,</span>
 <span>    movement_type <span class="op">=</span> <span class="st">"hire"</span>,</span>
 <span>    measurement_type <span class="op">=</span> <span class="st">"count"</span>,</span>
-<span>    group <span class="op">=</span> <span class="st">"ref_date"</span></span>
+<span>    group_cols <span class="op">=</span> <span class="st">"ref_date"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="03-analytics_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="700">
 Again, if you are interested in how these flows vary across groups, you
@@ -163,7 +163,7 @@ grouping variables.</p>
 <span>    <span class="va">movement_hire_gender_count</span>,</span>
 <span>    movement_type <span class="op">=</span> <span class="st">"hire"</span>,</span>
 <span>    measurement_type <span class="op">=</span> <span class="st">"count"</span>,</span>
-<span>    group <span class="op">=</span> <span class="st">"gender"</span></span>
+<span>    group_cols <span class="op">=</span> <span class="st">"gender"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="03-analytics_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="700"></p>
 </div>
@@ -179,24 +179,24 @@ function can visualize that trend.</p>
 <code class="sourceCode R"><span><span class="co"># total wagebill by reference date</span></span>
 <span><span class="va">wagebill_trend</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
 <span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_contract.html">bra_hrmis_contract</a></span>,</span>
-<span>  group <span class="op">=</span> <span class="st">"ref_date"</span>,</span>
+<span>  group_col <span class="op">=</span> <span class="st">"ref_date"</span>,</span>
 <span>  measure_col <span class="op">=</span> <span class="st">"gross_salary_lcu"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">wagebill_trend</span>, group <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">wagebill_trend</span>, group_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="03-analytics_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="700"></p>
 <p>A similar differentiation by group is possible, using the same
-grammar for the <code>group</code> argument.</p>
+grammar for the <code>group_col</code> argument.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># total wagebill by reference date</span></span>
 <span><span class="va">wagebill_paygrade_trend</span> <span class="op">&lt;-</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_contract.html">bra_hrmis_contract</a></span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">paygrade</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
-<span>        group <span class="op">=</span> <span class="st">"paygrade"</span>,</span>
+<span>        group_col <span class="op">=</span> <span class="st">"paygrade"</span>,</span>
 <span>        measure_col <span class="op">=</span> <span class="st">"gross_salary_lcu"</span></span>
 <span>    <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">wagebill_paygrade_trend</span>, group <span class="op">=</span> <span class="st">"paygrade"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">wagebill_paygrade_trend</span>, group_col <span class="op">=</span> <span class="st">"paygrade"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="03-analytics_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">

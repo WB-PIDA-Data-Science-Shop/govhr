@@ -7,12 +7,12 @@ ordered from highest median to lowest.
 ## Usage
 
 ``` r
-ggplot_segment(.data, col, group)
+ggplot_segment(data, col, group_col)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
   A data.frame or tibble.
 
@@ -20,7 +20,7 @@ ggplot_segment(.data, col, group)
 
   Unquoted numeric column (values).
 
-- group:
+- group_col:
 
   Unquoted grouping column.
 

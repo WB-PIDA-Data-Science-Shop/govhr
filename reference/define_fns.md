@@ -1,10 +1,11 @@
-# Define Default Summary Functions
+# Define default summary functions
 
 Creates and returns a named list of default summary functions used
-throughout the analytics framework (e.g., by \[compute_fastsummary()\]).
-Each function is defined as a purrr-style formula (\`~\`) that operates
-on a vector \`.x\` and returns a scalar summary statistic. The returned
-list can be supplied directly to a summarization pipeline or extended by
+throughout the analytics framework (e.g., by
+[`compute_fastsummary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastsummary.md)).
+Each function is defined as a purrr-style formula (`~`) that operates on
+a vector `.x` and returns a scalar summary statistic. The returned list
+can be supplied directly to a summarization pipeline or extended by
 users with custom functions.
 
 ## Usage
@@ -19,7 +20,7 @@ The list includes the following summary functions:
 
 - sum:
 
-  Sum of values, ignoring \`NA\`s.
+  Sum of values, ignoring `NA`s.
 
 - mean:
 
@@ -31,11 +32,15 @@ The list includes the following summary functions:
 
 - cv:
 
-  Coefficient of variation (requires a \`cv()\` helper).
+  Coefficient of variation (requires a
+  [`cv()`](https://wb-pida-data-science-shop.github.io/govhr/reference/cv.md)
+  helper).
 
 - cp_ratio:
 
-  Custom "cp ratio" statistic (requires a \`cp_ratio()\` helper).
+  Custom "cp ratio" statistic (requires a
+  [`cp_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/cp_ratio.md)
+  helper).
 
 - var:
 
@@ -43,7 +48,7 @@ The list includes the following summary functions:
 
 - iqr:
 
-  Interquartile range, computed as \`diff(range(.x))\`.
+  Interquartile range, computed as `diff(range(.x))`.
 
 - min:
 
@@ -63,7 +68,7 @@ The list includes the following summary functions:
 
 - prop_na:
 
-  Proportion of missing (\`NA\`) values.
+  Proportion of missing (`NA`) values.
 
 - prop_zero:
 
@@ -88,8 +93,9 @@ The list includes the following summary functions:
 ## Value
 
 A named list of formula functions suitable for use with
-\`dplyr::across()\`, where each element name is the function label and
-the value is a one-sided formula that computes the summary.
+[`dplyr::across()`](https://dplyr.tidyverse.org/reference/across.html),
+where each element name is the function label and the value is a
+one-sided formula that computes the summary.
 
 ## Details
 
@@ -97,11 +103,13 @@ The returned list contains commonly used descriptive statistics for
 numeric vectors, including measures of central tendency, dispersion,
 distribution, and data quality (e.g., share of missing or zero values).
 Users can extend or override the defaults by appending their own named
-formulas before passing to \[compute_fastsummary()\].
+formulas before passing to
+[`compute_fastsummary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastsummary.md).
 
 ## See also
 
-\[compute_fastsummary()\], \[compute_fastshare()\]
+[`compute_fastsummary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastsummary.md),
+[`compute_fastshare()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastshare.md)
 
 ## Examples
 
@@ -133,6 +141,7 @@ compute_fastsummary(
   groups = c("country_code"),
   fns = c("mean", "sd", "cv")
 )
+#> Warning: `groups` is deprecated and will be removed in a future release; use `group_cols` instead.
 #>     country_code             indicator        value
 #>           <char>                <fctr>        <num>
 #>  1:            A gross_salary_lcu_mean 1.007079e+03

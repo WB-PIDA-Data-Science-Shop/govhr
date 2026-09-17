@@ -1,4 +1,4 @@
-# Plot Transfer Heatmap
+# Plot transfer heatmap
 
 Draws transfers between groups as a heatmap, origin groups on the y-axis
 and destination groups on the x-axis.
@@ -6,14 +6,14 @@ and destination groups on the x-axis.
 ## Usage
 
 ``` r
-plot_transfer_heatmap(.data)
+plot_transfer_heatmap(data)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
-  Data frame with \`from\`, \`to\` and \`transfer\` columns.
+  Data frame with `from`, `to` and `transfer` columns.
 
 ## Value
 

@@ -1,12 +1,12 @@
-# Function to compute the total cost associated with personnel movements.
+# Function to compute the total cost associated with personnel movements
 
-Function to compute the total cost associated with personnel movements.
+Function to compute the total cost associated with personnel movements
 
 ## Usage
 
 ``` r
 compute_movement_cost(
-  .data,
+  data,
   id_col = "personnel_id",
   event_type,
   start_date = NULL,
@@ -21,7 +21,7 @@ compute_movement_cost(
 
 ## Arguments
 
-- .data:
+- data:
 
   A data frame containing the data to be processed.
 
@@ -39,12 +39,12 @@ compute_movement_cost(
 - start_date:
 
   The start date for the classification period. Defaults to the minimum
-  reference date found in \`.data\`.
+  reference date found in `.data`.
 
 - end_date:
 
   The end date for the classification period. Defaults to the maximum
-  reference date found in \`.data\`.
+  reference date found in `.data`.
 
 - status_col:
 
@@ -54,7 +54,7 @@ compute_movement_cost(
 - freq:
 
   The frequency of the reference dates. Defaults to a guess based on
-  \`.data\`.
+  `.data`.
 
 - measure_col:
 

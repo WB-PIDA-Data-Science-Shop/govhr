@@ -9,7 +9,7 @@ grouping column and returns all rows belonging to the sampled groups."><meta pro
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,18 +42,18 @@ grouping column and returns all rows belonging to the sampled groups.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">sample_group</span><span class="op">(</span><span class="va">.data</span>, <span class="va">group</span>, <span class="va">n</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">sample_group</span><span class="op">(</span><span class="va">data</span>, <span class="va">group_col</span>, <span class="va">n</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg--data">.data<a class="anchor" aria-label="anchor" href="#arg--data"></a></dt>
+<dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>A data.frame, tibble, or data.table.</p></dd>
 
 
-<dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
+<dt id="arg-group-col">group_col<a class="anchor" aria-label="anchor" href="#arg-group-col"></a></dt>
 <dd><p>Unquoted column name used to define groups.</p></dd>
 
 
@@ -64,9 +64,9 @@ number of available groups, all groups are returned.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An object of the same class as `.data` (tibble -&gt; tibble,
-  data.table -&gt; data.table, data.frame -&gt; data.frame) containing only rows
-  whose group value was sampled.</p>
+    <p>An object of the same class as <code>.data</code> (tibble -&gt; tibble,
+data.table -&gt; data.table, data.frame -&gt; data.frame) containing only rows
+whose group value was sampled.</p>
     </div>
 
     <div class="section level2">

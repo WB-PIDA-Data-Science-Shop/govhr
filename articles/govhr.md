@@ -105,9 +105,9 @@ quickly check this aspect of quality of the data.
 # assess coverage (share of non-missing values) by employment status
 compute_coverage(
   personnel_clean,
-  group = "employment_status"
+  group_cols = "employment_status"
 )
-#> # A tibble: 24 × 3
+#> # A tibble: 26 × 3
 #>    employment_status variable     coverage
 #>    <chr>             <chr>           <dbl>
 #>  1 active            personnel_id    100  
@@ -120,7 +120,7 @@ compute_coverage(
 #>  8 pensioner         age             100  
 #>  9 active            gender          100  
 #> 10 pensioner         gender          100  
-#> # ℹ 14 more rows
+#> # ℹ 16 more rows
 ```
 
 ### Analytics
@@ -154,7 +154,7 @@ plot_compression_ratio(compression_ratio)
 
 ![](govhr_files/figure-html/unnamed-chunk-5-1.png)
 
-Another government want to know whether there was an increase in the
+Another government may want to know whether there was an increase in the
 number of personnel with higher education. The `compute_growth` function
 quickly computes that growth rate, by group.
 
@@ -163,7 +163,7 @@ quickly computes that growth rate, by group.
 # growth in headcount from the first to the last reference date, by service type
 compute_growth(
   bra_hrmis_personnel,
-  group = "educat7"
+  group_col = "educat7"
 )
 #> # A tibble: 7 × 2
 #>   educat7                                  growth_rate

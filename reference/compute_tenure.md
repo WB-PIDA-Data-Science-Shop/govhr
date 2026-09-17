@@ -11,7 +11,7 @@ tenure.
 
 ``` r
 compute_tenure(
-  contract_dt,
+  contracts,
   ref_date,
   personnel_id_col = "personnel_id",
   contract_id_col = "contract_id",
@@ -24,9 +24,9 @@ compute_tenure(
 
 ## Arguments
 
-- contract_dt:
+- contracts:
 
-  data.table containing the contract history. Must include personnel
+  Data.table containing the contract history. Must include personnel
   identifiers, contract identifiers, contract start and end dates,
   contract types, and any grouping variables supplied in `group_cols`.
 

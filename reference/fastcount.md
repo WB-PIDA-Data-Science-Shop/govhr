@@ -1,9 +1,11 @@
 # Fast counting via dtplyr
 
-\`fastcount()\` delegates \[dplyr::count()\] to a \`data.table\` backend
-by converting the input to a lazy \`dtplyr\` table first. This preserves
-the familiar \`count()\` interface while exploiting \`data.table\`
-performance.
+`fastcount()` delegates
+[`dplyr::count()`](https://dplyr.tidyverse.org/reference/count.html) to
+a `data.table` backend by converting the input to a lazy `dtplyr` table
+first. This preserves the familiar
+[`count()`](https://dplyr.tidyverse.org/reference/count.html) interface
+while exploiting `data.table` performance.
 
 ## Usage
 

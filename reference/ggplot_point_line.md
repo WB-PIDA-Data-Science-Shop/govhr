@@ -6,12 +6,12 @@ variable (y) evolves along another variable (x).
 ## Usage
 
 ``` r
-ggplot_point_line(data, x, y, group = NULL, label = NULL, ...)
+ggplot_point_line(.data, x, y, group_col = NULL, label = NULL, ...)
 ```
 
 ## Arguments
 
-- data:
+- .data:
 
   A data frame or tibble containing the variables to plot.
 
@@ -23,7 +23,7 @@ ggplot_point_line(data, x, y, group = NULL, label = NULL, ...)
 
   Column to be mapped to the y-axis.
 
-- group:
+- group_col:
 
   Column specifying the grouping variable (mapped to color).
 

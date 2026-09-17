@@ -1,4 +1,4 @@
-# Classify Personnel Movement Events
+# Classify personnel movement events
 
 This function classifies the personnel module into three types of
 movements: hires, fires, or retirements.
@@ -7,7 +7,7 @@ movements: hires, fires, or retirements.
 
 ``` r
 classify_personnel_event(
-  .data,
+  data,
   id_col,
   event_type,
   start_date,
@@ -19,7 +19,7 @@ classify_personnel_event(
 
 ## Arguments
 
-- .data:
+- data:
 
   A data frame containing personnel data.
 

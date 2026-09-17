@@ -6,29 +6,29 @@ turnover
 ## Usage
 
 ``` r
-compute_workforce_movement(.data, movement_type, measurement_type, group_cols)
+compute_workforce_movement(data, movement_type, measurement_type, group_cols)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
   A data frame containing personnel data.
 
 - movement_type:
 
-  A character string indicating the type of movement: "hire", "fire",
+  A string indicating the type of movement: "hire", "fire",
   "retirement", or "turnover".
 
 - measurement_type:
 
-  A character string indicating the measurement type: "count" or "rate".
-  Ignored for turnover, which is a ratio.
+  A string indicating the measurement type: "count" or "rate". Ignored
+  for turnover, which is a ratio.
 
 - group_cols:
 
-  A character string indicating the grouping column, or "ref_date" for
-  no grouping.
+  A character vector of columns to group by, or `"ref_date"` for no
+  grouping.
 
 ## Value
 

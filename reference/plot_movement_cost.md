@@ -1,24 +1,24 @@
-# Plot Movement Cost
+# Plot movement cost
 
-Plot Movement Cost
+Plot movement cost
 
 ## Usage
 
 ``` r
-plot_movement_cost(.data, group_cols)
+plot_movement_cost(data, group_cols)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
   A data frame containing the movement cost data with columns
-  \`movement_cost\` and optionally a grouping column.
+  `movement_cost` and optionally a grouping column.
 
 - group_cols:
 
-  A character string indicating the grouping column, or "ref_date" for
-  no grouping.
+  A character vector of columns to group by, or `"ref_date"` for no
+  grouping.
 
 ## Value
 

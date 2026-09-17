@@ -1,4 +1,4 @@
-# Compute Ratio of Last Salary to First Pension for Retired Workers
+# Compute ratio of last salary to first pension for retired workers
 
 For each individual who has retired, computes the ratio of their first
 pension payment to their last active salary.
@@ -7,65 +7,76 @@ pension payment to their last active salary.
 
 ``` r
 compute_pension_ratio(
-  personnel_dt,
-  contract_dt,
+  personnel,
+  contracts,
   salary_col,
   personnel_id_col = "personnel_id",
   status_col = "employment_status",
   date_col = "ref_date",
   pensioner_value = "pensioner",
-  keep_vars = NULL
+  keep_vars = NULL,
+  personnel_dt = NULL,
+  contract_dt = NULL
 )
 ```
 
 ## Arguments
 
-- personnel_dt:
+- personnel:
 
   A data.table (or tibble/data.frame) containing at minimum the columns
-  named in \`id_col\`, \`status_col\`, and \`date_col\`.
+  named in `id_col`, `status_col`, and `date_col`.
 
-- contract_dt:
+- contracts:
 
   A data.table (or tibble/data.frame) containing at minimum the columns
-  named in \`id_col\`, \`date_col\`, and \`salary_col\`.
+  named in `id_col`, `date_col`, and `salary_col`.
 
 - salary_col:
 
   A single string naming the compensation column to use, e.g.
-  \`"gross_salary_def"\` (default), \`"base_salary_lcu"\`, etc.
+  `"gross_salary_def"` (default), `"base_salary_lcu"`, etc.
 
 - personnel_id_col:
 
   A single string naming the personnel identifier column. Defaults to
-  \`"personnel_id"\`.
+  `"personnel_id"`.
 
 - status_col:
 
   A single string naming the employment status column inside
-  \`personnel_dt\`. Defaults to \`"employment_status"\`.
+  `personnel_dt`. Defaults to `"employment_status"`.
 
 - date_col:
 
   A single string naming the snapshot/reference date column. Defaults to
-  \`"ref_date"\`.
+  `"ref_date"`.
 
 - pensioner_value:
 
-  A single string giving the value of \`status_col\` that identifies a
-  pensioner record. Defaults to \`"pensioner"\`.
+  A single string giving the value of `status_col` that identifies a
+  pensioner record. Defaults to `"pensioner"`.
 
 - keep_vars:
 
   A character vector of additional contract-level columns to attach via
-  \`govhr::add_contract_to_event()\`. Defaults to NULL
+  [`govhr::add_contract_to_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/add_contract_to_event.md).
+  Defaults to NULL
+
+- personnel_dt:
+
+  Deprecated. Use `personnel` instead.
+
+- contract_dt:
+
+  Deprecated. Use `contracts` instead.
 
 ## Value
 
 A data.table with one row per retiring individual containing the
-\`id_col\` identifier, \`ref_date_active\` (last active date),
-\`last_salary\`, \`ref_date_pension\` (first pension date),
-\`first_pension\`, and \`replacement_rate\`.
+`id_col` identifier, `ref_date_active` (last active date),
+`last_salary`, `ref_date_pension` (first pension date), `first_pension`,
+and `replacement_rate`.
 
 ## Details
 
@@ -77,7 +88,7 @@ and workforce analysis, and it matters here for a few distinct reasons:
 
 - **Retirement incentive / take-up behavior**: Low replacement rates
   help explain deferred retirement, relevant to calibrating
-  `ANNUAL_TAKE_UP` rather than assuming 100% take-up at eligibility.
+  `ANNUAL_TAKE_UP` rather than assuming 100\\ eligibility.
 
 - **Equity diagnostics**: Comparing rates across paygrade, occupation,
   or establishment can surface structural inequities in how the pension

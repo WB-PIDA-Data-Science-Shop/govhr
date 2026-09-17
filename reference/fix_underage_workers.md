@@ -1,9 +1,9 @@
-# Flag or Remove Underage Workers
+# Flag or remove underage workers
 
-Addresses violations of the \`personnel_minimum_age\` rule. Workers
-below \`min_age\` (default: 18) are identified using \`birth_date\` and
-\`ref_date\`. Age is calculated as \`difftime(ref_date, birth_date,
-units = "days") / 365.25\`.
+Addresses violations of the `personnel_minimum_age` rule. Workers below
+`min_age` (default: 18) are identified using `birth_date` and
+`ref_date`. Age is calculated as
+`difftime(ref_date, birth_date, units = "days") / 365.25`.
 
 ## Usage
 
@@ -15,8 +15,7 @@ fix_underage_workers(data, min_age = 18, treatment = c("flag", "filter"))
 
 - data:
 
-  A data.frame with \`birth_date\` and \`ref_date\` columns (Date
-  class).
+  A data.frame with `birth_date` and `ref_date` columns (Date class).
 
 - min_age:
 
@@ -26,13 +25,13 @@ fix_underage_workers(data, min_age = 18, treatment = c("flag", "filter"))
 
   Handling strategy:
 
-  - \`"flag"\`: Add \`underage_flag\` column (TRUE for underage workers)
+  - `"flag"`: Add `underage_flag` column (TRUE for underage workers)
 
-  - \`"filter"\`: Remove underage worker records
+  - `"filter"`: Remove underage worker records
 
 ## Value
 
-A data.frame with underage workers handled according to \`treatment\`.
+A data.frame with underage workers handled according to `treatment`.
 
 ## See also
 

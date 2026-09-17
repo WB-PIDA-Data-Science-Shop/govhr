@@ -11,7 +11,7 @@ assess the quality and consistency of personnel records in HRMIS data."><meta pr
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,16 +53,16 @@ assess the quality and consistency of personnel records in HRMIS data.</p>
     <p>A tibble with 9 rows and 5 variables:</p><dl><dt>rule</dt>
 <dd><p>Character. The validation rule expression as a string that can be parsed by <code><a href="https://rdrr.io/pkg/validate/man/validator.html" class="external-link">validate::validator()</a></code>.</p></dd>
 
-  <dt>name</dt>
+<dt>name</dt>
 <dd><p>Character. Unique identifier for the rule (e.g., "personnel_ref_date_valid").</p></dd>
 
-  <dt>description</dt>
+<dt>description</dt>
 <dd><p>Character. Detailed explanation of what the rule checks. This description appears in validation summaries.</p></dd>
 
-  <dt>label</dt>
+<dt>label</dt>
 <dd><p>Character. Short 2-3 word label for the rule, useful for plotting and quick reference.</p></dd>
 
-  <dt>required_vars</dt>
+<dt>required_vars</dt>
 <dd><p>Character. Comma-separated list of minimum required variables for the rule to be evaluated. At minimum: personnel_id and birth_date.</p></dd>
 
 

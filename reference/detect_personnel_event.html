@@ -11,7 +11,7 @@ personnel–date combinations, fills missing periods, and identifies "hire" or
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,36 +61,36 @@ personnel–date combinations, fills missing periods, and identifies "hire" or
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data.table or data.frame containing at least the columns:
-- `personnel_id`: Unique identifier for personnel.
-- `ref_date`: Reference date (must be coercible to Date).
-- `employment_status`: Personnel status (e.g., "active", "pensioner", "inactive").</p></dd>
+<dd><p>A data.table or data.frame containing at least the columns:</p><ul><li><p><code>personnel_id</code>: Unique identifier for personnel.</p></li>
+<li><p><code>ref_date</code>: Reference date (must be coercible to Date).</p></li>
+<li><p><code>employment_status</code>: Personnel status (e.g., "active", "pensioner", "inactive").</p></li>
+</ul></dd>
 
 
 <dt id="arg-id-col">id_col<a class="anchor" aria-label="anchor" href="#arg-id-col"></a></dt>
-<dd><p>Character. Name of the identifier column (e.g., `"personnel_id"`).</p></dd>
+<dd><p>Character. Name of the identifier column (e.g., <code>"personnel_id"</code>).</p></dd>
 
 
 <dt id="arg-event-type">event_type<a class="anchor" aria-label="anchor" href="#arg-event-type"></a></dt>
-<dd><p>Character. Either `"hire"` or `"fire"`, controlling which event to detect.</p></dd>
+<dd><p>Character. Either <code>"hire"</code> or <code>"fire"</code>, controlling which event to detect.</p></dd>
 
 
 <dt id="arg-start-date">start_date<a class="anchor" aria-label="anchor" href="#arg-start-date"></a></dt>
 <dd><p>Optional start date for the full date sequence
-(default: `"2007-09-01"`).</p></dd>
+(default: <code>"2007-09-01"</code>).</p></dd>
 
 
 <dt id="arg-end-date">end_date<a class="anchor" aria-label="anchor" href="#arg-end-date"></a></dt>
 <dd><p>Optional end date for the full date sequence
-(default: `"2018-01-01"`).</p></dd>
+(default: <code>"2018-01-01"</code>).</p></dd>
 
 
 <dt id="arg-status-col">status_col<a class="anchor" aria-label="anchor" href="#arg-status-col"></a></dt>
-<dd><p>a column within `data` object for the employment status of personnel</p></dd>
+<dd><p>A column within <code>data</code> object for the employment status of personnel.</p></dd>
 
 
 <dt id="arg-freq">freq<a class="anchor" aria-label="anchor" href="#arg-freq"></a></dt>
-<dd><p>Frequency for the sequence of dates (default: `"year"`).
+<dd><p>Frequency for the sequence of dates (default: <code>"year"</code>).
 Can be any valid value for <code>seq.Date(by = ...)</code>.</p></dd>
 
 </dl></div>

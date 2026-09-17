@@ -1,24 +1,26 @@
-# Plot Decile Summary
+# Plot decile summary
 
-Plot Decile Summary
+Plot decile summary
 
 ## Usage
 
 ``` r
-plot_decile(.data, group_cols)
+plot_decile(data, group_cols)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
-  A data frame produced by \`compute_decile()\`, containing columns
-  \`decile\`, \`mean_value\`, and optionally a grouping column.
+  A data frame produced by
+  [`compute_decile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_decile.md),
+  containing columns `decile`, `mean_value`, and optionally a grouping
+  column.
 
 - group_cols:
 
-  A character string indicating the grouping column, or "ref_date" for
-  no grouping.
+  A character vector of columns to group by, or `"ref_date"` for no
+  grouping.
 
 ## Value
 

@@ -1,20 +1,21 @@
-# Plot Growth Rates by Group
+# Plot growth rates by group
 
-Draws a horizontal bar chart with groups ordered by \`growth_rate\`,
-with a dashed reference line at zero separating growth from decline.
+Draws a horizontal bar chart with groups ordered by `growth_rate`, with
+a dashed reference line at zero separating growth from decline.
 
 ## Usage
 
 ``` r
-plot_bar_growth(.data, group_col)
+plot_bar_growth(data, group_col)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
-  Data frame with the grouping column and a \`growth_rate\` column, as
-  returned by \[compute_growth_summary()\].
+  Data frame with the grouping column and a `growth_rate` column, as
+  returned by
+  [`compute_growth_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_growth_summary.md).
 
 - group_col:
 

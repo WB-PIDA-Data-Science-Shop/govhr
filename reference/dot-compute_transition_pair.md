@@ -1,4 +1,4 @@
-# Compute Transition Counts for a Single Consecutive Snapshot Pair
+# Compute transition counts for a single consecutive snapshot pair
 
 Internal workhorse called by
 [`roll_snapshot_pairs()`](https://wb-pida-data-science-shop.github.io/govhr/reference/roll_snapshot_pairs.md)
@@ -50,14 +50,14 @@ T1), this function:
 
 - snap_t0:
 
-  data.table. Subset of the full panel at snapshot T0, already filtered
+  Data.table. Subset of the full panel at snapshot T0, already filtered
   to a single reference date. Must contain `ref_date_col`,
   `personnel_id_col`, `group_cols`, `start_date_col`, `end_date_col`,
   and `contract_type_col`.
 
 - snap_t1:
 
-  data.table. Subset of the full panel at snapshot T1 (the period
+  Data.table. Subset of the full panel at snapshot T1 (the period
   immediately following T0). Same column requirements as `snap_t0`.
 
 - ref_date_col:
@@ -67,7 +67,7 @@ T1), this function:
 
 - group_cols:
 
-  Character vector. Columns whose concatenated values define the
+  A character vector. Columns whose concatenated values define the
   movement state for each person. Rows with `NA` in any of these columns
   are dropped via [`na.omit()`](https://rdrr.io/r/stats/na.fail.html)
   before state labels are formed.

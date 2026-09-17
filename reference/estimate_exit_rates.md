@@ -1,4 +1,4 @@
-# Estimate Historical Non-Retirement Exit Rates from Panel Data
+# Estimate historical non-retirement exit rates from panel data
 
 Uses `govhr::detect_personnel_event(event_type = "fire")` to identify
 non-retirement attrition events (voluntary resignation, dismissal,
@@ -10,8 +10,8 @@ returns the mean rate per group.
 
 ``` r
 estimate_exit_rates(
-  contract_dt,
-  personnel_dt,
+  contracts,
+  personnel,
   group_cols = NULL,
   freq = "year",
   ref_date = NULL,
@@ -20,19 +20,21 @@ estimate_exit_rates(
   start_date_col = "start_date",
   contract_type_col = "contract_type",
   end_date_col = "end_date",
-  status_col = "employment_status"
+  status_col = "employment_status",
+  contract_dt = NULL,
+  personnel_dt = NULL
 )
 ```
 
 ## Arguments
 
-- contract_dt:
+- contracts:
 
-  data.table. Full panel of contract data (all `ref_date` snapshots).
+  Data.table. Full panel of contract data (all `ref_date` snapshots).
 
-- personnel_dt:
+- personnel:
 
-  data.table. Full panel of personnel data.
+  Data.table. Full panel of personnel data.
 
 - group_cols:
 
@@ -73,6 +75,14 @@ estimate_exit_rates(
 - status_col:
 
   Character. Default `"employment_status"`.
+
+- contract_dt:
+
+  Deprecated. Use `contracts` instead.
+
+- personnel_dt:
+
+  Deprecated. Use `personnel` instead.
 
 ## Value
 

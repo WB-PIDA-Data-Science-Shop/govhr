@@ -16,7 +16,7 @@ A data frame with 436 rows and 9 variables:
 
 - isco_version:
 
-  Character. Version of the ISCO classification (e.g., \`"ISCO-08"\`).
+  Character. Version of the ISCO classification (e.g., `"ISCO-08"`).
 
 - major:
 
@@ -24,7 +24,7 @@ A data frame with 436 rows and 9 variables:
 
 - major_label:
 
-  Character. Title of the major group (e.g., \`"Managers"\`).
+  Character. Title of the major group (e.g., `"Managers"`).
 
 - sub_major:
 
@@ -32,8 +32,8 @@ A data frame with 436 rows and 9 variables:
 
 - sub_major_label:
 
-  Character. Title of the sub-major group (e.g., \`"Chief Executives,
-  Senior Officials and Legislators"\`).
+  Character. Title of the sub-major group (e.g.,
+  `"Chief Executives, Senior Officials and Legislators"`).
 
 - minor:
 
@@ -41,8 +41,8 @@ A data frame with 436 rows and 9 variables:
 
 - minor_label:
 
-  Character. Title of the minor group (e.g., \`"Legislators and Senior
-  Officials"\`).
+  Character. Title of the minor group (e.g.,
+  `"Legislators and Senior Officials"`).
 
 - unit:
 
@@ -51,7 +51,7 @@ A data frame with 436 rows and 9 variables:
 - description:
 
   Character. Definition or title of the occupation at the unit group
-  level (e.g., \`"Legislators"\`, \`"Senior Government Officials"\`).
+  level (e.g., `"Legislators"`, `"Senior Government Officials"`).
 
 ## Source
 
@@ -65,11 +65,16 @@ information to facilitate international comparisons and harmonization of
 occupational statistics. It is widely used in labor statistics, survey
 design, and policy analysis.
 
-ISCO-08 is structured hierarchically: - **Major groups** (1 digit) –
-broad occupational categories - **Sub-major groups** (2 digits) –
-subdivisions of major groups - **Minor groups** (3 digits) –
-subdivisions of sub-major groups - **Unit groups** (4 digits) – most
-detailed level, individual occupations
+ISCO-08 is structured hierarchically:
+
+- **Major groups** (1 digit) – broad occupational categories
+
+- **Sub-major groups** (2 digits) – subdivisions of major groups
+
+- **Minor groups** (3 digits) – subdivisions of sub-major groups
+
+- **Unit groups** (4 digits) – most detailed level, individual
+  occupations
 
 Each unit group includes a description outlining the scope of the
 occupation according to ILO’s ISCO-08 documentation.

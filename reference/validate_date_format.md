@@ -1,6 +1,6 @@
-# Validate Date Format
+# Validate date format
 
-Validate Date Format
+Validate date format
 
 ## Usage
 
@@ -12,11 +12,11 @@ validate_date_format(date, varname)
 
 - date:
 
-  Object to validate
+  Object to validate.
 
 - varname:
 
-  Character. Variable name for error messages
+  Character. Variable name for error messages.
 
 ## Value
 

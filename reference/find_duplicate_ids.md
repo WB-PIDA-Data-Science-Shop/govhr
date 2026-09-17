@@ -1,4 +1,4 @@
-# Find Duplicate Identifiers in a Data Frame
+# Find duplicate identifiers in a data frame
 
 Identifies duplicated values of a specified identifier column in a data
 frame or tibble. Returns a tibble with the identifier values that appear
@@ -23,7 +23,7 @@ find_duplicate_ids(data, identifier)
 
 ## Value
 
-A tibble with the identifier column and a count column \`n\` indicating
+A tibble with the identifier column and a count column `n` indicating
 the number of times each duplicate appears.
 
 ## Examples

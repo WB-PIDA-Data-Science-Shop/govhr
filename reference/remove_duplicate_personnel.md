@@ -1,7 +1,7 @@
-# Remove Duplicate Personnel Records
+# Remove duplicate personnel records
 
-Removes duplicate \`personnel_id\` + \`ref_date\` combinations,
-addressing violations of the \`personnel_unique_id\` rule.
+Removes duplicate `personnel_id` + `ref_date` combinations, addressing
+violations of the `personnel_unique_id` rule.
 
 ## Usage
 
@@ -13,12 +13,12 @@ remove_duplicate_personnel(data, keep = c("first", "last", "none"))
 
 - data:
 
-  A data.frame with columns \`personnel_id\` and \`ref_date\`.
+  A data.frame with columns `personnel_id` and `ref_date`.
 
 - keep:
 
-  Which record to keep per duplicate group: \`"first"\` (default),
-  \`"last"\`, or \`"none"\` (drops all records in a duplicate group).
+  Which record to keep per duplicate group: `"first"` (default),
+  `"last"`, or `"none"` (drops all records in a duplicate group).
 
 ## Value
 

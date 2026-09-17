@@ -1,11 +1,11 @@
-# Plot Coverage Heatmap by Group
+# Plot coverage heatmap by group
 
-Plot Coverage Heatmap by Group
+Plot coverage heatmap by group
 
 ## Usage
 
 ``` r
-plot_coverage_heatmap(data, group = NULL)
+plot_coverage_heatmap(data, group_col = NULL, group = NULL)
 ```
 
 ## Arguments
@@ -14,9 +14,13 @@ plot_coverage_heatmap(data, group = NULL)
 
   A data frame.
 
+- group_col:
+
+  A string. Grouping variable.
+
 - group:
 
-  Character string. Grouping variable.
+  Deprecated. Use `group_col` instead.
 
 ## Value
 

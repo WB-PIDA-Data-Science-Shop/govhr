@@ -1,25 +1,24 @@
-# Plot Density as Percentage Share
+# Plot density as percentage share
 
-Plot Density as Percentage Share
+Plot density as percentage share
 
 ## Usage
 
 ``` r
-plot_histogram(.data, plot_type = "histogram", group_col = NULL)
+plot_histogram(data, plot_type = "histogram", group_col = NULL)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
-  A data frame produced by \`compute_histogram()\` or
-  \`compute_cumulative()\`, containing columns \`bin\`, \`pct\`, and
+  A data frame produced by `compute_histogram()` or
+  `compute_cumulative()`, containing columns `bin`, `pct`, and
   optionally a grouping column.
 
 - plot_type:
 
-  A character string indicating the type of plot: "histogram" or
-  "cumulative".
+  A string indicating the type of plot: "histogram" or "cumulative".
 
 - group_col:
 

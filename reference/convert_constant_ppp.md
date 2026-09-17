@@ -23,13 +23,14 @@ convert_constant_ppp(data, cols)
 
 ## Value
 
-\`data_out\` augmented with columns converted to international 2021
+`data_out` augmented with columns converted to international 2021
 dollars.
 
 ## Details
 
-\#' @details CPI data is sourced from \[govhr::macro_indicators\], which
-must contain columns `country_code`, `year`, and `cpi`.
+\#' @details CPI data is sourced from
+[macro_indicators](https://wb-pida-data-science-shop.github.io/govhr/reference/macro_indicators.md),
+which must contain columns `country_code`, `year`, and `cpi`.
 
 ## Examples
 

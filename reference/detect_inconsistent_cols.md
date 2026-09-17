@@ -1,4 +1,4 @@
-# Detect Inconsistent Columns in a Data Frame
+# Detect inconsistent columns in a data frame
 
 This function checks whether any of the specified column names appear in
 a given data frame. It is typically used to identify the presence of
@@ -22,8 +22,8 @@ detect_inconsistent_cols(data, inconsistent_cols)
 
 ## Value
 
-A logical value: \`TRUE\` if any inconsistent columns are present in the
-data frame, \`FALSE\` otherwise.
+A logical value: `TRUE` if any inconsistent columns are present in the
+data frame, `FALSE` otherwise.
 
 ## Examples
 

@@ -11,7 +11,9 @@ countryclass
 
 ## Format
 
-\## \`countryclass\` A data frame with 267 rows and 4 columns:
+### `countryclass`
+
+A data frame with 267 rows and 4 columns:
 
 - country_code:
 
@@ -31,4 +33,4 @@ countryclass
 
 ## Source
 
-\<https://ddh-openapi.worldbank.org/resources/DR0095333/download/\>
+<https://ddh-openapi.worldbank.org/resources/DR0095333/download/>

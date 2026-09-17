@@ -13,7 +13,7 @@ reference period."><meta property="og:image" content="https://wb-pida-data-scien
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,39 +55,38 @@ reference period.</p>
     <h2 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a></h2>
     <p>A data frame with 60,430 rows and 5 variables:</p><dl><dt>contract_id</dt>
 <dd><p>Character. Unique identifier for the employment
-  contract associated with the allowance.</p></dd>
+contract associated with the allowance.</p></dd>
 
 
-  <dt>ref_date</dt>
+<dt>ref_date</dt>
 <dd><p>Date. Reference date for the payroll record.</p></dd>
 
 
-  <dt>allowance_type</dt>
+<dt>allowance_type</dt>
 <dd><p>Character. Harmonized allowance or bonus category.</p></dd>
 
 
-  <dt>allowance_lcu</dt>
+<dt>allowance_lcu</dt>
 <dd><p>Numeric. Value of the allowance in local currency
-  units (LCU).</p></dd>
+units (LCU).</p></dd>
 
 
-  <dt>personnel_id</dt>
+<dt>personnel_id</dt>
 <dd><p>Character. Unique identifier for the individual
-  receiving the allowance.</p></dd>
+receiving the allowance.</p></dd>
 
 
 </dl></div>
     <div class="section level2">
     <h2 id="source">Source<a class="anchor" aria-label="anchor" href="#source"></a></h2>
     <p>Government of the State of Alagoas Human Resource Management Information
-System (HRMIS), harmonized by the `govhrcast` package.</p>
+System (HRMIS), harmonized by the <code>govhrcast</code> package.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The dataset follows a long format, with one observation per
-`contract_id`–`ref_date`–`allowance_type` combination. Monetary values are
+<code>contract_id</code>–<code>ref_date</code>–<code>allowance_type</code> combination. Monetary values are
 reported in local currency units (LCU).</p>
-
 <p>The allowance module records non-base salary remuneration components paid
 to employees, including permanent and temporary allowances, bonuses,
 commissions, and other supplementary payments. Each observation

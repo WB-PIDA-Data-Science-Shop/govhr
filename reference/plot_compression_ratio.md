@@ -1,24 +1,24 @@
-# Plot Compression Ratio
+# Plot compression ratio
 
-Plot Compression Ratio
+Plot compression ratio
 
 ## Usage
 
 ``` r
-plot_compression_ratio(.data, group_cols = NULL)
+plot_compression_ratio(data, group_cols = NULL)
 ```
 
 ## Arguments
 
-- .data:
+- data:
 
   A data frame containing the compression ratio data produced by
-  \`compute_compression_ratio()\`.
+  [`compute_compression_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_compression_ratio.md).
 
 - group_cols:
 
-  A character string indicating the grouping column, or "ref_date" for
-  no grouping.
+  A character vector of columns to group by, or `"ref_date"` for no
+  grouping.
 
 ## Value
 

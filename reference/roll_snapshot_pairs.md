@@ -1,4 +1,4 @@
-# Iterate Consecutive Snapshot Pairs in a Panel data.table
+# Iterate consecutive snapshot pairs in a panel data.table
 
 Sets a data.table key on `date_col` (enabling O(log N) binary-search
 subsetting rather than O(N) full-table scans), then calls a
@@ -21,7 +21,7 @@ roll_snapshot_pairs(panel_dt, date_col, f, ...)
 
 - panel_dt:
 
-  data.table. Panel data containing all snapshots. The key is
+  Data.table. Panel data containing all snapshots. The key is
   set/updated in-place on entry; pass
   [`data.table::copy()`](https://rdrr.io/pkg/data.table/man/copy.html)
   if the caller must preserve the original key.

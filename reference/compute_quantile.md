@@ -1,13 +1,13 @@
-# Function to compute quantiles of a measure column within groups and reference dates.
+# Function to compute quantiles of a measure column within groups and reference dates
 
 Function to compute quantiles of a measure column within groups and
-reference dates.
+reference dates
 
 ## Usage
 
 ``` r
 compute_quantile(
-  .data,
+  data,
   group_cols = NULL,
   measure_col,
   latest_measure = FALSE,
@@ -17,7 +17,7 @@ compute_quantile(
 
 ## Arguments
 
-- .data:
+- data:
 
   A data frame containing the data to be processed.
 

@@ -2,8 +2,8 @@
 
 Harmonized personnel-level human resource management information system
 (HRMIS) data for the State of Alagoas, Brazil. Each observation
-represents a unique worker at a given reference date (\`personnel_id\`,
-\`ref_date\`) and contains demographic characteristics, education,
+represents a unique worker at a given reference date (`personnel_id`,
+`ref_date`) and contains demographic characteristics, education,
 employment status, and public service information.
 
 ## Usage
@@ -61,6 +61,11 @@ A data frame with 15,681 rows and 11 variables:
 - first_employment_date:
 
   Date the worker first entered the public service.
+
+- retirement_date:
+
+  The date of retirement for those whose `employment_status` is
+  `"pensioner"`
 
 ## Source
 
