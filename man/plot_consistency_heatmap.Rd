@@ -2,20 +2,22 @@
 % Please edit documentation in R/qcheck_plots.R
 \name{plot_consistency_heatmap}
 \alias{plot_consistency_heatmap}
-\title{Plot Consistency Heatmap by Group}
+\title{Plot consistency heatmap by group}
 \usage{
-plot_consistency_heatmap(data, id_col, group)
+plot_consistency_heatmap(data, id_col, group_cols, group = NULL)
 }
 \arguments{
 \item{data}{A data frame.}
 
-\item{id_col}{Character string. The column name of the unique identifier for each record.}
+\item{id_col}{A string. The column name of the unique identifier for each record.}
 
-\item{group}{Character string. The column name of the grouping variable (e.g., "ref_date").}
+\item{group_cols}{A string. The column name of the grouping variable (e.g., "ref_date").}
+
+\item{group}{Deprecated. Use \code{group_cols} instead.}
 }
 \value{
 A plotly heatmap object representing consistency values by group and variable.
 }
 \description{
-Plot Consistency Heatmap by Group
+Plot consistency heatmap by group
 }

@@ -2,21 +2,21 @@
 % Please edit documentation in R/overview.R
 \name{apply_baseline_index}
 \alias{apply_baseline_index}
-\title{Apply Baseline Index to a Trend Summary}
+\title{Apply baseline index to a trend summary}
 \usage{
-apply_baseline_index(.data, group_col)
+apply_baseline_index(data, group_col)
 }
 \arguments{
-\item{.data}{Data frame with `ref_date` and `value`, as returned by
-[compute_trend_summary()].}
+\item{data}{Data frame with \code{ref_date} and \code{value}, as returned by
+\code{\link[=compute_trend_summary]{compute_trend_summary()}}.}
 
-\item{group_col}{Character. Column to group by, or `"ref_date"` for no
+\item{group_col}{Character. Column to group by, or \code{"ref_date"} for no
 grouping.}
 }
 \value{
-The input data frame with `value` rescaled to a baseline index.
+The input data frame with \code{value} rescaled to a baseline index.
 }
 \description{
-Rescales `value` so the earliest observation equals 100. When a grouping
+Rescales \code{value} so the earliest observation equals 100. When a grouping
 column is supplied the rescaling is applied independently within each group.
 }

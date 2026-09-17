@@ -1,6 +1,6 @@
 #' This function retrieves data from the Data360 API.
 #'
-#' @return A tibble containing data, including country codes, country names,
+#' @returns A tibble containing data, including country codes, country names,
 #'         years, and values.
 #' @examples
 #' \dontrun{
@@ -16,7 +16,7 @@
 #' @import dplyr
 #' @importFrom janitor clean_names
 #' @importFrom jsonlite fromJSON
-#' @importFrom tibble as_tibble tibble
+#' @importFrom tibble tibble
 #' @export
 get_data360_api <- function(dataset_id, indicator_id, pivot = TRUE) {
   base_url <- "https://data360api.worldbank.org/data360/data"
@@ -89,7 +89,7 @@ get_data360_api <- function(dataset_id, indicator_id, pivot = TRUE) {
 #'   - `INDICATOR`: Indicator code or name
 #'   - `OBS_VALUE`: Observation value for the indicator
 #'
-#' @return A tibble in wide format with columns:
+#' @returns A tibble in wide format with columns:
 #'   - `country_code`: The country or region code (from `REF_AREA`)
 #'   - `year`: The year or time period (from `TIME_PERIOD`)
 #'   - One column per unique `INDICATOR`, containing corresponding values from `OBS_VALUE`
@@ -143,10 +143,10 @@ pivot_data360 <- function(data) {
 #' URL, retrieves the metadata in JSON format, and parses it into an R list or
 #' data frame.
 #'
-#' @param dataset_id A character string or numeric identifier specifying the
+#' @param dataset_id A string or numeric identifier specifying the
 #'   dataset for which metadata should be retrieved.
 #'
-#' @return A list (or data frame) containing the metadata associated with the
+#' @returns A list (or data frame) containing the metadata associated with the
 #'   requested dataset, as returned by the Data360 API.
 #'
 #' @examples

@@ -2,10 +2,10 @@
 % Please edit documentation in R/overview.R
 \name{plot_trend}
 \alias{plot_trend}
-\title{Plot Time Trend}
+\title{Plot time trend}
 \usage{
 plot_trend(
-  .data,
+  data,
   group_col,
   toggle_growth = FALSE,
   y_col = "value",
@@ -13,25 +13,25 @@ plot_trend(
 )
 }
 \arguments{
-\item{.data}{Data frame with `ref_date` and the y-axis column, as returned by
-[compute_trend_summary()] and optionally [govhr::apply_baseline_index()].}
+\item{data}{Data frame with \code{ref_date} and the y-axis column, as returned by
+\code{\link[=compute_trend_summary]{compute_trend_summary()}} and optionally \code{\link[=apply_baseline_index]{apply_baseline_index()}}.}
 
-\item{group_col}{Character. Column to group by, or `"ref_date"` for no
+\item{group_col}{Character. Column to group by, or \code{"ref_date"} for no
 grouping.}
 
 \item{toggle_growth}{Logical. Format the y-axis as a baseline index. Default
-`FALSE`.}
+\code{FALSE}.}
 
-\item{y_col}{Character. Column to plot on the y-axis. Default `"value"`.}
+\item{y_col}{Character. Column to plot on the y-axis. Default \code{"value"}.}
 
-\item{y_label}{Character. y-axis label, used when `toggle_growth` is `FALSE`.
-Default `"Value"`.}
+\item{y_label}{Character. y-axis label, used when \code{toggle_growth} is \code{FALSE}.
+Default \code{"Value"}.}
 }
 \value{
 A ggplot2 object.
 }
 \description{
-Draws a line-and-point chart of the measure over `ref_date`, one coloured
-series per group. When `toggle_growth` is `TRUE` the y-axis is formatted as a
+Draws a line-and-point chart of the measure over \code{ref_date}, one coloured
+series per group. When \code{toggle_growth} is \code{TRUE} the y-axis is formatted as a
 baseline index with a dashed reference line at 100.
 }

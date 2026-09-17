@@ -367,6 +367,7 @@
 #'   \item{race}{Worker's race or broad ethnic classification, where available.}
 #'   \item{tribe}{Worker's ethnic or tribal affiliation, where available.}
 #'   \item{first_employment_date}{Date the worker first entered the public service.}
+#'   \item{retirement_date}{The date of retirement for those whose \code{employment_status} is \code{"pensioner"}}
 #' }
 #'
 #' @details

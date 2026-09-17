@@ -20,15 +20,15 @@ across all rows, or a character column of ISO3 country codes.}
 }
 \value{
 A numeric vector of the same length as \code{col}, expressed in
-  constant \code{base_year} LCU prices. Returns \code{NA} for any row where
-  CPI data is missing for the given country/year combination.
+constant \code{base_year} LCU prices. Returns \code{NA} for any row where
+CPI data is missing for the given country/year combination.
 }
 \description{
 Convert nominal wages (LCU prices) into real wages expressed in constant LCU prices of a specified base year using:
 \deqn{\text{real} = \text{nominal} \times \frac{\text{CPI}_{base}}{\text{CPI}_{ref}}}
 }
 \details{
-CPI data is sourced from [govhr::macro_indicators], which must contain
+CPI data is sourced from \link{macro_indicators}, which must contain
 columns \code{country_code}, \code{year}, and \code{cpi}.
 }
 \examples{

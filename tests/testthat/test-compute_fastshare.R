@@ -23,7 +23,7 @@ test_that("compute_fastshare computes correct long output", {
     macro_data = macro_dt,
     macro_cols = c("pop", "gdp"),
     cols = c("x"),
-    groups = "group",
+    group_cols = "group",
     fns = c("sum"),
     output = "long"
   )
@@ -60,7 +60,7 @@ test_that("compute_fastshare computes correct wide output", {
     macro_data = macro_dt,
     macro_cols = c("pop", "gdp"),
     cols = c("x"),
-    groups = "group",
+    group_cols = "group",
     fns = c("sum"),
     output = "wide"
   )
@@ -80,7 +80,7 @@ test_that("compute_fastshare works with user-defined functions", {
     macro_data = macro_dt,
     macro_cols = c("pop"),
     cols = "x",
-    groups = "group",
+    group_cols = "group",
     fns = list("mean", rng = ~ max(.x) - min(.x)),
     output = "long"
   )
@@ -99,7 +99,7 @@ test_that("compute_fastshare automatically detects join keys", {
     macro_data = macro_dt,
     macro_cols = "pop",
     cols = "x",
-    groups = "group",
+    group_cols = "group",
     fns = "sum"
   )
 
@@ -119,7 +119,7 @@ test_that("compute_fastshare errors when there are no join keys", {
       macro_data = macro2,
       macro_cols = "pop",
       cols = "x",
-      groups = "group",
+      group_cols = "group",
       fns = "sum"
     ),
     "No common grouping variables"
@@ -134,7 +134,7 @@ test_that("compute_fastshare works with multiple summary columns", {
     macro_data = macro_dt,
     macro_cols = c("pop"),
     cols = c("x","y"),
-    groups = "group",
+    group_cols = "group",
     fns = c("sum")
   )
 

@@ -7,41 +7,41 @@
 \format{
 A data frame with 10 rows and 3 variables:
 \describe{
-  \item{class_id}{Character. Two-digit COFOG class identifier (e.g.,
-  `"01"`, `"02"`).}
+\item{class_id}{Character. Two-digit COFOG class identifier (e.g.,
+\code{"01"}, \code{"02"}).}
 
-  \item{class_label}{Character. Name of the first-level COFOG function.}
+\item{class_label}{Character. Name of the first-level COFOG function.}
 
-  \item{description}{Character. Collection of keywords and descriptive
-  terms associated with each COFOG function. These are intended to support
-  rule-based and machine-assisted classification of government
-  establishments.}
+\item{description}{Character. Collection of keywords and descriptive
+terms associated with each COFOG function. These are intended to support
+rule-based and machine-assisted classification of government
+establishments.}
 }
 
 The ten first-level COFOG functions are:
 \enumerate{
-  \item General Public Services
-  \item Defence
-  \item Public Order and Safety
-  \item Economic Affairs
-  \item Environmental Protection
-  \item Housing and Community Amenities
-  \item Health
-  \item Recreation, Culture and Religion
-  \item Education
-  \item Social Protection
+\item General Public Services
+\item Defence
+\item Public Order and Safety
+\item Economic Affairs
+\item Environmental Protection
+\item Housing and Community Amenities
+\item Health
+\item Recreation, Culture and Religion
+\item Education
+\item Social Protection
 }
 }
 \source{
-United Nations. *Classification of the Functions of Government (COFOG)*;
-International Monetary Fund. *Government Finance Statistics Manual 2014*.
+United Nations. \emph{Classification of the Functions of Government (COFOG)};
+International Monetary Fund. \emph{Government Finance Statistics Manual 2014}.
 }
 \usage{
 data(cofog_taxonomy)
 }
 \description{
 A lookup table containing the first-level Classification of the Functions
-of Government (COFOG) taxonomy used by `govhrcast` to classify government
+of Government (COFOG) taxonomy used by \code{govhrcast} to classify government
 establishments according to their primary functional responsibilities.
 }
 \details{
@@ -50,7 +50,6 @@ International Monetary Fund (IMF) Government Finance Statistics Manual
 and the United Nations Classification of the Functions of Government,
 together with descriptive keyword dictionaries that facilitate automated
 establishment classification during HRMIS harmonization.
-
 
 This dataset is intended primarily for internal use by the establishment
 harmonization workflow, where establishment names are mapped to functional

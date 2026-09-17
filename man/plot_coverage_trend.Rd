@@ -4,23 +4,25 @@
 \alias{plot_coverage_trend}
 \title{Plot Coverage Over Time}
 \usage{
-plot_coverage_trend(data, group, toggle_growth = FALSE)
+plot_coverage_trend(data, group_col, toggle_growth = FALSE, group = NULL)
 }
 \arguments{
 \item{data}{A data frame. Typically the contract, personnel, or
 establishment dataset for the active module.}
 
-\item{group}{Character string. Grouping variable inherited from the
-`coverage_group` UI input (e.g. `"ref_date"`, `"grade_id"`).}
+\item{group_col}{A string. Grouping variable inherited from the
+\code{coverage_group} UI input (e.g. \code{"ref_date"}, \code{"grade_id"}).}
 
-\item{toggle_growth}{Logical. When `TRUE` the y-axis switches to a
-baseline-index view (first period = 100). Defaults to `FALSE`.}
+\item{toggle_growth}{Logical. When \code{TRUE} the y-axis switches to a
+baseline-index view (first period = 100). Defaults to \code{FALSE}.}
+
+\item{group}{Deprecated. Use \code{group_col} instead.}
 }
 \value{
 A ggplot2 object.
 }
 \description{
-Computes coverage using [compute_coverage()] (with `ref_date` always
+Computes coverage using \code{\link[=compute_coverage]{compute_coverage()}} (with \code{ref_date} always
 included, aggregated across variables) and renders a trend line via
-[plot_trend()].
+\code{\link[=plot_trend]{plot_trend()}}.
 }

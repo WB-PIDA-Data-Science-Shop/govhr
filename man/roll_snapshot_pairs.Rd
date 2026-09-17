@@ -2,12 +2,12 @@
 % Please edit documentation in R/movement_summarize.R
 \name{roll_snapshot_pairs}
 \alias{roll_snapshot_pairs}
-\title{Iterate Consecutive Snapshot Pairs in a Panel data.table}
+\title{Iterate consecutive snapshot pairs in a panel data.table}
 \usage{
 roll_snapshot_pairs(panel_dt, date_col, f, ...)
 }
 \arguments{
-\item{panel_dt}{data.table.  Panel data containing all snapshots.  The key
+\item{panel_dt}{Data.table.  Panel data containing all snapshots.  The key
 is set/updated in-place on entry; pass \code{data.table::copy()} if the
 caller must preserve the original key.}
 
@@ -24,9 +24,9 @@ skipped.}
 }
 \value{
 A single \code{data.table} produced by
-  \code{rbindlist(results, fill = TRUE, use.names = TRUE)} over all
-  non-\code{NULL} results.  Returns an empty \code{data.table()} when all
-  calls return \code{NULL} or the panel has fewer than two distinct dates.
+\code{rbindlist(results, fill = TRUE, use.names = TRUE)} over all
+non-\code{NULL} results.  Returns an empty \code{data.table()} when all
+calls return \code{NULL} or the panel has fewer than two distinct dates.
 }
 \description{
 Sets a data.table key on \code{date_col} (enabling O(log N) binary-search

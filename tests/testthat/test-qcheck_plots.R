@@ -12,7 +12,7 @@ qc_data <- tibble::tibble(
 # ---- plot_coverage_trend ------------------------------------------------------
 
 test_that("plot_coverage_trend returns a ggplot line trend over ref_date", {
-  p <- plot_coverage_trend(qc_data, group = "ref_date")
+  p <- plot_coverage_trend(qc_data, group_col = "ref_date")
 
   expect_s3_class(p, "ggplot")
   layer_geoms <- sapply(p$layers, \(l) class(l$geom)[1])
@@ -20,14 +20,14 @@ test_that("plot_coverage_trend returns a ggplot line trend over ref_date", {
 })
 
 test_that("plot_coverage_trend toggle_growth adds a baseline reference line", {
-  p <- plot_coverage_trend(qc_data, group = "ref_date", toggle_growth = TRUE)
+  p <- plot_coverage_trend(qc_data, group_col = "ref_date", toggle_growth = TRUE)
 
   layer_geoms <- sapply(p$layers, \(l) class(l$geom)[1])
   expect_true("GeomHline" %in% layer_geoms)
 })
 
 test_that("plot_coverage_trend accepts a real grouping column", {
-  expect_no_error(plot_coverage_trend(qc_data, group = "paygrade"))
+  expect_no_error(plot_coverage_trend(qc_data, group_col = "paygrade"))
 })
 
 # ---- plot_consistency_trend ---------------------------------------------------
@@ -38,7 +38,7 @@ test_that("plot_consistency_trend plots record consistency over time", {
   p <- plot_consistency_trend(
     record_consistency,
     id_col = "personnel_id",
-    group = "ref_date",
+    group_col = "ref_date",
     value_col = NULL,
     type_plot = "record"
   )
@@ -56,7 +56,7 @@ test_that("plot_consistency_trend plots value consistency over time", {
   p <- plot_consistency_trend(
     value_consistency,
     id_col = "personnel_id",
-    group = "ref_date",
+    group_col = "ref_date",
     value_col = "birth_date",
     type_plot = "value"
   )
@@ -71,7 +71,7 @@ test_that("plot_consistency_trend rejects an invalid type_plot", {
     plot_consistency_trend(
       record_consistency,
       id_col = "personnel_id",
-      group = "ref_date",
+      group_col = "ref_date",
       value_col = NULL,
       type_plot = "not_a_type"
     ),
@@ -99,20 +99,20 @@ test_that("plot_coverage_bar tiers coverage into Low/Medium/High", {
 # ---- plot_coverage_heatmap ------------------------------------------------------
 
 test_that("plot_coverage_heatmap returns a plotly heatmap", {
-  p <- plot_coverage_heatmap(qc_data, group = "ref_date")
+  p <- plot_coverage_heatmap(qc_data, group_col = "ref_date")
 
   expect_s3_class(p, "plotly")
 })
 
 test_that("plot_coverage_heatmap treats NULL and 'none' group as ref_date", {
-  expect_no_error(plot_coverage_heatmap(qc_data, group = NULL))
-  expect_no_error(plot_coverage_heatmap(qc_data, group = "none"))
+  expect_no_error(plot_coverage_heatmap(qc_data, group_col = NULL))
+  expect_no_error(plot_coverage_heatmap(qc_data, group_col = "none"))
 })
 
 # ---- plot_consistency_heatmap ---------------------------------------------------
 
 test_that("plot_consistency_heatmap returns a plotly heatmap", {
-  p <- plot_consistency_heatmap(qc_data, id_col = "personnel_id", group = "ref_date")
+  p <- plot_consistency_heatmap(qc_data, id_col = "personnel_id", group_cols = "ref_date")
 
   expect_s3_class(p, "plotly")
 })

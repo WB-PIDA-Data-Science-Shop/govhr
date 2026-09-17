@@ -2,41 +2,41 @@
 % Please edit documentation in R/transition.R
 \name{detect_career_transition}
 \alias{detect_career_transition}
-\title{Detect Career Transitions}
+\title{Detect career transitions}
 \usage{
 detect_career_transition(
-  .data,
+  data,
   id_col = "contract_id",
   group_cols,
   return_all = FALSE
 )
 }
 \arguments{
-\item{.data}{Data frame containing a `ref_date` column, the identifier and
+\item{data}{Data frame containing a \code{ref_date} column, the identifier and
 the grouping columns.}
 
 \item{id_col}{Character. Column identifying the entity whose career is
-tracked. Default `"contract_id"`.}
+tracked. Default \code{"contract_id"}.}
 
 \item{group_cols}{Character vector of columns defining the career position
 (e.g. paygrade, department). Multiple columns are pasted into one label.}
 
 \item{return_all}{Logical. Keep terminal spells, which have no destination
-and so carry `NA` in both `to` and `ref_date`. Default `FALSE`.}
+and so carry \code{NA} in both \code{to} and \code{ref_date}. Default \code{FALSE}.}
 }
 \value{
-A data table with the identifier, `from`, `to`, `from_date` and
-  `ref_date`.
+A data table with the identifier, \code{from}, \code{to}, \code{from_date} and
+\code{ref_date}.
 }
 \description{
 Collapses each entity's history into spells of consecutive periods in the
 same group, then pairs each spell with the one that follows it. A row is
-dated by `ref_date`, the period in which the entity is first observed in the
-destination group, so a transition is counted when it happens. `from_date`
+dated by \code{ref_date}, the period in which the entity is first observed in the
+destination group, so a transition is counted when it happens. \code{from_date}
 records when the origin spell began.
 }
 \details{
-Records must be uniquely identified by `id_col` and `ref_date`. An entity
+Records must be uniquely identified by \code{id_col} and \code{ref_date}. An entity
 holding more than one record in the same period has no well-defined position,
 so every record for that entity is dropped with a warning reporting how many.
 }

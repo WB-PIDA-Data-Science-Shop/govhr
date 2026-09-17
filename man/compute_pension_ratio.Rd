@@ -2,50 +2,56 @@
 % Please edit documentation in R/retirement.R
 \name{compute_pension_ratio}
 \alias{compute_pension_ratio}
-\title{Compute Ratio of Last Salary to First Pension for Retired Workers}
+\title{Compute ratio of last salary to first pension for retired workers}
 \usage{
 compute_pension_ratio(
-  personnel_dt,
-  contract_dt,
+  personnel,
+  contracts,
   salary_col,
   personnel_id_col = "personnel_id",
   status_col = "employment_status",
   date_col = "ref_date",
   pensioner_value = "pensioner",
-  keep_vars = NULL
+  keep_vars = NULL,
+  personnel_dt = NULL,
+  contract_dt = NULL
 )
 }
 \arguments{
-\item{personnel_dt}{A data.table (or tibble/data.frame) containing at minimum
-the columns named in `id_col`, `status_col`, and `date_col`.}
+\item{personnel}{A data.table (or tibble/data.frame) containing at minimum
+the columns named in \code{id_col}, \code{status_col}, and \code{date_col}.}
 
-\item{contract_dt}{A data.table (or tibble/data.frame) containing at minimum
-the columns named in `id_col`, `date_col`, and `salary_col`.}
+\item{contracts}{A data.table (or tibble/data.frame) containing at minimum
+the columns named in \code{id_col}, \code{date_col}, and \code{salary_col}.}
 
 \item{salary_col}{A single string naming the compensation column to use,
-e.g. `"gross_salary_def"` (default), `"base_salary_lcu"`, etc.}
+e.g. \code{"gross_salary_def"} (default), \code{"base_salary_lcu"}, etc.}
 
 \item{personnel_id_col}{A single string naming the personnel identifier column.
-Defaults to `"personnel_id"`.}
+Defaults to \code{"personnel_id"}.}
 
 \item{status_col}{A single string naming the employment status column inside
-`personnel_dt`.
-  Defaults to `"employment_status"`.}
+\code{personnel_dt}.
+Defaults to \code{"employment_status"}.}
 
 \item{date_col}{A single string naming the snapshot/reference date column.
-Defaults to `"ref_date"`.}
+Defaults to \code{"ref_date"}.}
 
-\item{pensioner_value}{A single string giving the value of `status_col`
-that identifies a pensioner record. Defaults to `"pensioner"`.}
+\item{pensioner_value}{A single string giving the value of \code{status_col}
+that identifies a pensioner record. Defaults to \code{"pensioner"}.}
 
 \item{keep_vars}{A character vector of additional contract-level columns
-to attach via `govhr::add_contract_to_event()`. Defaults to NULL}
+to attach via \code{govhr::add_contract_to_event()}. Defaults to NULL}
+
+\item{personnel_dt}{Deprecated. Use \code{personnel} instead.}
+
+\item{contract_dt}{Deprecated. Use \code{contracts} instead.}
 }
 \value{
 A data.table with one row per retiring individual containing
-  the `id_col` identifier, `ref_date_active` (last active date),
-  `last_salary`, `ref_date_pension` (first pension date),
-  `first_pension`, and `replacement_rate`.
+the \code{id_col} identifier, \code{ref_date_active} (last active date),
+\code{last_salary}, \code{ref_date_pension} (first pension date),
+\code{first_pension}, and \code{replacement_rate}.
 }
 \description{
 For each individual who has retired, computes the ratio of their first
@@ -56,19 +62,19 @@ The replacement rate is a standard diagnostic in public sector pension
 and workforce analysis, and it matters here for a few distinct reasons:
 
 \itemize{
-  \item \strong{Fiscal sustainability}: Aggregated across occupation or
-    paygrade, replacement rates feed directly into pension liability
-    projections.
-  \item \strong{Retirement incentive / take-up behavior}: Low replacement
-    rates help explain deferred retirement, relevant to calibrating
-    \code{ANNUAL_TAKE_UP} rather than assuming 100\% take-up at
-    eligibility.
-  \item \strong{Equity diagnostics}: Comparing rates across paygrade,
-    occupation, or establishment can surface structural inequities in
-    how the pension formula interacts with career trajectories.
-  \item \strong{Policy reform simulation}: Because the function is
-    column-name agnostic, it can be re-run under counterfactual salary
-    or pension formulas or against differently structured client
-    datasets without code changes.
+\item \strong{Fiscal sustainability}: Aggregated across occupation or
+paygrade, replacement rates feed directly into pension liability
+projections.
+\item \strong{Retirement incentive / take-up behavior}: Low replacement
+rates help explain deferred retirement, relevant to calibrating
+\code{ANNUAL_TAKE_UP} rather than assuming 100\\% take-up at
+eligibility.
+\item \strong{Equity diagnostics}: Comparing rates across paygrade,
+occupation, or establishment can surface structural inequities in
+how the pension formula interacts with career trajectories.
+\item \strong{Policy reform simulation}: Because the function is
+column-name agnostic, it can be re-run under counterfactual salary
+or pension formulas or against differently structured client
+datasets without code changes.
 }
 }

@@ -2,21 +2,21 @@
 % Please edit documentation in R/zzz.R
 \name{validate_columns_exist}
 \alias{validate_columns_exist}
-\title{Validate Multiple Columns Exist}
+\title{Validate multiple columns exist}
 \usage{
 validate_columns_exist(dt, colnames, varname)
 }
 \arguments{
-\item{dt}{data.table to check}
+\item{dt}{Data.table to check.}
 
-\item{colnames}{Character vector. Column names to validate}
+\item{colnames}{A character vector. Column names to validate.}
 
-\item{varname}{Character. Variable name for error messages}
+\item{varname}{Character. Variable name for error messages.}
 }
 \value{
 Invisible TRUE if valid, stops with error otherwise
 }
 \description{
-Validate Multiple Columns Exist
+Validate multiple columns exist
 }
 \keyword{internal}

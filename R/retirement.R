@@ -1,6 +1,6 @@
 #' Project Retirement Dates
 #' @details The function takes a data frame containing personnel data with birth dates and reference dates. It only considers the last reference date in the data. It then calculates the projected retirement date for each staff member based on the specified threshold age, and counts the number of staff eligible for retirement at each future reference date.
-#' @param .data A data frame, either the workforce or wage bill data.
+#' @param data A data frame, either the workforce or wage bill data.
 #' @param threshold_age The age at which personnel are considered eligible for retirement (default is 60).
 #' @param birth_col The name of the column representing birth dates (default is "birth_date").
 #' @param group_cols A character vector of column names to group the data by when counting eligible retirees (default is NULL, meaning no grouping).
@@ -9,7 +9,7 @@
 #' @param simplify_retirement_date A logical value indicating whether to simplify the retirement date to the end of the year (default is TRUE).
 #' @param cutoff_date A numeric value indicating the cut-off for future retirement projections in years (default is 10).
 #'
-#' @return A data frame with projected retirement dates and counts of staff eligible for retirement at each reference date.
+#' @returns A data frame with projected retirement dates and counts of staff eligible for retirement at each reference date.
 #'
 #' @importFrom data.table as.data.table
 #' @importFrom lubridate years
@@ -17,7 +17,7 @@
 #'
 #' @export
 project_retirement <- function(
-  .data,
+  data,
   threshold_age = 60,
   birth_col = "birth_date",
   group_cols = NULL,
@@ -26,7 +26,7 @@ project_retirement <- function(
   simplify_retirement_date = TRUE,
   cutoff_date = 10
 ) {
-  data_dt <- as.data.table(.data)
+  data_dt <- as.data.table(data)
 
   # future extension: (a) incorporate threshold_tenure (b) enable user to choose which reference date to use as a baseline for projection.
 
@@ -39,7 +39,7 @@ project_retirement <- function(
 
   # retain only projected retirements after last reference date in the data
   data_dt <- data_dt[
-    retirement_date > max(.data[["ref_date"]])
+    retirement_date > max(data[["ref_date"]])
   ]
 
   if (simplify_retirement_date) {
@@ -87,20 +87,20 @@ project_retirement <- function(
   # cut-off date
   projected_retirement_data <- projected_retirement_data[
     retirement_date <=
-      (max(.data[["ref_date"]]) + lubridate::years(cutoff_date))
+      (max(data[["ref_date"]]) + lubridate::years(cutoff_date))
   ]
 
   projected_retirement_data[]
 }
 
-#' Compute Ratio of Last Salary to First Pension for Retired Workers
+#' Compute ratio of last salary to first pension for retired workers
 #'
 #' For each individual who has retired, computes the ratio of their first
 #' pension payment to their last active salary.
 #'
-#' @param personnel_dt A data.table (or tibble/data.frame) containing at minimum
+#' @param personnel A data.table (or tibble/data.frame) containing at minimum
 #'   the columns named in `id_col`, `status_col`, and `date_col`.
-#' @param contract_dt A data.table (or tibble/data.frame) containing at minimum
+#' @param contracts A data.table (or tibble/data.frame) containing at minimum
 #'   the columns named in `id_col`, `date_col`, and `salary_col`.
 #' @param salary_col A single string naming the compensation column to use,
 #'   e.g. `"gross_salary_def"` (default), `"base_salary_lcu"`, etc.
@@ -115,9 +115,11 @@ project_retirement <- function(
 #'   that identifies a pensioner record. Defaults to `"pensioner"`.
 #' @param keep_vars A character vector of additional contract-level columns
 #'   to attach via `govhr::add_contract_to_event()`. Defaults to NULL
+#' @param personnel_dt Deprecated. Use `personnel` instead.
+#' @param contract_dt Deprecated. Use `contracts` instead.
 #'
 #'
-#' @return A data.table with one row per retiring individual containing
+#' @returns A data.table with one row per retiring individual containing
 #'   the `id_col` identifier, `ref_date_active` (last active date),
 #'   `last_salary`, `ref_date_pension` (first pension date),
 #'   `first_pension`, and `replacement_rate`.
@@ -145,38 +147,42 @@ project_retirement <- function(
 #'
 #' @export
 compute_pension_ratio <- function(
-  personnel_dt,
-  contract_dt,
+  personnel,
+  contracts,
   salary_col,
   personnel_id_col = "personnel_id",
   status_col = "employment_status",
   date_col = "ref_date",
   pensioner_value = "pensioner",
-  keep_vars = NULL
+  keep_vars = NULL,
+  personnel_dt = NULL,
+  contract_dt = NULL
 ) {
+  personnel <- resolve_renamed_arg(personnel, personnel_dt, "personnel_dt", "personnel")
+  contracts <- resolve_renamed_arg(contracts, contract_dt, "contract_dt", "contracts")
   ## ensure we have data.tables
-  personnel_dt <- data.table::as.data.table(personnel_dt)
-  contract_dt <- data.table::as.data.table(contract_dt)
+  personnel <- data.table::as.data.table(personnel)
+  contracts <- data.table::as.data.table(contracts)
 
   stopifnot(
-    salary_col %in% names(contract_dt),
-    status_col %in% names(personnel_dt),
-    personnel_id_col %in% names(personnel_dt),
-    personnel_id_col %in% names(contract_dt),
-    date_col %in% names(personnel_dt),
-    date_col %in% names(contract_dt)
+    salary_col %in% names(contracts),
+    status_col %in% names(personnel),
+    personnel_id_col %in% names(personnel),
+    personnel_id_col %in% names(contracts),
+    date_col %in% names(personnel),
+    date_col %in% names(contracts)
   )
 
   # Identify pensioner IDs
-  retiree_ids <- unique(personnel_dt[
+  retiree_ids <- unique(personnel[
     get(status_col) == pensioner_value,
     get(personnel_id_col)
   ])
 
   # Tag retiree contracts with employment_status from personnel table
   retiree_tagged <- merge(
-    contract_dt[get(personnel_id_col) %in% retiree_ids],
-    personnel_dt[, c(personnel_id_col, status_col, date_col), with = FALSE],
+    contracts[get(personnel_id_col) %in% retiree_ids],
+    personnel[, c(personnel_id_col, status_col, date_col), with = FALSE],
     by = c(personnel_id_col, date_col),
     all.x = TRUE
   )
@@ -204,8 +210,8 @@ compute_pension_ratio <- function(
 
   # Add contract details
   last_active <- add_contract_to_event(
-    event_dt = last_active,
-    contract_dt = contract_dt,
+    events = last_active,
+    contracts = contracts,
     keep_vars = keep_vars
   )
   data.table::setorderv(
@@ -216,8 +222,8 @@ compute_pension_ratio <- function(
   last_active <- last_active[, .SD[1L], by = c(personnel_id_col, date_col)]
 
   first_pension <- add_contract_to_event(
-    event_dt = first_pension,
-    contract_dt = contract_dt,
+    events = first_pension,
+    contracts = contracts,
     keep_vars = keep_vars
   )
   data.table::setorderv(
@@ -259,21 +265,23 @@ compute_pension_ratio <- function(
 
 # helpers ----------------------------------------------------------------
 
-#' Add Contract Information to Event Records
+#' Add contract information to event records
 #'
 #' @description
 #' This function merges contract information into an event dataset (such as hires, terminations, or transfers)
 #' by matching on `personnel_id` and `ref_date`. It ensures that selected variables from the contract dataset
 #' are attached to corresponding events without duplicating records.
 #'
-#' @param event_dt A data.table containing personnel event records. Must include the columns
+#' @param events A data.table containing personnel event records. Must include the columns
 #'   `personnel_id` and `ref_date`.
-#' @param contract_dt A data.table containing contract information, also including `personnel_id`
+#' @param contracts A data.table containing contract information, also including `personnel_id`
 #'   and `ref_date`. The contract dataset provides additional attributes describing the personnel's
 #'   contractual context on each reference date.
 #' @param keep_vars A character vector of variable names in `contract_dt` to be merged into the
 #'   event dataset. These typically describe contract-level attributes such as position, department,
 #'   or employment type.
+#' @param event_dt Deprecated. Use `events` instead.
+#' @param contract_dt Deprecated. Use `contracts` instead.
 #'
 #' @return
 #' A data.table identical to `event_dt`, but with the specified variables from `contract_dt`
@@ -314,13 +322,15 @@ compute_pension_ratio <- function(
 #'
 #' @seealso [data.table::merge()], [data.table::unique()]
 #' @export
-add_contract_to_event <- function(event_dt, contract_dt, keep_vars) {
-  contract_dt <- unique(contract_dt[,
+add_contract_to_event <- function(events, contracts, keep_vars, event_dt = NULL, contract_dt = NULL) {
+  events <- resolve_renamed_arg(events, event_dt, "event_dt", "events")
+  contracts <- resolve_renamed_arg(contracts, contract_dt, "contract_dt", "contracts")
+  contracts <- unique(contracts[,
     c("personnel_id", "ref_date", keep_vars),
     with = FALSE
   ])
 
-  event_dt <- contract_dt[event_dt, on = c("personnel_id", "ref_date")]
+  events <- contracts[events, on = c("personnel_id", "ref_date")]
 
-  return(event_dt)
+  return(events)
 }

@@ -8,28 +8,32 @@ pivot_data360(data)
 }
 \arguments{
 \item{data}{A data frame or tibble containing the variables:
-- `REF_AREA`: Country or region code
-- `TIME_PERIOD`: Year or time reference
-- `INDICATOR`: Indicator code or name
-- `OBS_VALUE`: Observation value for the indicator}
+\itemize{
+\item \code{REF_AREA}: Country or region code
+\item \code{TIME_PERIOD}: Year or time reference
+\item \code{INDICATOR}: Indicator code or name
+\item \code{OBS_VALUE}: Observation value for the indicator
+}}
 }
 \value{
 A tibble in wide format with columns:
-  - `country_code`: The country or region code (from `REF_AREA`)
-  - `year`: The year or time period (from `TIME_PERIOD`)
-  - One column per unique `INDICATOR`, containing corresponding values from `OBS_VALUE`
+\itemize{
+\item \code{country_code}: The country or region code (from \code{REF_AREA})
+\item \code{year}: The year or time period (from \code{TIME_PERIOD})
+\item One column per unique \code{INDICATOR}, containing corresponding values from \code{OBS_VALUE}
+}
 }
 \description{
 This function reshapes a Data360-style dataset from long to wide format.
-It spreads indicator values (`OBS_VALUE`) across multiple columns based on
-the indicator variable (`INDICATOR`), while keeping the reference area and
+It spreads indicator values (\code{OBS_VALUE}) across multiple columns based on
+the indicator variable (\code{INDICATOR}), while keeping the reference area and
 time period identifiers. The resulting dataset is renamed and cleaned to
 have snake_case variable names.
 }
 \details{
 This function is particularly useful for preparing Data360 or similar
 datasets for analysis, where multiple indicators are recorded by country
-and year. The output dataset is cleaned using `janitor::clean_names()` to
+and year. The output dataset is cleaned using \code{janitor::clean_names()} to
 ensure consistent naming.
 }
 \examples{

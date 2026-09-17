@@ -12,7 +12,7 @@ dt <- data.table(
 cv_fun <- function(x) sd(x) / mean(x)
 
 test_that("compute_fastsummary returns correct structure", {
-  res <- compute_fastsummary(dt, cols = c("x", "y"), groups = "group", fns = c("mean", "sd"))
+  res <- compute_fastsummary(dt, cols = c("x", "y"), group_cols = "group", fns = c("mean", "sd"))
   expect_s3_class(res, "data.table")
   expect_true(all(c("group", "indicator", "value") %in% names(res)))
 })
@@ -22,12 +22,12 @@ test_that("compute_fastsummary handles long and wide outputs as expected", {
 
   long_res <- compute_fastsummary(dt, 
                                   cols = c("x", "y"), 
-                                  groups = "group", 
+                                  group_cols = "group", 
                                   output = "long", 
                                   fns = def_fns)
   wide_res <- compute_fastsummary(dt, 
                                   cols = c("x", "y"), 
-                                  groups = "group", 
+                                  group_cols = "group", 
                                   output = "wide",
                                   fns = def_fns)
   
@@ -38,7 +38,7 @@ test_that("compute_fastsummary handles long and wide outputs as expected", {
 })
 
 test_that("compute_fastsummary returns tibble if tbl = TRUE", {
-  res_tbl <- compute_fastsummary(dt, cols = "x", groups = "group", tbl = TRUE, fns = c("sd", "mean"))
+  res_tbl <- compute_fastsummary(dt, cols = "x", group_cols = "group", tbl = TRUE, fns = c("sd", "mean"))
   expect_s3_class(res_tbl, "tbl_df")
 })
 
@@ -51,7 +51,7 @@ test_that("compute_fastsummary works with both default and user-defined function
     dt,
     cols = c("x", "y"),
     fns = list("mean", newind = ~ sd(.x) * 10 / mean(.x)),
-    groups = "group",
+    group_cols = "group",
     output = "long"
   )
 
@@ -77,7 +77,7 @@ test_that("compute_fastsummary works with both default and user-defined function
 
 test_that("compute_fastsummary errors on unknown function names", {
   expect_error(
-    compute_fastsummary(dt, cols = "x", fns = c("not_a_fn"), groups = "group"),
+    compute_fastsummary(dt, cols = "x", fns = c("not_a_fn"), group_cols = "group"),
     "Unknown function name"
   )
 })

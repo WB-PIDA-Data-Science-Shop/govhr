@@ -19,15 +19,18 @@ export(compute_fastsummary)
 export(compute_global_consistency)
 export(compute_global_coverage)
 export(compute_growth)
+export(compute_growth_decomposition)
 export(compute_growth_summary)
 export(compute_movement_cost)
 export(compute_pension_ratio)
 export(compute_percentile)
 export(compute_quantile)
 export(compute_record_consistency)
+export(compute_service_table)
 export(compute_time_trend)
 export(compute_trend_summary)
 export(compute_value_consistency)
+export(compute_wage_decomposition)
 export(compute_wagebill)
 export(compute_workforce_movement)
 export(convert_constant_ppp)
@@ -39,11 +42,11 @@ export(dedup_values)
 export(define_fns)
 export(deflate_to_real)
 export(detect_career_transition)
-export(detect_career_transitions)
 export(detect_inconsistent_cols)
 export(detect_personnel_event)
 export(detect_reallocation)
 export(detect_retirement)
+export(estimate_decrement_rates)
 export(estimate_exit_rates)
 export(fastcount)
 export(fastprop)
@@ -64,6 +67,7 @@ export(ggplot_point_line)
 export(ggplot_segment)
 export(guess_date_frequency)
 export(harmonize_columns)
+export(model_wage)
 export(pivot_data360)
 export(plot_bar_growth)
 export(plot_bar_total)
@@ -75,6 +79,8 @@ export(plot_coverage_heatmap)
 export(plot_coverage_trend)
 export(plot_decile)
 export(plot_histogram)
+export(plot_model_wage)
+export(plot_model_wage_fes)
 export(plot_movement)
 export(plot_movement_cost)
 export(plot_segment)
@@ -86,14 +92,16 @@ export(remove_duplicate_personnel)
 export(rescale_baseline)
 export(sample_group)
 export(scale_plot_height)
+export(smooth_decrement_rates)
 export(validate_data)
 import(dplyr)
 import(ggplot2)
-import(glue)
 import(httr)
 importFrom(broom,tidy)
 importFrom(collapse,fquantile)
 importFrom(data.table,
+  ":=",
+  .N,
   CJ,
   as.data.table,
   copy,
@@ -120,7 +128,6 @@ importFrom(dplyr,
   any_of,
   arrange,
   case_when,
-  collect,
   count,
   desc,
   distinct,
@@ -150,6 +157,8 @@ importFrom(dplyr,
   union
 )
 importFrom(dtplyr,lazy_dt)
+importFrom(fixest,fixef)
+importFrom(forcats,fct_reorder)
 importFrom(ggiraph,
   geom_point_interactive,
   girafe,
@@ -158,8 +167,8 @@ importFrom(ggiraph,
 )
 importFrom(ggplot2,
   aes,
-  arrow,
   coord_cartesian,
+  element_text,
   expansion,
   facet_wrap,
   geom_col,
@@ -172,9 +181,9 @@ importFrom(ggplot2,
   geom_vline,
   ggplot,
   guide_axis,
+  label_wrap_gen,
   labs,
   margin,
-  position_jitter,
   scale_color_manual,
   scale_size_identity,
   scale_x_continuous,
@@ -195,10 +204,10 @@ importFrom(ggraph,
   scale_edge_width_continuous
 )
 importFrom(ggrepel,geom_text_repel)
-importFrom(ggthemes,scale_color_few)
+importFrom(ggstats,ggcoef_model)
+importFrom(ggthemes,scale_colour_few)
 importFrom(glue,glue)
 importFrom(grDevices,colorRampPalette)
-importFrom(grid,unit)
 importFrom(httr,
   GET,
   content,
@@ -262,16 +271,9 @@ importFrom(tibble,
 )
 importFrom(tidygraph,as_tbl_graph)
 importFrom(tidyr,
+  complete,
   nest,
-  pivot_longer,
+  nesting,
   pivot_wider
 )
 importFrom(tidyselect,eval_select)
-importFrom(validate,
-  confront,
-  description,
-  label,
-  summary,
-  validator,
-  values
-)

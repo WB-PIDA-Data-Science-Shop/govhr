@@ -6,18 +6,20 @@
 #'
 #' @param data A data frame. Typically the contract, personnel, or
 #'   establishment dataset for the active module.
-#' @param group Character string. Grouping variable inherited from the
+#' @param group_col A string. Grouping variable inherited from the
 #'   `coverage_group` UI input (e.g. `"ref_date"`, `"grade_id"`).
 #' @param toggle_growth Logical. When `TRUE` the y-axis switches to a
 #'   baseline-index view (first period = 100). Defaults to `FALSE`.
+#' @param group Deprecated. Use `group_col` instead.
 #'
-#' @return A ggplot2 object.
+#' @returns A ggplot2 object.
 #'
 #' @export
-plot_coverage_trend <- function(data, group, toggle_growth = FALSE) {
+plot_coverage_trend <- function(data, group_col, toggle_growth = FALSE, group = NULL) {
+  group_col <- resolve_renamed_arg(group_col, group, "group", "group_col")
   coverage_data <- compute_coverage(
     data,
-    group = group,
+    group_cols = group_col,
     include_ref_date = TRUE,
     aggregate = TRUE
   )
@@ -25,37 +27,39 @@ plot_coverage_trend <- function(data, group, toggle_growth = FALSE) {
   plot_trend(
     coverage_data,
     y_col = "coverage",
-    group_col = group,
+    group_col = group_col,
     toggle_growth = toggle_growth,
     y_label = "Coverage"
   )
 }
 
-#' Plot Consistency Over Time
+#' Plot consistency over time
 #'
 #' @param data A data frame.
-#' @param id_col Character string. The column name of the unique identifier for each record.
-#' @param group Character string. The column name of the grouping variable (e.g., "ref_date").
-#' @param value_col Character string. The column name of the value to be checked for consistency.
-#' @param type_plot Character string. The type of consistency plot ("record" or "value").
+#' @param id_col A string. The column name of the unique identifier for each record.
+#' @param group_col A string. The column name of the grouping variable (e.g., "ref_date").
+#' @param value_col A string. The column name of the value to be checked for consistency.
+#' @param type_plot A string. The type of consistency plot ("record" or "value").
 #' @param toggle_growth Logical. When `TRUE` the y-axis switches to a baseline-index view (first period = 100). Defaults to `FALSE`.
+#' @param group Deprecated. Use `group_col` instead.
 #'
-#' @return A ggplot2 object.
+#' @returns A ggplot2 object.
 #'
-#' @importFrom dplyr collect
 #' @export
 plot_consistency_trend <- function(
   data,
   id_col,
-  group,
+  group_col,
   value_col,
   type_plot,
-  toggle_growth = FALSE
+  toggle_growth = FALSE,
+  group = NULL
 ) {
+  group_col <- resolve_renamed_arg(group_col, group, "group", "group_col")
   # add ref_date to the group if not already included
   group_with_ref_date <- unique(
     c(
-      group,
+      group_col,
       "ref_date"
     )
   )
@@ -73,13 +77,13 @@ plot_consistency_trend <- function(
   plot_trend(
     data,
     y_col = consistency_col,
-    group_col = group,
+    group_col = group_col,
     toggle_growth = toggle_growth,
     y_label = "Consistency"
   )
 }
 
-#' Plot Coverage by Group (Coloured Bar Chart)
+#' Plot coverage by group (coloured bar chart)
 #'
 #' Computes per-group coverage using [compute_coverage()] (without
 #' `ref_date`, not aggregated) and renders a horizontal bar chart coloured
@@ -92,7 +96,7 @@ plot_consistency_trend <- function(
 #' @param data A data frame. Typically the contract, personnel, or
 #'   establishment dataset for the active module.
 #'
-#' @return A ggplot2 object.
+#' @returns A ggplot2 object.
 #'
 #' @import ggplot2
 #' @importFrom dplyr filter mutate case_when
@@ -152,26 +156,27 @@ plot_coverage_bar <- function(data) {
     ggplot2::labs(x = "Coverage", y = "", fill = "Coverage")
 }
 
-#' Plot Coverage Heatmap by Group
+#' Plot coverage heatmap by group
 #'
 #' @param data A data frame.
-#' @param group Character string. Grouping variable.
+#' @param group_col A string. Grouping variable.
+#' @param group Deprecated. Use `group_col` instead.
 #'
 #' @importFrom plotly plot_ly layout
-#' @importFrom dplyr across everything summarise mutate
-#' @importFrom tidyr pivot_longer
+#' @importFrom dplyr mutate
 #' @importFrom scales label_percent
 #'
-#' @return A plotly object representing a heatmap of coverage values by group and variable.
+#' @returns A plotly object representing a heatmap of coverage values by group and variable.
 #' @export
-plot_coverage_heatmap <- function(data, group = NULL) {
-  if (is.null(group) || group == "none") {
-    group <- "ref_date"
+plot_coverage_heatmap <- function(data, group_col = NULL, group = NULL) {
+  group_col <- resolve_renamed_arg(group_col, group, "group", "group_col")
+  if (is.null(group_col) || group_col == "none") {
+    group_col <- "ref_date"
   }
 
   coverage_data <- compute_coverage(
     data,
-    group = group,
+    group_cols = group_col,
     aggregate = FALSE
   ) |>
     dplyr::mutate(
@@ -181,7 +186,7 @@ plot_coverage_heatmap <- function(data, group = NULL) {
   # plot heatmap
   plotly::plot_ly(
     data = coverage_data,
-    x = ~ .data[[group]],
+    x = ~ .data[[group_col]],
     y = ~variable,
     z = ~coverage,
     type = "heatmap",
@@ -207,22 +212,23 @@ plot_coverage_heatmap <- function(data, group = NULL) {
     )
 }
 
-#' Plot Consistency Heatmap by Group
+#' Plot consistency heatmap by group
 #'
 #' @param data A data frame.
-#' @param id_col Character string. The column name of the unique identifier for each record.
-#' @param group Character string. The column name of the grouping variable (e.g., "ref_date").
+#' @param id_col A string. The column name of the unique identifier for each record.
+#' @param group_cols A string. The column name of the grouping variable (e.g., "ref_date").
+#' @param group Deprecated. Use `group_cols` instead.
 #'
 #' @importFrom plotly plot_ly layout
-#' @importFrom dplyr across everything summarise mutate
-#' @importFrom tidyr pivot_longer
+#' @importFrom dplyr mutate
 #' @importFrom scales label_percent
 #' @importFrom purrr map_dfr
 #'
-#' @return A plotly heatmap object representing consistency values by group and variable.
+#' @returns A plotly heatmap object representing consistency values by group and variable.
 #' @export
-plot_consistency_heatmap <- function(data, id_col, group) {
-  value_cols <- setdiff(names(data), c(id_col, group))
+plot_consistency_heatmap <- function(data, id_col, group_cols, group = NULL) {
+  group_cols <- resolve_renamed_arg(group_cols, group, "group", "group_cols")
+  value_cols <- setdiff(names(data), c(id_col, group_cols))
 
   consistency_data <- purrr::map_dfr(
     value_cols,
@@ -230,7 +236,7 @@ plot_consistency_heatmap <- function(data, id_col, group) {
       data,
       id_col = id_col,
       value_col = .x,
-      group_cols = group
+      group_cols = group_cols
     ) |>
       dplyr::mutate(
         variable = .x,
@@ -240,7 +246,7 @@ plot_consistency_heatmap <- function(data, id_col, group) {
 
   plotly::plot_ly(
     data = consistency_data,
-    x = ~ .data[[group]],
+    x = ~ .data[[group_cols]],
     y = ~variable,
     z = ~value_consistency,
     type = "heatmap",

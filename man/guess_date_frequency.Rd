@@ -2,16 +2,16 @@
 % Please edit documentation in R/harmonization.R
 \name{guess_date_frequency}
 \alias{guess_date_frequency}
-\title{Guess the Reporting Frequency of the Reference Dates}
+\title{Guess the reporting frequency of the reference dates}
 \usage{
-guess_date_frequency(.data)
+guess_date_frequency(data)
 }
 \arguments{
-\item{.data}{A dataset containing a column named \code{ref_date} with date values.}
+\item{data}{A dataset containing a column named \code{ref_date} with date values.}
 }
 \value{
 A single character scalar: \code{"year"}, \code{"quarter"},
-  \code{"month"}, \code{"week"}, or \code{"day"}.
+\code{"month"}, \code{"week"}, or \code{"day"}.
 }
 \description{
 Evaluates a vector of reference dates and returns a single

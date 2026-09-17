@@ -2,25 +2,29 @@
 % Please edit documentation in R/transition.R
 \name{detect_reallocation}
 \alias{detect_reallocation}
-\title{Detect Personnel Reallocation Events}
+\title{Detect personnel reallocation events}
 \usage{
 detect_reallocation(data, personnel_hire)
 }
 \arguments{
 \item{data}{A data.frame or tibble containing at least the columns:
-- `personnel_id`: Unique personnel identifier.
-- `ref_date`: Reference date (Date or convertible to Date).
-- `est_id`: Establishment ID.}
+\itemize{
+\item \code{personnel_id}: Unique personnel identifier.
+\item \code{ref_date}: Reference date (Date or convertible to Date).
+\item \code{est_id}: Establishment ID.
+}}
 
 \item{personnel_hire}{A data.frame or tibble containing hire events with columns
-`personnel_id` and `ref_date`.}
+\code{personnel_id} and \code{ref_date}.}
 }
 \value{
 A tibble with columns:
-  - `personnel_id`
-  - `ref_date`
-  - `est_id_nested`: List-column of establishment IDs for that personnel and date.
-  - `type_event`: `"reallocation"` or `"no reallocation"`.
+\itemize{
+\item \code{personnel_id}
+\item \code{ref_date}
+\item \code{est_id_nested}: List-column of establishment IDs for that personnel and date.
+\item \code{type_event}: \code{"reallocation"} or \code{"no reallocation"}.
+}
 }
 \description{
 Identifies reallocation events when a personnel's set of establishments changes

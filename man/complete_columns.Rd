@@ -15,7 +15,7 @@ complete_columns(data, cols)
 A tibble with all requested columns, missing ones filled with NA.
 }
 \description{
-If any column in `cols` is missing from `data`, this function adds it
+If any column in \code{cols} is missing from \code{data}, this function adds it
 and populates it with NA values.
 }
 \examples{

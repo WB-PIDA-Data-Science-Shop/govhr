@@ -2,18 +2,20 @@
 % Please edit documentation in R/qcheck_plots.R
 \name{plot_coverage_heatmap}
 \alias{plot_coverage_heatmap}
-\title{Plot Coverage Heatmap by Group}
+\title{Plot coverage heatmap by group}
 \usage{
-plot_coverage_heatmap(data, group = NULL)
+plot_coverage_heatmap(data, group_col = NULL, group = NULL)
 }
 \arguments{
 \item{data}{A data frame.}
 
-\item{group}{Character string. Grouping variable.}
+\item{group_col}{A string. Grouping variable.}
+
+\item{group}{Deprecated. Use \code{group_col} instead.}
 }
 \value{
 A plotly object representing a heatmap of coverage values by group and variable.
 }
 \description{
-Plot Coverage Heatmap by Group
+Plot coverage heatmap by group
 }

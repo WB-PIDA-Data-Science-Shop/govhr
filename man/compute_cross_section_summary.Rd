@@ -2,22 +2,22 @@
 % Please edit documentation in R/overview.R
 \name{compute_cross_section_summary}
 \alias{compute_cross_section_summary}
-\title{Compute Cross-Section Summary}
+\title{Compute cross-section summary}
 \usage{
-compute_cross_section_summary(.data, group_col, measure_col = NULL)
+compute_cross_section_summary(data, group_col, measure_col = NULL)
 }
 \arguments{
-\item{.data}{Data frame containing `ref_date` and the grouping column.}
+\item{data}{Data frame containing \code{ref_date} and the grouping column.}
 
 \item{group_col}{Character. Column to group by.}
 
-\item{measure_col}{Character. Numeric column to sum, or `NULL` to count rows.}
+\item{measure_col}{Character. Numeric column to sum, or \code{NULL} to count rows.}
 }
 \value{
-A data frame with the grouping column and a `value` column.
+A data frame with the grouping column and a \code{value} column.
 }
 \description{
 Keeps each group's latest reference date and aggregates it into a single
-`value` per group. Counts rows when `measure_col` is `NULL` (headcount) and
+\code{value} per group. Counts rows when \code{measure_col} is \code{NULL} (headcount) and
 sums the column otherwise (wage bill).
 }

@@ -7,11 +7,11 @@
 \format{
 A tibble with 9 rows and 5 variables:
 \describe{
-  \item{rule}{Character. The validation rule expression as a string that can be parsed by \code{validate::validator()}.}
-  \item{name}{Character. Unique identifier for the rule (e.g., "personnel_ref_date_valid").}
-  \item{description}{Character. Detailed explanation of what the rule checks. This description appears in validation summaries.}
-  \item{label}{Character. Short 2-3 word label for the rule, useful for plotting and quick reference.}
-  \item{required_vars}{Character. Comma-separated list of minimum required variables for the rule to be evaluated. At minimum: personnel_id and birth_date.}
+\item{rule}{Character. The validation rule expression as a string that can be parsed by \code{validate::validator()}.}
+\item{name}{Character. Unique identifier for the rule (e.g., "personnel_ref_date_valid").}
+\item{description}{Character. Detailed explanation of what the rule checks. This description appears in validation summaries.}
+\item{label}{Character. Short 2-3 word label for the rule, useful for plotting and quick reference.}
+\item{required_vars}{Character. Comma-separated list of minimum required variables for the rule to be evaluated. At minimum: personnel_id and birth_date.}
 }
 }
 \source{
@@ -28,12 +28,12 @@ assess the quality and consistency of personnel records in HRMIS data.
 \details{
 The personnel validation rules check:
 \itemize{
-  \item Column existence (personnel_id, ref_date, birth_date, status)
-  \item ID uniqueness (personnel_id + ref_date combination is unique)
-  \item Reference date validity (within reasonable historical bounds)
-  \item Age range (18-70 years calculated from birth_date and ref_date)
-  \item Birth date reasonableness
-  \item Employment status validity (active, inactive, retired, terminated)
+\item Column existence (personnel_id, ref_date, birth_date, status)
+\item ID uniqueness (personnel_id + ref_date combination is unique)
+\item Reference date validity (within reasonable historical bounds)
+\item Age range (18-70 years calculated from birth_date and ref_date)
+\item Birth date reasonableness
+\item Employment status validity (active, inactive, retired, terminated)
 }
 
 These rules can be programmatically converted to \code{validate::validator()} objects

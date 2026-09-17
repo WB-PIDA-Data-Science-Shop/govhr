@@ -9,7 +9,7 @@ ggplot_coef(model, coef)
 \arguments{
 \item{model}{A fitted model object (e.g., lm, glm).}
 
-\item{coef}{A character string of coefficient name to plot. It can be a regular expression (e.g., "^term").}
+\item{coef}{A string of coefficient name to plot. It can be a regular expression (e.g., "^term").}
 }
 \value{
 A ggplot object showing coefficients with error bars.

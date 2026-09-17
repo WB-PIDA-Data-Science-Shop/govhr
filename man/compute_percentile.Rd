@@ -2,10 +2,10 @@
 % Please edit documentation in R/equity.R
 \name{compute_percentile}
 \alias{compute_percentile}
-\title{Bin a Measure into a Share Distribution}
+\title{Bin a measure into a share distribution}
 \usage{
 compute_percentile(
-  .data,
+  data,
   group_col = NULL,
   measure_col,
   binwidth = 1,
@@ -13,23 +13,23 @@ compute_percentile(
 )
 }
 \arguments{
-\item{.data}{Data frame containing a `ref_date` column and the measure.}
+\item{data}{Data frame containing a \code{ref_date} column and the measure.}
 
-\item{group_col}{Character. Column to group by, or `NULL` for no grouping.}
+\item{group_col}{Character. Column to group by, or \code{NULL} for no grouping.}
 
 \item{measure_col}{Character. Numeric column to bin.}
 
-\item{binwidth}{Numeric. Width of each bin. Default `1`.}
+\item{binwidth}{Numeric. Width of each bin. Default \code{1}.}
 
 \item{latest_measure}{Logical. Restrict to the latest reference date. Default
-`FALSE`.}
+\code{FALSE}.}
 }
 \value{
-A data frame with the grouping column, `bin`, `count`, `pct` and
-  `cum_pct`.
+A data frame with the grouping column, \code{bin}, \code{count}, \code{pct} and
+\code{cum_pct}.
 }
 \description{
-Bins `measure_col` at a fixed width and reports each bin's share and
+Bins \code{measure_col} at a fixed width and reports each bin's share and
 cumulative share of observations, filling empty bins with zero so the
 distribution is gap-free.
 }

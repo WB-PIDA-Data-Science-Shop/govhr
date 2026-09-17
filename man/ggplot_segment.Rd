@@ -4,14 +4,14 @@
 \alias{ggplot_segment}
 \title{Plot segments overlaid with points, ordered by median}
 \usage{
-ggplot_segment(.data, col, group)
+ggplot_segment(data, col, group_col)
 }
 \arguments{
-\item{.data}{A data.frame or tibble.}
+\item{data}{A data.frame or tibble.}
 
 \item{col}{Unquoted numeric column (values).}
 
-\item{group}{Unquoted grouping column.}
+\item{group_col}{Unquoted grouping column.}
 }
 \value{
 A ggplot object.

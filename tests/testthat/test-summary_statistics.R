@@ -92,7 +92,7 @@ test_that("compute_time_trend counts rows per period when measure_col is NULL", 
     group = c("A", "A", "A")
   )
 
-  out <- compute_time_trend(df, group = "ref_date")
+  out <- compute_time_trend(df, group_col = "ref_date")
 
   expect_equal(out$value, c(2, 1))
 })
@@ -104,7 +104,7 @@ test_that("compute_time_trend sums measure_col per group and ref_date when suppl
     wage = c(10, 20, 5)
   )
 
-  out <- compute_time_trend(df, group = "group", measure_col = "wage")
+  out <- compute_time_trend(df, group_col = "group", measure_col = "wage")
 
   expect_equal(sum(out$value), 35)
 })
@@ -117,7 +117,7 @@ test_that("rescale_baseline indexes the first ungrouped value to 100", {
     value = c(50, 75, 100)
   )
 
-  out <- rescale_baseline(df, group = "ref_date")
+  out <- rescale_baseline(df, group_col = "ref_date")
 
   expect_equal(out$value[1], 100)
   expect_equal(out$value[2], 150)
@@ -130,7 +130,7 @@ test_that("rescale_baseline indexes within each group separately", {
     value = c(10, 20, 5, 15)
   )
 
-  out <- rescale_baseline(df, group = "group")
+  out <- rescale_baseline(df, group_col = "group")
 
   expect_equal(out$value[out$group == "A"], c(100, 200))
   expect_equal(out$value[out$group == "B"], c(100, 300))
@@ -145,7 +145,7 @@ test_that("compute_cross_section filters to the latest ref_date per group and su
     wage = c(10, 20, 5, 15)
   )
 
-  out <- compute_cross_section(df, group = "group", measure_col = "wage")
+  out <- compute_cross_section(df, group_cols = "group", measure_col = "wage")
 
   expect_equal(out$value[out$group == "A"], 20)
   expect_equal(out$value[out$group == "B"], 15)
@@ -157,7 +157,7 @@ test_that("compute_cross_section counts rows when measure_col is NULL", {
     ref_date = as.Date(c("2020-01-01", "2020-02-01", "2020-02-01", "2020-01-01"))
   )
 
-  out <- compute_cross_section(df, group = "group")
+  out <- compute_cross_section(df, group_cols = "group")
 
   expect_equal(out$value[out$group == "A"], 2)
   expect_equal(out$value[out$group == "B"], 1)
@@ -172,7 +172,7 @@ test_that("compute_growth computes percentage change from first to last ref_date
     wage = c(100, 110, 150)
   )
 
-  out <- compute_growth(df, group = "group", measure_col = "wage")
+  out <- compute_growth(df, group_col = "group", measure_col = "wage")
 
   expect_equal(out$growth_rate, 50)
 })
@@ -183,7 +183,7 @@ test_that("compute_growth counts rows per group when measure_col is NULL", {
     ref_date = as.Date(c("2020-01-01", "2020-01-01", "2020-03-01", "2020-03-01"))
   )
   # first period: 2 rows, last period: 2 rows -> 0% growth
-  out <- compute_growth(df, group = "group")
+  out <- compute_growth(df, group_col = "group")
 
   expect_equal(out$growth_rate, 0)
 })

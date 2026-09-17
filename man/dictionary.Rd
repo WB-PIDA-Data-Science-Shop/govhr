@@ -7,12 +7,12 @@
 \format{
 A tibble with 50 rows and 6 variables:
 \describe{
-  \item{variable_name}{Character. Human-readable name of the standardized variable.}
-  \item{variable_id}{Character. Standardized machine-readable variable identifier.}
-  \item{variable_description}{Character. Definition and intended use of the variable.}
-  \item{variable_class}{Character. Expected R class for the variable.}
-  \item{module}{Character. Harmonization module to which the variable belongs.}
-  \item{values}{Character. Expected values, formats, coding schemes, or controlled vocabularies associated with the variable.}
+\item{variable_name}{Character. Human-readable name of the standardized variable.}
+\item{variable_id}{Character. Standardized machine-readable variable identifier.}
+\item{variable_description}{Character. Definition and intended use of the variable.}
+\item{variable_class}{Character. Expected R class for the variable.}
+\item{module}{Character. Harmonization module to which the variable belongs.}
+\item{values}{Character. Expected values, formats, coding schemes, or controlled vocabularies associated with the variable.}
 }
 }
 \source{
@@ -42,22 +42,22 @@ schema, enabling cross-country comparability and reproducible analytics.
 The dictionary contains the following fields:
 
 \itemize{
-  \item \strong{variable_name} -- Human-readable name of the standardized variable.
-  \item \strong{variable_id} -- Machine-readable variable identifier used in harmonized datasets.
-  \item \strong{variable_description} -- Definition and intended use of the variable.
-  \item \strong{variable_class} -- Expected R data type for the variable.
-  \item \strong{module} -- Harmonization module to which the variable belongs (e.g., Establishment, Personnel, or Contract).
-  \item \strong{values} -- Expected values, formats, coding schemes, or controlled vocabularies associated with the variable.
+\item \strong{variable_name} -- Human-readable name of the standardized variable.
+\item \strong{variable_id} -- Machine-readable variable identifier used in harmonized datasets.
+\item \strong{variable_description} -- Definition and intended use of the variable.
+\item \strong{variable_class} -- Expected R data type for the variable.
+\item \strong{module} -- Harmonization module to which the variable belongs (e.g., Establishment, Personnel, or Contract).
+\item \strong{values} -- Expected values, formats, coding schemes, or controlled vocabularies associated with the variable.
 }
 
 This dictionary is designed to support:
 
 \enumerate{
-  \item Validation of required variables and schema compliance;
-  \item Standardized renaming of source variables;
-  \item Data type coercion and consistency checks;
-  \item Generation of harmonized module-specific outputs;
-  \item Documentation and governance of the GovHR data standard.
+\item Validation of required variables and schema compliance;
+\item Standardized renaming of source variables;
+\item Data type coercion and consistency checks;
+\item Generation of harmonized module-specific outputs;
+\item Documentation and governance of the GovHR data standard.
 }
 }
 \section{Dictionary Version}{
@@ -71,7 +71,7 @@ harmonization dictionary.
 \section{Version History}{
 
 \itemize{
-  \item \strong{Version 1.0.0} (2026-06-25): Initial release.
+\item \strong{Version 1.0.0} (2026-06-25): Initial release.
 }
 }
 

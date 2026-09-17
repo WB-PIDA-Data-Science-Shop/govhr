@@ -2,19 +2,19 @@
 % Please edit documentation in R/plots.R
 \name{plot_compression_ratio}
 \alias{plot_compression_ratio}
-\title{Plot Compression Ratio}
+\title{Plot compression ratio}
 \usage{
-plot_compression_ratio(.data, group_cols = NULL)
+plot_compression_ratio(data, group_cols = NULL)
 }
 \arguments{
-\item{.data}{A data frame containing the compression ratio data produced by `compute_compression_ratio()`.}
+\item{data}{A data frame containing the compression ratio data produced by \code{compute_compression_ratio()}.}
 
-\item{group_cols}{A character string indicating the grouping column, or "ref_date"
+\item{group_cols}{A character vector of columns to group by, or \code{"ref_date"}
 for no grouping.}
 }
 \value{
 A ggplot2 object representing the compression ratio.
 }
 \description{
-Plot Compression Ratio
+Plot compression ratio
 }

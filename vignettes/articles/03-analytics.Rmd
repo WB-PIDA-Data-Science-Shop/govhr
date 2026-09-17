@@ -27,22 +27,22 @@ The function `compute_time_trend` and its companion plotting function `plot_tren
 # total headcount by reference date
 headcount_trend <- compute_time_trend(
   govhr::bra_hrmis_personnel,
-  group = "ref_date"
+  group_col = "ref_date"
 )
 
-plot_trend(headcount_trend, group = "ref_date")
+plot_trend(headcount_trend, group_col = "ref_date")
 ```
 
-You might also be curious about how time trends for headcount varies across groups, such as gender. Modifying the `group` argument makes that possible. Note that implicitly the function will still take the reference date into account.
+You might also be curious about how time trends for headcount varies across groups, such as gender. Modifying the `group_col` argument makes that possible. Note that implicitly the function will still take the reference date into account.
 
 ```{r}
 # total headcount by reference date and gender
 headcount_trend_gender <- compute_time_trend(
   govhr::bra_hrmis_personnel,
-  group = c("gender")
+  group_col = c("gender")
 )
 
-plot_trend(headcount_trend_gender, group = c("gender"))
+plot_trend(headcount_trend_gender, group_col = c("gender"))
 ```
 
 ## Movement
@@ -61,7 +61,7 @@ plot_movement(
     movement_hire_count,
     movement_type = "hire",
     measurement_type = "count",
-    group = "ref_date"
+    group_cols = "ref_date"
 )
 ```
 Again, if you are interested in how these flows vary across groups, you can modify the `group_cols` argument to include additional grouping variables.
@@ -78,7 +78,7 @@ plot_movement(
     movement_hire_gender_count,
     movement_type = "hire",
     measurement_type = "count",
-    group = "gender"
+    group_cols = "gender"
 )
 ```
 
@@ -90,25 +90,25 @@ Most of the analysis presented in the workforce analytics section can be replica
 # total wagebill by reference date
 wagebill_trend <- compute_time_trend(
   govhr::bra_hrmis_contract,
-  group = "ref_date",
+  group_col = "ref_date",
   measure_col = "gross_salary_lcu"
 )
 
-plot_trend(wagebill_trend, group = "ref_date")
+plot_trend(wagebill_trend, group_col = "ref_date")
 ```
 
-A similar differentiation by group is possible, using the same grammar for the `group` argument.
+A similar differentiation by group is possible, using the same grammar for the `group_col` argument.
 
 ```{r}
 # total wagebill by reference date
 wagebill_paygrade_trend <- govhr::bra_hrmis_contract |>
     filter(!is.na(paygrade)) |>
     compute_time_trend(
-        group = "paygrade",
+        group_col = "paygrade",
         measure_col = "gross_salary_lcu"
     )
 
-plot_trend(wagebill_paygrade_trend, group = "paygrade")
+plot_trend(wagebill_paygrade_trend, group_col = "paygrade")
 ```
 
 ## Equity

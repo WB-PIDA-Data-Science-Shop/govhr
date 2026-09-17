@@ -2,19 +2,19 @@
 % Please edit documentation in R/zzz.R
 \name{validate_date_format}
 \alias{validate_date_format}
-\title{Validate Date Format}
+\title{Validate date format}
 \usage{
 validate_date_format(date, varname)
 }
 \arguments{
-\item{date}{Object to validate}
+\item{date}{Object to validate.}
 
-\item{varname}{Character. Variable name for error messages}
+\item{varname}{Character. Variable name for error messages.}
 }
 \value{
 Invisible TRUE if valid, stops with error otherwise
 }
 \description{
-Validate Date Format
+Validate date format
 }
 \keyword{internal}

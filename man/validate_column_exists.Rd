@@ -2,21 +2,21 @@
 % Please edit documentation in R/zzz.R
 \name{validate_column_exists}
 \alias{validate_column_exists}
-\title{Validate Column Exists in Data Table}
+\title{Validate column exists in data table}
 \usage{
 validate_column_exists(dt, colname, varname)
 }
 \arguments{
-\item{dt}{data.table to check}
+\item{dt}{Data.table to check.}
 
-\item{colname}{Character. Column name to validate}
+\item{colname}{Character. Column name to validate.}
 
-\item{varname}{Character. Variable name for error messages}
+\item{varname}{Character. Variable name for error messages.}
 }
 \value{
 Invisible TRUE if valid, stops with error otherwise
 }
 \description{
-Validate Column Exists in Data Table
+Validate column exists in data table
 }
 \keyword{internal}

@@ -2,13 +2,13 @@
 % Please edit documentation in R/overview.R
 \name{plot_bar_growth}
 \alias{plot_bar_growth}
-\title{Plot Growth Rates by Group}
+\title{Plot growth rates by group}
 \usage{
-plot_bar_growth(.data, group_col)
+plot_bar_growth(data, group_col)
 }
 \arguments{
-\item{.data}{Data frame with the grouping column and a `growth_rate` column,
-as returned by [compute_growth_summary()].}
+\item{data}{Data frame with the grouping column and a \code{growth_rate} column,
+as returned by \code{\link[=compute_growth_summary]{compute_growth_summary()}}.}
 
 \item{group_col}{Character. Column to group by.}
 }
@@ -16,6 +16,6 @@ as returned by [compute_growth_summary()].}
 A ggplot2 object.
 }
 \description{
-Draws a horizontal bar chart with groups ordered by `growth_rate`, with a
+Draws a horizontal bar chart with groups ordered by \code{growth_rate}, with a
 dashed reference line at zero separating growth from decline.
 }

@@ -5,7 +5,7 @@
 \title{Project Retirement Dates}
 \usage{
 project_retirement(
-  .data,
+  data,
   threshold_age = 60,
   birth_col = "birth_date",
   group_cols = NULL,
@@ -16,7 +16,7 @@ project_retirement(
 )
 }
 \arguments{
-\item{.data}{A data frame, either the workforce or wage bill data.}
+\item{data}{A data frame, either the workforce or wage bill data.}
 
 \item{threshold_age}{The age at which personnel are considered eligible for retirement (default is 60).}
 

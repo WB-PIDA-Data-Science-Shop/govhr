@@ -7,23 +7,23 @@
 \format{
 A data frame with 60,430 rows and 5 variables:
 \describe{
-  \item{contract_id}{Character. Unique identifier for the employment
-  contract associated with the allowance.}
+\item{contract_id}{Character. Unique identifier for the employment
+contract associated with the allowance.}
 
-  \item{ref_date}{Date. Reference date for the payroll record.}
+\item{ref_date}{Date. Reference date for the payroll record.}
 
-  \item{allowance_type}{Character. Harmonized allowance or bonus category.}
+\item{allowance_type}{Character. Harmonized allowance or bonus category.}
 
-  \item{allowance_lcu}{Numeric. Value of the allowance in local currency
-  units (LCU).}
+\item{allowance_lcu}{Numeric. Value of the allowance in local currency
+units (LCU).}
 
-  \item{personnel_id}{Character. Unique identifier for the individual
-  receiving the allowance.}
+\item{personnel_id}{Character. Unique identifier for the individual
+receiving the allowance.}
 }
 }
 \source{
 Government of the State of Alagoas Human Resource Management Information
-System (HRMIS), harmonized by the `govhrcast` package.
+System (HRMIS), harmonized by the \code{govhrcast} package.
 }
 \usage{
 data(bra_hrmis_allowance)
@@ -36,9 +36,8 @@ reference period.
 }
 \details{
 The dataset follows a long format, with one observation per
-`contract_id`–`ref_date`–`allowance_type` combination. Monetary values are
+\code{contract_id}–\code{ref_date}–\code{allowance_type} combination. Monetary values are
 reported in local currency units (LCU).
-
 
 The allowance module records non-base salary remuneration components paid
 to employees, including permanent and temporary allowances, bonuses,

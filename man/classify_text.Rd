@@ -22,24 +22,26 @@ classify_text(
 \item{corpus}{A data.frame with at minimum an id column and a text column.}
 
 \item{taxonomy}{Either:
-- A named character vector: names = class IDs, values = class labels/descriptions
-- A data.frame with columns identified by `class_id_col` and `class_label_col`}
+\itemize{
+\item A named character vector: names = class IDs, values = class labels/descriptions
+\item A data.frame with columns identified by \code{class_id_col} and \code{class_label_col}
+}}
 
-\item{id_col}{Name of the id column in `corpus`. Default "id".}
+\item{id_col}{Name of the id column in \code{corpus}. Default "id".}
 
-\item{text_col}{Name of the text column in `corpus`. Default "text".}
+\item{text_col}{Name of the text column in \code{corpus}. Default "text".}
 
-\item{class_id_col}{Name of the class ID column in `taxonomy` (if data.frame). Default "class_id".}
+\item{class_id_col}{Name of the class ID column in \code{taxonomy} (if data.frame). Default "class_id".}
 
-\item{class_label_col}{Name of the class label column in `taxonomy` (if data.frame). Default "class_label".}
+\item{class_label_col}{Name of the class label column in \code{taxonomy} (if data.frame). Default "class_label".}
 
 \item{num_leaves}{Number of top-matching classes to return per item. Default 1.}
 
 \item{method}{"tfidf_sum" (mirrors labourR) or "cosine" (improved, length-normalised). Default "tfidf_sum".}
 
-\item{max_dist}{Maximum string distance for fuzzy token matching (used when `string_dist` is set).}
+\item{max_dist}{Maximum string distance for fuzzy token matching (used when \code{string_dist} is set).}
 
-\item{string_dist}{String distance method passed to `stringdist::amatch()`. NULL disables fuzzy matching.}
+\item{string_dist}{String distance method passed to \code{stringdist::amatch()}. NULL disables fuzzy matching.}
 
 \item{stopwords}{Character vector of stopwords to remove. NULL uses a built-in English set.}
 }

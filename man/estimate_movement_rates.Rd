@@ -2,10 +2,10 @@
 % Please edit documentation in R/movement_summarize.R
 \name{estimate_movement_rates}
 \alias{estimate_movement_rates}
-\title{Estimate Movement Baseline from Panel Data}
+\title{Estimate movement baseline from panel data}
 \usage{
 estimate_movement_rates(
-  contract_dt,
+  contracts,
   group_cols,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
@@ -16,10 +16,10 @@ estimate_movement_rates(
 )
 }
 \arguments{
-\item{contract_dt}{data.table. Contract data in long (panel) format.
+\item{contracts}{Data.table. Contract data in long (panel) format.
 Must contain \code{ref_date_col} for panel snapshot identification.}
 
-\item{group_cols}{Character vector. One or more columns defining the movement
+\item{group_cols}{A character vector. One or more columns defining the movement
 states between which transitions are measured
 (e.g., \code{c("est_id", "paygrade")} or \code{c("paygrade")}). Values
 are concatenated into a single state label when multiple columns are
@@ -46,34 +46,34 @@ the output (see Value). Default: \code{NULL}.}
 }
 \value{
 A \code{data.table} with one row per
-  \code{(from_group, to_group, from_period, to_period)} transition pair,
-  keyed on those four columns. Returns an empty \code{data.table} with the
-  same schema if no valid transitions are found. Columns:
-  \describe{
-    \item{from_group}{Character. Concatenated \code{group_cols} state at the
-      start of the period (T0).}
-    \item{to_group}{Character. Concatenated \code{group_cols} state at the
-      end of the period (T1).}
-    \item{movement_rate}{Numeric. Empirical transition probability for this
-      specific period pair: \eqn{n\_moves / n\_pop}.}
-    \item{from_period}{Date. Snapshot date at the start of the period (T0).}
-    \item{to_period}{Date. Snapshot date at the end of the period (T1).}
-    \item{n_pop}{Integer. Number of persons in \code{from_group} at T0.}
-    \item{n_moves}{Integer. Number of persons who moved from
-      \code{from_group} to \code{to_group} between T0 and T1.}
-  }
-  When \code{salary_col} is not \code{NULL}, five additional columns are
-  appended:
-  \describe{
-    \item{mean_salary_t0}{Numeric. Mean salary in \code{from_group} at T0.}
-    \item{mean_salary_t1}{Numeric. Mean salary in \code{to_group} at T1.}
-    \item{mean_salary_change}{Numeric. Absolute change in mean salary
-      (T1 minus T0).}
-    \item{median_salary_change}{Numeric. Median absolute salary change across
-      movers.}
-    \item{mean_salary_pct_change}{Numeric. Mean percentage salary change
-      across movers.}
-  }
+\code{(from_group, to_group, from_period, to_period)} transition pair,
+keyed on those four columns. Returns an empty \code{data.table} with the
+same schema if no valid transitions are found. Columns:
+\describe{
+\item{from_group}{Character. Concatenated \code{group_cols} state at the
+start of the period (T0).}
+\item{to_group}{Character. Concatenated \code{group_cols} state at the
+end of the period (T1).}
+\item{movement_rate}{Numeric. Empirical transition probability for this
+specific period pair: \eqn{n\_moves / n\_pop}.}
+\item{from_period}{Date. Snapshot date at the start of the period (T0).}
+\item{to_period}{Date. Snapshot date at the end of the period (T1).}
+\item{n_pop}{Integer. Number of persons in \code{from_group} at T0.}
+\item{n_moves}{Integer. Number of persons who moved from
+\code{from_group} to \code{to_group} between T0 and T1.}
+}
+When \code{salary_col} is not \code{NULL}, five additional columns are
+appended:
+\describe{
+\item{mean_salary_t0}{Numeric. Mean salary in \code{from_group} at T0.}
+\item{mean_salary_t1}{Numeric. Mean salary in \code{to_group} at T1.}
+\item{mean_salary_change}{Numeric. Absolute change in mean salary
+(T1 minus T0).}
+\item{median_salary_change}{Numeric. Median absolute salary change across
+movers.}
+\item{mean_salary_pct_change}{Numeric. Mean percentage salary change
+across movers.}
+}
 }
 \description{
 Analyzes longitudinal panel data to compute empirical transition probabilities

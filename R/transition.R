@@ -1,6 +1,6 @@
 
 
-#' Detect Personnel Reallocation Events
+#' Detect personnel reallocation events
 #'
 #' Identifies reallocation events when a personnel's set of establishments changes
 #' between consecutive reference dates. Removes hire events and only keeps
@@ -13,7 +13,7 @@
 #' @param personnel_hire A data.frame or tibble containing hire events with columns
 #'   `personnel_id` and `ref_date`.
 #'
-#' @return A tibble with columns:
+#' @returns A tibble with columns:
 #'   - `personnel_id`
 #'   - `ref_date`
 #'   - `est_id_nested`: List-column of establishment IDs for that personnel and date.
@@ -68,128 +68,7 @@ detect_reallocation <- function(data, personnel_hire) {
   return(data_reallocation)
 }
 
-#' Detect Career Transitions Based on Contract Attributes
-#'
-#' @description
-#' Identifies transitions in specified job-related attributes (e.g., pay grade, seniority)
-#' for each personnel over time. The function first determines the "dominant" contract
-#' per personnel and reference date based on a decision variable (e.g., highest base salary),
-#' and then detects when the selected attributes change across time.
-#'
-#' @param contract_dt A `data.table`, `data.frame` object containing contract level records.
-#' Must include columns for `personnel_id`, `ref_date`, the variables listed in `vars`,
-#' and the `decision_var`.
-#' @param vars A character vector of attribute names (column names) to monitor for changes
-#' (e.g., `c("paygrade", "seniority")`).
-#' @param decision_var A string specifying the column name used to identify the dominant
-#' contract per personnel and date (e.g., `"base_salary_lcu"`).
-#' @param decision_fn A function defining the decision rule for selecting the dominant
-#' contract within each personnel-date group (default: `max`). Typically `max`, `min`, or
-#' a custom summary function.
-#'
-#' @details
-#' The function:
-#' \enumerate{
-#'   \item Sorts contracts by `personnel_id`, `ref_date`, and the decision variable.
-#'   \item Selects the dominant contract per personnel-date combination using `decision_fn`.
-#'   \item For each attribute in `vars`, compares its value to the previous record
-#'   (by personnel) and detects any changes.
-#'   \item Returns all transitions, including the attribute name, previous and new values,
-#'   and the start and end dates for the transition.
-#' }
-#'
-#' The function assumes that higher values of `decision_var` represent more dominant
-#' contracts when `decision_fn = max`. If ties occur, the first instance is selected.
-#'
-#' @return A `data.table` with the following columns:
-#' \describe{
-#'   \item{personnel_id}{Unique personnel identifier.}
-#'   \item{start_date}{Date of the previous contract before the change.}
-#'   \item{ref_date}{Date when the new attribute value takes effect.}
-#'   \item{attribute}{Name of the attribute that changed.}
-#'   \item{from}{Previous value of the attribute.}
-#'   \item{to}{New value of the attribute.}
-#' }
-#'
-#' @examples
-#' library(data.table)
-#' dt <- data.table(
-#'   personnel_id = c(1, 1, 1, 2, 2),
-#'   ref_date = as.Date(c("2020-01-01", "2021-01-01", "2022-01-01",
-#'                        "2020-06-01", "2021-06-01")),
-#'   paygrade = c("A", "A", "B", "C", "D"),
-#'   seniority = c(1, 2, 3, 1, 2),
-#'   base_salary_lcu = c(50000, 55000, 60000, 40000, 42000)
-#' )
-#'
-#' detect_career_transitions(
-#'   contract_dt = dt,
-#'   vars = c("paygrade", "seniority"),
-#'   decision_var = "base_salary_lcu"
-#' )
-#'
-#' @export
-detect_career_transitions <- function(
-  contract_dt,
-  vars,
-  decision_var,
-  decision_fn = max
-) {
-  # Keep only needed columns
-  contract_dt <- contract_dt[,
-    c("personnel_id", "ref_date", vars, decision_var),
-    with = FALSE
-  ]
-
-  # Sort by personnel, date, and decision variable
-  setorderv(
-    contract_dt,
-    c("personnel_id", "ref_date", decision_var),
-    order = c(1, 1, -1)
-  )
-
-  # Apply decision rule: pick the dominant job for each personnel-date
-  # We assume decision_fn = max by default (i.e. highest of whatever decision_var)
-  contract_main <- contract_dt[,
-    .SD[get(decision_var) == decision_fn(get(decision_var))][1],
-    by = .(personnel_id, ref_date)
-  ]
-
-  # Now detect transitions for each variable
-  detect_transitions <- function(attr) {
-    # Add previous value by personnel
-    contract_main[,
-      paste0(attr, "_prev") := shift(get(attr)),
-      by = personnel_id
-    ]
-
-    # Keep rows where the attribute changed
-    transitions <- contract_main[
-      get(attr) != get(paste0(attr, "_prev")),
-      .(
-        personnel_id,
-        start_date = shift(ref_date, 1L, type = "lag"),
-        ref_date,
-        attribute = attr,
-        from = get(paste0(attr, "_prev")),
-        to = get(attr)
-      ),
-      by = personnel_id
-    ]
-
-    return(transitions[])
-  }
-
-  # Apply transition detection across all attributes
-  transitions_list <- lapply(vars, detect_transitions)
-
-  # Combine all attributes into one long data.table
-  transitions_dt <- data.table::rbindlist(transitions_list, use.names = TRUE)
-
-  return(transitions_dt[])
-}
-
-#' Detect Career Transitions
+#' Detect career transitions
 #'
 #' Collapses each entity's history into spells of consecutive periods in the
 #' same group, then pairs each spell with the one that follows it. A row is
@@ -201,7 +80,7 @@ detect_career_transitions <- function(
 #' holding more than one record in the same period has no well-defined position,
 #' so every record for that entity is dropped with a warning reporting how many.
 #'
-#' @param .data Data frame containing a `ref_date` column, the identifier and
+#' @param data Data frame containing a `ref_date` column, the identifier and
 #'   the grouping columns.
 #' @param id_col Character. Column identifying the entity whose career is
 #'   tracked. Default `"contract_id"`.
@@ -210,17 +89,17 @@ detect_career_transitions <- function(
 #' @param return_all Logical. Keep terminal spells, which have no destination
 #'   and so carry `NA` in both `to` and `ref_date`. Default `FALSE`.
 #'
-#' @return A data table with the identifier, `from`, `to`, `from_date` and
+#' @returns A data table with the identifier, `from`, `to`, `from_date` and
 #'   `ref_date`.
 #'
 #' @importFrom data.table as.data.table rleidv setnames setorderv shift
 #' @importFrom stats complete.cases
 #' @export
 detect_career_transition <- function(
-  .data, id_col = "contract_id", group_cols,
+  data, id_col = "contract_id", group_cols,
   return_all = FALSE
 ) {
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
 
   dt <- dt[
     stats::complete.cases(dt[, c(id_col, group_cols), with = FALSE])
@@ -306,26 +185,26 @@ detect_career_transition <- function(
 }
 
 
-#' Plot Transfer Heatmap
+#' Plot transfer heatmap
 #'
 #' Draws transfers between groups as a heatmap, origin groups on the y-axis and
 #' destination groups on the x-axis.
 #'
-#' @param .data Data frame with `from`, `to` and `transfer` columns.
+#' @param data Data frame with `from`, `to` and `transfer` columns.
 #'
-#' @return A plotly object.
+#' @returns A plotly object.
 #'
 #' @importFrom plotly layout plot_ly
 #' @importFrom stats median
 #' @keywords internal
-plot_transfer_heatmap <- function(.data) {
-  transfer <- .data[["transfer"]]
+plot_transfer_heatmap <- function(data) {
+  transfer <- data[["transfer"]]
 
   plotly::plot_ly(
-    data = .data,
-    x = ~ .data[["to"]],
-    y = ~ .data[["from"]],
-    z = ~ .data[["transfer"]],
+    data = data,
+    x = ~ data[["to"]],
+    y = ~ data[["from"]],
+    z = ~ data[["transfer"]],
     type = "heatmap",
     colorscale = list(
       c(min(transfer, na.rm = TRUE), "#d32f2f"),
@@ -350,21 +229,20 @@ plot_transfer_heatmap <- function(.data) {
     )
 }
 
-#' Plot Transition Network
+#' Plot transition network
 #'
 #' Draws career transitions as a directed graph, with edge width proportional to
 #' the number of transitions and node size to degree centrality. Networks of ten
 #' or more nodes are labelled by index rather than by name.
 #'
-#' @param .data Data frame with `from` and `to` columns, as returned by
+#' @param data Data frame with `from` and `to` columns, as returned by
 #'   [detect_career_transition()].
 #'
-#' @return A ggiraph girafe object.
+#' @returns A ggiraph girafe object.
 #'
 #' @importFrom dplyr across mutate pull row_number
 #' @importFrom ggplot2 aes coord_cartesian expansion margin scale_color_manual
 #'   scale_size_identity scale_x_continuous scale_y_continuous theme theme_void
-#' @importFrom govhr fastcount
 #' @importFrom grDevices colorRampPalette
 #' @importFrom tidygraph as_tbl_graph
 #' @importFrom igraph gorder
@@ -374,8 +252,8 @@ plot_transfer_heatmap <- function(.data) {
 #' 
 #' @keywords internal
 #' @export
-plot_transition_network <- function(.data) {
-  edges <- govhr::fastcount(.data, .data[["from"]], .data[["to"]], name = "weight") |>
+plot_transition_network <- function(data) {
+  edges <- govhr::fastcount(data, .data[["from"]], .data[["to"]], name = "weight") |>
     # coerce to character to ensure that as_tble_graph produces a `name` column
     dplyr::mutate(
       dplyr::across(

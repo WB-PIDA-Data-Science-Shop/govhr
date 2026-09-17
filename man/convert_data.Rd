@@ -2,12 +2,12 @@
 % Please edit documentation in R/harmonization.R
 \name{convert_data}
 \alias{convert_data}
-\title{Convert Data to Match Original Class}
+\title{Convert data to match original class}
 \usage{
 convert_data(data, data_original)
 }
 \arguments{
-\item{data}{A dataset to be converted. Typically a `data.table` or `data.frame`.}
+\item{data}{A dataset to be converted. Typically a \code{data.table} or \code{data.frame}.}
 
 \item{data_original}{The original dataset whose class should be matched.}
 }
@@ -18,16 +18,16 @@ The input \code{data} converted to the same class as \code{data_original}.
 Converts a dataset to have the same class as another reference dataset.
 This is useful for ensuring consistent output formats when performing
 operations that temporarily convert data structures (e.g., between
-`data.table`, `data.frame`, or `tibble`).
+\code{data.table}, \code{data.frame}, or \code{tibble}).
 }
 \details{
 The function checks the class of \code{data_original} in the following order:
 \itemize{
-  \item If it is a tibble (`tbl_df`), \code{data} is converted using
-    \code{tibble::as_tibble()}.
-  \item If it is a base data frame but not a data.table, \code{data} is converted
-    using \code{as.data.frame()}.
-  \item Otherwise, \code{data} is returned unchanged (e.g., for data.table input).
+\item If it is a tibble (\code{tbl_df}), \code{data} is converted using
+\code{tibble::as_tibble()}.
+\item If it is a base data frame but not a data.table, \code{data} is converted
+using \code{as.data.frame()}.
+\item Otherwise, \code{data} is returned unchanged (e.g., for data.table input).
 }
 }
 \examples{

@@ -9,7 +9,7 @@
 #'
 #' @param data_list A list of data frames to check.
 #'
-#' @return A character vector of column names that are not shared across all data frames.
+#' @returns A character vector of column names that are not shared across all data frames.
 #' These are the inconsistent or unique column names that appear in only some of the data frames.
 #'
 #' @examples
@@ -34,7 +34,7 @@ find_inconsistent_colnames <- function(data_list) {
   dplyr::symdiff(shared_cols, all_cols)
 }
 
-#' Detect Inconsistent Columns in a Data Frame
+#' Detect inconsistent columns in a data frame
 #'
 #' This function checks whether any of the specified column names appear in a given data frame.
 #' It is typically used to identify the presence of inconsistent or unexpected column names across multiple data frames.
@@ -42,7 +42,7 @@ find_inconsistent_colnames <- function(data_list) {
 #' @param data A data frame to inspect.
 #' @param inconsistent_cols A character vector of column names considered inconsistent.
 #'
-#' @return A logical value: `TRUE` if any inconsistent columns are present in the data frame, `FALSE` otherwise.
+#' @returns A logical value: `TRUE` if any inconsistent columns are present in the data frame, `FALSE` otherwise.
 #'
 #' @examples
 #' df <- data.frame(a = 1:3, b = 4:6)
@@ -70,7 +70,7 @@ detect_inconsistent_cols <- function(data, inconsistent_cols) {
 #'   column names and values are the original column names), or a data frame with
 #'   two columns: `from` (original column names) and `to` (standardized names).
 #'
-#' @return A data frame with harmonized column names.
+#' @returns A data frame with harmonized column names.
 #'
 #' @examples
 #' # Using a named character vector
@@ -108,7 +108,7 @@ harmonize_columns <- function(data, dictionary) {
   return(data_renamed)
 }
 
-#' Find Duplicate Identifiers in a Data Frame
+#' Find duplicate identifiers in a data frame
 #'
 #' Identifies duplicated values of a specified identifier column in a data frame or tibble.
 #' Returns a tibble with the identifier values that appear more than once and their counts.
@@ -116,7 +116,7 @@ harmonize_columns <- function(data, dictionary) {
 #' @param data A data frame or tibble.
 #' @param identifier The column to check for duplicates. This should be passed as a bare (unquoted) column name using tidy evaluation.
 #'
-#' @return A tibble with the identifier column and a count column `n` indicating the number of times each duplicate appears.
+#' @returns A tibble with the identifier column and a count column `n` indicating the number of times each duplicate appears.
 #'
 #' @importFrom dplyr count filter
 #'
@@ -155,7 +155,7 @@ find_duplicate_ids <- function(data, identifier) {
 #' For \code{method = "mode"}, ties are broken arbitrarily by selecting the
 #' first encountered maximum. Missing values are ignored when computing the mode.
 #'
-#' @return A tibble with one row per unique combination of \code{id_col} and \code{date_col},
+#' @returns A tibble with one row per unique combination of \code{id_col} and \code{date_col},
 #' containing the deduplicated \code{value_col}.
 #'
 #' @examples
@@ -216,7 +216,7 @@ dedup_values <- function(
 #' @param data A data frame or tibble.
 #' @param cols A character vector of column names to check.
 #'
-#' @return A tibble with all requested columns, missing ones filled with NA.
+#' @returns A tibble with all requested columns, missing ones filled with NA.
 #'
 #' @examples
 #' library(tibble)
@@ -258,7 +258,7 @@ complete_columns <- function(data, cols) {
 #'
 #' @param data Data frame with columns (country_code, year, wage).
 #' @param cols A character vector with column name to convert to constant PPP in international 2021 dollars.
-#' @return `data_out` augmented with columns converted to international 2021 dollars.
+#' @returns `data_out` augmented with columns converted to international 2021 dollars.
 #' @examples
 #' library(tibble)
 #' data <- tibble(
@@ -270,7 +270,6 @@ complete_columns <- function(data, cols) {
 #' convert_constant_ppp(data, "wage")
 #'
 #' @importFrom dplyr filter select rename left_join mutate
-#' @import glue
 #' @export
 convert_constant_ppp <- function(data, cols) {
   ## Basic input checks
@@ -329,7 +328,7 @@ convert_constant_ppp <- function(data, cols) {
 #' @param base_year Integer scalar. The base year to deflate to. Defaults to
 #'   \code{2021}.
 #'
-#' @return A numeric vector of the same length as \code{col}, expressed in
+#' @returns A numeric vector of the same length as \code{col}, expressed in
 #'   constant \code{base_year} LCU prices. Returns \code{NA} for any row where
 #'   CPI data is missing for the given country/year combination.
 #'
@@ -414,7 +413,7 @@ merge_wrapper <- function(...) {
 #' @param string_dist  String distance method passed to `stringdist::amatch()`. NULL disables fuzzy matching.
 #' @param stopwords    Character vector of stopwords to remove. NULL uses a built-in English set.
 #'
-#' @return A data.table with columns: <id_col>, class_id, class_label, score
+#' @returns A data.table with columns: <id_col>, class_id, class_label, score
 #'
 #' @importFrom rlang .data
 #'
@@ -646,12 +645,12 @@ classify_text <- function(
 #' sample_group() randomly samples a specified number of unique values from a
 #' grouping column and returns all rows belonging to the sampled groups.
 #'
-#' @param .data A data.frame, tibble, or data.table.
-#' @param group Unquoted column name used to define groups.
+#' @param data A data.frame, tibble, or data.table.
+#' @param group_col Unquoted column name used to define groups.
 #' @param n Integer; number of distinct groups to sample. If greater than the
 #'   number of available groups, all groups are returned.
 #'
-#' @return An object of the same class as `.data` (tibble -> tibble,
+#' @returns An object of the same class as `.data` (tibble -> tibble,
 #'   data.table -> data.table, data.frame -> data.frame) containing only rows
 #'   whose group value was sampled.
 #'
@@ -663,9 +662,9 @@ classify_text <- function(
 #' @importFrom data.table as.data.table is.data.table
 #' @importFrom rlang ensym as_string
 #' @importFrom tibble is_tibble as_tibble
-sample_group <- function(.data, group, n) {
-  dt <- data.table::as.data.table(.data)
-  group_sym <- rlang::ensym(group)
+sample_group <- function(data, group_col, n) {
+  dt <- data.table::as.data.table(data)
+  group_sym <- rlang::ensym(group_col)
   group_col <- rlang::as_string(group_sym)
 
   uniq_vals <- unique(dt[[group_col]])
@@ -679,16 +678,16 @@ sample_group <- function(.data, group, n) {
   res_dt <- dt[get(group_col) %in% sampled_vals]
 
   # return in same "type" the user passed: tibble -> tibble, data.frame -> data.frame, data.table -> data.table
-  if (tibble::is_tibble(.data)) {
+  if (tibble::is_tibble(data)) {
     tibble::as_tibble(res_dt)
-  } else if (data.table::is.data.table(.data)) {
+  } else if (data.table::is.data.table(data)) {
     res_dt
   } else {
     as.data.frame(res_dt)
   }
 }
 
-#' Convert Data to Match Original Class
+#' Convert data to match original class
 #'
 #' Converts a dataset to have the same class as another reference dataset.
 #' This is useful for ensuring consistent output formats when performing
@@ -698,7 +697,7 @@ sample_group <- function(.data, group, n) {
 #' @param data A dataset to be converted. Typically a `data.table` or `data.frame`.
 #' @param data_original The original dataset whose class should be matched.
 #'
-#' @return The input \code{data} converted to the same class as \code{data_original}.
+#' @returns The input \code{data} converted to the same class as \code{data_original}.
 #'
 #' @details
 #' The function checks the class of \code{data_original} in the following order:
@@ -737,15 +736,15 @@ convert_data <- function(data, data_original) {
   return(data)
 }
 
-#' Guess the Reporting Frequency of the Reference Dates
+#' Guess the reporting frequency of the reference dates
 #'
 #' Evaluates a vector of reference dates and returns a single
 #' string representing the data's reporting interval (e.g., "year", "month").
 #' The function calculates the median day difference between consecutive dates.
 #'
-#' @param .data A dataset containing a column named \code{ref_date} with date values.
+#' @param data A dataset containing a column named \code{ref_date} with date values.
 #'
-#' @return A single character scalar: \code{"year"}, \code{"quarter"},
+#' @returns A single character scalar: \code{"year"}, \code{"quarter"},
 #'   \code{"month"}, \code{"week"}, or \code{"day"}.
 #'
 #' @export
@@ -759,8 +758,8 @@ convert_data <- function(data, data_original) {
 #' guess_date_frequency(data)
 #' #> [1] "month"
 #' @importFrom stats median
-guess_date_frequency <- function(.data) {
-  ref_date <- .data[["ref_date"]] |>
+guess_date_frequency <- function(data) {
+  ref_date <- data[["ref_date"]] |>
     unique() |>
     sort()
 

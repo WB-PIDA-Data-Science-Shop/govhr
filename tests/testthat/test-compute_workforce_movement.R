@@ -10,13 +10,13 @@ test_that("compute_workforce_movement computes hire count and rate correctly", {
   )
 
   res_count <- compute_workforce_movement(
-    .data = panel_dt,
+    data = panel_dt,
     movement_type = "hire",
     measurement_type = "count",
     group_cols = NULL
   )
   res_rate <- compute_workforce_movement(
-    .data = panel_dt,
+    data = panel_dt,
     movement_type = "hire",
     measurement_type = "rate",
     group_cols = NULL
@@ -42,13 +42,13 @@ test_that("compute_workforce_movement computes fire count and rate correctly", {
   )
 
   res_count <- compute_workforce_movement(
-    .data = panel_dt,
+    data = panel_dt,
     movement_type = "fire",
     measurement_type = "count",
     group_cols = NULL
   )
   res_rate <- compute_workforce_movement(
-    .data = panel_dt,
+    data = panel_dt,
     movement_type = "fire",
     measurement_type = "rate",
     group_cols = NULL
@@ -74,13 +74,13 @@ test_that("compute_workforce_movement computes turnover and accepts count/rate a
   )
 
   res_count <- compute_workforce_movement(
-    .data = panel_dt,
+    data = panel_dt,
     movement_type = "turnover",
     measurement_type = "count",
     group_cols = NULL
   )
   res_rate <- compute_workforce_movement(
-    .data = panel_dt,
+    data = panel_dt,
     movement_type = "turnover",
     measurement_type = "rate",
     group_cols = NULL

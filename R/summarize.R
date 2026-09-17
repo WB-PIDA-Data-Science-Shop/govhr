@@ -17,15 +17,16 @@
 #'     \item A list of functions or formulas, possibly mixed with character
 #'       names referring to `define_fns()`.
 #'   }
-#' @param groups A character vector. Column(s) by which to group the data
+#' @param group_cols A character vector. Column(s) by which to group the data
 #'   before computing the summary statistics.
 #' @param output Character. Either `"long"` (default) or `"wide"` to specify
 #'   the output format. `"long"` returns one row per group per summary
 #'   statistic, `"wide"` returns one row per group with multiple columns for
 #'   each summary statistic.
 #' @param tbl Logical. If `TRUE`, converts the result to a tibble (`tibble::as_tibble()`).
+#' @param groups Deprecated. Use `group_cols` instead.
 #'
-#' @return A dataset containing the summary statistics for the selected columns.
+#' @returns A dataset containing the summary statistics for the selected columns.
 #'   The output will be either long or wide depending on the `output` argument.
 #'   The returned object will match the class of the input `data` (unless `tbl = TRUE`).
 #'
@@ -64,10 +65,12 @@ compute_fastsummary <- function(
   data,
   cols,
   fns = NULL,
-  groups,
+  group_cols,
   output = c("long", "wide"),
-  tbl = FALSE
+  tbl = FALSE,
+  groups = NULL
 ) {
+  group_cols <- resolve_renamed_arg(group_cols, groups, "groups", "group_cols")
   output <- match.arg(output)
   orig_class <- class(data)
   if (!data.table::is.data.table(data)) {
@@ -109,12 +112,12 @@ compute_fastsummary <- function(
   }
 
   j_call <- as.call(c(as.name("list"), calls))
-  stats_dt <- data[, eval(j_call), by = groups]
+  stats_dt <- data[, eval(j_call), by = group_cols]
 
   if (output == "long") {
     stats_dt <- data.table::melt(
       stats_dt,
-      id.vars = groups,
+      id.vars = group_cols,
       variable.name = "indicator",
       value.name = "value"
     )
@@ -149,15 +152,16 @@ compute_fastsummary <- function(
 #' @param macro_cols A character vector of column names in `macro_data` to use as denominators
 #'   for ratio calculations.
 #' @param cols A character vector of column names in `data` to summarize.
-#' @param groups A character vector of column names in `data` to group by.
+#' @param group_cols A character vector of column names in `data` to group by.
 #'   Typically includes country and date/year variables. Default is `c("country_code", "year")`.
 #' @param fns A character vector of summary functions to apply to `cols`.
 #'   Examples: `"sum"`, `"mean"`, `"median"`.
 #' @param output Either `"long"` or `"wide"` (default `"long"`).
 #'   - `"long"` returns a tidy table with columns: group variables, `macro_var`, `summary_var`, `indicator`, and `value`.
 #'   - `"wide"` returns a table with one column per indicator and original macro/summary values.
+#' @param groups Deprecated. Use `group_cols` instead.
 #'
-#' @return A dataset containing:
+#' @returns A dataset containing:
 #' - In `"long"` format: group variables, `macro_var`, `macro_value`, `summary_var`, `summary_value`, `indicator`, and `value`.
 #' - In `"wide"` format: group variables, one column per indicator (`summary_var` per `macro_var`), and original macro and summary values.
 #'   The returned object will match the class of the input `data`.
@@ -205,10 +209,12 @@ compute_fastshare <- function(
   macro_data = macro_indicators |> data.table::as.data.table(),
   macro_cols,
   cols,
-  groups,
+  group_cols,
   fns,
-  output = c("long", "wide")
+  output = c("long", "wide"),
+  groups = NULL
 ) {
+  group_cols <- resolve_renamed_arg(group_cols, groups, "groups", "group_cols")
   output <- match.arg(output)
   orig_class <- class(data)
   orig_macro_class <- class(macro_data)
@@ -223,7 +229,7 @@ compute_fastshare <- function(
     data = data,
     cols = cols,
     fns = fns,
-    groups = groups,
+    group_cols = group_cols,
     output = "wide"
   )
 
@@ -341,7 +347,7 @@ compute_fastshare <- function(
 #' @param date_col A date or numeric column (either unquoted or as a string)
 #'   used to order the data and define the time sequence (typically a year column).
 #'
-#' @return A dataset with:
+#' @returns A dataset with:
 #' \itemize{
 #'   \item The completed `date_col` sequence.
 #'   \item A new column named `"growth_<col>"` containing the year-over-year growth rates.
@@ -416,7 +422,7 @@ compute_fastchange <- function(data, col, date_col) {
 #'
 #' @inheritParams dplyr::count
 #'
-#' @return A tibble with one row per group and a count column.
+#' @returns A tibble with one row per group and a count column.
 #'
 #' @examples
 #' df <- tibble::tibble(group = c("a", "a", "b"))
@@ -445,7 +451,7 @@ fastcount <- function(x, ..., wt = NULL, sort = FALSE, name = NULL) {
 #' @param ... Grouping variables. Proportions are
 #'   computed within the combinations of these variables.
 #'
-#' @return A tibble with the same columns as `.data` plus a numeric
+#' @returns A tibble with the same columns as `.data` plus a numeric
 #'   `prop` column giving the group share (0–1). Missing `n` values are
 #'   ignored in the denominator via `na.rm = TRUE`.
 #'
@@ -469,97 +475,6 @@ fastprop <- function(.data, ...) {
   prop_dt
 }
 
-#' Compute wage bill aggregates with optional macro-fiscal shares
-#'
-#' @description
-#' Computes aggregate wage bill statistics from contract-level salary data.
-#' The function converts salary variables to constant purchasing power parity
-#' (PPP) using macro indicators, then aggregates by specified grouping variables.
-#' Optionally computes wage bill shares relative to macro-fiscal aggregates
-#' (e.g., GDP, public expenditure, revenue).
-#'
-#' @param contract_df A data.frame or tibble containing contract-level salary data.
-#'   Must include the columns specified in `wage_vars` and `groups`.
-#' @param wage_vars Character vector of salary column names to aggregate.
-#'   Defaults to `c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")`.
-#' @param groups Character vector of grouping columns for aggregation.
-#'   Defaults to `c("country_code", "year")`.
-#' @param share_macro Logical; if `TRUE`, computes wage bill shares relative
-#'   to macro-fiscal aggregates specified in `macro_vars`. Defaults to `FALSE`.
-#' @param macro_vars Character vector of macro indicator column names to use
-#'   as denominators when `share_macro = TRUE`. Defaults to
-#'   `c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu")`.
-#' @param drop_na Logical; if `TRUE`, removes `NA` values before aggregation.
-#'   Defaults to `TRUE`.
-#'
-#' @return A wage bill table with optional grouping variables,
-#'   an `indicator` column (describing the wage variable and level of analysis),
-#'   and a `value` column. When `share_macro = TRUE`, values represent
-#'   shares (wage bill / macro aggregate).
-#'
-#' @examples
-#' # Compute wage bill totals by country and year
-#' \dontrun{
-#' compute_wagebill(
-#'   contract_df = govhr::bra_hrmis_contract,
-#'   wage_vars = c("gross_salary_lcu"),
-#'   groups = c("country_code", "year")
-#' )
-#'
-#' # Compute wage bill as share of GDP and public expenditure
-#' compute_wagebill(
-#'   contract_df = govhr::bra_hrmis_contract,
-#'   wage_vars = c("gross_salary_lcu", "net_salary_lcu"),
-#'   groups = c("country_code", "year"),
-#'   share_macro = TRUE,
-#'   macro_vars = c("gdp_lcu", "pexpenditure_lcu")
-#' )
-#' }
-#'
-#' @seealso
-#' \code{\link{convert_constant_ppp}} for PPP conversion
-#' \code{\link{compute_fastsummary}} for general aggregation
-#' \code{\link{compute_fastshare}} for share computation (when `share_macro = TRUE`)
-#'
-#' @export
-compute_wagebill <- function(
-  contract_df,
-  wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
-  groups = c("country_code", "year"),
-  share_macro = FALSE,
-  macro_vars = c(
-    "gdp_lcu",
-    "pexpenditure_lcu",
-    "prevenue_lcu",
-    "taxrevenue_lcu"
-  ),
-  drop_na = TRUE
-) {
-  data_ppp <- contract_df |>
-    convert_constant_ppp(
-      cols = wage_vars
-    )
-
-  if (share_macro) {
-    data_ppp |>
-      compute_fastshare(
-        cols = wage_vars,
-        macro_cols = macro_vars,
-        groups = groups,
-        fns = "sum",
-        output = "long"
-      )
-  } else {
-    data_ppp |>
-      compute_fastsummary(
-        cols = wage_vars,
-        groups = groups,
-        fns = "sum",
-        output = "long"
-      )
-  }
-}
-
 #' Compute index values relative to base year
 #'
 #' @description
@@ -573,7 +488,7 @@ compute_wagebill <- function(
 #' @param ... Unquoted column names to compute indices for. Each selected
 #'   column must be numeric.
 #'
-#' @return A tibble with the date column and computed index columns. Index
+#' @returns A tibble with the date column and computed index columns. Index
 #'   column names are formed by appending "_index" to the original column names.
 #'
 #' @examples
@@ -586,7 +501,7 @@ compute_wagebill <- function(
 #' @importFrom rlang enquo as_name enquos expr
 #' @importFrom tidyselect eval_select
 #' @importFrom tibble as_tibble
-#' @importFrom dplyr select all_of
+#' @importFrom dplyr all_of
 #'
 #' @export
 compute_baseline_index <- function(.data, date_col, ...) {
@@ -626,28 +541,28 @@ compute_baseline_index <- function(.data, date_col, ...) {
   indexed_df
 }
 
-#' Function to compute quantiles of a measure column within groups and reference dates.
+#' Function to compute quantiles of a measure column within groups and reference dates
 #'
-#' @param .data A data frame containing the data to be processed.
+#' @param data A data frame containing the data to be processed.
 #' @param group_cols A character vector of column names to group the data by.
 #' @param measure_col The name of the column for which quantiles will be computed.
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date's quantiles (default is FALSE).
 #' @param n_quantiles The number of quantiles to compute (default is 10 for deciles).
 #'
-#' @return A data frame containing the quantiles, median values, and mean values for the specified measure column within the specified groups and reference dates.
+#' @returns A data frame containing the quantiles, median values, and mean values for the specified measure column within the specified groups and reference dates.
 #'
 #' @importFrom data.table as.data.table setorderv
 #' @importFrom dplyr ntile
 #'
 #' @export
 compute_quantile <- function(
-  .data,
+  data,
   group_cols = NULL,
   measure_col,
   latest_measure = FALSE,
   n_quantiles = 10
 ) {
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
 
   # change group_cols based on the choice of latest measure
   if (latest_measure) {
@@ -677,27 +592,27 @@ compute_quantile <- function(
 
 #' Function to compute the compression ratio
 #'
-#' @param .data A data frame.
+#' @param data A data frame.
 #' @param group_cols A character vector of column names to group the data by.
 #' @param percentiles A numeric vector of length 3 indicating the upper, middle, and lower percentiles to compute (default is c(0.9, 0.5, 0.1)).
 #' @param measure_col The name of the column for which the compression ratio will be computed.
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
 #'
-#' @return A data frame containing the 90th, 50th, and 10th percentiles for the specified measure column within the specified groups and reference dates.
+#' @returns A data frame containing the 90th, 50th, and 10th percentiles for the specified measure column within the specified groups and reference dates.
 #'
 #' @importFrom data.table as.data.table setorderv
 #' @importFrom collapse fquantile
 #'
 #' @export
 compute_compression_ratio <- function(
-  .data,
+  data,
   group_cols = NULL,
   percentiles = c(0.9, 0.5, 0.1),
   measure_col,
   latest_measure = FALSE
 ) {
   # consider generalizing this function to compute any percentile, not just 90th, 50th, and 10th
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
 
   by_cols <- c(group_cols, "ref_date")
 
@@ -732,32 +647,32 @@ compute_compression_ratio <- function(
   out[]
 }
 
-#' Function to compute the distribution function of a variable.
+#' Function to compute the distribution function of a variable
 #'
-#' @param .data A data frame.
-#' @param group_col A character vector of column names to group the data by.
+#' @param data A data frame.
+#' @param group_col A string naming a single column to group by, or `NULL` for no grouping.
 #' @param measure_col The name of the column for which the percentile values will be computed.
 #' @param binwidth The width of the bins for grouping the measure values (default is 1).
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
 #'
-#' @return A data frame with the distribution function, where `pct` denotes the percentage of observations in each bin and `cum_pct` denotes the cumulative percentage.
+#' @returns A data frame with the distribution function, where `pct` denotes the percentage of observations in each bin and `cum_pct` denotes the cumulative percentage.
 #'
 #' @importFrom data.table as.data.table setorderv
 #' @importFrom collapse fquantile
 #'
 #' @export
 compute_density <- function(
-  .data,
+  data,
   group_col = NULL,
   measure_col,
   binwidth = 1,
   latest_measure = FALSE
 ) {
   if (latest_measure) {
-    .data <- .data[.data[["ref_date"]] == max(.data[["ref_date"]]), ]
+    data <- data[data[["ref_date"]] == max(data[["ref_date"]]), ]
   }
 
-  dt <- data.table::as.data.table(.data)
+  dt <- data.table::as.data.table(data)
   dt[, bin := floor(get(measure_col) / binwidth) * binwidth]
   dt <- dt[!is.na(bin)]
 
@@ -804,21 +719,23 @@ compute_density <- function(
 #' When `measure_col` is `NULL`, counts rows per period (headcount). When a
 #' column name is supplied, sums that column per period (wage bill).
 #'
-#' @param .data A data frame containing at least a `ref_date` column.
-#' @param group Character string naming the grouping column, or `"ref_date"` for
+#' @param data A data frame containing at least a `ref_date` column.
+#' @param group_col Character string naming the grouping column, or `"ref_date"` for
 #'   no grouping.
 #' @param measure_col Character string naming the numeric column to sum, or
 #'   `NULL` to count rows.
+#' @param group Deprecated. Use `group_col` instead.
 #'
-#' @return A summarized data frame with columns `ref_date`, optionally `group`, and `value`. Value denotes either a sum or headcount (if `measure_col` is `NULL`).
+#' @returns A summarized data frame with columns `ref_date`, optionally `group`, and `value`. Value denotes either a sum or headcount (if `measure_col` is `NULL`).
 #'
 #' @importFrom data.table as.data.table
 #'
 #' @export
-compute_time_trend <- function(.data, group, measure_col = NULL) {
-  .data_dt <- data.table::as.data.table(.data)
+compute_time_trend <- function(data, group_col, measure_col = NULL, group = NULL) {
+  group_col <- resolve_renamed_arg(group_col, group, "group", "group_col")
+  .data_dt <- data.table::as.data.table(data)
 
-  groups <- if (group == "ref_date") "ref_date" else c("ref_date", group)
+  groups <- if (group_col == "ref_date") "ref_date" else c("ref_date", group_col)
 
   if (is.null(measure_col)) {
     # headcount by group
@@ -833,12 +750,12 @@ compute_time_trend <- function(.data, group, measure_col = NULL) {
       compute_fastsummary(
         cols = measure_col,
         fns = "sum",
-        groups = groups
+        group_cols = groups
       )
   }
 }
 
-#' Rescale to Baseline Index
+#' Rescale to baseline index
 #'
 #' Rescales the `value` column so that the first observation equals 100,
 #' producing a baseline index. When a grouping variable is present, the
@@ -846,16 +763,18 @@ compute_time_trend <- function(.data, group, measure_col = NULL) {
 #'
 #' @param data A data frame with columns `ref_date` and `value`, as returned by
 #'   [compute_time_trend()].
-#' @param group Character string naming the grouping column, or `"ref_date"` for
+#' @param group_col Character string naming the grouping column, or `"ref_date"` for
 #'   no grouping.
+#' @param group Deprecated. Use `group_col` instead.
 #'
-#' @return The input data frame with `value` rescaled to a baseline index.
+#' @returns The input data frame with `value` rescaled to a baseline index.
 #'
 #' @importFrom dplyr arrange mutate across all_of ungroup first
 #'
 #' @export
-rescale_baseline <- function(data, group) {
-  if (group == "ref_date") {
+rescale_baseline <- function(data, group_col, group = NULL) {
+  group_col <- resolve_renamed_arg(group_col, group, "group", "group_col")
+  if (group_col == "ref_date") {
     data |>
       dplyr::arrange(.data[["ref_date"]]) |>
       dplyr::mutate(
@@ -866,12 +785,12 @@ rescale_baseline <- function(data, group) {
       dplyr::arrange(.data[["ref_date"]]) |>
       dplyr::mutate(
         value = .data[["value"]] / dplyr::first(.data[["value"]]) * 100,
-        .by = dplyr::all_of(group)
+        .by = dplyr::all_of(group_col)
       )
   }
 }
 
-#' Compute Cross-Section Summary Table
+#' Compute cross-section summary table
 #'
 #' Filters to the latest reference date within each group, then aggregates to
 #' produce a per-group `value`. Used as the data source for total-by-group bar
@@ -880,29 +799,31 @@ rescale_baseline <- function(data, group) {
 #' When `measure_col` is `NULL`, counts rows (headcount). When a column name is
 #' supplied, sums that column (wage bill).
 #'
-#' @param .data A data frame containing a `ref_date` column and the grouping
+#' @param data A data frame containing a `ref_date` column and the grouping
 #'   column.
-#' @param group Character string naming the grouping column.
+#' @param group_cols Character string naming the grouping column.
 #' @param measure_col Character string naming the numeric column to sum, or
 #'   `NULL` to count rows.
+#' @param group Deprecated. Use `group_cols` instead.
 #'
-#' @return A data frame with the grouping column and a `value` column.
+#' @returns A data frame with the grouping column and a `value` column.
 #'
 #' @importFrom dplyr group_by across all_of filter ungroup summarise n
 #'
 #' @export
-compute_cross_section <- function(.data, group, measure_col = NULL) {
+compute_cross_section <- function(data, group_cols, measure_col = NULL, group = NULL) {
+  group_cols <- resolve_renamed_arg(group_cols, group, "group", "group_cols")
   # only consider latest reference date
-  data_latest <- .data |>
+  data_latest <- data |>
     dplyr::filter(
       .data[["ref_date"]] == max(.data[["ref_date"]]),
-      .by = dplyr::all_of(group)
+      .by = dplyr::all_of(group_cols)
     )
 
   if (is.null(measure_col)) {
     data_latest |>
       fastcount(
-        dplyr::across(dplyr::all_of(group)),
+        dplyr::across(dplyr::all_of(group_cols)),
         name = "value"
       )
   } else {
@@ -910,12 +831,12 @@ compute_cross_section <- function(.data, group, measure_col = NULL) {
       compute_fastsummary(
         cols = measure_col,
         fns = "sum",
-        groups = group
+        group_cols = group_cols
       )
   }
 }
 
-#' Compute Growth Rate Summary Table
+#' Compute growth rate summary table
 #'
 #' Filters to the first and last reference date within each group and computes
 #' the percentage change from first `ref_date` to last `ref_date`.
@@ -923,23 +844,25 @@ compute_cross_section <- function(.data, group, measure_col = NULL) {
 #' When `measure_col` is `NULL`, counts rows per date-group cell (headcount).
 #' When a column name is supplied, sums that column (wage bill).
 #'
-#' @param .data A data frame with `ref_date` and the grouping column.
-#' @param group Character string naming the grouping column.
+#' @param data A data frame with `ref_date` and the grouping column.
+#' @param group_col Character string naming the grouping column.
 #' @param measure_col Character string naming the numeric column to sum, or
 #'   `NULL` to count rows.
+#' @param group Deprecated. Use `group_col` instead.
 #'
-#' @return A data frame with the grouping column and a `growth_rate` column
+#' @returns A data frame with the grouping column and a `growth_rate` column
 #'   (percentage points, e.g. 12.5 for +12.5%).
 #'
 #' @importFrom dplyr filter arrange summarise last first all_of
 #'
 #' @export
-compute_growth <- function(.data, group, measure_col = NULL) {
-  endpoints <- .data |>
+compute_growth <- function(data, group_col, measure_col = NULL, group = NULL) {
+  group_col <- resolve_renamed_arg(group_col, group, "group", "group_col")
+  endpoints <- data |>
     dplyr::filter(
       .data[["ref_date"]] %in%
         c(max(.data[["ref_date"]]), min(.data[["ref_date"]])),
-      .by = dplyr::all_of(group)
+      .by = dplyr::all_of(group_col)
     ) |>
     dplyr::arrange(.data[["ref_date"]])
 
@@ -947,31 +870,31 @@ compute_growth <- function(.data, group, measure_col = NULL) {
     endpoints |>
       dplyr::summarise(
         value = dplyr::n(),
-        .by = dplyr::all_of(c("ref_date", group))
+        .by = dplyr::all_of(c("ref_date", group_col))
       )
   } else {
     endpoints |>
       compute_fastsummary(
         cols = measure_col,
         fns = "sum",
-        groups = c("ref_date", group)
+        group_cols = c("ref_date", group_col)
       )
   }
 
   summarized |>
-    dplyr::filter(!is.na(.data[[group]])) |>
+    dplyr::filter(!is.na(.data[[group_col]])) |>
     dplyr::summarise(
       growth_rate = round(
         dplyr::last(.data[["value"]]) / dplyr::first(.data[["value"]]) - 1,
         3
       ) *
         100,
-      .by = dplyr::all_of(group)
+      .by = dplyr::all_of(group_col)
     ) |>
     dplyr::filter(!is.na(.data[["growth_rate"]]))
 }
 
-#' Compute the Coefficient of Variation (CV)
+#' Compute the coefficient of variation (CV)
 #'
 #' Calculates the coefficient of variation for a numeric vector, defined as the
 #' ratio of the standard deviation to the mean. This provides a unitless measure
@@ -987,7 +910,7 @@ compute_growth <- function(.data, group, measure_col = NULL) {
 #' (to avoid division by zero). If the input vector is empty or the mean equals
 #' zero, the function returns `NA_real_`.
 #'
-#' @return A numeric value representing the coefficient of variation (CV).
+#' @returns A numeric value representing the coefficient of variation (CV).
 #' Returns `NA_real_` if the computation is not possible (e.g., all values are
 #' missing or the mean is zero).
 #'
@@ -1015,7 +938,7 @@ cv <- function(x, na.rm = TRUE) {
   return(y)
 }
 
-#' Compute a Compression Ratio Between Two Percentiles
+#' Compute a compression ratio between two percentiles
 #'
 #' Calculates a wage (or value) compression ratio by dividing one quantile by
 #' another, typically the 90th percentile divided by the 10th percentile.
@@ -1034,7 +957,7 @@ cv <- function(x, na.rm = TRUE) {
 #' their ratio (`upper / lower`). If either quantile is `NA` or the lower
 #' quantile is zero, the function returns `NA_real_`.
 #'
-#' @return A numeric value representing the ratio of the specified upper to
+#' @returns A numeric value representing the ratio of the specified upper to
 #' lower percentile values. Returns `NA_real_` if computation is not possible
 #' (e.g., due to missing data or zero denominator).
 #'
@@ -1072,13 +995,13 @@ prop <- function(x) {
 }
 
 
-#' Count Unique Non-Missing Values
+#' Count unique non-missing values
 #'
 #' Returns the number of unique values in a vector, excluding missing values (NA).
 #'
 #' @param x A vector of any type (numeric, character, factor, etc.)
 #'
-#' @return An integer representing the count of unique non-missing values in `x`.
+#' @returns An integer representing the count of unique non-missing values in `x`.
 #'
 #' @examples
 #' # Basic usage
@@ -1103,7 +1026,7 @@ count_unique <- function(x) {
   return(y)
 }
 
-#' Define Default Summary Functions
+#' Define default summary functions
 #'
 #' @description
 #' Creates and returns a named list of default summary functions used

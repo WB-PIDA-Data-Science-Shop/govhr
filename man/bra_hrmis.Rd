@@ -7,40 +7,40 @@
 \format{
 A data frame with 34 variables:
 \describe{
-  \item{ANO_PAGAMENTO}{Payment year (numeric)}
-  \item{MES_REFERENCIA}{Reference month (numeric)}
-  \item{MATRICULA}{Employee registration/enrollment number (character)}
-  \item{CPF}{Brazilian tax identification number - Cadastro de Pessoas Físicas (character)}
-  \item{DATA_NASCIMENTO}{Date of birth (Date)}
-  \item{GENERO}{Gender (character)}
-  \item{ESCOLARIDADE}{Educational level/degree (character)}
-  \item{DATA_ADMISSAO}{Admission/hiring date (Date)}
-  \item{ADMINISTRACAO}{Administration type (character)}
-  \item{TIPO_CONTRATO}{Contract type (character)}
-  \item{GRUPO}{Employee group classification (character)}
-  \item{COD_ORGAO}{Agency/department code (character)}
-  \item{ORGAO}{Agency/department name (character)}
-  \item{CARREIRA}{Career path/track (character)}
-  \item{CARGO}{Position/job title (character)}
-  \item{JORNADA}{Work schedule/hours (character)}
-  \item{CLASSE}{Position class (character)}
-  \item{NIVEL}{Position level (character)}
-  \item{DATA_ULT_PROGRESSAO}{Date of last career progression (Date)}
-  \item{SALARIO_BASE}{Base salary (numeric)}
-  \item{CONTRIBUICAO_PREVIDENCIA}{Social security contribution (numeric)}
-  \item{ADICIONAL_TEMPO_SERVICO}{Time of service bonus (numeric)}
-  \item{COMISSAO}{Commission payment (numeric)}
-  \item{ABONO_PERMANENCIA}{Permanence allowance (numeric)}
-  \item{DECISAO_JUDICIAL}{Judicial decision payments (numeric)}
-  \item{DEMAIS_GRATIFICACOES_TRANSITORIAS}{Other temporary bonuses (numeric)}
-  \item{DEMAIS_GRATIFICACOES_CARREIRA}{Other career-related bonuses (numeric)}
-  \item{SALARIO_BRUTO}{Gross salary (numeric)}
-  \item{SALARIO_LIQUIDO}{Net salary (numeric)}
-  \item{DATA_APOSENTADORIA}{Retirement date (Date)}
-  \item{VALOR_BRUTO}{Gross amount (numeric)}
-  \item{VALOR_LIQUIDO}{Net amount (numeric)}
-  \item{TIPO}{Type/category (character)}
-  \item{TEMPO DE CONTRIBUIÇÃO}{Contribution time period (character)}
+\item{ANO_PAGAMENTO}{Payment year (numeric)}
+\item{MES_REFERENCIA}{Reference month (numeric)}
+\item{MATRICULA}{Employee registration/enrollment number (character)}
+\item{CPF}{Brazilian tax identification number - Cadastro de Pessoas Físicas (character)}
+\item{DATA_NASCIMENTO}{Date of birth (Date)}
+\item{GENERO}{Gender (character)}
+\item{ESCOLARIDADE}{Educational level/degree (character)}
+\item{DATA_ADMISSAO}{Admission/hiring date (Date)}
+\item{ADMINISTRACAO}{Administration type (character)}
+\item{TIPO_CONTRATO}{Contract type (character)}
+\item{GRUPO}{Employee group classification (character)}
+\item{COD_ORGAO}{Agency/department code (character)}
+\item{ORGAO}{Agency/department name (character)}
+\item{CARREIRA}{Career path/track (character)}
+\item{CARGO}{Position/job title (character)}
+\item{JORNADA}{Work schedule/hours (character)}
+\item{CLASSE}{Position class (character)}
+\item{NIVEL}{Position level (character)}
+\item{DATA_ULT_PROGRESSAO}{Date of last career progression (Date)}
+\item{SALARIO_BASE}{Base salary (numeric)}
+\item{CONTRIBUICAO_PREVIDENCIA}{Social security contribution (numeric)}
+\item{ADICIONAL_TEMPO_SERVICO}{Time of service bonus (numeric)}
+\item{COMISSAO}{Commission payment (numeric)}
+\item{ABONO_PERMANENCIA}{Permanence allowance (numeric)}
+\item{DECISAO_JUDICIAL}{Judicial decision payments (numeric)}
+\item{DEMAIS_GRATIFICACOES_TRANSITORIAS}{Other temporary bonuses (numeric)}
+\item{DEMAIS_GRATIFICACOES_CARREIRA}{Other career-related bonuses (numeric)}
+\item{SALARIO_BRUTO}{Gross salary (numeric)}
+\item{SALARIO_LIQUIDO}{Net salary (numeric)}
+\item{DATA_APOSENTADORIA}{Retirement date (Date)}
+\item{VALOR_BRUTO}{Gross amount (numeric)}
+\item{VALOR_LIQUIDO}{Net amount (numeric)}
+\item{TIPO}{Type/category (character)}
+\item{TEMPO DE CONTRIBUIÇÃO}{Contribution time period (character)}
 }
 }
 \source{

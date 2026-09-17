@@ -12,7 +12,7 @@ convert_constant_ppp(data, cols)
 \item{cols}{A character vector with column name to convert to constant PPP in international 2021 dollars.}
 }
 \value{
-`data_out` augmented with columns converted to international 2021 dollars.
+\code{data_out} augmented with columns converted to international 2021 dollars.
 }
 \description{
 Convert nominal wages (LCU at survey-year prices) into real wages expressed
@@ -21,7 +21,7 @@ in 2021 PPP international dollars using:
 }
 \details{
 #' @details
-CPI data is sourced from [govhr::macro_indicators], which must contain
+CPI data is sourced from \link{macro_indicators}, which must contain
 columns \code{country_code}, \code{year}, and \code{cpi}.
 }
 \examples{

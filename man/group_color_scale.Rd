@@ -2,7 +2,7 @@
 % Please edit documentation in R/overview.R
 \name{group_color_scale}
 \alias{group_color_scale}
-\title{Orange Gradient Colour Scale for Grouped Series}
+\title{Orange gradient colour scale for grouped series}
 \usage{
 group_color_scale(values)
 }

@@ -11,7 +11,7 @@ harmonize_columns(data, dictionary)
 
 \item{dictionary}{Either a named character vector (names are the desired standardized
 column names and values are the original column names), or a data frame with
-two columns: `from` (original column names) and `to` (standardized names).}
+two columns: \code{from} (original column names) and \code{to} (standardized names).}
 }
 \value{
 A data frame with harmonized column names.
