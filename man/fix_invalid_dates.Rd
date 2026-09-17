@@ -12,25 +12,25 @@ fix_invalid_dates(
 )
 }
 \arguments{
-\item{data}{A data.frame with a `ref_date` column (Date class).}
+\item{data}{A data.frame with a \code{ref_date} column (Date class).}
 
-\item{min_date}{Minimum valid date (default: `1900-01-01`).}
+\item{min_date}{Minimum valid date (default: \code{1900-01-01}).}
 
-\item{max_date}{Maximum valid date (default: `Sys.Date()`).}
+\item{max_date}{Maximum valid date (default: \code{Sys.Date()}).}
 
 \item{treatment}{Correction strategy:
 \itemize{
-  \item `"na"`: Set invalid dates to `NA`
-  \item `"clamp"`: Replace out-of-range dates with `min_date` or `max_date`
-  \item `"filter"`: Remove records with invalid dates
+\item \code{"na"}: Set invalid dates to \code{NA}
+\item \code{"clamp"}: Replace out-of-range dates with \code{min_date} or \code{max_date}
+\item \code{"filter"}: Remove records with invalid dates
 }}
 }
 \value{
-A data.frame with corrected `ref_date` values.
+A data.frame with corrected \code{ref_date} values.
 }
 \description{
-Corrects `ref_date` values outside the valid range, addressing violations of
-`personnel_ref_date_valid` and `contract_ref_date_valid` rules.
+Corrects \code{ref_date} values outside the valid range, addressing violations of
+\code{personnel_ref_date_valid} and \code{contract_ref_date_valid} rules.
 }
 \examples{
 \dontrun{

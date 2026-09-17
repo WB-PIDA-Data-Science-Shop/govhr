@@ -15,9 +15,9 @@ sample_group(.data, group, n)
 number of available groups, all groups are returned.}
 }
 \value{
-An object of the same class as `.data` (tibble -> tibble,
-  data.table -> data.table, data.frame -> data.frame) containing only rows
-  whose group value was sampled.
+An object of the same class as \code{.data} (tibble -> tibble,
+data.table -> data.table, data.frame -> data.frame) containing only rows
+whose group value was sampled.
 }
 \description{
 sample_group() randomly samples a specified number of unique values from a

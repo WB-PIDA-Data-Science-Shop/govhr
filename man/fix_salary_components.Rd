@@ -10,16 +10,16 @@ fix_salary_components(
 )
 }
 \arguments{
-\item{data}{A data.frame with columns `gross_salary_lcu`, `base_salary_lcu`,
-`net_salary_lcu`, `allowance_lcu`.}
+\item{data}{A data.frame with columns \code{gross_salary_lcu}, \code{base_salary_lcu},
+\code{net_salary_lcu}, \code{allowance_lcu}.}
 
 \item{strategy}{Correction strategy:
 \itemize{
-  \item `"recalculate_gross"`: Set `gross = base + allowance`
-  \item `"cap_net"`: Cap net at gross
-  \item `"cap_base"`: Cap base at gross
-  \item `"flag"`: Add flag columns `gross_composition_flag`,
-    `net_exceeds_gross_flag`, `base_exceeds_gross_flag`
+\item \code{"recalculate_gross"}: Set \code{gross = base + allowance}
+\item \code{"cap_net"}: Cap net at gross
+\item \code{"cap_base"}: Cap base at gross
+\item \code{"flag"}: Add flag columns \code{gross_composition_flag},
+\code{net_exceeds_gross_flag}, \code{base_exceeds_gross_flag}
 }}
 }
 \value{

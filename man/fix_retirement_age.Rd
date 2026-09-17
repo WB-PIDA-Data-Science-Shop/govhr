@@ -7,23 +7,23 @@
 fix_retirement_age(data, max_age = 65, treatment = c("flag", "adjust_status"))
 }
 \arguments{
-\item{data}{A data.frame with `birth_date`, `ref_date`, and `status` columns.}
+\item{data}{A data.frame with \code{birth_date}, \code{ref_date}, and \code{status} columns.}
 
 \item{max_age}{Retirement age threshold in years (default: 65).}
 
 \item{treatment}{Handling strategy:
 \itemize{
-  \item `"flag"`: Add `over_retirement_flag` column
-  \item `"adjust_status"`: Set `status` to `"retired"` for affected workers
+\item \code{"flag"}: Add \code{over_retirement_flag} column
+\item \code{"adjust_status"}: Set \code{status} to \code{"retired"} for affected workers
 }}
 }
 \value{
 A data.frame with over-retirement-age workers handled according to
-  `treatment`.
+\code{treatment}.
 }
 \description{
-Addresses violations of the `personnel_maximum_age` rule. Only targets
-workers with `status == "active"`; retired or inactive workers are ignored.
+Addresses violations of the \code{personnel_maximum_age} rule. Only targets
+workers with \code{status == "active"}; retired or inactive workers are ignored.
 }
 \examples{
 \dontrun{

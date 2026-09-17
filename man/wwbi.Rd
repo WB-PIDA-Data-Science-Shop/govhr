@@ -7,31 +7,31 @@
 \format{
 A data frame with 993 rows and 11 variables:
 \describe{
-  \item{\code{country_code}}{character World Bank country code.}
-  \item{\code{year}}{double Year.}
-  \item{\code{share_no_edu}}{double Share of public sector personnel with no education.}
-  \item{\code{share_primary_edu}}{double Share of public sector personnel with primary education completed.}
-  \item{\code{share_secondary_edu}}{double Share of public sector personnel with secondary education completed.}
-  \item{\code{share_tertiary_edu}}{double Share of public sector personnel with tertiary education completed.}
-  \item{\code{ps_wage_premium_edu_sector}}{double Public sector wage premium in the education sector, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_hea_sector}}{double Public sector wage premium in the health sector, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_female}}{double Public sector wage premium for female personnel, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_male}}{double Public sector wage premium for male personnel, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_pooled}}{double Public sector wage premium for all public sector personnel, compared to formal wage employees in the private sector.}
-  \item{\code{ps_share_total_emp}}{double Public sector employment, as a share of total employment}
-  \item{\code{ps_share_paid_emp}}{double Public sector employment, as a share of paid employment}
-  \item{\code{ps_share_formal_emp}}{double Public sector employment, as a share of formal employment}
-  \item{\code{ps_wage_premium_isced_n}}{double Public sector wage premium for personnel with no education, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_isced_1}}{double Public sector wage premium for personnel with primary education completed, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_isced_2_3}}{double Public sector wage premium for personnel with secondary education completed, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_isced_5t8}}{double Public sector wage premium for personnel with tertiary education completed, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_clerk}}{double Public sector wage premium for personnel in clerical support occupations, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_elementary}}{double Public sector wage premium for personnel in elementary occupations, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_professional}}{double Public sector wage premium for personnel in professional occupations, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_manager}}{double Public sector wage premium for personnel in managerial occupations, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wage_premium_technical}}{double Public sector wage premium for personnel in technical and associate professional occupations, compared to formal wage employees in the private sector.}
-  \item{\code{ps_wagebill_share_gdp}}{double Public sector wage bill, as a share of GDP.}
-  \item{\code{ps_wagebill_share_expenditure}}{double Public sector wage bill, as a share of total government expenditure.}
+\item{\code{country_code}}{character World Bank country code.}
+\item{\code{year}}{double Year.}
+\item{\code{share_no_edu}}{double Share of public sector personnel with no education.}
+\item{\code{share_primary_edu}}{double Share of public sector personnel with primary education completed.}
+\item{\code{share_secondary_edu}}{double Share of public sector personnel with secondary education completed.}
+\item{\code{share_tertiary_edu}}{double Share of public sector personnel with tertiary education completed.}
+\item{\code{ps_wage_premium_edu_sector}}{double Public sector wage premium in the education sector, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_hea_sector}}{double Public sector wage premium in the health sector, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_female}}{double Public sector wage premium for female personnel, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_male}}{double Public sector wage premium for male personnel, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_pooled}}{double Public sector wage premium for all public sector personnel, compared to formal wage employees in the private sector.}
+\item{\code{ps_share_total_emp}}{double Public sector employment, as a share of total employment}
+\item{\code{ps_share_paid_emp}}{double Public sector employment, as a share of paid employment}
+\item{\code{ps_share_formal_emp}}{double Public sector employment, as a share of formal employment}
+\item{\code{ps_wage_premium_isced_n}}{double Public sector wage premium for personnel with no education, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_isced_1}}{double Public sector wage premium for personnel with primary education completed, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_isced_2_3}}{double Public sector wage premium for personnel with secondary education completed, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_isced_5t8}}{double Public sector wage premium for personnel with tertiary education completed, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_clerk}}{double Public sector wage premium for personnel in clerical support occupations, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_elementary}}{double Public sector wage premium for personnel in elementary occupations, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_professional}}{double Public sector wage premium for personnel in professional occupations, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_manager}}{double Public sector wage premium for personnel in managerial occupations, compared to formal wage employees in the private sector.}
+\item{\code{ps_wage_premium_technical}}{double Public sector wage premium for personnel in technical and associate professional occupations, compared to formal wage employees in the private sector.}
+\item{\code{ps_wagebill_share_gdp}}{double Public sector wage bill, as a share of GDP.}
+\item{\code{ps_wagebill_share_expenditure}}{double Public sector wage bill, as a share of total government expenditure.}
 }
 }
 \source{

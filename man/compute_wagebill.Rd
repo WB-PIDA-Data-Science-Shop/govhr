@@ -15,29 +15,29 @@ compute_wagebill(
 }
 \arguments{
 \item{contract_df}{A data.frame or tibble containing contract-level salary data.
-Must include the columns specified in `wage_vars` and `groups`.}
+Must include the columns specified in \code{wage_vars} and \code{groups}.}
 
 \item{wage_vars}{Character vector of salary column names to aggregate.
-Defaults to `c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")`.}
+Defaults to \code{c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")}.}
 
 \item{groups}{Character vector of grouping columns for aggregation.
-Defaults to `c("country_code", "year")`.}
+Defaults to \code{c("country_code", "year")}.}
 
-\item{share_macro}{Logical; if `TRUE`, computes wage bill shares relative
-to macro-fiscal aggregates specified in `macro_vars`. Defaults to `FALSE`.}
+\item{share_macro}{Logical; if \code{TRUE}, computes wage bill shares relative
+to macro-fiscal aggregates specified in \code{macro_vars}. Defaults to \code{FALSE}.}
 
 \item{macro_vars}{Character vector of macro indicator column names to use
-as denominators when `share_macro = TRUE`. Defaults to
-`c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu")`.}
+as denominators when \code{share_macro = TRUE}. Defaults to
+\code{c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu")}.}
 
-\item{drop_na}{Logical; if `TRUE`, removes `NA` values before aggregation.
-Defaults to `TRUE`.}
+\item{drop_na}{Logical; if \code{TRUE}, removes \code{NA} values before aggregation.
+Defaults to \code{TRUE}.}
 }
 \value{
 A wage bill table with optional grouping variables,
-  an `indicator` column (describing the wage variable and level of analysis),
-  and a `value` column. When `share_macro = TRUE`, values represent
-  shares (wage bill / macro aggregate).
+an \code{indicator} column (describing the wage variable and level of analysis),
+and a \code{value} column. When \code{share_macro = TRUE}, values represent
+shares (wage bill / macro aggregate).
 }
 \description{
 Computes aggregate wage bill statistics from contract-level salary data.
@@ -69,5 +69,5 @@ compute_wagebill(
 \seealso{
 \code{\link{convert_constant_ppp}} for PPP conversion
 \code{\link{compute_fastsummary}} for general aggregation
-\code{\link{compute_fastshare}} for share computation (when `share_macro = TRUE`)
+\code{\link{compute_fastshare}} for share computation (when \code{share_macro = TRUE})
 }

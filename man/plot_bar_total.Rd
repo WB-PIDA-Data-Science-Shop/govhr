@@ -8,13 +8,13 @@ plot_bar_total(.data, group_col, x_col = "value", x_label = "Value")
 }
 \arguments{
 \item{.data}{Data frame with the grouping column and the x-axis column, as
-returned by [compute_cross_section_summary()].}
+returned by \code{\link[=compute_cross_section_summary]{compute_cross_section_summary()}}.}
 
 \item{group_col}{Character. Column to group by.}
 
-\item{x_col}{Character. Column to plot on the x-axis. Default `"value"`.}
+\item{x_col}{Character. Column to plot on the x-axis. Default \code{"value"}.}
 
-\item{x_label}{Character. x-axis label. Default `"Value"`.}
+\item{x_label}{Character. x-axis label. Default \code{"Value"}.}
 }
 \value{
 A ggplot2 object.

@@ -7,18 +7,18 @@
 compute_trend_summary(.data, group_col, measure_col = NULL)
 }
 \arguments{
-\item{.data}{Data frame containing at least a `ref_date` column.}
+\item{.data}{Data frame containing at least a \code{ref_date} column.}
 
-\item{group_col}{Character. Column to group by, or `"ref_date"` for no
+\item{group_col}{Character. Column to group by, or \code{"ref_date"} for no
 grouping.}
 
-\item{measure_col}{Character. Numeric column to sum, or `NULL` to count rows.}
+\item{measure_col}{Character. Numeric column to sum, or \code{NULL} to count rows.}
 }
 \value{
-A data frame with `ref_date`, optionally `group_col`, and `value`.
+A data frame with \code{ref_date}, optionally \code{group_col}, and \code{value}.
 }
 \description{
-Aggregates data over time into a tidy frame of `ref_date`, the optional
-grouping column, and `value`. Counts rows when `measure_col` is `NULL`
+Aggregates data over time into a tidy frame of \code{ref_date}, the optional
+grouping column, and \code{value}. Counts rows when \code{measure_col} is \code{NULL}
 (headcount) and sums the column otherwise (wage bill).
 }

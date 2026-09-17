@@ -55,20 +55,20 @@ for noise reduction on strata that have no gap at all.}
 }
 \value{
 A data.table with one row per age / \code{group_cols}:
-  \describe{
-    \item{age_col, group_cols}{As supplied.}
-    \item{px}{Probability of remaining active from age x to x+1.}
-    \item{lx}{Survivors at age x, out of \code{radix} at the youngest age:
-      \eqn{l(x) = radix \prod_{y<x} p(y)}.}
-    \item{lx_next}{Survivors at age x+1: \eqn{l(x) \cdot p(x)}.}
-    \item{Lx}{Person-years of service between age x and x+1:
-      \eqn{(l(x) + l_{next}(x)) / 2} (trapezoidal approximation, assuming
-      exits are spread uniformly across the year).}
-    \item{Tx}{Total remaining person-years of service from age x onward:
-      \eqn{\sum_{y \ge x} L(y)}.}
-    \item{ex}{Expected remaining years of service at age x:
-      \eqn{T(x) / l(x)}.}
-  }
+\describe{
+\item{age_col, group_cols}{As supplied.}
+\item{px}{Probability of remaining active from age x to x+1.}
+\item{lx}{Survivors at age x, out of \code{radix} at the youngest age:
+\eqn{l(x) = radix \prod_{y<x} p(y)}.}
+\item{lx_next}{Survivors at age x+1: \eqn{l(x) \cdot p(x)}.}
+\item{Lx}{Person-years of service between age x and x+1:
+\eqn{(l(x) + l_{next}(x)) / 2} (trapezoidal approximation, assuming
+exits are spread uniformly across the year).}
+\item{Tx}{Total remaining person-years of service from age x onward:
+\eqn{\sum_{y \ge x} L(y)}.}
+\item{ex}{Expected remaining years of service at age x:
+\eqn{T(x) / l(x)}.}
+}
 }
 \description{
 Builds a multiple-decrement service table: for each age (and any

@@ -7,13 +7,13 @@
 plot_movement(.data, movement_type, measurement_type, group_cols)
 }
 \arguments{
-\item{.data}{A data frame containing the movement data with columns `ref_date`, `indicator`, and optionally a grouping column.}
+\item{.data}{A data frame containing the movement data with columns \code{ref_date}, \code{indicator}, and optionally a grouping column.}
 
 \item{movement_type}{A character string indicating the type of movement: "hire", "fire", or "turnover".}
 
 \item{measurement_type}{A character string indicating the measurement type: "count" or "rate".}
 
-\item{group_cols}{A character string indicating the grouping column, or "ref_date" for no grouping.}
+\item{group_cols}{A character vector of columns to group by, or \code{"ref_date"} for no grouping.}
 }
 \value{
 A ggplot2 object representing the personnel movement over time.

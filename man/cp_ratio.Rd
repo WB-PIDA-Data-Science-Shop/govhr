@@ -9,18 +9,18 @@ cp_ratio(x, upper = 0.9, lower = 0.1, na.rm = TRUE)
 \arguments{
 \item{x}{A numeric vector of values (e.g., wages or salaries).}
 
-\item{upper}{Numeric; the upper percentile to compute (default is `0.9` for
+\item{upper}{Numeric; the upper percentile to compute (default is \code{0.9} for
 the 90th percentile).}
 
-\item{lower}{Numeric; the lower percentile to compute (default is `0.1` for
+\item{lower}{Numeric; the lower percentile to compute (default is \code{0.1} for
 the 10th percentile).}
 
-\item{na.rm}{Logical; if `TRUE`, missing values (`NA`) are removed before
-computation. Defaults to `TRUE`.}
+\item{na.rm}{Logical; if \code{TRUE}, missing values (\code{NA}) are removed before
+computation. Defaults to \code{TRUE}.}
 }
 \value{
 A numeric value representing the ratio of the specified upper to
-lower percentile values. Returns `NA_real_` if computation is not possible
+lower percentile values. Returns \code{NA_real_} if computation is not possible
 (e.g., due to missing data or zero denominator).
 }
 \description{
@@ -30,8 +30,8 @@ This provides a measure of wage inequality or spread within a group.
 }
 \details{
 The function computes the specified upper and lower quantiles and returns
-their ratio (`upper / lower`). If either quantile is `NA` or the lower
-quantile is zero, the function returns `NA_real_`.
+their ratio (\code{upper / lower}). If either quantile is \code{NA} or the lower
+quantile is zero, the function returns \code{NA_real_}.
 }
 \examples{
 wages <- c(1000, 1200, 900, 3000, 5000, NA)

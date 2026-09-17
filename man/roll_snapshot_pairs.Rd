@@ -24,9 +24,9 @@ skipped.}
 }
 \value{
 A single \code{data.table} produced by
-  \code{rbindlist(results, fill = TRUE, use.names = TRUE)} over all
-  non-\code{NULL} results.  Returns an empty \code{data.table()} when all
-  calls return \code{NULL} or the panel has fewer than two distinct dates.
+\code{rbindlist(results, fill = TRUE, use.names = TRUE)} over all
+non-\code{NULL} results.  Returns an empty \code{data.table()} when all
+calls return \code{NULL} or the panel has fewer than two distinct dates.
 }
 \description{
 Sets a data.table key on \code{date_col} (enabling O(log N) binary-search

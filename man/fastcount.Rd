@@ -32,9 +32,9 @@ it will use \code{nn}. If there's a column called \code{n} and \code{nn}, it'll 
 A tibble with one row per group and a count column.
 }
 \description{
-`fastcount()` delegates [dplyr::count()] to a `data.table` backend by
-converting the input to a lazy `dtplyr` table first. This preserves the
-familiar `count()` interface while exploiting `data.table` performance.
+\code{fastcount()} delegates \code{\link[dplyr:count]{dplyr::count()}} to a \code{data.table} backend by
+converting the input to a lazy \code{dtplyr} table first. This preserves the
+familiar \code{count()} interface while exploiting \code{data.table} performance.
 }
 \examples{
 df <- tibble::tibble(group = c("a", "a", "b"))

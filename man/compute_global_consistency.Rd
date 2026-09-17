@@ -25,9 +25,9 @@ Compute the proportion of consistent records and values in a data frame.
 }
 \details{
 Consistency is defined as the proportion of records and values that are consistent
-  across the dataset. A record is considered consistent if it has a unique identifier and all
-  its associated values are consistent. A value is considered consistent if it does not
-  contradict other values for the same record.
+across the dataset. A record is considered consistent if it has a unique identifier and all
+its associated values are consistent. A value is considered consistent if it does not
+contradict other values for the same record.
 }
 \examples{
 govhr::compute_global_consistency(

@@ -47,7 +47,7 @@ included to prevent partial argument matching against \code{ref_date_col}).}
 }
 \value{
 data.table with \code{group_cols} (if specified) and
-  \code{exit_rate} column.
+\code{exit_rate} column.
 }
 \description{
 Uses \code{govhr::detect_personnel_event(event_type = "fire")} to identify

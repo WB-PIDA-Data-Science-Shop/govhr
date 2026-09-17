@@ -13,7 +13,7 @@ compute_workforce_movement(.data, movement_type, measurement_type, group_cols)
 
 \item{measurement_type}{A character string indicating the measurement type: "count" or "rate". Ignored for turnover, which is a ratio.}
 
-\item{group_cols}{A character string indicating the grouping column, or "ref_date" for no grouping.}
+\item{group_cols}{A character vector of columns to group by, or \code{"ref_date"} for no grouping.}
 }
 \value{
 A data.table containing the aggregated movement data.

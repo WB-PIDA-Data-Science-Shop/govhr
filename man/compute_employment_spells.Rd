@@ -43,13 +43,13 @@ establishment, occupation, or organization). Default is \code{NULL}.}
 }
 \value{
 A data.table with one row per unique combination of
-  \code{personnel_id} and \code{group_cols}, containing:
-  \describe{
-    \item{ref_date}{The last reference date at which the person was
-    observed in this \code{group_cols} state.}
-    \item{spell_years}{Total cumulative tenure, in years, accrued in
-    this state as of that date.}
-  }
+\code{personnel_id} and \code{group_cols}, containing:
+\describe{
+\item{ref_date}{The last reference date at which the person was
+observed in this \code{group_cols} state.}
+\item{spell_years}{Total cumulative tenure, in years, accrued in
+this state as of that date.}
+}
 }
 \description{
 Derives, for each person and (optionally) each grouping variable such as
@@ -72,15 +72,15 @@ combination and date.
 
 Two caveats affect interpretation:
 \itemize{
-  \item If \code{contract_id} is included in \code{group_cols} and a
-  person is renewed onto a new contract while remaining on the same
-  paygrade, this will be treated as two separate spells rather than one
-  continuous spell, understating true time-in-grade for that person.
-  \item If a person leaves a given \code{group_cols} state and later
-  returns to it (e.g. paygrade A -> B -> A) under the same grouping
-  combination, the two non-contiguous stints are combined into a single
-  spell, and \code{spell_years} will reflect their combined duration
-  rather than just the most recent stint.
+\item If \code{contract_id} is included in \code{group_cols} and a
+person is renewed onto a new contract while remaining on the same
+paygrade, this will be treated as two separate spells rather than one
+continuous spell, understating true time-in-grade for that person.
+\item If a person leaves a given \code{group_cols} state and later
+returns to it (e.g. paygrade A -> B -> A) under the same grouping
+combination, the two non-contiguous stints are combined into a single
+spell, and \code{spell_years} will reflect their combined duration
+rather than just the most recent stint.
 }
 
 This function does not distinguish spells that ended because the person

@@ -7,23 +7,23 @@
 compute_cross_section(.data, group, measure_col = NULL)
 }
 \arguments{
-\item{.data}{A data frame containing a `ref_date` column and the grouping
+\item{.data}{A data frame containing a \code{ref_date} column and the grouping
 column.}
 
 \item{group}{Character string naming the grouping column.}
 
 \item{measure_col}{Character string naming the numeric column to sum, or
-`NULL` to count rows.}
+\code{NULL} to count rows.}
 }
 \value{
-A data frame with the grouping column and a `value` column.
+A data frame with the grouping column and a \code{value} column.
 }
 \description{
 Filters to the latest reference date within each group, then aggregates to
-produce a per-group `value`. Used as the data source for total-by-group bar
+produce a per-group \code{value}. Used as the data source for total-by-group bar
 charts.
 }
 \details{
-When `measure_col` is `NULL`, counts rows (headcount). When a column name is
+When \code{measure_col} is \code{NULL}, counts rows (headcount). When a column name is
 supplied, sums that column (wage bill).
 }

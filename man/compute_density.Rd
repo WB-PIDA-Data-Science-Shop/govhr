@@ -15,7 +15,7 @@ compute_density(
 \arguments{
 \item{.data}{A data frame.}
 
-\item{group_col}{A character vector of column names to group the data by.}
+\item{group_col}{A string naming a single column to group by, or \code{NULL} for no grouping.}
 
 \item{measure_col}{The name of the column for which the percentile values will be computed.}
 
@@ -24,7 +24,7 @@ compute_density(
 \item{latest_measure}{A logical value indicating whether to return only the measures for the latest reference date.}
 }
 \value{
-A data frame with the distribution function, where `pct` denotes the percentage of observations in each bin and `cum_pct` denotes the cumulative percentage.
+A data frame with the distribution function, where \code{pct} denotes the percentage of observations in each bin and \code{cum_pct} denotes the cumulative percentage.
 }
 \description{
 Function to compute the distribution function of a variable.

@@ -13,21 +13,21 @@ fix_negative_salaries(
 \arguments{
 \item{data}{A data.frame with salary columns.}
 
-\item{columns}{Salary columns to fix (default: `gross_salary_lcu`,
-`base_salary_lcu`, `net_salary_lcu`).}
+\item{columns}{Salary columns to fix (default: \code{gross_salary_lcu},
+\code{base_salary_lcu}, \code{net_salary_lcu}).}
 
 \item{treatment}{Correction strategy:
 \itemize{
-  \item `"na"`: Set negative values to `NA`
-  \item `"abs"`: Take absolute value
-  \item `"zero"`: Set negative values to `0`
+\item \code{"na"}: Set negative values to \code{NA}
+\item \code{"abs"}: Take absolute value
+\item \code{"zero"}: Set negative values to \code{0}
 }}
 }
 \value{
 A data.frame with corrected salary values in the specified columns.
 }
 \description{
-Addresses violations of positive salary rules (`wagebill_*_positive`) by
+Addresses violations of positive salary rules (\verb{wagebill_*_positive}) by
 handling negative values across salary columns.
 }
 \examples{

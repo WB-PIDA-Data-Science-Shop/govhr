@@ -17,11 +17,11 @@ the y-axis.}
 }
 \value{
 A ggplot2 object displaying:
-  \itemize{
-    \item Grey horizontal segments showing the range (min to max) for each group
-    \item Jittered points showing the distribution of individual observations
-    \item Groups ordered by median value (highest to lowest, top to bottom)
-  }
+\itemize{
+\item Grey horizontal segments showing the range (min to max) for each group
+\item Jittered points showing the distribution of individual observations
+\item Groups ordered by median value (highest to lowest, top to bottom)
+}
 }
 \description{
 Produces a ggplot2 visualization showing the range (min to max) and distribution
@@ -31,11 +31,11 @@ their median values in descending order.
 \details{
 The function:
 \itemize{
-  \item Computes min, max, and median for each group
-  \item Handles infinite values by converting them to NA
-  \item Orders groups by median in descending order
-  \item Uses hollow circles (shape = 1) for points with 70% transparency
-  \item Applies minimal theme styling
+\item Computes min, max, and median for each group
+\item Handles infinite values by converting them to NA
+\item Orders groups by median in descending order
+\item Uses hollow circles (shape = 1) for points with 70\% transparency
+\item Applies minimal theme styling
 }
 }
 \examples{

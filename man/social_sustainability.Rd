@@ -7,9 +7,9 @@
 \format{
 A data frame with 195 rows and 3 variables:
 \describe{
-  \item{\code{country_code}}{character World Bank country code.}
-  \item{\code{year}}{numeric Year.}
-  \item{\code{confidence_in_gov}}{numeric Percentage of population with confidence in government.}
+\item{\code{country_code}}{character World Bank country code.}
+\item{\code{year}}{numeric Year.}
+\item{\code{confidence_in_gov}}{numeric Percentage of population with confidence in government.}
 }
 }
 \source{
@@ -20,6 +20,6 @@ World Bank
 social_sustainability
 }
 \description{
-The Social Sustainability global database and its visualization dashboard <https://public.tableau.com/app/profile/social.sustainability.and.inclusion.world.bank/viz/SocialSustainabilityGlobalDashboard2_0/Historia1?publish=yes/> are global public goods produced by the Social Development Global Practice of The World Bank Group. They feature leading indicators of inclusion, resilience, social cohesion, and process legitimacy, for 222 countries, disaggregated by population group and analyzed spatially and over time. In addition, the dashboard allows the user to overlay the indicators in the geospatial platform of the World Bank Group.
+The Social Sustainability global database and its visualization dashboard \url{https://public.tableau.com/app/profile/social.sustainability.and.inclusion.world.bank/viz/SocialSustainabilityGlobalDashboard2_0/Historia1?publish=yes/} are global public goods produced by the Social Development Global Practice of The World Bank Group. They feature leading indicators of inclusion, resilience, social cohesion, and process legitimacy, for 222 countries, disaggregated by population group and analyzed spatially and over time. In addition, the dashboard allows the user to overlay the indicators in the geospatial platform of the World Bank Group.
 }
 \keyword{datasets}

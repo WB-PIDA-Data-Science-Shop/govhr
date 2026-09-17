@@ -7,17 +7,17 @@
 rescale_baseline(data, group)
 }
 \arguments{
-\item{data}{A data frame with columns `ref_date` and `value`, as returned by
-[compute_time_trend()].}
+\item{data}{A data frame with columns \code{ref_date} and \code{value}, as returned by
+\code{\link[=compute_time_trend]{compute_time_trend()}}.}
 
-\item{group}{Character string naming the grouping column, or `"ref_date"` for
+\item{group}{Character string naming the grouping column, or \code{"ref_date"} for
 no grouping.}
 }
 \value{
-The input data frame with `value` rescaled to a baseline index.
+The input data frame with \code{value} rescaled to a baseline index.
 }
 \description{
-Rescales the `value` column so that the first observation equals 100,
+Rescales the \code{value} column so that the first observation equals 100,
 producing a baseline index. When a grouping variable is present, the
 rescaling is applied within each group.
 }

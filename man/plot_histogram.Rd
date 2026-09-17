@@ -7,7 +7,7 @@
 plot_histogram(.data, plot_type = "histogram", group_col = NULL)
 }
 \arguments{
-\item{.data}{A data frame produced by `compute_histogram()` or `compute_cumulative()`, containing columns `bin`, `pct`, and optionally a grouping column.}
+\item{.data}{A data frame produced by \code{compute_histogram()} or \code{compute_cumulative()}, containing columns \code{bin}, \code{pct}, and optionally a grouping column.}
 
 \item{plot_type}{A character string indicating the type of plot: "histogram" or "cumulative".}
 

@@ -24,13 +24,13 @@ compute_movement_cost(
 
 \item{event_type}{A character vector indicating which movement event(s) to include (e.g., "hire", "fire", "retirement"). Multiple types can be supplied to compute costs for each type.}
 
-\item{start_date}{The start date for the classification period. Defaults to the minimum reference date found in `.data`.}
+\item{start_date}{The start date for the classification period. Defaults to the minimum reference date found in \code{.data}.}
 
-\item{end_date}{The end date for the classification period. Defaults to the maximum reference date found in `.data`.}
+\item{end_date}{The end date for the classification period. Defaults to the maximum reference date found in \code{.data}.}
 
 \item{status_col}{The name of the column representing employment status (default is "employment_status").}
 
-\item{freq}{The frequency of the reference dates. Defaults to a guess based on `.data`.}
+\item{freq}{The frequency of the reference dates. Defaults to a guess based on \code{.data}.}
 
 \item{measure_col}{The name of the column containing the cost/measure to sum.}
 

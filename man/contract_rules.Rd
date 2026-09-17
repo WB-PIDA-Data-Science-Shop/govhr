@@ -7,11 +7,11 @@
 \format{
 A tibble with 17 rows and 5 variables:
 \describe{
-  \item{rule}{Character. The validation rule expression as a string that can be parsed by \code{validate::validator()}.}
-  \item{name}{Character. Unique identifier for the rule (e.g., "contract_ref_date_valid").}
-  \item{description}{Character. Detailed explanation of what the rule checks. This description appears in validation summaries.}
-  \item{label}{Character. Short 2-3 word label for the rule, useful for plotting and quick reference.}
-  \item{required_vars}{Character. Comma-separated list of minimum required variables for the rule to be evaluated. At minimum: contract_id, personnel_id, gross_salary_lcu, base_salary_lcu, and allowance_lcu.}
+\item{rule}{Character. The validation rule expression as a string that can be parsed by \code{validate::validator()}.}
+\item{name}{Character. Unique identifier for the rule (e.g., "contract_ref_date_valid").}
+\item{description}{Character. Detailed explanation of what the rule checks. This description appears in validation summaries.}
+\item{label}{Character. Short 2-3 word label for the rule, useful for plotting and quick reference.}
+\item{required_vars}{Character. Comma-separated list of minimum required variables for the rule to be evaluated. At minimum: contract_id, personnel_id, gross_salary_lcu, base_salary_lcu, and allowance_lcu.}
 }
 }
 \source{
@@ -28,16 +28,16 @@ assess the quality and consistency of contract records in HRMIS data.
 \details{
 The contract validation rules check:
 \itemize{
-  \item Column existence (contract_id, ref_date, gross_salary_lcu, base_salary_lcu, allowance_lcu)
-  \item Contract ID uniqueness (contract_id + ref_date combination is unique)
-  \item Personnel assignment uniqueness (contract_id + personnel_id + ref_date combination is unique)
-  \item Reference date validity
-  \item Working hours reasonableness (1-168 hours per week)
-  \item Contract status consistency (start_date <= ref_date)
-  \item Wage bill composition (gross = base + allowance)
-  \item Wage bill hierarchy (net <= gross, base <= gross)
-  \item Positive salary values (gross, base, net >= 1)
-  \item Allowance validity (non-negative or missing)
+\item Column existence (contract_id, ref_date, gross_salary_lcu, base_salary_lcu, allowance_lcu)
+\item Contract ID uniqueness (contract_id + ref_date combination is unique)
+\item Personnel assignment uniqueness (contract_id + personnel_id + ref_date combination is unique)
+\item Reference date validity
+\item Working hours reasonableness (1-168 hours per week)
+\item Contract status consistency (start_date <= ref_date)
+\item Wage bill composition (gross = base + allowance)
+\item Wage bill hierarchy (net <= gross, base <= gross)
+\item Positive salary values (gross, base, net >= 1)
+\item Allowance validity (non-negative or missing)
 }
 
 These rules can be programmatically converted to \code{validate::validator()} objects

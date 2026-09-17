@@ -24,7 +24,7 @@ plot_consistency_trend(
 
 \item{type_plot}{Character string. The type of consistency plot ("record" or "value").}
 
-\item{toggle_growth}{Logical. When `TRUE` the y-axis switches to a baseline-index view (first period = 100). Defaults to `FALSE`.}
+\item{toggle_growth}{Logical. When \code{TRUE} the y-axis switches to a baseline-index view (first period = 100). Defaults to \code{FALSE}.}
 }
 \value{
 A ggplot2 object.

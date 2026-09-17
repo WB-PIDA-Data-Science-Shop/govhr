@@ -45,12 +45,12 @@ establishment, occupation, or organization). Default is
 }
 \value{
 A data.table with one row per unique combination of
-  \code{personnel_id} and optional \code{group_cols}, containing:
-  \describe{
-    \item{tenure_days}{Total employment tenure in days.}
-    \item{tenure_years}{Total employment tenure in years, calculated as
-    tenure days divided by 365.25.}
-  }
+\code{personnel_id} and optional \code{group_cols}, containing:
+\describe{
+\item{tenure_days}{Total employment tenure in days.}
+\item{tenure_years}{Total employment tenure in years, calculated as
+tenure days divided by 365.25.}
+}
 }
 \description{
 Computes cumulative employment tenure for each personnel member as of a

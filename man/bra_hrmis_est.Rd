@@ -7,13 +7,13 @@
 \format{
 A data frame with 65 rows and 6 variables:
 \describe{
-  \item{est_name_native}{Official establishment name in the native language (Portuguese).}
-  \item{est_id}{Unique identifier assigned to each establishment.}
-  \item{ref_date}{Reference date of the HRMIS record.}
-  \item{country_code}{Three-letter ISO 3166-1 alpha-3 country code following the World Bank convention (e.g., \code{"BRA"}).}
-  \item{country_name}{Official World Bank country name.}
-  \item{est_name_en}{Official establishment name translated into English.}
-  \item{sector}{Standardized Classification of the Functions of Government (COFOG) sector assigned to the establishment.}
+\item{est_name_native}{Official establishment name in the native language (Portuguese).}
+\item{est_id}{Unique identifier assigned to each establishment.}
+\item{ref_date}{Reference date of the HRMIS record.}
+\item{country_code}{Three-letter ISO 3166-1 alpha-3 country code following the World Bank convention (e.g., \code{"BRA"}).}
+\item{country_name}{Official World Bank country name.}
+\item{est_name_en}{Official establishment name translated into English.}
+\item{sector}{Standardized Classification of the Functions of Government (COFOG) sector assigned to the establishment.}
 }
 }
 \source{
@@ -34,23 +34,22 @@ The dataset follows the GovHR establishment module data dictionary and is
 intended to support organizational analysis, workforce reporting, and
 aggregation of personnel and contract records.
 
-
 This dataset is harmonized according to the GovHR establishment module data
 dictionary. Establishment names are translated into English to facilitate
 international comparative analysis. Each establishment is assigned to one of
 the ten top-level COFOG functional sectors:
 
 \itemize{
-  \item General Public Services
-  \item Defence
-  \item Public Order and Safety
-  \item Economic Affairs
-  \item Environmental Protection
-  \item Housing and Community Amenities
-  \item Health
-  \item Recreation, Culture and Religion
-  \item Education
-  \item Social Protection
+\item General Public Services
+\item Defence
+\item Public Order and Safety
+\item Economic Affairs
+\item Environmental Protection
+\item Housing and Community Amenities
+\item Health
+\item Recreation, Culture and Religion
+\item Education
+\item Social Protection
 }
 }
 \examples{

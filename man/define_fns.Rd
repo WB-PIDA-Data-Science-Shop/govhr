@@ -6,23 +6,23 @@
 \format{
 The list includes the following summary functions:
 \describe{
-  \item{sum}{Sum of values, ignoring `NA`s.}
-  \item{mean}{Arithmetic mean.}
-  \item{median}{Median value.}
-  \item{cv}{Coefficient of variation (requires a `cv()` helper).}
-  \item{cp_ratio}{Custom "cp ratio" statistic (requires a `cp_ratio()` helper).}
-  \item{var}{Sample variance.}
-  \item{iqr}{Interquartile range, computed as `diff(range(.x))`.}
-  \item{min}{Minimum value.}
-  \item{max}{Maximum value.}
-  \item{count}{Number of observations.}
-  \item{count_unique}{Number of distinct (unique) values.}
-  \item{prop_na}{Proportion of missing (`NA`) values.}
-  \item{prop_zero}{Proportion of zero values among non-missing data.}
-  \item{p25}{25th percentile (first quartile).}
-  \item{p75}{75th percentile (third quartile).}
-  \item{p90}{90th percentile.}
-  \item{sd}{Standard deviation.}
+\item{sum}{Sum of values, ignoring \code{NA}s.}
+\item{mean}{Arithmetic mean.}
+\item{median}{Median value.}
+\item{cv}{Coefficient of variation (requires a \code{cv()} helper).}
+\item{cp_ratio}{Custom "cp ratio" statistic (requires a \code{cp_ratio()} helper).}
+\item{var}{Sample variance.}
+\item{iqr}{Interquartile range, computed as \code{diff(range(.x))}.}
+\item{min}{Minimum value.}
+\item{max}{Maximum value.}
+\item{count}{Number of observations.}
+\item{count_unique}{Number of distinct (unique) values.}
+\item{prop_na}{Proportion of missing (\code{NA}) values.}
+\item{prop_zero}{Proportion of zero values among non-missing data.}
+\item{p25}{25th percentile (first quartile).}
+\item{p75}{75th percentile (third quartile).}
+\item{p90}{90th percentile.}
+\item{sd}{Standard deviation.}
 }
 }
 \usage{
@@ -30,14 +30,14 @@ define_fns()
 }
 \value{
 A named list of formula functions suitable for use with
-`dplyr::across()`, where each element name is the function label
+\code{dplyr::across()}, where each element name is the function label
 and the value is a one-sided formula that computes the summary.
 }
 \description{
 Creates and returns a named list of default summary functions used
-throughout the analytics framework (e.g., by [compute_fastsummary()]).
-Each function is defined as a purrr-style formula (`~`) that operates
-on a vector `.x` and returns a scalar summary statistic. The returned
+throughout the analytics framework (e.g., by \code{\link[=compute_fastsummary]{compute_fastsummary()}}).
+Each function is defined as a purrr-style formula (\code{~}) that operates
+on a vector \code{.x} and returns a scalar summary statistic. The returned
 list can be supplied directly to a summarization pipeline or extended
 by users with custom functions.
 }
@@ -46,7 +46,7 @@ The returned list contains commonly used descriptive statistics for
 numeric vectors, including measures of central tendency, dispersion,
 distribution, and data quality (e.g., share of missing or zero values).
 Users can extend or override the defaults by appending their own
-named formulas before passing to [compute_fastsummary()].
+named formulas before passing to \code{\link[=compute_fastsummary]{compute_fastsummary()}}.
 }
 \examples{
 # Load the default function set
@@ -75,7 +75,7 @@ compute_fastsummary(
 
 }
 \seealso{
-[compute_fastsummary()], [compute_fastshare()]
+\code{\link[=compute_fastsummary]{compute_fastsummary()}}, \code{\link[=compute_fastshare]{compute_fastshare()}}
 }
 \keyword{internal}
 \keyword{summarization}

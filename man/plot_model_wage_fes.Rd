@@ -10,12 +10,12 @@ plot_model_wage_fes(
 )
 }
 \arguments{
-\item{model_fit}{A `fixest` model object, as returned by `model_wage()`.}
+\item{model_fit}{A \code{fixest} model object, as returned by \code{model_wage()}.}
 
 \item{fixed_effects_var}{Character. Name of the fixed effects variable to plot.}
 }
 \value{
-A `ggplot` object visualizing the fixed effects.
+A \code{ggplot} object visualizing the fixed effects.
 }
 \description{
 Plot fixed effects from a wage model fit

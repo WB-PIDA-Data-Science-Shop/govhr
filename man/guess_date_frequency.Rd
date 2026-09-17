@@ -11,7 +11,7 @@ guess_date_frequency(.data)
 }
 \value{
 A single character scalar: \code{"year"}, \code{"quarter"},
-  \code{"month"}, \code{"week"}, or \code{"day"}.
+\code{"month"}, \code{"week"}, or \code{"day"}.
 }
 \description{
 Evaluates a vector of reference dates and returns a single

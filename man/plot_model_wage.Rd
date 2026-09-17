@@ -7,10 +7,10 @@
 plot_model_wage(model_fit)
 }
 \arguments{
-\item{model_fit}{A `fixest` model object, as returned by `model_wage()`.}
+\item{model_fit}{A \code{fixest} model object, as returned by \code{model_wage()}.}
 }
 \value{
-A `ggplot` object visualizing the model coefficients.
+A \code{ggplot} object visualizing the model coefficients.
 }
 \description{
 Plot a wage model fit

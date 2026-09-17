@@ -15,11 +15,11 @@ unit (e.g. "country_code") within which shares/composition are computed
 separately. NULL pools all rows into one global composition per ref_date.}
 }
 \value{
-A data.table, one row per ref_date (or per ref_date x `group_cols`),
-  with avg_compensation, avg_compensation_lag, within_effect,
-  between_effect, cross_effect, entry_effect, exit_effect, and total_effect
-  (which equals avg_compensation - avg_compensation_lag by construction,
-  except at the panel's first period, which is NA -- no lagged baseline).
+A data.table, one row per ref_date (or per ref_date x \code{group_cols}),
+with avg_compensation, avg_compensation_lag, within_effect,
+between_effect, cross_effect, entry_effect, exit_effect, and total_effect
+(which equals avg_compensation - avg_compensation_lag by construction,
+except at the panel's first period, which is NA -- no lagged baseline).
 }
 \description{
 Takes the per-group output of compute_growth_decomposition() and answers

@@ -7,20 +7,20 @@
 \format{
 A data frame with 15,681 rows and 11 variables:
 \describe{
-  \item{personnel_id}{Unique identifier assigned to each worker.}
-  \item{ref_date}{Reference date of the HRMIS record.}
-  \item{birth_date}{Worker's date of birth.}
-  \item{age}{Worker's age in years at the reference date.}
-  \item{gender}{Worker's gender.}
-  \item{educat7}{Educational attainment using the World Bank Global Labor Database (GLD) seven-level education classification.}
-  \item{employment_status}{Standardized employment status. One of
-  \code{"active"}, \code{"inactive"}, or \code{"pensioner"}.}
-  \item{service_type}{Type of public service. One of
-  \code{"civilian"} or \code{"military"}.}
-  \item{race}{Worker's race or broad ethnic classification, where available.}
-  \item{tribe}{Worker's ethnic or tribal affiliation, where available.}
-  \item{first_employment_date}{Date the worker first entered the public service.}
-  \item{retirement_date}{The date of retirement for those whose \code{employment_status} is \code{"pensioner"}}
+\item{personnel_id}{Unique identifier assigned to each worker.}
+\item{ref_date}{Reference date of the HRMIS record.}
+\item{birth_date}{Worker's date of birth.}
+\item{age}{Worker's age in years at the reference date.}
+\item{gender}{Worker's gender.}
+\item{educat7}{Educational attainment using the World Bank Global Labor Database (GLD) seven-level education classification.}
+\item{employment_status}{Standardized employment status. One of
+\code{"active"}, \code{"inactive"}, or \code{"pensioner"}.}
+\item{service_type}{Type of public service. One of
+\code{"civilian"} or \code{"military"}.}
+\item{race}{Worker's race or broad ethnic classification, where available.}
+\item{tribe}{Worker's ethnic or tribal affiliation, where available.}
+\item{first_employment_date}{Date the worker first entered the public service.}
+\item{retirement_date}{The date of retirement for those whose \code{employment_status} is \code{"pensioner"}}
 }
 }
 \source{
@@ -33,7 +33,7 @@ bra_hrmis_personnel
 \description{
 Harmonized personnel-level human resource management information system
 (HRMIS) data for the State of Alagoas, Brazil. Each observation represents a
-unique worker at a given reference date (`personnel_id`, `ref_date`) and
+unique worker at a given reference date (\code{personnel_id}, \code{ref_date}) and
 contains demographic characteristics, education, employment status, and
 public service information.
 }
@@ -41,7 +41,6 @@ public service information.
 The dataset follows the GovHR personnel module data dictionary and is
 intended for workforce analytics, demographic analysis, and personnel
 microsimulation.
-
 
 This dataset is harmonized according to the GovHR data dictionary. Educational
 attainment follows the seven-level classification used by the World Bank's

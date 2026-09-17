@@ -32,9 +32,9 @@ containing the deduplicated \code{value_col}.
 This function deduplicates values within groups defined by a combination
 of identifier and date columns. It provides three strategies:
 \enumerate{
-  \item \code{"mode"}: returns the most frequent (modal) value in the group.
-  \item \code{"first"}: returns the first value in the group, even if \code{NA}.
-  \item \code{"first_nonmissing"}: returns the first non-missing value in the group.
+\item \code{"mode"}: returns the most frequent (modal) value in the group.
+\item \code{"first"}: returns the first value in the group, even if \code{NA}.
+\item \code{"first_nonmissing"}: returns the first non-missing value in the group.
 }
 }
 \details{

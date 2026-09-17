@@ -34,18 +34,18 @@ represents "stayed" rather than an exit. Defaults to \code{"active"}.}
 }
 \value{
 A data.table with one row per age / \code{group_cols} /
-  \code{status_col}, spanning the full observed age range within each
-  group with no gaps:
-  \describe{
-    \item{age_col, group_cols}{As supplied.}
-    \item{status_col}{The outcome type, including \code{active_value}.}
-    \item{decrement_rate}{The graduated rate, clipped to \code{[0, 1]}.
-      Sums to 1 across outcome types for a given age/group (up to the
-      clamping caveat below).}
-  }
-  \code{pop}, \code{exits}, and \code{n_periods} from \code{decrement_dt}
-  are not carried forward: an interpolated age never had a real headcount,
-  so those columns would be fabricated rather than meaningful.
+\code{status_col}, spanning the full observed age range within each
+group with no gaps:
+\describe{
+\item{age_col, group_cols}{As supplied.}
+\item{status_col}{The outcome type, including \code{active_value}.}
+\item{decrement_rate}{The graduated rate, clipped to \code{[0, 1]}.
+Sums to 1 across outcome types for a given age/group (up to the
+clamping caveat below).}
+}
+\code{pop}, \code{exits}, and \code{n_periods} from \code{decrement_dt}
+are not carried forward: an interpolated age never had a real headcount,
+so those columns would be fabricated rather than meaningful.
 }
 \description{
 Takes the pooled output of \code{estimate_decrement_rates()} and returns a
@@ -78,5 +78,5 @@ that is not further corrected.
 }
 \seealso{
 \code{\link{.smooth_rate_curve}}, \code{\link{estimate_decrement_rates}},
-  \code{\link{compute_service_table}}
+\code{\link{compute_service_table}}
 }

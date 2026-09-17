@@ -12,7 +12,7 @@ detect_inconsistent_cols(data, inconsistent_cols)
 \item{inconsistent_cols}{A character vector of column names considered inconsistent.}
 }
 \value{
-A logical value: `TRUE` if any inconsistent columns are present in the data frame, `FALSE` otherwise.
+A logical value: \code{TRUE} if any inconsistent columns are present in the data frame, \code{FALSE} otherwise.
 }
 \description{
 This function checks whether any of the specified column names appear in a given data frame.

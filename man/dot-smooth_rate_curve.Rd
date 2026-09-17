@@ -24,8 +24,8 @@ more global fit, smaller values track local features more closely.}
 }
 \value{
 A numeric vector of smoothed rates, one per element of
-  \code{full_ages}, in the same order. Not clipped to \code{[0, 1]} --
-  callers (e.g. \code{smooth_decrement_rates()}) are responsible for that.
+\code{full_ages}, in the same order. Not clipped to \code{[0, 1]} --
+callers (e.g. \code{smooth_decrement_rates()}) are responsible for that.
 }
 \description{
 Internal single-curve workhorse called by \code{smooth_decrement_rates()}
@@ -37,17 +37,17 @@ pensioner rate by age"), returns a smoothed rate for \emph{every} age in
 The method used depends on how much data is actually available, since a
 local regression needs enough support to be stable:
 \itemize{
-  \item Exactly one distinct age observed: there is no trend to fit from a
-    single point, so that one rate is repeated flat across the whole grid.
-  \item Two or three distinct ages: too few for a stable \code{loess} fit,
-    so falls back to \code{stats::approx()} (piecewise linear
-    interpolation). Ages in \code{full_ages} outside the observed range get
-    the nearest boundary value (\code{rule = 2}) rather than \code{NA}.
-  \item Four or more distinct ages: fits
-    \code{stats::loess(rate ~ age, weights = weight, span = span, degree = 2)}
-    and predicts it onto \code{full_ages}. \code{weight} (exposure) means an
-    age with many people at risk pulls the local curve toward its raw rate
-    harder than a thin, noisy age.
+\item Exactly one distinct age observed: there is no trend to fit from a
+single point, so that one rate is repeated flat across the whole grid.
+\item Two or three distinct ages: too few for a stable \code{loess} fit,
+so falls back to \code{stats::approx()} (piecewise linear
+interpolation). Ages in \code{full_ages} outside the observed range get
+the nearest boundary value (\code{rule = 2}) rather than \code{NA}.
+\item Four or more distinct ages: fits
+\code{stats::loess(rate ~ age, weights = weight, span = span, degree = 2)}
+and predicts it onto \code{full_ages}. \code{weight} (exposure) means an
+age with many people at risk pulls the local curve toward its raw rate
+harder than a thin, noisy age.
 }
 }
 \seealso{

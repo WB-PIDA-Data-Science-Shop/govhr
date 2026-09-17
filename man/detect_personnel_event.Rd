@@ -16,23 +16,25 @@ detect_personnel_event(
 }
 \arguments{
 \item{data}{A data.table or data.frame containing at least the columns:
-- `personnel_id`: Unique identifier for personnel.
-- `ref_date`: Reference date (must be coercible to Date).
-- `employment_status`: Personnel status (e.g., "active", "pensioner", "inactive").}
+\itemize{
+\item \code{personnel_id}: Unique identifier for personnel.
+\item \code{ref_date}: Reference date (must be coercible to Date).
+\item \code{employment_status}: Personnel status (e.g., "active", "pensioner", "inactive").
+}}
 
-\item{id_col}{Character. Name of the identifier column (e.g., `"personnel_id"`).}
+\item{id_col}{Character. Name of the identifier column (e.g., \code{"personnel_id"}).}
 
-\item{event_type}{Character. Either `"hire"` or `"fire"`, controlling which event to detect.}
+\item{event_type}{Character. Either \code{"hire"} or \code{"fire"}, controlling which event to detect.}
 
 \item{start_date}{Optional start date for the full date sequence
-(default: `"2007-09-01"`).}
+(default: \code{"2007-09-01"}).}
 
 \item{end_date}{Optional end date for the full date sequence
-(default: `"2018-01-01"`).}
+(default: \code{"2018-01-01"}).}
 
-\item{status_col}{a column within `data` object for the employment status of personnel}
+\item{status_col}{a column within \code{data} object for the employment status of personnel}
 
-\item{freq}{Frequency for the sequence of dates (default: `"year"`).
+\item{freq}{Frequency for the sequence of dates (default: \code{"year"}).
 Can be any valid value for \code{seq.Date(by = ...)}.}
 }
 \value{

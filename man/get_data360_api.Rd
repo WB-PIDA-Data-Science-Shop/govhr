@@ -15,7 +15,7 @@ get_data360_api(dataset_id, indicator_id, pivot = TRUE)
 }
 \value{
 A tibble containing data, including country codes, country names,
-        years, and values.
+years, and values.
 }
 \description{
 This function retrieves data from the Data360 API.

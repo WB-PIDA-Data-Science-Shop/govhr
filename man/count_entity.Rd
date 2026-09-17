@@ -11,10 +11,10 @@ count_entity(.data, id_col, group_cols = NULL)
 
 \item{id_col}{Character. Column name of the unique identifier for the entity.}
 
-\item{group_cols}{Character vector of column names to group by, or `NULL` for no grouping.}
+\item{group_cols}{Character vector of column names to group by, or \code{NULL} for no grouping.}
 }
 \value{
-A data frame with the grouping columns and a `count` column representing the number of unique entities in each group.
+A data frame with the grouping columns and a \code{count} column representing the number of unique entities in each group.
 }
 \description{
 Count Unique Entities by Group

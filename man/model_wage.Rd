@@ -17,24 +17,24 @@ model_wage(
 effects columns.}
 
 \item{outcome_var}{Character. Name of the outcome column.
-Default `"gross_salary_lcu"`.}
+Default \code{"gross_salary_lcu"}.}
 
 \item{predictor_vars}{Character vector. Names of predictor columns.
-Default `c("contract_type", "occupation_native", "educat7", "whours", "paygrade")`.}
+Default \code{c("contract_type", "occupation_native", "educat7", "whours", "paygrade")}.}
 
-\item{fixed_effects_vars}{Character vector, or `NULL` to fit without fixed
+\item{fixed_effects_vars}{Character vector, or \code{NULL} to fit without fixed
 effects. Names of fixed effects columns.
-Default `c("personnel_id", "est_id", "ref_date")`.}
+Default \code{c("personnel_id", "est_id", "ref_date")}.}
 }
 \value{
-A `fixest` model object, as returned by `fixest::feols()`.
+A \code{fixest} model object, as returned by \code{fixest::feols()}.
 }
 \description{
 Fits a linear wage model based on a set of predictors and fixed effects.
 }
 \details{
-`outcome_var` and `fixed_effects_vars` are required to be present in
-`data`. `predictor_vars` are covariates and are dropped with a
+\code{outcome_var} and \code{fixed_effects_vars} are required to be present in
+\code{data}. \code{predictor_vars} are covariates and are dropped with a
 warning rather than failing the whole call; if none remain, the model is
-fit with an intercept-only right-hand side (`1`).
+fit with an intercept-only right-hand side (\code{1}).
 }

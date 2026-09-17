@@ -52,4 +52,5 @@ Authors@R: c(
     person("Galileu", "Kim", , "galileukim@worldbank.org", role = c("aut", "cre")),
     person("Ifeanyi", "Edochie", , "iedochie@worldbank.org", role = c("aut"))
   )
+Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.1.0

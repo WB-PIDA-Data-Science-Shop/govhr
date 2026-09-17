@@ -40,27 +40,27 @@ occupation, service type) to estimate separate rates by, alongside age.}
 }
 \value{
 A data.table with one row per age / \code{group_cols} / outcome
-  type, pooled across every consecutive snapshot pair in
-  \code{personnel_dt}:
-  \describe{
-    \item{age_col, group_cols}{The age and grouping columns, as supplied.}
-    \item{status_col}{The outcome type this row's rate applies to --
-      \code{"active"} (stayed), an observed exit status (e.g.
-      \code{"pensioner"}), or the synthetic \code{"non-retirement-exit"}
-      (someone who dropped out of the panel without an explicit exit
-      status). For a given age/group, these rows sum to 1.}
-    \item{pop}{Total exposure: the number of person-periods active at the
-      start of a snapshot pair, summed across every pair that contributed
-      to this age/group.}
-    \item{exits}{Total number of people in that exposure who had this
-      outcome by the next snapshot, summed the same way.}
-    \item{decrement_rate}{The pooled rate, \code{exits / pop}. This is the
-      empirical \code{qx} (or \code{px}, for the \code{"active"} row) to
-      feed into a life table.}
-    \item{n_periods}{Number of distinct snapshot pairs that contributed to
-      this age/group/outcome cell -- a quick way to spot ages resting on
-      very little data.}
-  }
+type, pooled across every consecutive snapshot pair in
+\code{personnel_dt}:
+\describe{
+\item{age_col, group_cols}{The age and grouping columns, as supplied.}
+\item{status_col}{The outcome type this row's rate applies to --
+\code{"active"} (stayed), an observed exit status (e.g.
+\code{"pensioner"}), or the synthetic \code{"non-retirement-exit"}
+(someone who dropped out of the panel without an explicit exit
+status). For a given age/group, these rows sum to 1.}
+\item{pop}{Total exposure: the number of person-periods active at the
+start of a snapshot pair, summed across every pair that contributed
+to this age/group.}
+\item{exits}{Total number of people in that exposure who had this
+outcome by the next snapshot, summed the same way.}
+\item{decrement_rate}{The pooled rate, \code{exits / pop}. This is the
+empirical \code{qx} (or \code{px}, for the \code{"active"} row) to
+feed into a life table.}
+\item{n_periods}{Number of distinct snapshot pairs that contributed to
+this age/group/outcome cell -- a quick way to spot ages resting on
+very little data.}
+}
 }
 \description{
 Estimates, for each age (and any grouping columns you supply), the
@@ -84,12 +84,12 @@ computed, not just what it means.
 collapsing two different axes, and this function only ever does the
 first one:
 \itemize{
-  \item \emph{Time}, here: every consecutive snapshot pair in
-    \code{personnel_dt} (2015-2016, 2016-2017, ...) is walked via
-    \code{roll_snapshot_pairs()}, and each pair's exposure/outcome counts
-    are pooled into one age-indexed rate. This function never chains
-    anything across \emph{age} -- that is a separate step (a life-table
-    function operating purely on this function's output).
+\item \emph{Time}, here: every consecutive snapshot pair in
+\code{personnel_dt} (2015-2016, 2016-2017, ...) is walked via
+\code{roll_snapshot_pairs()}, and each pair's exposure/outcome counts
+are pooled into one age-indexed rate. This function never chains
+anything across \emph{age} -- that is a separate step (a life-table
+function operating purely on this function's output).
 }
 
 \strong{Pooling is exposure-weighted, not a mean of rates.} For a given

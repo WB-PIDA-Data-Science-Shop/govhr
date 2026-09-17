@@ -7,10 +7,10 @@
 detect_retirement(data)
 }
 \arguments{
-\item{data}{A data.frame or data.table with columns `personnel_id`, `ref_date`, and `status`.}
+\item{data}{A data.frame or data.table with columns \code{personnel_id}, \code{ref_date}, and \code{status}.}
 }
 \value{
-A data.table with `personnel_id`, `ref_date`, and `type_event = "retire"`.
+A data.table with \code{personnel_id}, \code{ref_date}, and \code{type_event = "retire"}.
 }
 \description{
 Identifies personnel who retired, i.e., whose status changed from "active" to "inactive".

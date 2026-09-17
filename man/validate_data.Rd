@@ -18,12 +18,12 @@ ignored. The function now always returns \code{list(report, violations)}.}
 \value{
 A named list:
 \describe{
-  \item{\code{report}}{data.table with columns \code{Rule},
-    \code{Description}, \code{Total Records}, \code{Passes},
-    \code{Pass Rate}, \code{Fails}, \code{Errors}.}
-  \item{\code{violations}}{Named list of data.tables, one per rule label.
-    Each element contains the rows of \code{data} that failed that rule.
-    Rules with zero failures return a zero-row data.table.}
+\item{\code{report}}{data.table with columns \code{Rule},
+\code{Description}, \code{Total Records}, \code{Passes},
+\code{Pass Rate}, \code{Fails}, \code{Errors}.}
+\item{\code{violations}}{Named list of data.tables, one per rule label.
+Each element contains the rows of \code{data} that failed that rule.
+Rules with zero failures return a zero-row data.table.}
 }
 }
 \description{

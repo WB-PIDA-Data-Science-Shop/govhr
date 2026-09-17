@@ -7,9 +7,9 @@
 \format{
 A data frame with 413 rows and 3 variables:
 \describe{
-  \item{\code{country_code}}{character World Bank country code.}
-  \item{\code{year}}{character Year.}
-  \item{\code{workforce_constraint}}{character Proportion of establishments identifying an inadequately educated workforce as a major or severe constraint to the current operations of the establishment.}
+\item{\code{country_code}}{character World Bank country code.}
+\item{\code{year}}{character Year.}
+\item{\code{workforce_constraint}}{character Proportion of establishments identifying an inadequately educated workforce as a major or severe constraint to the current operations of the establishment.}
 }
 }
 \source{

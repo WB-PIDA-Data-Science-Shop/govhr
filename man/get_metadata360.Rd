@@ -12,11 +12,11 @@ dataset for which metadata should be retrieved.}
 }
 \value{
 A list (or data frame) containing the metadata associated with the
-  requested dataset, as returned by the Data360 API.
+requested dataset, as returned by the Data360 API.
 }
 \description{
 This function queries the World Bank Data360 API to fetch metadata for a
-specified dataset, identified by its `dataset_id`. It constructs the request
+specified dataset, identified by its \code{dataset_id}. It constructs the request
 URL, retrieves the metadata in JSON format, and parses it into an R list or
 data frame.
 }

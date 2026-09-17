@@ -11,23 +11,23 @@ remove_duplicate_contracts(
 )
 }
 \arguments{
-\item{data}{A data.frame with columns `contract_id`, `personnel_id`, and `ref_date`.}
+\item{data}{A data.frame with columns \code{contract_id}, \code{personnel_id}, and \code{ref_date}.}
 
 \item{level}{Deduplication scope:
 \itemize{
-  \item `"contract"`: Deduplicate on `contract_id` + `ref_date`
-  \item `"assignment"`: Deduplicate on `contract_id` + `personnel_id` + `ref_date`
+\item \code{"contract"}: Deduplicate on \code{contract_id} + \code{ref_date}
+\item \code{"assignment"}: Deduplicate on \code{contract_id} + \code{personnel_id} + \code{ref_date}
 }}
 
-\item{keep}{Which record to keep: `"first"`, `"last"`, or `"none"`.
+\item{keep}{Which record to keep: \code{"first"}, \code{"last"}, or \code{"none"}.
 See \code{\link{remove_duplicate_personnel}}.}
 }
 \value{
 A data.frame with duplicates removed.
 }
 \description{
-Removes duplicate contract records, addressing violations of `contract_unique_id`
-(contract-level) and `contract_unique_personnel` (assignment-level) rules.
+Removes duplicate contract records, addressing violations of \code{contract_unique_id}
+(contract-level) and \code{contract_unique_personnel} (assignment-level) rules.
 }
 \examples{
 \dontrun{

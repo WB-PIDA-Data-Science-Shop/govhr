@@ -17,44 +17,50 @@ compute_fastshare(
 \arguments{
 \item{data}{A dataset containing the raw data to summarize.}
 
-\item{macro_data}{A `data.frame`, `data.table`, or tibble containing macro-level indicators.
-Must share at least one common grouping variable with `data`. Default is `macro_indicators`.
+\item{macro_data}{A \code{data.frame}, \code{data.table}, or tibble containing macro-level indicators.
+Must share at least one common grouping variable with \code{data}. Default is \code{macro_indicators}.
 The result will be returned in the same class as the input.}
 
-\item{macro_cols}{A character vector of column names in `macro_data` to use as denominators
+\item{macro_cols}{A character vector of column names in \code{macro_data} to use as denominators
 for ratio calculations.}
 
-\item{cols}{A character vector of column names in `data` to summarize.}
+\item{cols}{A character vector of column names in \code{data} to summarize.}
 
-\item{groups}{A character vector of column names in `data` to group by.
-Typically includes country and date/year variables. Default is `c("country_code", "year")`.}
+\item{groups}{A character vector of column names in \code{data} to group by.
+Typically includes country and date/year variables. Default is \code{c("country_code", "year")}.}
 
-\item{fns}{A character vector of summary functions to apply to `cols`.
-Examples: `"sum"`, `"mean"`, `"median"`.}
+\item{fns}{A character vector of summary functions to apply to \code{cols}.
+Examples: \code{"sum"}, \code{"mean"}, \code{"median"}.}
 
-\item{output}{Either `"long"` or `"wide"` (default `"long"`).
-- `"long"` returns a tidy table with columns: group variables, `macro_var`, `summary_var`, `indicator`, and `value`.
-- `"wide"` returns a table with one column per indicator and original macro/summary values.}
+\item{output}{Either \code{"long"} or \code{"wide"} (default \code{"long"}).
+\itemize{
+\item \code{"long"} returns a tidy table with columns: group variables, \code{macro_var}, \code{summary_var}, \code{indicator}, and \code{value}.
+\item \code{"wide"} returns a table with one column per indicator and original macro/summary values.
+}}
 }
 \value{
 A dataset containing:
-- In `"long"` format: group variables, `macro_var`, `macro_value`, `summary_var`, `summary_value`, `indicator`, and `value`.
-- In `"wide"` format: group variables, one column per indicator (`summary_var` per `macro_var`), and original macro and summary values.
-  The returned object will match the class of the input `data`.
+\itemize{
+\item In \code{"long"} format: group variables, \code{macro_var}, \code{macro_value}, \code{summary_var}, \code{summary_value}, \code{indicator}, and \code{value}.
+\item In \code{"wide"} format: group variables, one column per indicator (\code{summary_var} per \code{macro_var}), and original macro and summary values.
+The returned object will match the class of the input \code{data}.
+}
 }
 \description{
-`compute_fastshare()` summarizes selected numeric columns by specified groups,
+\code{compute_fastshare()} summarizes selected numeric columns by specified groups,
 merges the result with macroeconomic indicators, computes ratios
 of summarized variables per macro variable, and returns either a
 long or wide-format dataset.
 }
 \details{
 The function works as follows:
-1. Summarizes `cols` by `groups` using the functions in `fns`.
-2. Automatically detects common join variables between `summary_dt` and `macro_data`.
-3. Merges the summarized data with macro indicators.
-4. Computes ratio indicators (`summary_value / macro_value`) for all combinations of summarized columns and macro columns.
-5. Optionally reshapes the result into wide format with one column per indicator.
+\enumerate{
+\item Summarizes \code{cols} by \code{groups} using the functions in \code{fns}.
+\item Automatically detects common join variables between \code{summary_dt} and \code{macro_data}.
+\item Merges the summarized data with macro indicators.
+\item Computes ratio indicators (\code{summary_value / macro_value}) for all combinations of summarized columns and macro columns.
+\item Optionally reshapes the result into wide format with one column per indicator.
+}
 }
 \examples{
 

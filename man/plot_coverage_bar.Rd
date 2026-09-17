@@ -14,12 +14,14 @@ establishment dataset for the active module.}
 A ggplot2 object.
 }
 \description{
-Computes per-group coverage using [compute_coverage()] (without
-`ref_date`, not aggregated) and renders a horizontal bar chart coloured
+Computes per-group coverage using \code{\link[=compute_coverage]{compute_coverage()}} (without
+\code{ref_date}, not aggregated) and renders a horizontal bar chart coloured
 green-yellow-red according to the same cutpoints used by the value boxes:
 }
 \details{
-* **High (>=80%)** — green (`#388e3c`)
-* **Medium (50-79%)** — yellow (`#f9a825`)
-* **Low (<50%)** — red (`#d32f2f`)
+\itemize{
+\item \strong{High (>=80\%)} — green (\verb{#388e3c})
+\item \strong{Medium (50-79\%)} — yellow (\verb{#f9a825})
+\item \strong{Low (<50\%)} — red (\verb{#d32f2f})
+}
 }

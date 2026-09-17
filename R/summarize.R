@@ -644,7 +644,7 @@ compute_compression_ratio <- function(
 #' Function to compute the distribution function of a variable.
 #'
 #' @param .data A data frame.
-#' @param group_col A character vector of column names to group the data by.
+#' @param group_col A string naming a single column to group by, or `NULL` for no grouping.
 #' @param measure_col The name of the column for which the percentile values will be computed.
 #' @param binwidth The width of the bins for grouping the measure values (default is 1).
 #' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.

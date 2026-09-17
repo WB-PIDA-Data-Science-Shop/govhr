@@ -7,9 +7,9 @@
 plot_movement_cost(.data, group_cols)
 }
 \arguments{
-\item{.data}{A data frame containing the movement cost data with columns `movement_cost` and optionally a grouping column.}
+\item{.data}{A data frame containing the movement cost data with columns \code{movement_cost} and optionally a grouping column.}
 
-\item{group_cols}{A character string indicating the grouping column, or "ref_date" for no grouping.}
+\item{group_cols}{A character vector of columns to group by, or \code{"ref_date"} for no grouping.}
 }
 \value{
 A ggplot2 object representing the movement cost.

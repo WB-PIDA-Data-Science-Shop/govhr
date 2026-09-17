@@ -7,21 +7,21 @@
 fix_working_hours(data, treatment = c("na", "clamp", "flag"))
 }
 \arguments{
-\item{data}{A data.frame with a `whours` column (numeric).}
+\item{data}{A data.frame with a \code{whours} column (numeric).}
 
 \item{treatment}{Correction strategy:
 \itemize{
-  \item `"na"`: Set invalid hours to `NA`
-  \item `"clamp"`: Clamp to `[0, 40]`
-  \item `"flag"`: Add `invalid_hours_flag` column (also flags `NA`)
+\item \code{"na"}: Set invalid hours to \code{NA}
+\item \code{"clamp"}: Clamp to \verb{[0, 40]}
+\item \code{"flag"}: Add \code{invalid_hours_flag} column (also flags \code{NA})
 }}
 }
 \value{
 A data.frame with corrected working hours.
 }
 \description{
-Corrects `whours` values outside the valid range [0, 168], addressing
-violations of the `contract_whours` rule. The maximum of 168 reflects
+Corrects \code{whours} values outside the valid range \link{0, 168}, addressing
+violations of the \code{contract_whours} rule. The maximum of 168 reflects
 5 days × 8 hours per week.
 }
 \examples{

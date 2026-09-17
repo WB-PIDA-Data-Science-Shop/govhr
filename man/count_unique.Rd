@@ -10,7 +10,7 @@ count_unique(x)
 \item{x}{A vector of any type (numeric, character, factor, etc.)}
 }
 \value{
-An integer representing the count of unique non-missing values in `x`.
+An integer representing the count of unique non-missing values in \code{x}.
 }
 \description{
 Returns the number of unique values in a vector, excluding missing values (NA).

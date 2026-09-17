@@ -12,7 +12,7 @@ find_duplicate_ids(data, identifier)
 \item{identifier}{The column to check for duplicates. This should be passed as a bare (unquoted) column name using tidy evaluation.}
 }
 \value{
-A tibble with the identifier column and a count column `n` indicating the number of times each duplicate appears.
+A tibble with the identifier column and a count column \code{n} indicating the number of times each duplicate appears.
 }
 \description{
 Identifies duplicated values of a specified identifier column in a data frame or tibble.

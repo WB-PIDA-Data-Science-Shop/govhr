@@ -7,8 +7,8 @@
 plot_transition_network(.data)
 }
 \arguments{
-\item{.data}{Data frame with `from` and `to` columns, as returned by
-[detect_career_transition()].}
+\item{.data}{Data frame with \code{from} and \code{to} columns, as returned by
+\code{\link[=detect_career_transition]{detect_career_transition()}}.}
 }
 \value{
 A ggiraph girafe object.

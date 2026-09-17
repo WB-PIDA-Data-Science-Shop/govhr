@@ -7,18 +7,18 @@
 compute_growth_summary(.data, group_col, measure_col = NULL)
 }
 \arguments{
-\item{.data}{Data frame containing `ref_date` and the grouping column.}
+\item{.data}{Data frame containing \code{ref_date} and the grouping column.}
 
 \item{group_col}{Character. Column to group by.}
 
-\item{measure_col}{Character. Numeric column to sum, or `NULL` to count rows.}
+\item{measure_col}{Character. Numeric column to sum, or \code{NULL} to count rows.}
 }
 \value{
-A data frame with the grouping column and a `growth_rate` column, in
-  percentage points (e.g. `12.5` for +12.5%).
+A data frame with the grouping column and a \code{growth_rate} column, in
+percentage points (e.g. \code{12.5} for +12.5\%).
 }
 \description{
 Keeps each group's first and last reference date and computes the percentage
-change between them. Counts rows when `measure_col` is `NULL` (headcount) and
+change between them. Counts rows when \code{measure_col} is \code{NULL} (headcount) and
 sums the column otherwise (wage bill).
 }

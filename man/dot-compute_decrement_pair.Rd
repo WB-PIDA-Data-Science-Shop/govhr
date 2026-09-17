@@ -45,24 +45,24 @@ service type) to stratify exposure and outcome counts by, alongside
 }
 \value{
 A \code{data.table} with one row per
-  \code{(age_col, group_cols, status_col)} combination observed in the T0
-  exposure cohort. Columns:
-  \describe{
-    \item{age_col}{Integer. T0 age (column name taken from \code{age_col}).}
-    \item{group_cols}{The stratifying columns, taken directly from T0.}
-    \item{status_col}{Character. The T1 outcome type (column name taken
-      from \code{status_col}), e.g. \code{"active"}, \code{"pensioner"},
-      \code{"non-retirement-exit"}.}
-    \item{pop}{Integer. Number of active persons at T0 in this age/group
-      (the exposure, and the denominator for \code{decrement_rate}).}
-    \item{exits}{Integer. Number of cohort members in this age/group who
-      had this outcome at T1. \code{0L} where the combination had no
-      occurrences.}
-    \item{decrement_rate}{Numeric. \eqn{exits / pop} for this
-      age/group/outcome combination.}
-    \item{t0_date}{Date. Reference date of the T0 snapshot.}
-    \item{t1_date}{Date. Reference date of the T1 snapshot.}
-  }
+\code{(age_col, group_cols, status_col)} combination observed in the T0
+exposure cohort. Columns:
+\describe{
+\item{age_col}{Integer. T0 age (column name taken from \code{age_col}).}
+\item{group_cols}{The stratifying columns, taken directly from T0.}
+\item{status_col}{Character. The T1 outcome type (column name taken
+from \code{status_col}), e.g. \code{"active"}, \code{"pensioner"},
+\code{"non-retirement-exit"}.}
+\item{pop}{Integer. Number of active persons at T0 in this age/group
+(the exposure, and the denominator for \code{decrement_rate}).}
+\item{exits}{Integer. Number of cohort members in this age/group who
+had this outcome at T1. \code{0L} where the combination had no
+occurrences.}
+\item{decrement_rate}{Numeric. \eqn{exits / pop} for this
+age/group/outcome combination.}
+\item{t0_date}{Date. Reference date of the T0 snapshot.}
+\item{t1_date}{Date. Reference date of the T1 snapshot.}
+}
 }
 \description{
 Internal workhorse intended to be called by \code{roll_snapshot_pairs()}
@@ -72,30 +72,30 @@ consecutive panel snapshots (\code{snap_t0} at T0 and \code{snap_t1} at
 T1), this function:
 
 \enumerate{
-  \item Defines the exposure cohort as every person with
-        \code{status_col == "active"} at T0, and tabulates exposure by
-        \code{age_col}/\code{group_cols} using each person's T0 age and
-        group -- ages are never shifted, since individuals are tracked by
-        identity rather than aggregated independently per snapshot.
-  \item Looks up each cohort member's \code{status_col} value at T1 via a
-        native data.table join (\code{x[i, on =]}) on
-        \code{personnel_id_col}. Anyone absent from \code{snap_t1}
-        altogether (i.e. dropped out of the panel) is assigned the
-        synthetic outcome \code{"non-retirement-exit"}.
-  \item Builds the outcome vocabulary from whatever \code{status_col}
-        values actually appear in \code{snap_t1} (e.g. \code{"active"},
-        \code{"pensioner"}, \code{"deceased"}, ...), unioned with
-        \code{"non-retirement-exit"}, which is always included since it is
-        synthesized rather than drawn from the data. No status values are
-        hardcoded.
-  \item Counts, per \code{age_col}/\code{group_cols}/\code{status_col}
-        combination, how many cohort members ended up with each outcome at
-        T1 -- including \code{"active"} (i.e. stayed), so the resulting
-        rates for a given age/group sum to 1 across all outcome types.
-  \item Expands the result to a complete grid of every exposure
-        age/group crossed with every outcome type, filling \code{exits = 0}
-        where a combination had no occurrences, so no age/group ever
-        collapses into an ambiguous \code{NA}-status row.
+\item Defines the exposure cohort as every person with
+\code{status_col == "active"} at T0, and tabulates exposure by
+\code{age_col}/\code{group_cols} using each person's T0 age and
+group -- ages are never shifted, since individuals are tracked by
+identity rather than aggregated independently per snapshot.
+\item Looks up each cohort member's \code{status_col} value at T1 via a
+native data.table join (\code{x[i, on =]}) on
+\code{personnel_id_col}. Anyone absent from \code{snap_t1}
+altogether (i.e. dropped out of the panel) is assigned the
+synthetic outcome \code{"non-retirement-exit"}.
+\item Builds the outcome vocabulary from whatever \code{status_col}
+values actually appear in \code{snap_t1} (e.g. \code{"active"},
+\code{"pensioner"}, \code{"deceased"}, ...), unioned with
+\code{"non-retirement-exit"}, which is always included since it is
+synthesized rather than drawn from the data. No status values are
+hardcoded.
+\item Counts, per \code{age_col}/\code{group_cols}/\code{status_col}
+combination, how many cohort members ended up with each outcome at
+T1 -- including \code{"active"} (i.e. stayed), so the resulting
+rates for a given age/group sum to 1 across all outcome types.
+\item Expands the result to a complete grid of every exposure
+age/group crossed with every outcome type, filling \code{exits = 0}
+where a combination had no occurrences, so no age/group ever
+collapses into an ambiguous \code{NA}-status row.
 }
 }
 \seealso{

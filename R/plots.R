@@ -311,7 +311,7 @@ plot_segment <- function(.data, col, group) {
 #' @param .data A data frame containing the movement data with columns `ref_date`, `indicator`, and optionally a grouping column.
 #' @param movement_type A character string indicating the type of movement: "hire", "fire", or "turnover".
 #' @param measurement_type A character string indicating the measurement type: "count" or "rate".
-#' @param group_cols A character string indicating the grouping column, or "ref_date" for no grouping.
+#' @param group_cols A character vector of columns to group by, or `"ref_date"` for no grouping.
 #'
 #' @return A ggplot2 object representing the personnel movement over time.
 #'
@@ -386,7 +386,7 @@ plot_movement <- function(.data, movement_type, measurement_type, group_cols) {
 #' Plot Decile Summary
 #'
 #' @param .data A data frame produced by `compute_decile()`, containing columns `decile`, `mean_value`, and optionally a grouping column.
-#' @param group_cols A character string indicating the grouping column, or "ref_date" for no grouping.
+#' @param group_cols A character vector of columns to group by, or `"ref_date"` for no grouping.
 #'
 #' @return A ggplot2 object representing the decile summary.
 #'
@@ -478,7 +478,7 @@ plot_histogram <- function(.data, plot_type = "histogram", group_col = NULL) {
 #' Plot Compression Ratio
 #'
 #' @param .data A data frame containing the compression ratio data produced by `compute_compression_ratio()`.
-#' @param group_cols A character string indicating the grouping column, or "ref_date"
+#' @param group_cols A character vector of columns to group by, or `"ref_date"`
 #' for no grouping.
 #'
 #' @return A ggplot2 object representing the compression ratio.
@@ -534,7 +534,7 @@ plot_compression_ratio <- function(.data, group_cols = NULL) {
 #' Plot Movement Cost
 #'
 #' @param .data A data frame containing the movement cost data with columns `movement_cost` and optionally a grouping column.
-#' @param group_cols A character string indicating the grouping column, or "ref_date" for no grouping.
+#' @param group_cols A character vector of columns to group by, or `"ref_date"` for no grouping.
 #'
 #' @return A ggplot2 object representing the movement cost.
 #'

@@ -12,21 +12,21 @@ fix_invalid_birthdates(
 )
 }
 \arguments{
-\item{data}{A data.frame with a `birth_date` column (Date class).}
+\item{data}{A data.frame with a \code{birth_date} column (Date class).}
 
-\item{min_date}{Minimum valid birth date (default: `1920-01-01`).}
+\item{min_date}{Minimum valid birth date (default: \code{1920-01-01}).}
 
-\item{max_date}{Maximum valid birth date (default: `Sys.Date()`).}
+\item{max_date}{Maximum valid birth date (default: \code{Sys.Date()}).}
 
-\item{treatment}{Correction strategy: `"na"`, `"clamp"`, or `"filter"`.
+\item{treatment}{Correction strategy: \code{"na"}, \code{"clamp"}, or \code{"filter"}.
 See \code{\link{fix_invalid_dates}}.}
 }
 \value{
-A data.frame with corrected `birth_date` values.
+A data.frame with corrected \code{birth_date} values.
 }
 \description{
-Corrects `birth_date` values outside the valid range, addressing violations
-of the `personnel_birth_date` rule. Defaults assume no active worker was born
+Corrects \code{birth_date} values outside the valid range, addressing violations
+of the \code{personnel_birth_date} rule. Defaults assume no active worker was born
 before 1920 or in the future.
 }
 \examples{

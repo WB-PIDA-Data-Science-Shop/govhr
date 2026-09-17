@@ -17,30 +17,30 @@ clean_hr_data(
 \arguments{
 \item{data}{A data.frame containing personnel or contract records.}
 
-\item{data_type}{`"personnel"` or `"contract"`.}
+\item{data_type}{\code{"personnel"} or \code{"contract"}.}
 
-\item{remove_duplicates}{Logical (default: `TRUE`).}
+\item{remove_duplicates}{Logical (default: \code{TRUE}).}
 
-\item{fix_dates}{Logical (default: `TRUE`).}
+\item{fix_dates}{Logical (default: \code{TRUE}).}
 
-\item{fix_ages}{Logical, personnel only (default: `TRUE`).}
+\item{fix_ages}{Logical, personnel only (default: \code{TRUE}).}
 
-\item{fix_salaries}{Logical, contract only (default: `TRUE`).}
+\item{fix_salaries}{Logical, contract only (default: \code{TRUE}).}
 
-\item{verbose}{Logical, print step-level messages (default: `FALSE`).}
+\item{verbose}{Logical, print step-level messages (default: \code{FALSE}).}
 }
 \value{
 A cleaned data.frame.
 }
 \description{
 Chains the treatment functions in a recommended order. Steps applied per
-`data_type`:
+\code{data_type}:
 \enumerate{
-  \item **Both**: Remove duplicates (keep first); fix `ref_date` → `NA`
-  \item **Personnel**: Fix `birth_date` → `NA`; flag underage and
-    over-retirement-age workers
-  \item **Contract**: Clamp `whours`; abs(negative salaries);
-    recalculate gross = base + allowance
+\item \strong{Both}: Remove duplicates (keep first); fix \code{ref_date} → \code{NA}
+\item \strong{Personnel}: Fix \code{birth_date} → \code{NA}; flag underage and
+over-retirement-age workers
+\item \strong{Contract}: Clamp \code{whours}; abs(negative salaries);
+recalculate gross = base + allowance
 }
 Use individual functions directly when you need custom strategies.
 }

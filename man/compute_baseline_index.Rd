@@ -16,7 +16,7 @@ column must be numeric.}
 }
 \value{
 A tibble with the date column and computed index columns. Index
-  column names are formed by appending "_index" to the original column names.
+column names are formed by appending "_index" to the original column names.
 }
 \description{
 Computes index values for specified columns where the earliest year value

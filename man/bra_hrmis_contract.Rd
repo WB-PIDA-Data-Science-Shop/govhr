@@ -7,27 +7,27 @@
 \format{
 A data frame with 16,434 rows and 19 variables:
 \describe{
-  \item{contract_id}{Unique identifier assigned to each contract.}
-  \item{personnel_id}{Unique identifier assigned to each worker.}
-  \item{est_id}{Unique identifier assigned to each establishment.}
-  \item{ref_date}{Reference date of the HRMIS record.}
-  \item{base_salary_lcu}{Basic salary before allowances and deductions (local currency units).}
-  \item{allowance_lcu}{Total allowances paid in addition to base salary (local currency units).}
-  \item{gross_salary_lcu}{Total compensation before taxes and deductions (local currency units).}
-  \item{net_salary_lcu}{Take-home pay after taxes and deductions (local currency units).}
-  \item{whours}{Contracted working hours.}
-  \item{start_date}{Employment contract start date.}
-  \item{end_date}{Employment contract end date, if applicable.}
-  \item{paygrade}{Pay grade or salary scale classification.}
-  \item{seniority}{Level or step within the pay grade.}
-  \item{occupation_native}{Occupation title in the native language.}
-  \item{occupation_english}{Occupation title translated into English.}
-  \item{occupation_iscocode}{ISCO-08 occupation code (4-digit level).}
-  \item{occupation_isconame}{ISCO-08 occupation name corresponding to the occupation code.}
-  \item{contract_type_native}{Employment contract type in the native language.}
-  \item{contract_type}{Standardized employment contract type. One of
-  \code{"permanent"}, \code{"fixed-term"}, \code{"short-term"},
-  \code{"pensioner"}, or \code{"inactive"}.}
+\item{contract_id}{Unique identifier assigned to each contract.}
+\item{personnel_id}{Unique identifier assigned to each worker.}
+\item{est_id}{Unique identifier assigned to each establishment.}
+\item{ref_date}{Reference date of the HRMIS record.}
+\item{base_salary_lcu}{Basic salary before allowances and deductions (local currency units).}
+\item{allowance_lcu}{Total allowances paid in addition to base salary (local currency units).}
+\item{gross_salary_lcu}{Total compensation before taxes and deductions (local currency units).}
+\item{net_salary_lcu}{Take-home pay after taxes and deductions (local currency units).}
+\item{whours}{Contracted working hours.}
+\item{start_date}{Employment contract start date.}
+\item{end_date}{Employment contract end date, if applicable.}
+\item{paygrade}{Pay grade or salary scale classification.}
+\item{seniority}{Level or step within the pay grade.}
+\item{occupation_native}{Occupation title in the native language.}
+\item{occupation_english}{Occupation title translated into English.}
+\item{occupation_iscocode}{ISCO-08 occupation code (4-digit level).}
+\item{occupation_isconame}{ISCO-08 occupation name corresponding to the occupation code.}
+\item{contract_type_native}{Employment contract type in the native language.}
+\item{contract_type}{Standardized employment contract type. One of
+\code{"permanent"}, \code{"fixed-term"}, \code{"short-term"},
+\code{"pensioner"}, or \code{"inactive"}.}
 }
 }
 \source{
@@ -40,14 +40,13 @@ bra_hrmis_contract
 \description{
 Harmonized contract-level human resource management information system (HRMIS)
 data for the State of Alagoas, Brazil. Each observation represents a unique
-contract at a given reference date (`contract_id`, `ref_date`) and contains
+contract at a given reference date (\code{contract_id}, \code{ref_date}) and contains
 information on remuneration, contract characteristics, occupation, and
 employment details.
 }
 \details{
 The dataset follows the GovHR contract module data dictionary and is intended
 for workforce analytics, payroll analysis, and personnel microsimulation.
-
 
 This dataset is harmonized according to the GovHR data dictionary. Salary
 variables are expressed in nominal local currency units (LCU). Occupations
