@@ -2,7 +2,7 @@
 % Please edit documentation in R/overview.R
 \name{count_entity}
 \alias{count_entity}
-\title{Count Unique Entities by Group}
+\title{Count unique entities by group}
 \usage{
 count_entity(data, id_col, group_cols = NULL)
 }
@@ -17,5 +17,5 @@ count_entity(data, id_col, group_cols = NULL)
 A data frame with the grouping columns and a \code{count} column representing the number of unique entities in each group.
 }
 \description{
-Count Unique Entities by Group
+Count unique entities by group
 }

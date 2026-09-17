@@ -15,7 +15,7 @@ compute_growth_decomposition(
 
 \item{group_cols}{A character vector specifying the names of the columns to group by.}
 
-\item{measure_col}{A character string specifying the name of the column containing the measure of interest (default is "gross_salary_lcu").}
+\item{measure_col}{A string specifying the name of the column containing the measure of interest (default is "gross_salary_lcu").}
 }
 \value{
 A data.table with headcount, compensation, wagebill, wagebill_lag,

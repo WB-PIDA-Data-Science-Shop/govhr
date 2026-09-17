@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize.R
 \name{cp_ratio}
 \alias{cp_ratio}
-\title{Compute a Compression Ratio Between Two Percentiles}
+\title{Compute a compression ratio between two percentiles}
 \usage{
 cp_ratio(x, upper = 0.9, lower = 0.1, na.rm = TRUE)
 }

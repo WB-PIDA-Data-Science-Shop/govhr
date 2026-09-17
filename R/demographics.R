@@ -34,11 +34,11 @@
 #'         collapses into an ambiguous \code{NA}-status row.
 #' }
 #'
-#' @param snap_t0 data.table. Subset of the full personnel panel at snapshot
+#' @param snap_t0 Data.table. Subset of the full personnel panel at snapshot
 #'   T0, already filtered to a single reference date. Must contain
 #'   \code{age_col}, \code{status_col}, \code{personnel_id_col},
 #'   \code{ref_date_col}, and \code{group_cols}.
-#' @param snap_t1 data.table. Subset of the full personnel panel at snapshot
+#' @param snap_t1 Data.table. Subset of the full personnel panel at snapshot
 #'   T1 (the period immediately following T0). Same column requirements as
 #'   \code{snap_t0}.
 #' @param age_col Character. Name of the (integer or coercible-to-integer)
@@ -52,11 +52,11 @@
 #'   column, used to join each cohort member's T0 record to their T1 status.
 #' @param ref_date_col Character. Name of the reference date column used to
 #'   extract the T0 and T1 dates attached to the output.
-#' @param group_cols Character vector. Additional columns (e.g. gender,
+#' @param group_cols A character vector. Additional columns (e.g. gender,
 #'   service type) to stratify exposure and outcome counts by, alongside
 #'   \code{age_col}.
 #'
-#' @return A \code{data.table} with one row per
+#' @returns A \code{data.table} with one row per
 #'   \code{(age_col, group_cols, status_col)} combination observed in the T0
 #'   exposure cohort. Columns:
 #'   \describe{
@@ -176,7 +176,7 @@
 }
 
 
-#' Estimate Empirical Decrement Rates from a Personnel Panel
+#' Estimate empirical decrement rates from a personnel panel
 #'
 #' @description
 #' Estimates, for each age (and any grouping columns you supply), the
@@ -192,7 +192,7 @@
 #' using all of the data available, rather than relying on any single pair
 #' of snapshots (which can be noisy for ages with few people).
 #'
-#' @param personnel_dt A data.table (or data.frame/tibble, coerced
+#' @param personnel A data.table (or data.frame/tibble, coerced
 #'   automatically) containing the personnel panel: multiple snapshots of
 #'   the same population over time, identified by \code{ref_date_col}. Must
 #'   contain at least two distinct, non-missing reference dates.
@@ -210,8 +210,9 @@
 #'   identifies each snapshot.
 #' @param group_cols A character vector of additional columns (e.g. gender,
 #'   occupation, service type) to estimate separate rates by, alongside age.
+#' @param personnel_dt Deprecated. Use `personnel` instead.
 #'
-#' @return A data.table with one row per age / \code{group_cols} / outcome
+#' @returns A data.table with one row per age / \code{group_cols} / outcome
 #'   type, pooled across every consecutive snapshot pair in
 #'   \code{personnel_dt}:
 #'   \describe{
@@ -306,24 +307,25 @@
 #'
 #' @seealso \code{\link{.compute_decrement_pair}}, \code{\link{roll_snapshot_pairs}}
 #' @export
-estimate_decrement_rates <- function(personnel_dt,
+estimate_decrement_rates <- function(personnel,
                                      age_col,
                                      status_col,
                                      personnel_id_col,
                                      ref_date_col,
-                                     group_cols){
+                                     group_cols, personnel_dt = NULL) {
+  personnel <- resolve_renamed_arg(personnel, personnel_dt, "personnel_dt", "personnel")
   
   
   # Validate inputs
-  if (!data.table::is.data.table(personnel_dt)) {
+  if (!data.table::is.data.table(personnel)) {
 
-    personnel_dt <- as.data.table(personnel_dt)
+    personnel <- as.data.table(personnel)
 
   }
 
 
   # Get sorted unique reference dates
-  all_dates <- sort(unique(personnel_dt[[ref_date_col]]))
+  all_dates <- sort(unique(personnel[[ref_date_col]]))
   all_dates <- all_dates[!is.na(all_dates)]
 
   # check if there are gaps in all_dates
@@ -347,7 +349,7 @@ estimate_decrement_rates <- function(personnel_dt,
 
   ### roll through the panel, computing decrement counts for each consecutive
   ### snapshot pair, then rbindlist() them all together into a single table
-  decrement_dt <- roll_snapshot_pairs(panel_dt = personnel_dt,
+  decrement_dt <- roll_snapshot_pairs(panel_dt = personnel,
                                       date_col = ref_date_col,
                                       f = .compute_decrement_pair,
                                       # extra args forwarded to .compute_decrement_pair:
@@ -377,7 +379,7 @@ estimate_decrement_rates <- function(personnel_dt,
 
 
 
-#' Graduate a Single Age Curve Onto a Complete Age Grid
+#' Graduate a single age curve onto a complete age grid
 #'
 #' @description
 #' Internal single-curve workhorse called by \code{smooth_decrement_rates()}
@@ -413,7 +415,7 @@ estimate_decrement_rates <- function(personnel_dt,
 #'   there are at least 4 distinct ages); larger values produce a smoother,
 #'   more global fit, smaller values track local features more closely.
 #'
-#' @return A numeric vector of smoothed rates, one per element of
+#' @returns A numeric vector of smoothed rates, one per element of
 #'   \code{full_ages}, in the same order. Not clipped to \code{[0, 1]} --
 #'   callers (e.g. \code{smooth_decrement_rates()}) are responsible for that.
 #'
@@ -434,7 +436,7 @@ estimate_decrement_rates <- function(personnel_dt,
   as.numeric(stats::predict(fit, newdata = data.frame(age = full_ages)))
 }
 
-#' Graduate (Smooth and Gap-Fill) Empirical Decrement Rates
+#' Graduate (smooth and gap-fill) empirical decrement rates
 #'
 #' @description
 #' Takes the pooled output of \code{estimate_decrement_rates()} and returns a
@@ -452,7 +454,7 @@ estimate_decrement_rates <- function(personnel_dt,
 #' still sum to exactly 1 after smoothing (independently smoothing every
 #' outcome type would not preserve that).
 #'
-#' @param decrement_dt A data.table (or coercible) shaped like the output of
+#' @param decrements A data.table (or coercible) shaped like the output of
 #'   \code{estimate_decrement_rates()}: one row per age / \code{group_cols} /
 #'   \code{status_col}, with a \code{pop} (exposure) and \code{decrement_rate}
 #'   column.
@@ -464,8 +466,9 @@ estimate_decrement_rates <- function(personnel_dt,
 #'   represents "stayed" rather than an exit. Defaults to \code{"active"}.
 #' @param span Numeric. The \code{loess()} smoothing span passed through to
 #'   \code{.smooth_rate_curve()}. Defaults to \code{0.75}.
+#' @param decrement_dt Deprecated. Use `decrements` instead.
 #'
-#' @return A data.table with one row per age / \code{group_cols} /
+#' @returns A data.table with one row per age / \code{group_cols} /
 #'   \code{status_col}, spanning the full observed age range within each
 #'   group with no gaps:
 #'   \describe{
@@ -495,24 +498,25 @@ estimate_decrement_rates <- function(personnel_dt,
 #' @seealso \code{\link{.smooth_rate_curve}}, \code{\link{estimate_decrement_rates}},
 #'   \code{\link{compute_service_table}}
 #' @export
-smooth_decrement_rates <- function(decrement_dt,
+smooth_decrement_rates <- function(decrements,
                                    age_col,
                                    status_col,
                                    group_cols,
                                    active_value = "active",
-                                   span = 0.75) {
+                                   span = 0.75, decrement_dt = NULL) {
+  decrements <- resolve_renamed_arg(decrements, decrement_dt, "decrement_dt", "decrements")
 
-  decrement_dt <- as.data.table(decrement_dt)
+  decrements <- as.data.table(decrements)
 
   ### the age grid to graduate onto: the full observed age range within
   ### each group, computed once across all outcome types (not per-status)
   ### so every exit cause ends up on exactly the same age sequence
-  age_range_dt <- decrement_dt[,
+  age_range_dt <- decrements[,
     .(min_age = min(get(age_col)), max_age = max(get(age_col))),
     by = group_cols
   ]
 
-  exit_dt <- decrement_dt[get(status_col) != active_value]
+  exit_dt <- decrements[get(status_col) != active_value]
 
   ### when there are no group_cols, age_range_dt is a single global row --
   ### a join has no columns to match on in that case (data.table's `on =`
@@ -558,7 +562,7 @@ smooth_decrement_rates <- function(decrement_dt,
 }
 
 
-#' Compute an Actuarial Service Table from a Personnel Panel
+#' Compute an actuarial service table from a personnel panel
 #'
 #' @description
 #' Builds a multiple-decrement service table: for each age (and any
@@ -574,7 +578,7 @@ smooth_decrement_rates <- function(decrement_dt,
 #' complete, gapless, reasonably stable \code{qx} curve to produce a sensible
 #' result.
 #'
-#' @param personnel_dt A data.table (or data.frame/tibble, coerced
+#' @param personnel A data.table (or data.frame/tibble, coerced
 #'   automatically) containing the personnel panel. Passed straight through
 #'   to \code{estimate_decrement_rates()}.
 #' @param age_col A single string naming the age column.
@@ -601,8 +605,9 @@ smooth_decrement_rates <- function(decrement_dt,
 #'   for noise reduction on strata that have no gap at all.
 #' @param span Numeric. Forwarded to \code{smooth_decrement_rates()} when
 #'   \code{smooth = TRUE}. Defaults to \code{0.75}.
+#' @param personnel_dt Deprecated. Use `personnel` instead.
 #'
-#' @return A data.table with one row per age / \code{group_cols}:
+#' @returns A data.table with one row per age / \code{group_cols}:
 #'   \describe{
 #'     \item{age_col, group_cols}{As supplied.}
 #'     \item{px}{Probability of remaining active from age x to x+1.}
@@ -657,7 +662,7 @@ smooth_decrement_rates <- function(decrement_dt,
 #'
 #' @seealso \code{\link{estimate_decrement_rates}}, \code{\link{smooth_decrement_rates}}
 #' @export
-compute_service_table <- function(personnel_dt,
+compute_service_table <- function(personnel,
                                   age_col,
                                   status_col,
                                   personnel_id_col,
@@ -665,12 +670,13 @@ compute_service_table <- function(personnel_dt,
                                   group_cols,
                                   radix = 100000,
                                   smooth = FALSE,
-                                  span = 0.75) {
+                                  span = 0.75, personnel_dt = NULL) {
+  personnel <- resolve_renamed_arg(personnel, personnel_dt, "personnel_dt", "personnel")
 
   ## compute the decrement rates using the estimate_decrement_rates function
   ## across all time periods and groupings
   decrement_dt <-
-    estimate_decrement_rates(personnel_dt = personnel_dt,
+    estimate_decrement_rates(personnel = personnel,
                              age_col = age_col,
                              status_col = status_col,
                              personnel_id_col = personnel_id_col,
@@ -683,7 +689,7 @@ compute_service_table <- function(personnel_dt,
   ### smoothing fills gaps and grades away small-cell noise in one step
   if (isTRUE(smooth)) {
     decrement_dt <- smooth_decrement_rates(
-      decrement_dt = decrement_dt,
+      decrements = decrement_dt,
       age_col = age_col,
       status_col = status_col,
       group_cols = group_cols,
@@ -727,7 +733,7 @@ compute_service_table <- function(personnel_dt,
     )
 
     decrement_dt <- smooth_decrement_rates(
-      decrement_dt = decrement_dt,
+      decrements = decrement_dt,
       age_col = age_col,
       status_col = status_col,
       group_cols = group_cols,

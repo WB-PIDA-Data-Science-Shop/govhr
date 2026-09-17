@@ -2,7 +2,7 @@
 % Please edit documentation in R/treatment.R
 \name{fix_retirement_age}
 \alias{fix_retirement_age}
-\title{Flag or Adjust Over-Retirement-Age Workers}
+\title{Flag or adjust over-retirement-age workers}
 \usage{
 fix_retirement_age(data, max_age = 65, treatment = c("flag", "adjust_status"))
 }

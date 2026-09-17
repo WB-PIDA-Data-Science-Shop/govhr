@@ -2,9 +2,9 @@
 #'
 #' @param data A data frame containing the data to be analyzed. It should include columns for the grouping variables, a column for the reference date, and a column for the measure of interest (e.g., gross salary).
 #' @param group_cols A character vector specifying the names of the columns to group by.
-#' @param measure_col A character string specifying the name of the column containing the measure of interest (default is "gross_salary_lcu").
+#' @param measure_col A string specifying the name of the column containing the measure of interest (default is "gross_salary_lcu").
 #'
-#' @return A data.table with headcount, compensation, wagebill, wagebill_lag,
+#' @returns A data.table with headcount, compensation, wagebill, wagebill_lag,
 #'   the continuing-period decomposition (employment/compensation/interaction
 #'   effects), entry/exit effects, is_observed, and a `transition_type` label
 #'   for each row: "start" (panel's first period for this group -- left-
@@ -151,12 +151,12 @@ compute_growth_decomposition <- function(
 #' combined change" -- specifically, how much is pay growth within groups
 #' versus a shift in headcount share toward higher- or lower-paid groups.
 #'
-#' @param growth_decomp output of compute_growth_decomposition()
-#' @param group_cols optional character vector of columns identifying a higher-level
+#' @param growth_decomp Output of compute_growth_decomposition()
+#' @param group_cols Optional character vector of columns identifying a higher-level
 #'   unit (e.g. "country_code") within which shares/composition are computed
 #'   separately. NULL pools all rows into one global composition per ref_date.
 #'
-#' @return A data.table, one row per ref_date (or per ref_date x `group_cols`),
+#' @returns A data.table, one row per ref_date (or per ref_date x `group_cols`),
 #'   with avg_compensation, avg_compensation_lag, within_effect,
 #'   between_effect, cross_effect, entry_effect, exit_effect, and total_effect
 #'   (which equals avg_compensation - avg_compensation_lag by construction,

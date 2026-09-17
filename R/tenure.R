@@ -18,7 +18,7 @@
 #' resulting in an \eqn{O(n \log n)} algorithm dominated by the initial
 #' sorting step.
 #'
-#' @param contract_dt data.table containing the contract history. Must include
+#' @param contracts Data.table containing the contract history. Must include
 #'   personnel identifiers, contract identifiers, contract start and end
 #'   dates, contract types, and any grouping variables supplied in
 #'   \code{group_cols}.
@@ -38,7 +38,7 @@
 #'   establishment, occupation, or organization). Default is
 #'   \code{NULL}.
 #'
-#' @return A data.table with one row per unique combination of
+#' @returns A data.table with one row per unique combination of
 #'   \code{personnel_id} and optional \code{group_cols}, containing:
 #'   \describe{
 #'     \item{tenure_days}{Total employment tenure in days.}
@@ -57,7 +57,7 @@
 #' }
 #'
 compute_tenure <- function(
-  contract_dt,
+  contracts,
   ref_date,
   personnel_id_col = "personnel_id",
   contract_id_col = "contract_id",
@@ -67,10 +67,10 @@ compute_tenure <- function(
   group_cols = NULL
 ) {
   # 0. always ensure data.table
-  contract_dt <- as.data.table(contract_dt)
+  contracts <- as.data.table(contracts)
 
   if (is.null(group_cols) == FALSE) {
-    validate_columns_exist(dt = contract_dt, colnames = group_cols)
+    validate_columns_exist(dt = contracts, colnames = group_cols)
   }
 
   # Alias ref_date to a name that cannot be shadowed by a column named 'ref_date'
@@ -78,7 +78,7 @@ compute_tenure <- function(
   .ref_date_ <- if (inherits(ref_date, "Date")) ref_date else as.Date(ref_date)
 
   # 1. Filter inactive types — subset returns a new object, no copy() needed
-  dt <- contract_dt[!get(contract_type_col) %in% c("inactive", "pensioner")]
+  dt <- contracts[!get(contract_type_col) %in% c("inactive", "pensioner")]
 
   # 2. Keep only contracts that started on or before ref_date
   dt <- dt[get(start_date_col) <= .ref_date_]
@@ -172,7 +172,7 @@ compute_tenure <- function(
 #' \code{personnel_id}, optional grouping variables supplied through
 #' \code{group_cols}, and \code{ref_date}.
 #'
-#' @param contract_dt data.table containing the stacked contract panel.
+#' @param contracts Data.table containing the stacked contract panel.
 #'   Must include personnel identifiers, contract identifiers, contract
 #'   start and end dates, reference dates, contract types, and any grouping
 #'   variables supplied in \code{group_cols}.
@@ -192,7 +192,7 @@ compute_tenure <- function(
 #'   which tenure should be calculated independently (for example,
 #'   establishment, occupation, or organization). Default is \code{NULL}.
 #'
-#' @return A data.table with one row per unique combination of
+#' @returns A data.table with one row per unique combination of
 #'   \code{personnel_id}, optional \code{group_cols}, and
 #'   \code{ref_date}, containing:
 #'   \describe{
@@ -203,7 +203,7 @@ compute_tenure <- function(
 #'
 #' @keywords internal
 compute_tenure_panel <- function(
-  contract_dt,
+  contracts,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
   contract_id_col = "contract_id",
@@ -213,16 +213,16 @@ compute_tenure_panel <- function(
   group_cols = NULL
 ) {
   # 0. Quick set up ensuring data.table and to define a grouping key once at the start
-  contract_dt <- as.data.table(contract_dt)
+  contracts <- as.data.table(contracts)
 
   if (is.null(group_cols) == FALSE) {
-    validate_columns_exist(dt = contract_dt, colnames = group_cols)
+    validate_columns_exist(dt = contracts, colnames = group_cols)
   }
 
   by_cols <- c(personnel_id_col, group_cols, ref_date_col)
 
   # 1. Filter: active types only, started on or before each row's ref_date
-  dt <- contract_dt[
+  dt <- contracts[
     get(start_date_col) <= get(ref_date_col) &
       !get(contract_type_col) %in% c("inactive", "pensioner")
   ]
@@ -332,7 +332,7 @@ compute_tenure_panel <- function(
 #' last available panel snapshot (right-censored spells); both are treated
 #' identically.
 #'
-#' @param contract_dt data.table. Stacked contract panel, as passed to
+#' @param contracts Data.table. Stacked contract panel, as passed to
 #'   \code{\link{compute_tenure_panel}}.
 #' @param personnel_id_col Character. Name of the personnel identifier
 #'   column. Default is \code{"personnel_id"}.
@@ -350,7 +350,7 @@ compute_tenure_panel <- function(
 #'   over which tenure should be calculated independently (for example,
 #'   establishment, occupation, or organization). Default is \code{NULL}.
 #'
-#' @return A data.table with one row per unique combination of
+#' @returns A data.table with one row per unique combination of
 #'   \code{personnel_id} and \code{group_cols}, containing:
 #'   \describe{
 #'     \item{ref_date}{The last reference date at which the person was
@@ -362,7 +362,7 @@ compute_tenure_panel <- function(
 #' @seealso \code{\link{compute_tenure_panel}}
 #' @keywords internal
 compute_employment_spells <- function(
-  contract_dt,
+  contracts,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
   contract_id_col = "contract_id",
@@ -375,7 +375,7 @@ compute_employment_spells <- function(
   ### at each ref_date
   tenure_dt <-
     compute_tenure_panel(
-      contract_dt = contract_dt,
+      contracts = contracts,
       personnel_id_col = personnel_id_col,
       ref_date_col = ref_date_col,
       contract_id_col = contract_id_col,

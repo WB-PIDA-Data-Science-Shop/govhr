@@ -2,7 +2,7 @@
 % Please edit documentation in R/treatment.R
 \name{clean_hr_data}
 \alias{clean_hr_data}
-\title{Apply Standard HR Data Cleaning Pipeline}
+\title{Apply Standard HR data cleaning pipeline}
 \usage{
 clean_hr_data(
   data,

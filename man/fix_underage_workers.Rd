@@ -2,7 +2,7 @@
 % Please edit documentation in R/treatment.R
 \name{fix_underage_workers}
 \alias{fix_underage_workers}
-\title{Flag or Remove Underage Workers}
+\title{Flag or remove underage workers}
 \usage{
 fix_underage_workers(data, min_age = 18, treatment = c("flag", "filter"))
 }

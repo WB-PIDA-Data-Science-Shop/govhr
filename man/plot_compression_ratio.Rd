@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{plot_compression_ratio}
 \alias{plot_compression_ratio}
-\title{Plot Compression Ratio}
+\title{Plot compression ratio}
 \usage{
 plot_compression_ratio(data, group_cols = NULL)
 }
@@ -16,5 +16,5 @@ for no grouping.}
 A ggplot2 object representing the compression ratio.
 }
 \description{
-Plot Compression Ratio
+Plot compression ratio
 }

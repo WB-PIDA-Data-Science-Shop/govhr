@@ -2,7 +2,7 @@
 % Please edit documentation in R/harmonization.R
 \name{detect_inconsistent_cols}
 \alias{detect_inconsistent_cols}
-\title{Detect Inconsistent Columns in a Data Frame}
+\title{Detect inconsistent columns in a data frame}
 \usage{
 detect_inconsistent_cols(data, inconsistent_cols)
 }

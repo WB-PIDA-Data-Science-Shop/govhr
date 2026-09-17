@@ -2,18 +2,20 @@
 % Please edit documentation in R/summarize.R
 \name{compute_cross_section}
 \alias{compute_cross_section}
-\title{Compute Cross-Section Summary Table}
+\title{Compute cross-section summary table}
 \usage{
-compute_cross_section(data, group, measure_col = NULL)
+compute_cross_section(data, group_cols, measure_col = NULL, group = NULL)
 }
 \arguments{
 \item{data}{A data frame containing a \code{ref_date} column and the grouping
 column.}
 
-\item{group}{Character string naming the grouping column.}
+\item{group_cols}{Character string naming the grouping column.}
 
 \item{measure_col}{Character string naming the numeric column to sum, or
 \code{NULL} to count rows.}
+
+\item{group}{Deprecated. Use \code{group_cols} instead.}
 }
 \value{
 A data frame with the grouping column and a \code{value} column.

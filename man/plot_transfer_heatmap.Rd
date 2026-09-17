@@ -2,7 +2,7 @@
 % Please edit documentation in R/transition.R
 \name{plot_transfer_heatmap}
 \alias{plot_transfer_heatmap}
-\title{Plot Transfer Heatmap}
+\title{Plot transfer heatmap}
 \usage{
 plot_transfer_heatmap(data)
 }

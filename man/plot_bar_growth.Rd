@@ -2,7 +2,7 @@
 % Please edit documentation in R/overview.R
 \name{plot_bar_growth}
 \alias{plot_bar_growth}
-\title{Plot Growth Rates by Group}
+\title{Plot growth rates by group}
 \usage{
 plot_bar_growth(data, group_col)
 }

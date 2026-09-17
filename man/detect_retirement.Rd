@@ -2,7 +2,7 @@
 % Please edit documentation in R/movement.R
 \name{detect_retirement}
 \alias{detect_retirement}
-\title{Detect Personnel Retirement Events}
+\title{Detect personnel retirement events}
 \usage{
 detect_retirement(data)
 }

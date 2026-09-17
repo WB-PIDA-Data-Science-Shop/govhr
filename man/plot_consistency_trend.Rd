@@ -2,33 +2,36 @@
 % Please edit documentation in R/qcheck_plots.R
 \name{plot_consistency_trend}
 \alias{plot_consistency_trend}
-\title{Plot Consistency Over Time}
+\title{Plot consistency over time}
 \usage{
 plot_consistency_trend(
   data,
   id_col,
-  group,
+  group_col,
   value_col,
   type_plot,
-  toggle_growth = FALSE
+  toggle_growth = FALSE,
+  group = NULL
 )
 }
 \arguments{
 \item{data}{A data frame.}
 
-\item{id_col}{Character string. The column name of the unique identifier for each record.}
+\item{id_col}{A string. The column name of the unique identifier for each record.}
 
-\item{group}{Character string. The column name of the grouping variable (e.g., "ref_date").}
+\item{group_col}{A string. The column name of the grouping variable (e.g., "ref_date").}
 
-\item{value_col}{Character string. The column name of the value to be checked for consistency.}
+\item{value_col}{A string. The column name of the value to be checked for consistency.}
 
-\item{type_plot}{Character string. The type of consistency plot ("record" or "value").}
+\item{type_plot}{A string. The type of consistency plot ("record" or "value").}
 
 \item{toggle_growth}{Logical. When \code{TRUE} the y-axis switches to a baseline-index view (first period = 100). Defaults to \code{FALSE}.}
+
+\item{group}{Deprecated. Use \code{group_col} instead.}
 }
 \value{
 A ggplot2 object.
 }
 \description{
-Plot Consistency Over Time
+Plot consistency over time
 }

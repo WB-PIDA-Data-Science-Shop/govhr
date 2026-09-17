@@ -2,7 +2,7 @@
 % Please edit documentation in R/treatment.R
 \name{fix_negative_salaries}
 \alias{fix_negative_salaries}
-\title{Fix Negative Salary Values}
+\title{Fix negative salary values}
 \usage{
 fix_negative_salaries(
   data,

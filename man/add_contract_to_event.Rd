@@ -2,21 +2,31 @@
 % Please edit documentation in R/retirement.R
 \name{add_contract_to_event}
 \alias{add_contract_to_event}
-\title{Add Contract Information to Event Records}
+\title{Add contract information to event records}
 \usage{
-add_contract_to_event(event_dt, contract_dt, keep_vars)
+add_contract_to_event(
+  events,
+  contracts,
+  keep_vars,
+  event_dt = NULL,
+  contract_dt = NULL
+)
 }
 \arguments{
-\item{event_dt}{A data.table containing personnel event records. Must include the columns
+\item{events}{A data.table containing personnel event records. Must include the columns
 \code{personnel_id} and \code{ref_date}.}
 
-\item{contract_dt}{A data.table containing contract information, also including \code{personnel_id}
+\item{contracts}{A data.table containing contract information, also including \code{personnel_id}
 and \code{ref_date}. The contract dataset provides additional attributes describing the personnel's
 contractual context on each reference date.}
 
 \item{keep_vars}{A character vector of variable names in \code{contract_dt} to be merged into the
 event dataset. These typically describe contract-level attributes such as position, department,
 or employment type.}
+
+\item{event_dt}{Deprecated. Use \code{events} instead.}
+
+\item{contract_dt}{Deprecated. Use \code{contracts} instead.}
 }
 \value{
 A data.table identical to \code{event_dt}, but with the specified variables from \code{contract_dt}

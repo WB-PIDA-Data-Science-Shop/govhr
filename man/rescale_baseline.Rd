@@ -2,16 +2,18 @@
 % Please edit documentation in R/summarize.R
 \name{rescale_baseline}
 \alias{rescale_baseline}
-\title{Rescale to Baseline Index}
+\title{Rescale to baseline index}
 \usage{
-rescale_baseline(data, group)
+rescale_baseline(data, group_col, group = NULL)
 }
 \arguments{
 \item{data}{A data frame with columns \code{ref_date} and \code{value}, as returned by
 \code{\link[=compute_time_trend]{compute_time_trend()}}.}
 
-\item{group}{Character string naming the grouping column, or \code{"ref_date"} for
+\item{group_col}{Character string naming the grouping column, or \code{"ref_date"} for
 no grouping.}
+
+\item{group}{Deprecated. Use \code{group_col} instead.}
 }
 \value{
 The input data frame with \code{value} rescaled to a baseline index.

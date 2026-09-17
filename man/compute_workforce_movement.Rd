@@ -9,9 +9,9 @@ compute_workforce_movement(data, movement_type, measurement_type, group_cols)
 \arguments{
 \item{data}{A data frame containing personnel data.}
 
-\item{movement_type}{A character string indicating the type of movement: "hire", "fire", "retirement", or "turnover".}
+\item{movement_type}{A string indicating the type of movement: "hire", "fire", "retirement", or "turnover".}
 
-\item{measurement_type}{A character string indicating the measurement type: "count" or "rate". Ignored for turnover, which is a ratio.}
+\item{measurement_type}{A string indicating the measurement type: "count" or "rate". Ignored for turnover, which is a ratio.}
 
 \item{group_cols}{A character vector of columns to group by, or \code{"ref_date"} for no grouping.}
 }

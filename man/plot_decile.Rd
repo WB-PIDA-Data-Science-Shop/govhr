@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{plot_decile}
 \alias{plot_decile}
-\title{Plot Decile Summary}
+\title{Plot decile summary}
 \usage{
 plot_decile(data, group_cols)
 }
@@ -15,7 +15,7 @@ plot_decile(data, group_cols)
 A ggplot2 object representing the decile summary.
 }
 \description{
-Plot Decile Summary
+Plot decile summary
 }
 \examples{
 govhr::compute_decile(

@@ -5,7 +5,7 @@
 \title{Compute employment tenure from a stacked contract panel}
 \usage{
 compute_tenure_panel(
-  contract_dt,
+  contracts,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
   contract_id_col = "contract_id",
@@ -16,7 +16,7 @@ compute_tenure_panel(
 )
 }
 \arguments{
-\item{contract_dt}{data.table containing the stacked contract panel.
+\item{contracts}{Data.table containing the stacked contract panel.
 Must include personnel identifiers, contract identifiers, contract
 start and end dates, reference dates, contract types, and any grouping
 variables supplied in \code{group_cols}.}

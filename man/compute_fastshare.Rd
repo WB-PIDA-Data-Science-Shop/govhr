@@ -9,9 +9,10 @@ compute_fastshare(
   macro_data = data.table::as.data.table(macro_indicators),
   macro_cols,
   cols,
-  groups,
+  group_cols,
   fns,
-  output = c("long", "wide")
+  output = c("long", "wide"),
+  groups = NULL
 )
 }
 \arguments{
@@ -26,7 +27,7 @@ for ratio calculations.}
 
 \item{cols}{A character vector of column names in \code{data} to summarize.}
 
-\item{groups}{A character vector of column names in \code{data} to group by.
+\item{group_cols}{A character vector of column names in \code{data} to group by.
 Typically includes country and date/year variables. Default is \code{c("country_code", "year")}.}
 
 \item{fns}{A character vector of summary functions to apply to \code{cols}.
@@ -37,6 +38,8 @@ Examples: \code{"sum"}, \code{"mean"}, \code{"median"}.}
 \item \code{"long"} returns a tidy table with columns: group variables, \code{macro_var}, \code{summary_var}, \code{indicator}, and \code{value}.
 \item \code{"wide"} returns a table with one column per indicator and original macro/summary values.
 }}
+
+\item{groups}{Deprecated. Use \code{group_cols} instead.}
 }
 \value{
 A dataset containing:

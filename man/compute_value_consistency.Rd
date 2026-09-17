@@ -2,7 +2,7 @@
 % Please edit documentation in R/consistency.R
 \name{compute_value_consistency}
 \alias{compute_value_consistency}
-\title{Compute the proportion of consistent values in a data frame.}
+\title{Compute the proportion of consistent values in a data frame}
 \usage{
 compute_value_consistency(
   data,
@@ -15,9 +15,9 @@ compute_value_consistency(
 \arguments{
 \item{data}{A data frame.}
 
-\item{id_col}{A character string specifying the name of the column that uniquely identifies records.}
+\item{id_col}{A string specifying the name of the column that uniquely identifies records.}
 
-\item{value_col}{A character string specifying the name of the column whose values are to be checked for consistency.}
+\item{value_col}{A string specifying the name of the column whose values are to be checked for consistency.}
 
 \item{group_cols}{A character vector specifying the names of the columns to group by. Default is no grouping.}
 
@@ -27,7 +27,7 @@ compute_value_consistency(
 A data frame with the proportion of consistent values in the data frame, optionally by group.
 }
 \description{
-Compute the proportion of consistent values in a data frame.
+Compute the proportion of consistent values in a data frame
 }
 \details{
 Consistency is broadly defined as the proportion of records and values that are consistent

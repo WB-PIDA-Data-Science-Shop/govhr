@@ -45,7 +45,7 @@ test_that("ggplot_point_line applies color grouping when 'group' argument is use
     group_var = rep(c("A", "B"), each = 3)
   )
 
-  p <- ggplot_point_line(df, x = year, y = value, group = group_var)
+  p <- ggplot_point_line(df, x = year, y = value, group_col = group_var)
   mapping <- ggplot2::ggplot_build(p)$plot$mapping
 
   expect_true("colour" %in% names(mapping))
@@ -59,7 +59,7 @@ test_that("ggplot_point_line works when both group and label are specified", {
     group_var = rep(c("A", "B"), each = 3)
   )
 
-  p <- ggplot_point_line(df, x = year, y = value, group = group_var, label = year)
+  p <- ggplot_point_line(df, x = year, y = value, group_col = group_var, label = year)
 
   expect_s3_class(p, "ggplot")
   layer_classes <- sapply(p$layers, function(l) class(l$geom)[1])

@@ -32,7 +32,7 @@ detect_personnel_event(
 \item{end_date}{Optional end date for the full date sequence
 (default: \code{"2018-01-01"}).}
 
-\item{status_col}{a column within \code{data} object for the employment status of personnel}
+\item{status_col}{A column within \code{data} object for the employment status of personnel.}
 
 \item{freq}{Frequency for the sequence of dates (default: \code{"year"}).
 Can be any valid value for \code{seq.Date(by = ...)}.}

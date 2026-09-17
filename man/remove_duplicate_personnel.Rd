@@ -2,7 +2,7 @@
 % Please edit documentation in R/treatment.R
 \name{remove_duplicate_personnel}
 \alias{remove_duplicate_personnel}
-\title{Remove Duplicate Personnel Records}
+\title{Remove duplicate personnel records}
 \usage{
 remove_duplicate_personnel(data, keep = c("first", "last", "none"))
 }

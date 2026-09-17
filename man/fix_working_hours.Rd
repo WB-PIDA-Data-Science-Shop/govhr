@@ -2,7 +2,7 @@
 % Please edit documentation in R/treatment.R
 \name{fix_working_hours}
 \alias{fix_working_hours}
-\title{Fix Invalid Working Hours}
+\title{Fix invalid working hours}
 \usage{
 fix_working_hours(data, treatment = c("na", "clamp", "flag"))
 }
@@ -20,7 +20,7 @@ fix_working_hours(data, treatment = c("na", "clamp", "flag"))
 A data.frame with corrected working hours.
 }
 \description{
-Corrects \code{whours} values outside the valid range \link{0, 168}, addressing
+Corrects \code{whours} values outside the valid range [0, 168], addressing
 violations of the \code{contract_whours} rule. The maximum of 168 reflects
 5 days × 8 hours per week.
 }

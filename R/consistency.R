@@ -1,7 +1,7 @@
 #' Compute the proportion of consistent records and values in a data frame.
 #'
 #' @param data A data frame.
-#' @param id_col A character string specifying the name of the column that uniquely identifies records.
+#' @param id_col A string specifying the name of the column that uniquely identifies records.
 #' @param value_cols A character vector specifying the name(s) of columns whose values
 #'   are to be checked for consistency. Value consistency is computed separately for
 #'   each column and averaged across columns before being combined with record consistency.
@@ -10,7 +10,7 @@
 #' @import dplyr
 #' @importFrom purrr map_dbl
 #'
-#' @return A numeric value representing the proportion of consistent records and values in the data frame.
+#' @returns A numeric value representing the proportion of consistent records and values in the data frame.
 #' @details Consistency is defined as the proportion of records and values that are consistent
 #'   across the dataset. A record is considered consistent if it has a unique identifier and all
 #'   its associated values are consistent. A value is considered consistent if it does not
@@ -57,10 +57,10 @@ compute_global_consistency <- function(data, id_col, value_cols, digits = 2) {
     round(digits)
 }
 
-#' Compute the proportion of consistent records in a data frame.
+#' Compute the proportion of consistent records in a data frame
 #'
 #' @param data A data frame.
-#' @param id_col A character string specifying the name of the column that uniquely identifies records (e.g., "personnel_id" or "contract_id").
+#' @param id_col A string specifying the name of the column that uniquely identifies records (e.g., "personnel_id" or "contract_id").
 #' @param group_cols A character vector specifying the names of the columns to group by. Default is NULL, which means no grouping.
 #' @param digits An integer specifying the number of decimal places to round the result to. Default is 2.
 #'
@@ -68,7 +68,7 @@ compute_global_consistency <- function(data, id_col, value_cols, digits = 2) {
 #' @importFrom data.table as.data.table fifelse
 #' @importFrom tibble as_tibble
 #'
-#' @return A data frame with the proportion of consistent records in the data frame, optionally by group.
+#' @returns A data frame with the proportion of consistent records in the data frame, optionally by group.
 #'
 #' @details A record is considered consistent if it has a unique identifier and all its associated values are consistent.
 #' The function computes the proportion of consistent records in the data frame, optionally grouped by specified columns.
@@ -130,18 +130,18 @@ compute_record_consistency <- function(
   tibble::as_tibble(result)
 }
 
-#' Compute the proportion of consistent values in a data frame.
+#' Compute the proportion of consistent values in a data frame
 #'
 #' @param data A data frame.
-#' @param id_col A character string specifying the name of the column that uniquely identifies records.
-#' @param value_col A character string specifying the name of the column whose values are to be checked for consistency.
+#' @param id_col A string specifying the name of the column that uniquely identifies records.
+#' @param value_col A string specifying the name of the column whose values are to be checked for consistency.
 #' @param group_cols A character vector specifying the names of the columns to group by. Default is no grouping.
 #' @param digits An integer specifying the number of decimal places to round the result to. Default is 2.
 #'
 #' @importFrom data.table as.data.table
 #' @importFrom tibble as_tibble
 #'
-#' @return A data frame with the proportion of consistent values in the data frame, optionally by group.
+#' @returns A data frame with the proportion of consistent values in the data frame, optionally by group.
 #'
 #' @details Consistency is broadly defined as the proportion of records and values that are consistent
 #'   across the dataset. A value is considered consistent if it does not differ from

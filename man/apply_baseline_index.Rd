@@ -2,7 +2,7 @@
 % Please edit documentation in R/overview.R
 \name{apply_baseline_index}
 \alias{apply_baseline_index}
-\title{Apply Baseline Index to a Trend Summary}
+\title{Apply baseline index to a trend summary}
 \usage{
 apply_baseline_index(data, group_col)
 }

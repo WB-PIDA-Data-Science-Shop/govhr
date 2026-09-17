@@ -2,7 +2,7 @@
 % Please edit documentation in R/transition.R
 \name{plot_transition_network}
 \alias{plot_transition_network}
-\title{Plot Transition Network}
+\title{Plot transition network}
 \usage{
 plot_transition_network(data)
 }

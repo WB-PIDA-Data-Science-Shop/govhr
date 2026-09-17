@@ -4,7 +4,7 @@
 \alias{ggplot_point_line}
 \title{Plot grouped line chart with labeled points}
 \usage{
-ggplot_point_line(.data, x, y, group = NULL, label = NULL, ...)
+ggplot_point_line(.data, x, y, group_col = NULL, label = NULL, ...)
 }
 \arguments{
 \item{.data}{A data frame or tibble containing the variables to plot.}
@@ -13,7 +13,7 @@ ggplot_point_line(.data, x, y, group = NULL, label = NULL, ...)
 
 \item{y}{Column to be mapped to the y-axis.}
 
-\item{group}{Column specifying the grouping variable (mapped to color).}
+\item{group_col}{Column specifying the grouping variable (mapped to color).}
 
 \item{label}{Column specifying the labels for each point (optional).}
 

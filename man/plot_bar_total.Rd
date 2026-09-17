@@ -2,7 +2,7 @@
 % Please edit documentation in R/overview.R
 \name{plot_bar_total}
 \alias{plot_bar_total}
-\title{Plot Totals by Group}
+\title{Plot totals by group}
 \usage{
 plot_bar_total(data, group_col, x_col = "value", x_label = "Value")
 }

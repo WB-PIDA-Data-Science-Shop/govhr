@@ -2,19 +2,20 @@
 % Please edit documentation in R/demographics.R
 \name{smooth_decrement_rates}
 \alias{smooth_decrement_rates}
-\title{Graduate (Smooth and Gap-Fill) Empirical Decrement Rates}
+\title{Graduate (smooth and gap-fill) empirical decrement rates}
 \usage{
 smooth_decrement_rates(
-  decrement_dt,
+  decrements,
   age_col,
   status_col,
   group_cols,
   active_value = "active",
-  span = 0.75
+  span = 0.75,
+  decrement_dt = NULL
 )
 }
 \arguments{
-\item{decrement_dt}{A data.table (or coercible) shaped like the output of
+\item{decrements}{A data.table (or coercible) shaped like the output of
 \code{estimate_decrement_rates()}: one row per age / \code{group_cols} /
 \code{status_col}, with a \code{pop} (exposure) and \code{decrement_rate}
 column.}
@@ -31,6 +32,8 @@ represents "stayed" rather than an exit. Defaults to \code{"active"}.}
 
 \item{span}{Numeric. The \code{loess()} smoothing span passed through to
 \code{.smooth_rate_curve()}. Defaults to \code{0.75}.}
+
+\item{decrement_dt}{Deprecated. Use \code{decrements} instead.}
 }
 \value{
 A data.table with one row per age / \code{group_cols} /

@@ -2,10 +2,10 @@
 % Please edit documentation in R/movement_summarize.R
 \name{estimate_movement_rates}
 \alias{estimate_movement_rates}
-\title{Estimate Movement Baseline from Panel Data}
+\title{Estimate movement baseline from panel data}
 \usage{
 estimate_movement_rates(
-  contract_dt,
+  contracts,
   group_cols,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
@@ -16,10 +16,10 @@ estimate_movement_rates(
 )
 }
 \arguments{
-\item{contract_dt}{data.table. Contract data in long (panel) format.
+\item{contracts}{Data.table. Contract data in long (panel) format.
 Must contain \code{ref_date_col} for panel snapshot identification.}
 
-\item{group_cols}{Character vector. One or more columns defining the movement
+\item{group_cols}{A character vector. One or more columns defining the movement
 states between which transitions are measured
 (e.g., \code{c("est_id", "paygrade")} or \code{c("paygrade")}). Values
 are concatenated into a single state label when multiple columns are

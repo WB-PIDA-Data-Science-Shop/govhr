@@ -9,7 +9,7 @@ compute_global_consistency(data, id_col, value_cols, digits = 2)
 \arguments{
 \item{data}{A data frame.}
 
-\item{id_col}{A character string specifying the name of the column that uniquely identifies records.}
+\item{id_col}{A string specifying the name of the column that uniquely identifies records.}
 
 \item{value_cols}{A character vector specifying the name(s) of columns whose values
 are to be checked for consistency. Value consistency is computed separately for

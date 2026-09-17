@@ -52,7 +52,7 @@ test_that("fewer than 2 personnel snapshots raises error", {
   p <- data.table(personnel_id = "P1", ref_date = as.Date("2015-09-01"), status = "active")
   c <- make_contract()
   expect_error(
-    estimate_exit_rates(contract_dt = c, personnel_dt = p),
+    estimate_exit_rates(contracts = c, personnel = p),
     "2 distinct ref_date"
   )
 })
@@ -60,8 +60,8 @@ test_that("fewer than 2 personnel snapshots raises error", {
 test_that("data.frame inputs are accepted without error", {
   expect_no_error(
     estimate_exit_rates(
-      contract_dt  = as.data.frame(make_contract()),
-      personnel_dt = as.data.frame(make_personnel())
+      contracts  = as.data.frame(make_contract()),
+      personnel = as.data.frame(make_personnel())
     )
   )
 })
@@ -69,8 +69,8 @@ test_that("data.frame inputs are accepted without error", {
 test_that("ref_date extra argument is silently absorbed (no partial-match error)", {
   expect_no_error(
     estimate_exit_rates(
-      contract_dt  = make_contract(),
-      personnel_dt = make_personnel(),
+      contracts  = make_contract(),
+      personnel = make_personnel(),
       ref_date     = "2015-09-01"
     )
   )
@@ -81,8 +81,8 @@ test_that("ref_date extra argument is silently absorbed (no partial-match error)
 # ---------------------------------------------------------------------------
 test_that("ungrouped result has exactly one row with exit_rate column", {
   out <- estimate_exit_rates(
-    contract_dt  = make_contract(),
-    personnel_dt = make_personnel(),
+    contracts  = make_contract(),
+    personnel = make_personnel(),
     group_cols   = NULL
   )
   expect_s3_class(out, "data.table")
@@ -101,8 +101,8 @@ test_that("grouped result has one row per group", {
     make_personnel()[, personnel_id := paste0("X", personnel_id)]
   ))
   out <- estimate_exit_rates(
-    contract_dt  = c_dt,
-    personnel_dt = p_dt,
+    contracts  = c_dt,
+    personnel = p_dt,
     group_cols   = "est_id"
   )
   expect_equal(nrow(out), 2L)
@@ -112,8 +112,8 @@ test_that("grouped result has one row per group", {
 
 test_that("exit_rate is numeric and non-negative", {
   out <- estimate_exit_rates(
-    contract_dt  = make_contract(),
-    personnel_dt = make_personnel()
+    contracts  = make_contract(),
+    personnel = make_personnel()
   )
   expect_type(out$exit_rate, "double")
   expect_true(all(out$exit_rate >= 0, na.rm = TRUE))
@@ -136,7 +136,7 @@ test_that("zero exits produces exit_rate of 0", {
     make_contract()[personnel_id == "P1"][, ref_date := as.Date("2016-09-01")],
     make_contract()[personnel_id == "P2"][, ref_date := as.Date("2016-09-01")]
   ))
-  out <- estimate_exit_rates(contract_dt = c, personnel_dt = p)
+  out <- estimate_exit_rates(contracts = c, personnel = p)
   expect_equal(out$exit_rate, 0)
 })
 
@@ -147,7 +147,7 @@ test_that("integer ref_date column is coerced without error", {
   p[, ref_date := as.integer(ref_date)]
   c[, ref_date := as.integer(ref_date)]
   expect_no_error(
-    estimate_exit_rates(contract_dt = c, personnel_dt = p)
+    estimate_exit_rates(contracts = c, personnel = p)
   )
 })
 
@@ -156,7 +156,7 @@ test_that("contracts with non-active types (inactive) are excluded from stock", 
   # Replace contract type with inactive — stock should be 0
   c[, contract_type := "inactive"]
   p <- make_personnel()
-  out <- estimate_exit_rates(contract_dt = c, personnel_dt = p)
+  out <- estimate_exit_rates(contracts = c, personnel = p)
   # No active stock → exit_rate = 0 (fifelse guard)
   expect_equal(out$exit_rate, 0)
 })
@@ -170,8 +170,8 @@ test_that("group with no contract stock gets exit_rate of 0, not NA", {
   c[, contract_type := "inactive"]
   p <- make_personnel()
   out <- estimate_exit_rates(
-    contract_dt  = c,
-    personnel_dt = p,
+    contracts  = c,
+    personnel = p,
     group_cols   = "est_id"
   )
   expect_false(any(is.na(out$exit_rate)))

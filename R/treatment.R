@@ -17,7 +17,7 @@
 
 # 1. HANDLE DUPLICATE RECORDS ================================================
 
-#' Remove Duplicate Personnel Records
+#' Remove duplicate personnel records
 #'
 #' @description
 #' Removes duplicate `personnel_id` + `ref_date` combinations, addressing
@@ -27,7 +27,7 @@
 #' @param keep Which record to keep per duplicate group: `"first"` (default),
 #'   `"last"`, or `"none"` (drops all records in a duplicate group).
 #'
-#' @return A data.frame with duplicates removed.
+#' @returns A data.frame with duplicates removed.
 #'
 #' @examples
 #' \dontrun{
@@ -68,7 +68,7 @@ remove_duplicate_personnel <- function(
   }
 }
 
-#' Remove Duplicate Contract Records
+#' Remove duplicate contract records
 #'
 #' @description
 #' Removes duplicate contract records, addressing violations of `contract_unique_id`
@@ -83,7 +83,7 @@ remove_duplicate_personnel <- function(
 #' @param keep Which record to keep: `"first"`, `"last"`, or `"none"`.
 #'   See \code{\link{remove_duplicate_personnel}}.
 #'
-#' @return A data.frame with duplicates removed.
+#' @returns A data.frame with duplicates removed.
 #'
 #' @examples
 #' \dontrun{
@@ -135,7 +135,7 @@ remove_duplicate_contracts <- function(
 
 # 2. FIX DATE ISSUES ==========================================================
 
-#' Fix Invalid Reference Dates
+#' Fix invalid reference dates
 #'
 #' @description
 #' Corrects `ref_date` values outside the valid range, addressing violations of
@@ -151,7 +151,7 @@ remove_duplicate_contracts <- function(
 #'     \item `"filter"`: Remove records with invalid dates
 #'   }
 #'
-#' @return A data.frame with corrected `ref_date` values.
+#' @returns A data.frame with corrected `ref_date` values.
 #'
 #' @examples
 #' \dontrun{
@@ -203,7 +203,7 @@ fix_invalid_dates <- function(
   }
 }
 
-#' Fix Invalid Birth Dates
+#' Fix invalid birth dates
 #'
 #' @description
 #' Corrects `birth_date` values outside the valid range, addressing violations
@@ -216,7 +216,7 @@ fix_invalid_dates <- function(
 #' @param treatment Correction strategy: `"na"`, `"clamp"`, or `"filter"`.
 #'   See \code{\link{fix_invalid_dates}}.
 #'
-#' @return A data.frame with corrected `birth_date` values.
+#' @returns A data.frame with corrected `birth_date` values.
 #'
 #' @examples
 #' \dontrun{
@@ -260,7 +260,7 @@ fix_invalid_birthdates <- function(
 
 # 3. FIX AGE-RELATED ISSUES ==================================================
 
-#' Flag or Remove Underage Workers
+#' Flag or remove underage workers
 #'
 #' @description
 #' Addresses violations of the `personnel_minimum_age` rule. Workers below
@@ -275,7 +275,7 @@ fix_invalid_birthdates <- function(
 #'     \item `"filter"`: Remove underage worker records
 #'   }
 #'
-#' @return A data.frame with underage workers handled according to `treatment`.
+#' @returns A data.frame with underage workers handled according to `treatment`.
 #'
 #' @examples
 #' \dontrun{
@@ -324,7 +324,7 @@ fix_underage_workers <- function(
   }
 }
 
-#' Flag or Adjust Over-Retirement-Age Workers
+#' Flag or adjust over-retirement-age workers
 #'
 #' @description
 #' Addresses violations of the `personnel_maximum_age` rule. Only targets
@@ -338,7 +338,7 @@ fix_underage_workers <- function(
 #'     \item `"adjust_status"`: Set `status` to `"retired"` for affected workers
 #'   }
 #'
-#' @return A data.frame with over-retirement-age workers handled according to
+#' @returns A data.frame with over-retirement-age workers handled according to
 #'   `treatment`.
 #'
 #' @examples
@@ -390,10 +390,10 @@ fix_retirement_age <- function(
 
 # 4. FIX WORKING HOURS ISSUES ================================================
 
-#' Fix Invalid Working Hours
+#' Fix invalid working hours
 #'
 #' @description
-#' Corrects `whours` values outside the valid range [0, 168], addressing
+#' Corrects `whours` values outside the valid range \[0, 168\], addressing
 #' violations of the `contract_whours` rule. The maximum of 168 reflects
 #' 5 days × 8 hours per week.
 #'
@@ -405,7 +405,7 @@ fix_retirement_age <- function(
 #'     \item `"flag"`: Add `invalid_hours_flag` column (also flags `NA`)
 #'   }
 #'
-#' @return A data.frame with corrected working hours.
+#' @returns A data.frame with corrected working hours.
 #'
 #' @examples
 #' \dontrun{
@@ -450,7 +450,7 @@ fix_working_hours <- function(data, treatment = c("na", "clamp", "flag")) {
 
 # 5. FIX WAGE BILL INCONSISTENCIES ===========================================
 
-#' Fix Salary Component Inconsistencies
+#' Fix salary component inconsistencies
 #'
 #' @description
 #' Corrects violations of wage bill consistency rules: gross ≥ base + allowance,
@@ -467,7 +467,7 @@ fix_working_hours <- function(data, treatment = c("na", "clamp", "flag")) {
 #'       `net_exceeds_gross_flag`, `base_exceeds_gross_flag`
 #'   }
 #'
-#' @return A data.frame with corrected salary components.
+#' @returns A data.frame with corrected salary components.
 #'
 #' @examples
 #' \dontrun{
@@ -536,7 +536,7 @@ fix_salary_components <- function(
   }
 }
 
-#' Fix Negative Salary Values
+#' Fix negative salary values
 #'
 #' @description
 #' Addresses violations of positive salary rules (`wagebill_*_positive`) by
@@ -552,7 +552,7 @@ fix_salary_components <- function(
 #'     \item `"zero"`: Set negative values to `0`
 #'   }
 #'
-#' @return A data.frame with corrected salary values in the specified columns.
+#' @returns A data.frame with corrected salary values in the specified columns.
 #'
 #' @examples
 #' \dontrun{
@@ -587,7 +587,7 @@ fix_negative_salaries <- function(
 
 # 6. MASTER CLEANING FUNCTION ================================================
 
-#' Apply Standard HR Data Cleaning Pipeline
+#' Apply Standard HR data cleaning pipeline
 #'
 #' @description
 #' Chains the treatment functions in a recommended order. Steps applied per
@@ -609,7 +609,7 @@ fix_negative_salaries <- function(
 #' @param fix_salaries Logical, contract only (default: `TRUE`).
 #' @param verbose Logical, print step-level messages (default: `FALSE`).
 #'
-#' @return A cleaned data.frame.
+#' @returns A cleaned data.frame.
 #'
 #' @examples
 #' \dontrun{

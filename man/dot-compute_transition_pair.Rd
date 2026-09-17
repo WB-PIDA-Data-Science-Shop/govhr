@@ -2,7 +2,7 @@
 % Please edit documentation in R/movement_summarize.R
 \name{.compute_transition_pair}
 \alias{.compute_transition_pair}
-\title{Compute Transition Counts for a Single Consecutive Snapshot Pair}
+\title{Compute transition counts for a single consecutive snapshot pair}
 \usage{
 .compute_transition_pair(
   snap_t0,
@@ -17,19 +17,19 @@
 )
 }
 \arguments{
-\item{snap_t0}{data.table. Subset of the full panel at snapshot T0, already
+\item{snap_t0}{Data.table. Subset of the full panel at snapshot T0, already
 filtered to a single reference date. Must contain \code{ref_date_col},
 \code{personnel_id_col}, \code{group_cols}, \code{start_date_col},
 \code{end_date_col}, and \code{contract_type_col}.}
 
-\item{snap_t1}{data.table. Subset of the full panel at snapshot T1 (the
+\item{snap_t1}{Data.table. Subset of the full panel at snapshot T1 (the
 period immediately following T0). Same column requirements as
 \code{snap_t0}.}
 
 \item{ref_date_col}{Character. Name of the reference date column used to
 extract T0 and T1 dates from the snapshots.}
 
-\item{group_cols}{Character vector. Columns whose concatenated values define
+\item{group_cols}{A character vector. Columns whose concatenated values define
 the movement state for each person. Rows with \code{NA} in any of these
 columns are dropped via \code{na.omit()} before state labels are formed.}
 

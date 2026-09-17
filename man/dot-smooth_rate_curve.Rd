@@ -2,7 +2,7 @@
 % Please edit documentation in R/demographics.R
 \name{.smooth_rate_curve}
 \alias{.smooth_rate_curve}
-\title{Graduate a Single Age Curve Onto a Complete Age Grid}
+\title{Graduate a single age curve onto a complete age grid}
 \usage{
 .smooth_rate_curve(age, rate, weight, full_ages, span)
 }

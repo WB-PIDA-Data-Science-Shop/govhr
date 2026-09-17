@@ -1,6 +1,6 @@
 
 
-#' Detect Personnel Reallocation Events
+#' Detect personnel reallocation events
 #'
 #' Identifies reallocation events when a personnel's set of establishments changes
 #' between consecutive reference dates. Removes hire events and only keeps
@@ -13,7 +13,7 @@
 #' @param personnel_hire A data.frame or tibble containing hire events with columns
 #'   `personnel_id` and `ref_date`.
 #'
-#' @return A tibble with columns:
+#' @returns A tibble with columns:
 #'   - `personnel_id`
 #'   - `ref_date`
 #'   - `est_id_nested`: List-column of establishment IDs for that personnel and date.
@@ -68,7 +68,7 @@ detect_reallocation <- function(data, personnel_hire) {
   return(data_reallocation)
 }
 
-#' Detect Career Transitions
+#' Detect career transitions
 #'
 #' Collapses each entity's history into spells of consecutive periods in the
 #' same group, then pairs each spell with the one that follows it. A row is
@@ -89,7 +89,7 @@ detect_reallocation <- function(data, personnel_hire) {
 #' @param return_all Logical. Keep terminal spells, which have no destination
 #'   and so carry `NA` in both `to` and `ref_date`. Default `FALSE`.
 #'
-#' @return A data table with the identifier, `from`, `to`, `from_date` and
+#' @returns A data table with the identifier, `from`, `to`, `from_date` and
 #'   `ref_date`.
 #'
 #' @importFrom data.table as.data.table rleidv setnames setorderv shift
@@ -185,14 +185,14 @@ detect_career_transition <- function(
 }
 
 
-#' Plot Transfer Heatmap
+#' Plot transfer heatmap
 #'
 #' Draws transfers between groups as a heatmap, origin groups on the y-axis and
 #' destination groups on the x-axis.
 #'
 #' @param data Data frame with `from`, `to` and `transfer` columns.
 #'
-#' @return A plotly object.
+#' @returns A plotly object.
 #'
 #' @importFrom plotly layout plot_ly
 #' @importFrom stats median
@@ -229,7 +229,7 @@ plot_transfer_heatmap <- function(data) {
     )
 }
 
-#' Plot Transition Network
+#' Plot transition network
 #'
 #' Draws career transitions as a directed graph, with edge width proportional to
 #' the number of transitions and node size to degree centrality. Networks of ten
@@ -238,7 +238,7 @@ plot_transfer_heatmap <- function(data) {
 #' @param data Data frame with `from` and `to` columns, as returned by
 #'   [detect_career_transition()].
 #'
-#' @return A ggiraph girafe object.
+#' @returns A ggiraph girafe object.
 #'
 #' @importFrom dplyr across mutate pull row_number
 #' @importFrom ggplot2 aes coord_cartesian expansion margin scale_color_manual

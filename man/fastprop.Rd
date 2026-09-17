@@ -7,10 +7,10 @@
 fastprop(.data, ...)
 }
 \arguments{
+\item{.data}{A data frame or tibble containing a count column \code{n}.}
+
 \item{...}{Grouping variables. Proportions are
 computed within the combinations of these variables.}
-
-\item{data}{A data frame or tibble containing a count column \code{n}.}
 }
 \value{
 A tibble with the same columns as \code{.data} plus a numeric

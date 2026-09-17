@@ -1,11 +1,11 @@
 
-#' Count Unique Entities by Group
+#' Count unique entities by group
 #' 
 #' @param data Data frame containing the data.
 #' @param id_col Character. Column name of the unique identifier for the entity.
 #' @param group_cols Character vector of column names to group by, or `NULL` for no grouping.
 #' 
-#' @return A data frame with the grouping columns and a `count` column representing the number of unique entities in each group.
+#' @returns A data frame with the grouping columns and a `count` column representing the number of unique entities in each group.
 #' 
 #' @importFrom data.table as.data.table uniqueN setorderv
 #' @export
@@ -26,7 +26,7 @@ count_entity <- function(data, id_col, group_cols = NULL){
 }
 
 
-#' Compute Trend Summary
+#' Compute trend summary
 #'
 #' Aggregates data over time into a tidy frame of `ref_date`, the optional
 #' grouping column, and `value`. Counts rows when `measure_col` is `NULL`
@@ -37,7 +37,7 @@ count_entity <- function(data, id_col, group_cols = NULL){
 #'   grouping.
 #' @param measure_col Character. Numeric column to sum, or `NULL` to count rows.
 #'
-#' @return A data frame with `ref_date`, optionally `group_col`, and `value`.
+#' @returns A data frame with `ref_date`, optionally `group_col`, and `value`.
 #'
 #' @importFrom dplyr across all_of
 #' @export
@@ -51,12 +51,12 @@ compute_trend_summary <- function(data, group_col, measure_col = NULL) {
       data,
       cols = measure_col,
       fns = "sum",
-      groups = groups
+      group_cols = groups
     )
   }
 }
 
-#' Apply Baseline Index to a Trend Summary
+#' Apply baseline index to a trend summary
 #'
 #' Rescales `value` so the earliest observation equals 100. When a grouping
 #' column is supplied the rescaling is applied independently within each group.
@@ -66,7 +66,7 @@ compute_trend_summary <- function(data, group_col, measure_col = NULL) {
 #' @param group_col Character. Column to group by, or `"ref_date"` for no
 #'   grouping.
 #'
-#' @return The input data frame with `value` rescaled to a baseline index.
+#' @returns The input data frame with `value` rescaled to a baseline index.
 #'
 #' @importFrom dplyr arrange mutate all_of first
 #' @export
@@ -87,7 +87,7 @@ apply_baseline_index <- function(data, group_col) {
   }
 }
 
-#' Compute Cross-Section Summary
+#' Compute cross-section summary
 #'
 #' Keeps each group's latest reference date and aggregates it into a single
 #' `value` per group. Counts rows when `measure_col` is `NULL` (headcount) and
@@ -97,7 +97,7 @@ apply_baseline_index <- function(data, group_col) {
 #' @param group_col Character. Column to group by.
 #' @param measure_col Character. Numeric column to sum, or `NULL` to count rows.
 #'
-#' @return A data frame with the grouping column and a `value` column.
+#' @returns A data frame with the grouping column and a `value` column.
 #'
 #' @importFrom dplyr all_of filter n summarise
 #' @export
@@ -120,12 +120,12 @@ compute_cross_section_summary <- function(data, group_col, measure_col = NULL) {
       data_latest,
       cols = measure_col,
       fns = "sum",
-      groups = group_col
+      group_cols = group_col
     )
   }
 }
 
-#' Compute Growth Rate Summary
+#' Compute growth rate summary
 #'
 #' Keeps each group's first and last reference date and computes the percentage
 #' change between them. Counts rows when `measure_col` is `NULL` (headcount) and
@@ -135,7 +135,7 @@ compute_cross_section_summary <- function(data, group_col, measure_col = NULL) {
 #' @param group_col Character. Column to group by.
 #' @param measure_col Character. Numeric column to sum, or `NULL` to count rows.
 #'
-#' @return A data frame with the grouping column and a `growth_rate` column, in
+#' @returns A data frame with the grouping column and a `growth_rate` column, in
 #'   percentage points (e.g. `12.5` for +12.5%).
 #'
 #' @importFrom dplyr all_of arrange filter first last n summarise
@@ -156,7 +156,7 @@ compute_growth_summary <- function(data, group_col, measure_col = NULL) {
       labelled,
       cols = measure_col,
       fns = "sum",
-      groups = c("ref_date", group_col)
+      group_cols = c("ref_date", group_col)
     )
   }
 
@@ -178,7 +178,7 @@ compute_growth_summary <- function(data, group_col, measure_col = NULL) {
 }
 
 
-#' Orange Gradient Colour Scale for Grouped Series
+#' Orange gradient colour scale for grouped series
 #'
 #' Builds the package's standard sequential orange scale, sized to the number
 #' of distinct groups present in the data.
@@ -186,7 +186,7 @@ compute_growth_summary <- function(data, group_col, measure_col = NULL) {
 #' @param values Vector of group values. Distinct non-missing values determine
 #'   the number of colours.
 #'
-#' @return A ggplot2 manual colour scale.
+#' @returns A ggplot2 manual colour scale.
 #'
 #' @importFrom dplyr n_distinct
 #' @importFrom ggplot2 scale_color_manual
@@ -200,7 +200,7 @@ group_color_scale <- function(values) {
   )
 }
 
-#' Plot Time Trend
+#' Plot time trend
 #'
 #' Draws a line-and-point chart of the measure over `ref_date`, one coloured
 #' series per group. When `toggle_growth` is `TRUE` the y-axis is formatted as a
@@ -216,7 +216,7 @@ group_color_scale <- function(values) {
 #' @param y_label Character. y-axis label, used when `toggle_growth` is `FALSE`.
 #'   Default `"Value"`.
 #'
-#' @return A ggplot2 object.
+#' @returns A ggplot2 object.
 #'
 #' @importFrom ggplot2 aes geom_hline geom_line geom_point ggplot scale_y_continuous xlab ylab
 #' @importFrom scales cut_short_scale label_number
@@ -261,7 +261,7 @@ plot_trend <- function(
   }
 }
 
-#' Plot Totals by Group
+#' Plot totals by group
 #'
 #' Draws a horizontal bar chart with groups ordered by the plotted value. Rows
 #' missing either the value or the group label are dropped.
@@ -272,7 +272,7 @@ plot_trend <- function(
 #' @param x_col Character. Column to plot on the x-axis. Default `"value"`.
 #' @param x_label Character. x-axis label. Default `"Value"`.
 #'
-#' @return A ggplot2 object.
+#' @returns A ggplot2 object.
 #'
 #' @importFrom dplyr filter
 #' @importFrom ggplot2 aes geom_col ggplot guide_axis labs scale_x_continuous scale_y_discrete
@@ -302,7 +302,7 @@ plot_bar_total <- function(data, group_col, x_col = "value", x_label = "Value") 
     ggplot2::labs(x = x_label, y = "")
 }
 
-#' Plot Growth Rates by Group
+#' Plot growth rates by group
 #'
 #' Draws a horizontal bar chart with groups ordered by `growth_rate`, with a
 #' dashed reference line at zero separating growth from decline.
@@ -311,7 +311,7 @@ plot_bar_total <- function(data, group_col, x_col = "value", x_label = "Value") 
 #'   as returned by [compute_growth_summary()].
 #' @param group_col Character. Column to group by.
 #'
-#' @return A ggplot2 object.
+#' @returns A ggplot2 object.
 #'
 #' @importFrom ggplot2 aes geom_col geom_vline ggplot guide_axis labs scale_x_continuous scale_y_discrete
 #' @importFrom scales cut_short_scale label_number

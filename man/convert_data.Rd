@@ -2,7 +2,7 @@
 % Please edit documentation in R/harmonization.R
 \name{convert_data}
 \alias{convert_data}
-\title{Convert Data to Match Original Class}
+\title{Convert data to match original class}
 \usage{
 convert_data(data, data_original)
 }

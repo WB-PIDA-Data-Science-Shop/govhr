@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize.R
 \name{compute_density}
 \alias{compute_density}
-\title{Function to compute the distribution function of a variable.}
+\title{Function to compute the distribution function of a variable}
 \usage{
 compute_density(
   data,
@@ -27,5 +27,5 @@ compute_density(
 A data frame with the distribution function, where \code{pct} denotes the percentage of observations in each bin and \code{cum_pct} denotes the cumulative percentage.
 }
 \description{
-Function to compute the distribution function of a variable.
+Function to compute the distribution function of a variable
 }

@@ -19,7 +19,7 @@ effects columns.}
 \item{outcome_var}{Character. Name of the outcome column.
 Default \code{"gross_salary_lcu"}.}
 
-\item{predictor_vars}{Character vector. Names of predictor columns.
+\item{predictor_vars}{A character vector. Names of predictor columns.
 Default \code{c("contract_type", "occupation_native", "educat7", "whours", "paygrade")}.}
 
 \item{fixed_effects_vars}{Character vector, or \code{NULL} to fit without fixed

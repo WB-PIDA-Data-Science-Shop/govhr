@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize.R
 \name{count_unique}
 \alias{count_unique}
-\title{Count Unique Non-Missing Values}
+\title{Count unique non-missing values}
 \usage{
 count_unique(x)
 }

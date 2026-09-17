@@ -8,11 +8,11 @@
 #' Optionally computes wage bill shares relative to macro-fiscal aggregates
 #' (e.g., GDP, public expenditure, revenue).
 #'
-#' @param contract_df A data.frame or tibble containing contract-level salary data.
+#' @param contracts A data.frame or tibble containing contract-level salary data.
 #'   Must include the columns specified in `wage_vars` and `groups`.
 #' @param wage_vars Character vector of salary column names to aggregate.
 #'   Defaults to `c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")`.
-#' @param groups Character vector of grouping columns for aggregation.
+#' @param group_cols Character vector of grouping columns for aggregation.
 #'   Defaults to `c("country_code", "year")`.
 #' @param share_macro Logical; if `TRUE`, computes wage bill shares relative
 #'   to macro-fiscal aggregates specified in `macro_vars`. Defaults to `FALSE`.
@@ -21,8 +21,10 @@
 #'   `c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu")`.
 #' @param drop_na Logical; if `TRUE`, removes `NA` values before aggregation.
 #'   Defaults to `TRUE`.
+#' @param groups Deprecated. Use `group_cols` instead.
+#' @param contract_df Deprecated. Use `contracts` instead.
 #'
-#' @return A wage bill table with optional grouping variables,
+#' @returns A wage bill table with optional grouping variables,
 #'   an `indicator` column (describing the wage variable and level of analysis),
 #'   and a `value` column. When `share_macro = TRUE`, values represent
 #'   shares (wage bill / macro aggregate).
@@ -53,9 +55,9 @@
 #'
 #' @export
 compute_wagebill <- function(
-  contract_df,
+  contracts,
   wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
-  groups = c("country_code", "year"),
+  group_cols = c("country_code", "year"),
   share_macro = FALSE,
   macro_vars = c(
     "gdp_lcu",
@@ -63,9 +65,13 @@ compute_wagebill <- function(
     "prevenue_lcu",
     "taxrevenue_lcu"
   ),
-  drop_na = TRUE
+  drop_na = TRUE,
+  groups = NULL,
+  contract_df = NULL
 ) {
-  data_ppp <- contract_df |>
+  group_cols <- resolve_renamed_arg(group_cols, groups, "groups", "group_cols")
+  contracts <- resolve_renamed_arg(contracts, contract_df, "contract_df", "contracts")
+  data_ppp <- contracts |>
     convert_constant_ppp(
       cols = wage_vars
     )
@@ -75,7 +81,7 @@ compute_wagebill <- function(
       compute_fastshare(
         cols = wage_vars,
         macro_cols = macro_vars,
-        groups = groups,
+        group_cols = group_cols,
         fns = "sum",
         output = "long"
       )
@@ -83,7 +89,7 @@ compute_wagebill <- function(
     data_ppp |>
       compute_fastsummary(
         cols = wage_vars,
-        groups = groups,
+        group_cols = group_cols,
         fns = "sum",
         output = "long"
       )

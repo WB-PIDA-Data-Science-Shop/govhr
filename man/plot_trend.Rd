@@ -2,7 +2,7 @@
 % Please edit documentation in R/overview.R
 \name{plot_trend}
 \alias{plot_trend}
-\title{Plot Time Trend}
+\title{Plot time trend}
 \usage{
 plot_trend(
   data,

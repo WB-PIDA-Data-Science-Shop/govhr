@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize.R
 \name{cv}
 \alias{cv}
-\title{Compute the Coefficient of Variation (CV)}
+\title{Compute the coefficient of variation (CV)}
 \usage{
 cv(x, na.rm = TRUE)
 }

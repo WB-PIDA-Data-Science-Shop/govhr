@@ -2,24 +2,26 @@
 % Please edit documentation in R/retirement.R
 \name{compute_pension_ratio}
 \alias{compute_pension_ratio}
-\title{Compute Ratio of Last Salary to First Pension for Retired Workers}
+\title{Compute ratio of last salary to first pension for retired workers}
 \usage{
 compute_pension_ratio(
-  personnel_dt,
-  contract_dt,
+  personnel,
+  contracts,
   salary_col,
   personnel_id_col = "personnel_id",
   status_col = "employment_status",
   date_col = "ref_date",
   pensioner_value = "pensioner",
-  keep_vars = NULL
+  keep_vars = NULL,
+  personnel_dt = NULL,
+  contract_dt = NULL
 )
 }
 \arguments{
-\item{personnel_dt}{A data.table (or tibble/data.frame) containing at minimum
+\item{personnel}{A data.table (or tibble/data.frame) containing at minimum
 the columns named in \code{id_col}, \code{status_col}, and \code{date_col}.}
 
-\item{contract_dt}{A data.table (or tibble/data.frame) containing at minimum
+\item{contracts}{A data.table (or tibble/data.frame) containing at minimum
 the columns named in \code{id_col}, \code{date_col}, and \code{salary_col}.}
 
 \item{salary_col}{A single string naming the compensation column to use,
@@ -40,6 +42,10 @@ that identifies a pensioner record. Defaults to \code{"pensioner"}.}
 
 \item{keep_vars}{A character vector of additional contract-level columns
 to attach via \code{govhr::add_contract_to_event()}. Defaults to NULL}
+
+\item{personnel_dt}{Deprecated. Use \code{personnel} instead.}
+
+\item{contract_dt}{Deprecated. Use \code{contracts} instead.}
 }
 \value{
 A data.table with one row per retiring individual containing

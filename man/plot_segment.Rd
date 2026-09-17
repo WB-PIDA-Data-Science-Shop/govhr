@@ -2,9 +2,9 @@
 % Please edit documentation in R/plots.R
 \name{plot_segment}
 \alias{plot_segment}
-\title{Create a Segment Plot with Jittered Points}
+\title{Create a segment plot with jittered points}
 \usage{
-plot_segment(data, col, group)
+plot_segment(data, col, group_col, group = NULL)
 }
 \arguments{
 \item{data}{A data frame containing the variables to plot.}
@@ -12,8 +12,10 @@ plot_segment(data, col, group)
 \item{col}{Character string specifying the name of the numeric column to plot
 on the x-axis.}
 
-\item{group}{Character string specifying the name of the grouping column for
+\item{group_col}{Character string specifying the name of the grouping column for
 the y-axis.}
+
+\item{group}{Deprecated. Use \code{group_col} instead.}
 }
 \value{
 A ggplot2 object displaying:
@@ -39,6 +41,6 @@ The function:
 }
 }
 \examples{
-plot_segment(mtcars, col = "mpg", group = "cyl")
+plot_segment(mtcars, col = "mpg", group_col = "cyl")
 
 }

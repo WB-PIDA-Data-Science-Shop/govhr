@@ -15,7 +15,7 @@
 #' @param output_format Deprecated — kept for backward compatibility but
 #'   ignored. The function now always returns \code{list(report, violations)}.
 #'
-#' @return A named list:
+#' @returns A named list:
 #' \describe{
 #'   \item{\code{report}}{data.table with columns \code{Rule},
 #'     \code{Description}, \code{Total Records}, \code{Passes},

@@ -8,9 +8,10 @@ compute_fastsummary(
   data,
   cols,
   fns = NULL,
-  groups,
+  group_cols,
   output = c("long", "wide"),
-  tbl = FALSE
+  tbl = FALSE,
+  groups = NULL
 )
 }
 \arguments{
@@ -29,7 +30,7 @@ The result will be returned in the same class as the input (unless \code{tbl = T
 names referring to \code{define_fns()}.
 }}
 
-\item{groups}{A character vector. Column(s) by which to group the data
+\item{group_cols}{A character vector. Column(s) by which to group the data
 before computing the summary statistics.}
 
 \item{output}{Character. Either \code{"long"} (default) or \code{"wide"} to specify
@@ -38,6 +39,8 @@ statistic, \code{"wide"} returns one row per group with multiple columns for
 each summary statistic.}
 
 \item{tbl}{Logical. If \code{TRUE}, converts the result to a tibble (\code{tibble::as_tibble()}).}
+
+\item{groups}{Deprecated. Use \code{group_cols} instead.}
 }
 \value{
 A dataset containing the summary statistics for the selected columns.

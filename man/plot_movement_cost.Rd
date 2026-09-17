@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{plot_movement_cost}
 \alias{plot_movement_cost}
-\title{Plot Movement Cost}
+\title{Plot movement cost}
 \usage{
 plot_movement_cost(data, group_cols)
 }
@@ -15,5 +15,5 @@ plot_movement_cost(data, group_cols)
 A ggplot2 object representing the movement cost.
 }
 \description{
-Plot Movement Cost
+Plot movement cost
 }

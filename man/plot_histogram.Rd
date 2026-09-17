@@ -2,14 +2,14 @@
 % Please edit documentation in R/plots.R
 \name{plot_histogram}
 \alias{plot_histogram}
-\title{Plot Density as Percentage Share}
+\title{Plot density as percentage share}
 \usage{
 plot_histogram(data, plot_type = "histogram", group_col = NULL)
 }
 \arguments{
 \item{data}{A data frame produced by \code{compute_histogram()} or \code{compute_cumulative()}, containing columns \code{bin}, \code{pct}, and optionally a grouping column.}
 
-\item{plot_type}{A character string indicating the type of plot: "histogram" or "cumulative".}
+\item{plot_type}{A string indicating the type of plot: "histogram" or "cumulative".}
 
 \item{group_col}{The column name to group by.}
 }
@@ -17,5 +17,5 @@ plot_histogram(data, plot_type = "histogram", group_col = NULL)
 A ggplot2 object.
 }
 \description{
-Plot Density as Percentage Share
+Plot density as percentage share
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize.R
 \name{compute_quantile}
 \alias{compute_quantile}
-\title{Function to compute quantiles of a measure column within groups and reference dates.}
+\title{Function to compute quantiles of a measure column within groups and reference dates}
 \usage{
 compute_quantile(
   data,
@@ -27,5 +27,5 @@ compute_quantile(
 A data frame containing the quantiles, median values, and mean values for the specified measure column within the specified groups and reference dates.
 }
 \description{
-Function to compute quantiles of a measure column within groups and reference dates.
+Function to compute quantiles of a measure column within groups and reference dates
 }

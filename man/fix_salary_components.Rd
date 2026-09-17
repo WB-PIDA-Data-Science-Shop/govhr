@@ -2,7 +2,7 @@
 % Please edit documentation in R/treatment.R
 \name{fix_salary_components}
 \alias{fix_salary_components}
-\title{Fix Salary Component Inconsistencies}
+\title{Fix salary component inconsistencies}
 \usage{
 fix_salary_components(
   data,

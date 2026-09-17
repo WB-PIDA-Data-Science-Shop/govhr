@@ -2,7 +2,7 @@
 % Please edit documentation in R/overview.R
 \name{compute_growth_summary}
 \alias{compute_growth_summary}
-\title{Compute Growth Rate Summary}
+\title{Compute growth rate summary}
 \usage{
 compute_growth_summary(data, group_col, measure_col = NULL)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/transition.R
 \name{detect_reallocation}
 \alias{detect_reallocation}
-\title{Detect Personnel Reallocation Events}
+\title{Detect personnel reallocation events}
 \usage{
 detect_reallocation(data, personnel_hire)
 }

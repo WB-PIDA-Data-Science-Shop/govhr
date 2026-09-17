@@ -2,7 +2,7 @@
 % Please edit documentation in R/treatment.R
 \name{remove_duplicate_contracts}
 \alias{remove_duplicate_contracts}
-\title{Remove Duplicate Contract Records}
+\title{Remove duplicate contract records}
 \usage{
 remove_duplicate_contracts(
   data,

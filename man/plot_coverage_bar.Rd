@@ -2,7 +2,7 @@
 % Please edit documentation in R/qcheck_plots.R
 \name{plot_coverage_bar}
 \alias{plot_coverage_bar}
-\title{Plot Coverage by Group (Coloured Bar Chart)}
+\title{Plot coverage by group (coloured bar chart)}
 \usage{
 plot_coverage_bar(data)
 }

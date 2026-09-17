@@ -5,24 +5,27 @@
 \title{Generate Standard HR Analytics Report}
 \usage{
 generate_hr_report(
-  contract_dt,
-  personnel_dt,
-  est_dt,
+  contracts,
+  personnel,
+  establishments,
   country_code,
-  output = "hr_report.html"
+  output = "hr_report.html",
+  contract_dt = NULL,
+  personnel_dt = NULL,
+  est_dt = NULL
 )
 }
 \arguments{
-\item{contract_dt}{A data.table containing the Contract module data with
+\item{contracts}{A data.table containing the Contract module data with
 harmonized column names according to \code{\link{dictionary}}.
 Should include columns such as contract_id, personnel_id, est_id,
 ref_date, salary fields, and occupation information.}
 
-\item{personnel_dt}{A data.table containing the Personnel module data with
+\item{personnel}{A data.table containing the Personnel module data with
 harmonized column names. Should include personnel_id and demographic
 information.}
 
-\item{est_dt}{A data.table containing the Establishment module data with
+\item{establishments}{A data.table containing the Establishment module data with
 harmonized column names. Should include est_id and establishment
 characteristics.}
 
@@ -31,6 +34,12 @@ characteristics.}
 \item{output}{Character string specifying the output file name. Defaults to
 "hr_report.html". The file will be created in the current working
 directory.}
+
+\item{contract_dt}{Deprecated. Use \code{contracts} instead.}
+
+\item{personnel_dt}{Deprecated. Use \code{personnel} instead.}
+
+\item{est_dt}{Deprecated. Use \code{establishments} instead.}
 }
 \value{
 An HR report, in HTML.
@@ -47,7 +56,7 @@ Establishment modules.
 generate_hr_report(
   contract_dt = bra_hrmis_contract,
   personnel_dt = bra_hrmis_personnel,
-  est_dt = bra_hrmis_est,
+  establishments = bra_hrmis_est,
   country_code = "BRA",
   output = "brazil_hr_report.html"
 )

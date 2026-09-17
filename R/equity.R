@@ -10,7 +10,7 @@
 #' @param latest_measure Logical. Restrict to the latest reference date and drop
 #'   `ref_date` from the grouping. Default `FALSE`.
 #'
-#' @return A data frame with the grouping columns, `decile`, `median_value` and
+#' @returns A data frame with the grouping columns, `decile`, `median_value` and
 #'   `mean_value`.
 #'
 #' @importFrom data.table as.data.table setorderv
@@ -51,7 +51,7 @@ compute_decile <- function(
   out[]
 }
 
-#' Bin a Measure into a Share Distribution
+#' Bin a measure into a share distribution
 #'
 #' Bins `measure_col` at a fixed width and reports each bin's share and
 #' cumulative share of observations, filling empty bins with zero so the
@@ -64,7 +64,7 @@ compute_decile <- function(
 #' @param latest_measure Logical. Restrict to the latest reference date. Default
 #'   `FALSE`.
 #'
-#' @return A data frame with the grouping column, `bin`, `count`, `pct` and
+#' @returns A data frame with the grouping column, `bin`, `count`, `pct` and
 #'   `cum_pct`.
 #'
 #' @importFrom data.table CJ as.data.table data.table setnames setorderv

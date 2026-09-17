@@ -2,17 +2,19 @@
 % Please edit documentation in R/summarize.R
 \name{compute_growth}
 \alias{compute_growth}
-\title{Compute Growth Rate Summary Table}
+\title{Compute growth rate summary table}
 \usage{
-compute_growth(data, group, measure_col = NULL)
+compute_growth(data, group_col, measure_col = NULL, group = NULL)
 }
 \arguments{
 \item{data}{A data frame with \code{ref_date} and the grouping column.}
 
-\item{group}{Character string naming the grouping column.}
+\item{group_col}{Character string naming the grouping column.}
 
 \item{measure_col}{Character string naming the numeric column to sum, or
 \code{NULL} to count rows.}
+
+\item{group}{Deprecated. Use \code{group_col} instead.}
 }
 \value{
 A data frame with the grouping column and a \code{growth_rate} column

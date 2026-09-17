@@ -2,7 +2,7 @@
 % Please edit documentation in R/overview.R
 \name{compute_cross_section_summary}
 \alias{compute_cross_section_summary}
-\title{Compute Cross-Section Summary}
+\title{Compute cross-section summary}
 \usage{
 compute_cross_section_summary(data, group_col, measure_col = NULL)
 }

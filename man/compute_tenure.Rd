@@ -5,7 +5,7 @@
 \title{Compute employment tenure from contract history}
 \usage{
 compute_tenure(
-  contract_dt,
+  contracts,
   ref_date,
   personnel_id_col = "personnel_id",
   contract_id_col = "contract_id",
@@ -16,7 +16,7 @@ compute_tenure(
 )
 }
 \arguments{
-\item{contract_dt}{data.table containing the contract history. Must include
+\item{contracts}{Data.table containing the contract history. Must include
 personnel identifiers, contract identifiers, contract start and end
 dates, contract types, and any grouping variables supplied in
 \code{group_cols}.}

@@ -8,9 +8,9 @@ cross, entry, and exit effects (Foster-Haltiwanger-Krizan style)}
 compute_wage_decomposition(growth_decomp, group_cols = NULL)
 }
 \arguments{
-\item{growth_decomp}{output of compute_growth_decomposition()}
+\item{growth_decomp}{Output of compute_growth_decomposition()}
 
-\item{group_cols}{optional character vector of columns identifying a higher-level
+\item{group_cols}{Optional character vector of columns identifying a higher-level
 unit (e.g. "country_code") within which shares/composition are computed
 separately. NULL pools all rows into one global composition per ref_date.}
 }

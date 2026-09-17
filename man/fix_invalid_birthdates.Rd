@@ -2,7 +2,7 @@
 % Please edit documentation in R/treatment.R
 \name{fix_invalid_birthdates}
 \alias{fix_invalid_birthdates}
-\title{Fix Invalid Birth Dates}
+\title{Fix invalid birth dates}
 \usage{
 fix_invalid_birthdates(
   data,

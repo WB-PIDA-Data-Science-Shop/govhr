@@ -5,7 +5,7 @@
 \title{Compute total time spent in each specific group per person (eg paygrade, occupation)}
 \usage{
 compute_employment_spells(
-  contract_dt,
+  contracts,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
   contract_id_col = "contract_id",
@@ -16,7 +16,7 @@ compute_employment_spells(
 )
 }
 \arguments{
-\item{contract_dt}{data.table. Stacked contract panel, as passed to
+\item{contracts}{Data.table. Stacked contract panel, as passed to
 \code{\link{compute_tenure_panel}}.}
 
 \item{personnel_id_col}{Character. Name of the personnel identifier

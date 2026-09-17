@@ -2,7 +2,7 @@
 % Please edit documentation in R/overview.R
 \name{compute_trend_summary}
 \alias{compute_trend_summary}
-\title{Compute Trend Summary}
+\title{Compute trend summary}
 \usage{
 compute_trend_summary(data, group_col, measure_col = NULL)
 }

@@ -153,6 +153,8 @@ if (getRversion() >= "2.15.1") {
     "hires",
     "consistent_record",
     "coverage",
+    "label",
+    "description",
     "status",
     # compute_tenure
     ".eff_end",
@@ -269,13 +271,13 @@ if (getRversion() >= "2.15.1") {
   ))
 }
 
-#' Validate Column Exists in Data Table
+#' Validate column exists in data table
 #'
-#' @param dt data.table to check
-#' @param colname Character. Column name to validate
-#' @param varname Character. Variable name for error messages
+#' @param dt Data.table to check.
+#' @param colname Character. Column name to validate.
+#' @param varname Character. Variable name for error messages.
 #'
-#' @return Invisible TRUE if valid, stops with error otherwise
+#' @returns Invisible TRUE if valid, stops with error otherwise
 #' @keywords internal
 validate_column_exists <- function(dt, colname, varname) {
   if (!colname %in% names(dt)) {
@@ -291,13 +293,13 @@ validate_column_exists <- function(dt, colname, varname) {
   return(invisible(TRUE))
 }
 
-#' Validate Multiple Columns Exist
+#' Validate multiple columns exist
 #'
-#' @param dt data.table to check
-#' @param colnames Character vector. Column names to validate
-#' @param varname Character. Variable name for error messages
+#' @param dt Data.table to check.
+#' @param colnames A character vector. Column names to validate.
+#' @param varname Character. Variable name for error messages.
 #'
-#' @return Invisible TRUE if valid, stops with error otherwise
+#' @returns Invisible TRUE if valid, stops with error otherwise
 #' @keywords internal
 validate_columns_exist <- function(dt, colnames, varname) {
   missing_cols <- setdiff(colnames, names(dt))
@@ -315,12 +317,12 @@ validate_columns_exist <- function(dt, colnames, varname) {
   return(invisible(TRUE))
 }
 
-#' Validate Date Format
+#' Validate date format
 #'
-#' @param date Object to validate
-#' @param varname Character. Variable name for error messages
+#' @param date Object to validate.
+#' @param varname Character. Variable name for error messages.
 #'
-#' @return Invisible TRUE if valid, stops with error otherwise
+#' @returns Invisible TRUE if valid, stops with error otherwise
 #' @keywords internal
 validate_date_format <- function(date, varname) {
   # Accept both Date objects and character strings
@@ -360,3 +362,36 @@ validate_date_format <- function(date, varname) {
   return(date)
 }
 
+# Support a renamed argument for one deprecation cycle.
+#
+# Returns the value for the new argument, warning if the caller supplied the
+# old name instead. `old` defaults to NULL in the wrapping function, so a
+# non-NULL value means the caller explicitly passed the deprecated argument.
+#' @noRd
+resolve_renamed_arg <- function(new, old, old_name, new_name) {
+  if (is.null(old)) {
+    return(new)
+  }
+
+  warning(
+    "`", old_name, "` is deprecated and will be removed in a future release; ",
+    "use `", new_name, "` instead.",
+    call. = FALSE
+  )
+
+  # `new` may be a required formal the caller never supplied, so probe it
+  # without letting the missing-argument error escape.
+  supplied <- !inherits(
+    tryCatch(force(new), error = function(e) e),
+    "error"
+  )
+
+  if (supplied && !is.null(new)) {
+    stop(
+      "Supply either `", new_name, "` or `", old_name, "`, not both.",
+      call. = FALSE
+    )
+  }
+
+  old
+}

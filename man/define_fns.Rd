@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize.R
 \name{define_fns}
 \alias{define_fns}
-\title{Define Default Summary Functions}
+\title{Define default summary functions}
 \format{
 The list includes the following summary functions:
 \describe{

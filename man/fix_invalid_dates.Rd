@@ -2,7 +2,7 @@
 % Please edit documentation in R/treatment.R
 \name{fix_invalid_dates}
 \alias{fix_invalid_dates}
-\title{Fix Invalid Reference Dates}
+\title{Fix invalid reference dates}
 \usage{
 fix_invalid_dates(
   data,

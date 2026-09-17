@@ -1,5 +1,5 @@
 
-#' Estimate Movement Baseline from Panel Data
+#' Estimate movement baseline from panel data
 #'
 #' @description
 #' Analyzes longitudinal panel data to compute empirical transition probabilities
@@ -17,9 +17,9 @@
 #' result[, .(movement_rate = mean(movement_rate)), by = .(from_group, to_group)]
 #' }
 #'
-#' @param contract_dt data.table. Contract data in long (panel) format.
+#' @param contracts Data.table. Contract data in long (panel) format.
 #'   Must contain \code{ref_date_col} for panel snapshot identification.
-#' @param group_cols Character vector. One or more columns defining the movement
+#' @param group_cols A character vector. One or more columns defining the movement
 #'   states between which transitions are measured
 #'   (e.g., \code{c("est_id", "paygrade")} or \code{c("paygrade")}). Values
 #'   are concatenated into a single state label when multiple columns are
@@ -38,7 +38,7 @@
 #'   \code{contract_dt}. When provided, salary summary columns are appended to
 #'   the output (see Value). Default: \code{NULL}.
 #'
-#' @return A \code{data.table} with one row per
+#' @returns A \code{data.table} with one row per
 #'   \code{(from_group, to_group, from_period, to_period)} transition pair,
 #'   keyed on those four columns. Returns an empty \code{data.table} with the
 #'   same schema if no valid transitions are found. Columns:
@@ -70,7 +70,7 @@
 #'
 #' @keywords internal
 estimate_movement_rates <- function(
-  contract_dt,
+  contracts,
   group_cols,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
@@ -80,8 +80,8 @@ estimate_movement_rates <- function(
   salary_col = NULL
 ) {
   # Validate inputs
-  if (!data.table::is.data.table(contract_dt)) {
-    stop("contract_dt must be a data.table", call. = FALSE)
+  if (!data.table::is.data.table(contracts)) {
+    stop("contracts must be a data.table", call. = FALSE)
   }
   if (is.null(group_cols) || length(group_cols) == 0) {
     stop(
@@ -99,18 +99,18 @@ estimate_movement_rates <- function(
       end_date_col,
       contract_type_col
     ),
-    names(contract_dt)
+    names(contracts)
   )
   if (length(missing_cols) > 0) {
     stop(
-      "Columns not found in contract_dt: ",
+      "Columns not found in contracts: ",
       paste(missing_cols, collapse = ", "),
       call. = FALSE
     )
   }
 
   # Get sorted unique reference dates
-  all_dates <- sort(unique(contract_dt[[ref_date_col]]))
+  all_dates <- sort(unique(contracts[[ref_date_col]]))
   all_dates <- all_dates[!is.na(all_dates)]
 
   if (length(all_dates) < 2) {
@@ -128,7 +128,7 @@ estimate_movement_rates <- function(
   # iterating — converting full O(N_total) scans into O(log N) binary
   # lookups per snapshot, which is the dominant cost at scale.
   all_periods <- roll_snapshot_pairs(
-    panel_dt = contract_dt,
+    panel_dt = contracts,
     date_col = ref_date_col,
     f = .compute_transition_pair,
     # extra args forwarded to .compute_transition_pair:
@@ -210,7 +210,7 @@ estimate_movement_rates <- function(
   return(baseline_matrix)
 }
 
-#' Iterate Consecutive Snapshot Pairs in a Panel data.table
+#' Iterate consecutive snapshot pairs in a panel data.table
 #'
 #' @description
 #' Sets a data.table key on \code{date_col} (enabling O(log N) binary-search
@@ -224,7 +224,7 @@ estimate_movement_rates <- function(
 #' annual snapshots) the difference between an unkeyed and a keyed scan is
 #' roughly 5–10×.
 #'
-#' @param panel_dt data.table.  Panel data containing all snapshots.  The key
+#' @param panel_dt Data.table.  Panel data containing all snapshots.  The key
 #'   is set/updated in-place on entry; pass \code{data.table::copy()} if the
 #'   caller must preserve the original key.
 #' @param date_col Character scalar.  Name of the date column that identifies
@@ -236,7 +236,7 @@ estimate_movement_rates <- function(
 #'   skipped.
 #' @param ... Additional arguments forwarded to \code{f} unchanged.
 #'
-#' @return A single \code{data.table} produced by
+#' @returns A single \code{data.table} produced by
 #'   \code{rbindlist(results, fill = TRUE, use.names = TRUE)} over all
 #'   non-\code{NULL} results.  Returns an empty \code{data.table()} when all
 #'   calls return \code{NULL} or the panel has fewer than two distinct dates.
@@ -306,7 +306,7 @@ roll_snapshot_pairs <- function(panel_dt, date_col, f, ...) {
 # helpers ----------------------------------------------------------------
 
 
-#' Compute Transition Counts for a Single Consecutive Snapshot Pair
+#' Compute transition counts for a single consecutive snapshot pair
 #'
 #' @description
 #' Internal workhorse called by \code{roll_snapshot_pairs()} inside
@@ -334,16 +334,16 @@ roll_snapshot_pairs <- function(panel_dt, date_col, f, ...) {
 #'         snapshots), not over the full T0 population.
 #' }
 #'
-#' @param snap_t0 data.table. Subset of the full panel at snapshot T0, already
+#' @param snap_t0 Data.table. Subset of the full panel at snapshot T0, already
 #'   filtered to a single reference date. Must contain \code{ref_date_col},
 #'   \code{personnel_id_col}, \code{group_cols}, \code{start_date_col},
 #'   \code{end_date_col}, and \code{contract_type_col}.
-#' @param snap_t1 data.table. Subset of the full panel at snapshot T1 (the
+#' @param snap_t1 Data.table. Subset of the full panel at snapshot T1 (the
 #'   period immediately following T0). Same column requirements as
 #'   \code{snap_t0}.
 #' @param ref_date_col Character. Name of the reference date column used to
 #'   extract T0 and T1 dates from the snapshots.
-#' @param group_cols Character vector. Columns whose concatenated values define
+#' @param group_cols A character vector. Columns whose concatenated values define
 #'   the movement state for each person. Rows with \code{NA} in any of these
 #'   columns are dropped via \code{na.omit()} before state labels are formed.
 #' @param personnel_id_col Character. Name of the personnel identifier column.
@@ -360,7 +360,7 @@ roll_snapshot_pairs <- function(panel_dt, date_col, f, ...) {
 #'   \code{compute_fastsummary(fns = "sum")} before state construction, and
 #'   salary summary columns are appended to the output. Default: \code{NULL}.
 #'
-#' @return A \code{data.table} with one row per \code{(from_group, to_group)}
+#' @returns A \code{data.table} with one row per \code{(from_group, to_group)}
 #'   pair observed in this period, or \code{NULL} if either snapshot contains
 #'   no active contracts after filtering. Columns:
 #'   \describe{
@@ -439,7 +439,7 @@ roll_snapshot_pairs <- function(panel_dt, date_col, f, ...) {
       data = active_t0,
       cols = salary_col,
       fns = "sum",
-      groups = c(personnel_id_col, group_cols),
+      group_cols = c(personnel_id_col, group_cols),
       output = "wide"
     )
   }
@@ -469,7 +469,7 @@ roll_snapshot_pairs <- function(panel_dt, date_col, f, ...) {
       data = active_t1,
       cols = salary_col,
       fns = "sum",
-      groups = c(personnel_id_col, group_cols),
+      group_cols = c(personnel_id_col, group_cols),
       output = "wide"
     )
   }

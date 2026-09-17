@@ -2,7 +2,7 @@
 % Please edit documentation in R/equity.R
 \name{compute_percentile}
 \alias{compute_percentile}
-\title{Bin a Measure into a Share Distribution}
+\title{Bin a measure into a share distribution}
 \usage{
 compute_percentile(
   data,

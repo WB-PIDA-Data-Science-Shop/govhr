@@ -2,10 +2,10 @@
 % Please edit documentation in R/demographics.R
 \name{compute_service_table}
 \alias{compute_service_table}
-\title{Compute an Actuarial Service Table from a Personnel Panel}
+\title{Compute an actuarial service table from a personnel panel}
 \usage{
 compute_service_table(
-  personnel_dt,
+  personnel,
   age_col,
   status_col,
   personnel_id_col,
@@ -13,11 +13,12 @@ compute_service_table(
   group_cols,
   radix = 1e+05,
   smooth = FALSE,
-  span = 0.75
+  span = 0.75,
+  personnel_dt = NULL
 )
 }
 \arguments{
-\item{personnel_dt}{A data.table (or data.frame/tibble, coerced
+\item{personnel}{A data.table (or data.frame/tibble, coerced
 automatically) containing the personnel panel. Passed straight through
 to \code{estimate_decrement_rates()}.}
 
@@ -52,6 +53,8 @@ for noise reduction on strata that have no gap at all.}
 
 \item{span}{Numeric. Forwarded to \code{smooth_decrement_rates()} when
 \code{smooth = TRUE}. Defaults to \code{0.75}.}
+
+\item{personnel_dt}{Deprecated. Use \code{personnel} instead.}
 }
 \value{
 A data.table with one row per age / \code{group_cols}:

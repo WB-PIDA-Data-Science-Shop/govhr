@@ -5,22 +5,24 @@
 \title{Compute wage bill aggregates with optional macro-fiscal shares}
 \usage{
 compute_wagebill(
-  contract_df,
+  contracts,
   wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
-  groups = c("country_code", "year"),
+  group_cols = c("country_code", "year"),
   share_macro = FALSE,
   macro_vars = c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu"),
-  drop_na = TRUE
+  drop_na = TRUE,
+  groups = NULL,
+  contract_df = NULL
 )
 }
 \arguments{
-\item{contract_df}{A data.frame or tibble containing contract-level salary data.
+\item{contracts}{A data.frame or tibble containing contract-level salary data.
 Must include the columns specified in \code{wage_vars} and \code{groups}.}
 
 \item{wage_vars}{Character vector of salary column names to aggregate.
 Defaults to \code{c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")}.}
 
-\item{groups}{Character vector of grouping columns for aggregation.
+\item{group_cols}{Character vector of grouping columns for aggregation.
 Defaults to \code{c("country_code", "year")}.}
 
 \item{share_macro}{Logical; if \code{TRUE}, computes wage bill shares relative
@@ -32,6 +34,10 @@ as denominators when \code{share_macro = TRUE}. Defaults to
 
 \item{drop_na}{Logical; if \code{TRUE}, removes \code{NA} values before aggregation.
 Defaults to \code{TRUE}.}
+
+\item{groups}{Deprecated. Use \code{group_cols} instead.}
+
+\item{contract_df}{Deprecated. Use \code{contracts} instead.}
 }
 \value{
 A wage bill table with optional grouping variables,

@@ -15,12 +15,12 @@
 )
 }
 \arguments{
-\item{snap_t0}{data.table. Subset of the full personnel panel at snapshot
+\item{snap_t0}{Data.table. Subset of the full personnel panel at snapshot
 T0, already filtered to a single reference date. Must contain
 \code{age_col}, \code{status_col}, \code{personnel_id_col},
 \code{ref_date_col}, and \code{group_cols}.}
 
-\item{snap_t1}{data.table. Subset of the full personnel panel at snapshot
+\item{snap_t1}{Data.table. Subset of the full personnel panel at snapshot
 T1 (the period immediately following T0). Same column requirements as
 \code{snap_t0}.}
 
@@ -39,7 +39,7 @@ column, used to join each cohort member's T0 record to their T1 status.}
 \item{ref_date_col}{Character. Name of the reference date column used to
 extract the T0 and T1 dates attached to the output.}
 
-\item{group_cols}{Character vector. Additional columns (e.g. gender,
+\item{group_cols}{A character vector. Additional columns (e.g. gender,
 service type) to stratify exposure and outcome counts by, alongside
 \code{age_col}.}
 }

@@ -4,16 +4,18 @@
 \alias{compute_time_trend}
 \title{Compute time trend}
 \usage{
-compute_time_trend(data, group, measure_col = NULL)
+compute_time_trend(data, group_col, measure_col = NULL, group = NULL)
 }
 \arguments{
 \item{data}{A data frame containing at least a \code{ref_date} column.}
 
-\item{group}{Character string naming the grouping column, or \code{"ref_date"} for
+\item{group_col}{Character string naming the grouping column, or \code{"ref_date"} for
 no grouping.}
 
 \item{measure_col}{Character string naming the numeric column to sum, or
 \code{NULL} to count rows.}
+
+\item{group}{Deprecated. Use \code{group_col} instead.}
 }
 \value{
 A summarized data frame with columns \code{ref_date}, optionally \code{group}, and \code{value}. Value denotes either a sum or headcount (if \code{measure_col} is \code{NULL}).

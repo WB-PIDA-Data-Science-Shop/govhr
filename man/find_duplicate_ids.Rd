@@ -2,7 +2,7 @@
 % Please edit documentation in R/harmonization.R
 \name{find_duplicate_ids}
 \alias{find_duplicate_ids}
-\title{Find Duplicate Identifiers in a Data Frame}
+\title{Find duplicate identifiers in a data frame}
 \usage{
 find_duplicate_ids(data, identifier)
 }

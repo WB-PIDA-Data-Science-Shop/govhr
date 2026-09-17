@@ -2,19 +2,20 @@
 % Please edit documentation in R/demographics.R
 \name{estimate_decrement_rates}
 \alias{estimate_decrement_rates}
-\title{Estimate Empirical Decrement Rates from a Personnel Panel}
+\title{Estimate empirical decrement rates from a personnel panel}
 \usage{
 estimate_decrement_rates(
-  personnel_dt,
+  personnel,
   age_col,
   status_col,
   personnel_id_col,
   ref_date_col,
-  group_cols
+  group_cols,
+  personnel_dt = NULL
 )
 }
 \arguments{
-\item{personnel_dt}{A data.table (or data.frame/tibble, coerced
+\item{personnel}{A data.table (or data.frame/tibble, coerced
 automatically) containing the personnel panel: multiple snapshots of
 the same population over time, identified by \code{ref_date_col}. Must
 contain at least two distinct, non-missing reference dates.}
@@ -37,6 +38,8 @@ identifies each snapshot.}
 
 \item{group_cols}{A character vector of additional columns (e.g. gender,
 occupation, service type) to estimate separate rates by, alongside age.}
+
+\item{personnel_dt}{Deprecated. Use \code{personnel} instead.}
 }
 \value{
 A data.table with one row per age / \code{group_cols} / outcome

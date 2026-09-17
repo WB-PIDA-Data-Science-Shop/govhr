@@ -2,7 +2,7 @@
 % Please edit documentation in R/movement.R
 \name{complete_dates}
 \alias{complete_dates}
-\title{Complete Panel Data by Identifier and Reference Dates}
+\title{Complete panel data by identifier and reference dates}
 \usage{
 complete_dates(data, id_col, start_date = NULL, end_date = NULL, freq = "year")
 }

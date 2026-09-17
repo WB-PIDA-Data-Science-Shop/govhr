@@ -2,7 +2,7 @@
 % Please edit documentation in R/transition.R
 \name{detect_career_transition}
 \alias{detect_career_transition}
-\title{Detect Career Transitions}
+\title{Detect career transitions}
 \usage{
 detect_career_transition(
   data,

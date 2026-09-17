@@ -6,7 +6,7 @@
 #'   effects columns.
 #' @param outcome_var Character. Name of the outcome column.
 #'   Default `"gross_salary_lcu"`.
-#' @param predictor_vars Character vector. Names of predictor columns.
+#' @param predictor_vars A character vector. Names of predictor columns.
 #'   Default `c("contract_type", "occupation_native", "educat7", "whours", "paygrade")`.
 #' @param fixed_effects_vars Character vector, or `NULL` to fit without fixed
 #'   effects. Names of fixed effects columns.
@@ -18,7 +18,7 @@
 #' warning rather than failing the whole call; if none remain, the model is
 #' fit with an intercept-only right-hand side (`1`).
 #'
-#' @return A `fixest` model object, as returned by `fixest::feols()`.
+#' @returns A `fixest` model object, as returned by `fixest::feols()`.
 #'
 #' @export
 model_wage <- function(
@@ -76,7 +76,7 @@ model_wage <- function(
 #' Plot a wage model fit
 #'
 #' @param model_fit A `fixest` model object, as returned by `model_wage()`.
-#' @return A `ggplot` object visualizing the model coefficients.
+#' @returns A `ggplot` object visualizing the model coefficients.
 #' @export
 #'
 #' @importFrom ggstats ggcoef_model
@@ -98,7 +98,7 @@ plot_model_wage <- function(model_fit) {
 #'
 #' @param model_fit A `fixest` model object, as returned by `model_wage()`.
 #' @param fixed_effects_var Character. Name of the fixed effects variable to plot.
-#' @return A `ggplot` object visualizing the fixed effects.
+#' @returns A `ggplot` object visualizing the fixed effects.
 #'
 #' @export
 #'

@@ -2,7 +2,7 @@
 % Please edit documentation in R/movement.R
 \name{compute_movement_cost}
 \alias{compute_movement_cost}
-\title{Function to compute the total cost associated with personnel movements.}
+\title{Function to compute the total cost associated with personnel movements}
 \usage{
 compute_movement_cost(
   data,
@@ -42,5 +42,5 @@ compute_movement_cost(
 A data frame containing the movement cost for each requested event type within the specified groups and reference dates.
 }
 \description{
-Function to compute the total cost associated with personnel movements.
+Function to compute the total cost associated with personnel movements
 }

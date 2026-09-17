@@ -7,7 +7,7 @@
 get_metadata360(dataset_id)
 }
 \arguments{
-\item{dataset_id}{A character string or numeric identifier specifying the
+\item{dataset_id}{A string or numeric identifier specifying the
 dataset for which metadata should be retrieved.}
 }
 \value{

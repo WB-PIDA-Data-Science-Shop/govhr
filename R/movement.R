@@ -12,13 +12,13 @@
 #' @param event_type Character. Either `"hire"` or `"fire"`, controlling which event to detect.
 #' @param start_date Optional start date for the full date sequence
 #'   (default: `"2007-09-01"`).
-#' @param status_col a column within `data` object for the employment status of personnel
+#' @param status_col A column within `data` object for the employment status of personnel.
 #' @param end_date Optional end date for the full date sequence
 #'   (default: `"2018-01-01"`).
 #' @param freq Frequency for the sequence of dates (default: `"year"`).
 #'   Can be any valid value for \code{seq.Date(by = ...)}.
 #'
-#' @return A dataset with event types detected (e.g., hire or fire).
+#' @returns A dataset with event types detected (e.g., hire or fire).
 #'
 #' @importFrom data.table as.data.table copy setorderv shift fifelse
 #' @importFrom lubridate ymd
@@ -115,13 +115,13 @@ detect_personnel_event <- function(
   return(data_out)
 }
 
-#' Detect Personnel Retirement Events
+#' Detect personnel retirement events
 #'
 #' Identifies personnel who retired, i.e., whose status changed from "active" to "inactive".
 #'
 #' @param data A data.frame or data.table with columns `personnel_id`, `ref_date`, and `status`.
 #'
-#' @return A data.table with `personnel_id`, `ref_date`, and `type_event = "retire"`.
+#' @returns A data.table with `personnel_id`, `ref_date`, and `type_event = "retire"`.
 #'
 #' @importFrom data.table as.data.table shift
 #'
@@ -158,7 +158,7 @@ detect_retirement <- function(data) {
   return(retire_dt)
 }
 
-#' Classify Personnel Movement Events
+#' Classify personnel movement events
 #'
 #' This function classifies the personnel module into three types of movements: hires, fires, or retirements.
 #'
@@ -170,7 +170,7 @@ detect_retirement <- function(data) {
 #' @param status_col The name of the column representing employment status.
 #' @param freq The frequency of the reference dates (default is "year").
 #'
-#' @return A data frame with an additional column indicating the type of movement for each personnel record.
+#' @returns A data frame with an additional column indicating the type of movement for each personnel record.
 #'
 #' @importFrom data.table setDT fcase copy
 #' @importFrom lubridate ymd
@@ -227,7 +227,7 @@ classify_personnel_event <- function(
   data[]
 }
 
-#' Function to compute the total cost associated with personnel movements.
+#' Function to compute the total cost associated with personnel movements
 #'
 #' @param data A data frame containing the data to be processed.
 #' @param id_col The name of the column representing personnel IDs (default is "personnel_id").
@@ -243,7 +243,7 @@ classify_personnel_event <- function(
 #' @importFrom data.table as.data.table setorderv rbindlist
 #'
 #' @export
-#' @return A data frame containing the movement cost for each requested event type within the specified groups and reference dates.
+#' @returns A data frame containing the movement cost for each requested event type within the specified groups and reference dates.
 compute_movement_cost <- function(
   data,
   id_col = "personnel_id",
@@ -310,11 +310,11 @@ compute_movement_cost <- function(
 #' Function to compute workforce movement for hires, fires, retirement, or turnover
 #'
 #' @param data A data frame containing personnel data.
-#' @param movement_type A character string indicating the type of movement: "hire", "fire", "retirement", or "turnover".
-#' @param measurement_type A character string indicating the measurement type: "count" or "rate". Ignored for turnover, which is a ratio.
+#' @param movement_type A string indicating the type of movement: "hire", "fire", "retirement", or "turnover".
+#' @param measurement_type A string indicating the measurement type: "count" or "rate". Ignored for turnover, which is a ratio.
 #' @param group_cols A character vector of columns to group by, or `"ref_date"` for no grouping.
 #'
-#' @return A data.table containing the aggregated movement data.
+#' @returns A data.table containing the aggregated movement data.
 #'
 #' @importFrom data.table as.data.table setDT
 #'
@@ -408,7 +408,7 @@ compute_workforce_movement <- function(
   movement_data[]
 }
 
-#' Estimate Historical Non-Retirement Exit Rates from Panel Data
+#' Estimate historical non-retirement exit rates from panel data
 #'
 #' @description
 #' Uses \code{govhr::detect_personnel_event(event_type = "fire")} to identify
@@ -417,9 +417,9 @@ compute_workforce_movement <- function(
 #' \code{exit_rate = n_exits / n_active} per group per panel snapshot, then
 #' returns the mean rate per group.
 #'
-#' @param contract_dt data.table.  Full panel of contract data (all
+#' @param contracts Data.table.  Full panel of contract data (all
 #'   \code{ref_date} snapshots).
-#' @param personnel_dt data.table.  Full panel of personnel data.
+#' @param personnel Data.table.  Full panel of personnel data.
 #' @param group_cols Character vector or \code{NULL}.  Columns to group by
 #'   (e.g. \code{"est_id"}).  Pass \code{NULL} for an overall (ungrouped) rate.
 #' @param freq Character.  Frequency passed to
@@ -432,13 +432,15 @@ compute_workforce_movement <- function(
 #' @param end_date_col Character.  Default \code{"end_date"}.
 #' @param contract_type_col Character.  Default \code{"contract_type_code"}.
 #' @param status_col Character.  Default \code{"employment_status"}.
+#' @param contract_dt Deprecated. Use `contracts` instead.
+#' @param personnel_dt Deprecated. Use `personnel` instead.
 #'
-#' @return data.table with \code{group_cols} (if specified) and
+#' @returns data.table with \code{group_cols} (if specified) and
 #'   \code{exit_rate} column.
 #' @export
 estimate_exit_rates <- function(
-  contract_dt,
-  personnel_dt,
+  contracts,
+  personnel,
   group_cols = NULL,
   freq = "year",
   ref_date = NULL,
@@ -447,10 +449,14 @@ estimate_exit_rates <- function(
   start_date_col = "start_date",
   contract_type_col = "contract_type",
   end_date_col = "end_date",
-  status_col = "employment_status"
+  status_col = "employment_status",
+  contract_dt = NULL,
+  personnel_dt = NULL
 ) {
-  panel_contract_dt <- data.table::as.data.table(contract_dt)
-  panel_personnel_dt <- data.table::as.data.table(personnel_dt)
+  contracts <- resolve_renamed_arg(contracts, contract_dt, "contract_dt", "contracts")
+  personnel <- resolve_renamed_arg(personnel, personnel_dt, "personnel_dt", "personnel")
+  panel_contract_dt <- data.table::as.data.table(contracts)
+  panel_personnel_dt <- data.table::as.data.table(personnel)
 
   # Validate required columns exist before any downstream operations
   required_contract <- unique(c(
@@ -464,14 +470,14 @@ estimate_exit_rates <- function(
   missing_p <- setdiff(required_personnel, names(panel_personnel_dt))
   if (length(missing_c) > 0) {
     stop(
-      "Columns not found in contract_dt: ",
+      "Columns not found in contracts: ",
       paste(missing_c, collapse = ", "),
       call. = FALSE
     )
   }
   if (length(missing_p) > 0) {
     stop(
-      "Columns not found in personnel_dt: ",
+      "Columns not found in personnel: ",
       paste(missing_p, collapse = ", "),
       call. = FALSE
     )
@@ -492,7 +498,7 @@ estimate_exit_rates <- function(
 
   if (length(panel_dates) < 2L) {
     stop(
-      "personnel_dt must contain at least 2 distinct ref_date snapshots. ",
+      "personnel must contain at least 2 distinct ref_date snapshots. ",
       "Found ",
       length(panel_dates),
       ".",
@@ -584,7 +590,7 @@ estimate_exit_rates <- function(
 
 # helpers ----------------------------------------------------------------
 
-#' Complete Panel Data by Identifier and Reference Dates
+#' Complete panel data by identifier and reference dates
 #'
 #' Expands a dataset to include all combinations of identifiers and reference
 #' dates within a specified start–end range. This is useful for ensuring that
@@ -599,7 +605,7 @@ estimate_exit_rates <- function(
 #' @param freq Character. Interval for date sequence passed to
 #'   \code{seq.Date(by = ...)}. Default is `"year"`.
 #'
-#' @return A \code{data.table} containing all possible combinations of identifiers
+#' @returns A \code{data.table} containing all possible combinations of identifiers
 #'   and reference dates between the given start and end points, merged with
 #'   the original data.
 #'
