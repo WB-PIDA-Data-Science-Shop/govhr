@@ -1,11 +1,9 @@
 # govhr 0.4.0
 This release:
-- Renames the data argument to `data`, keeping `.data` only for functions that take `...`.
-- Renames grouping arguments to `group_col` or `group_cols` to match their arity, deprecating `group` and `groups`.
-- Drops storage-type suffixes from argument names, such as `personnel_dt` to `personnel` and `contract_dt` to `contracts`.
-- Warns on deprecated argument names, except in `ggplot_point_line`, `ggplot_segment` and `sample_group`, where they are removed outright.
-- Enables roxygen markdown, so code, lists and emphasis render correctly in the help pages.
-- Fixes invalid and unused imports, including one that masked `base::summary`.
+- Renames the function arguments, ensuring consistency.
+- Warns on deprecated argument names, to be removed in the next relase.
+- Fixes documentation and their rendering.
+- Fixes invalid and unused imports.
 
 # govhr 0.3.5
 This release:
