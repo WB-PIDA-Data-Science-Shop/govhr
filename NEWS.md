@@ -1,5 +1,6 @@
 # govhr 0.4.0
 This release:
+- Introduces novel wage bill modelling and demographic analysis.
 - Renames the function arguments, ensuring consistency.
 - Warns on deprecated argument names, to be removed in the next relase.
 - Fixes documentation and their rendering.
