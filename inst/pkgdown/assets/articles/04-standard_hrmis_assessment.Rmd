@@ -140,7 +140,7 @@ wagebill_shares_dt <- bra_wagebill |>
   compute_fastshare(
     cols = wage_vars,
     macro_cols = lcu_vars,
-    groups = c("country_code", "year"),
+    group_cols = c("country_code", "year"),
     fns = "sum",
     output = "long"
   )
@@ -191,7 +191,7 @@ bra_wagebill |>
   as.data.table() |>
   compute_fastsummary(
     cols = wage_vars,
-    groups = c("occupation_native", "year"),
+    group_cols = c("occupation_native", "year"),
     fns = "sum",
     output = "long"
   ) |>
@@ -323,7 +323,7 @@ govhr::wwbi |>
   ggplot_point_line(
     year,
     value,
-    group = name
+    group_col = name
   ) +
   scale_color_few(
       labels = c("Formal Employment", "Paid Employment", "Total Employment"),
@@ -347,7 +347,7 @@ contract_df |>
   ) |>
   compute_fastsummary(
     cols = "personnel_id",
-    groups = c("occupation_native", "year"),
+    group_cols = c("occupation_native", "year"),
     fns = list(n_distinct = ~n_distinct(.x)),
     output = "long"
   ) |> 
@@ -380,7 +380,7 @@ contract_df |>
 personnel_df |>
   compute_fastsummary(
     cols = "personnel_id",
-    groups = c("educat7", "year"),
+    group_cols = c("educat7", "year"),
     fns = list(n_distinct = ~n_distinct(.x)),
     output = "long"
   ) |> 
@@ -614,7 +614,7 @@ wwbi |>
   ggplot_point_line(
     year,
     value,
-    group = name
+    group_col = name
   )
 ```
 
@@ -647,7 +647,7 @@ contract_df |>
   ) |> 
   compute_fastsummary(
     cols = "base_salary_lcu",
-    groups = c("year"),
+    group_cols = c("year"),
     fns = c("cp_ratio"),
     output = "wide"
   ) |>
@@ -672,13 +672,13 @@ salary_dispersion <- contract_df |>
   mutate(year = lubridate::year(ref_date) |> as.integer()) |>
   compute_fastsummary(
     cols = "base_salary_ppp",
-    groups = c("occupation_isconame", "year"),
+    group_cols = c("occupation_isconame", "year"),
     fns = "median",
     output = "long"
   ) |> 
   ggplot_segment(
     col = value,
-    group = year
+    group_col = year
   ) +
   coord_flip() +
   labs(
@@ -704,7 +704,7 @@ salary_dispersion_occupation <- contract_df |>
 salary_dispersion_occupation |>
   ggplot_segment(
     col = base_salary_ppp,
-    group = occupation_native
+    group_col = occupation_native
   ) +
   scale_x_continuous(labels = scales::label_comma()) +
   labs(
@@ -729,7 +729,7 @@ contract_df |>
     ) |> 
     compute_fastsummary(
       cols = "base_salary_lcu",
-      groups = c("gender", "year"),
+      group_cols = c("gender", "year"),
       fns = "median"
     ) |> 
     filter(
@@ -831,7 +831,7 @@ contract_df |>
   ggplot_point_line(
     year,
     median_base_salary_ppp,
-    group = paygrade
+    group_col = paygrade
   ) +
   scale_color_few(
     name = "Paygrade"
@@ -897,7 +897,7 @@ contract_df |>
   mutate(year = lubridate::year(ref_date) |> as.integer()) |>
   compute_fastsummary(
     cols = c("base_salary_ppp", "allowance_ppp"),
-    groups = c("paygrade", "year"),
+    group_cols = c("paygrade", "year"),
     fns = "mean",
     output = "wide"
   ) |> 
@@ -910,7 +910,7 @@ contract_df |>
   ggplot_point_line(
     year,
     share_allowance,
-    group = paygrade
+    group_col = paygrade
   ) +
   facet_wrap(
     vars(paygrade)
@@ -947,7 +947,7 @@ contract_annual_growth <- contract_df |>
   mutate(year = lubridate::year(ref_date) |> as.integer()) |>
   compute_fastsummary(
     cols = "base_salary_ppp",
-    groups = c("year"),
+    group_cols = c("year"),
     fns = "median",
     output = "wide"
   ) |> 
@@ -1010,7 +1010,7 @@ contract_growth |>
   ggplot_point_line(
     year,
     value,
-    group = Indicator
+    group_col = Indicator
   ) +
   labs(
     x = "Year",
@@ -1089,7 +1089,7 @@ wwbi |>
   ggplot_point_line(
     year,
     value,
-    group = name
+    group_col = name
   )
 ```
 
@@ -1116,7 +1116,7 @@ contract_growth |>
   ggplot_point_line(
     year,
     value,
-    group = Indicator
+    group_col = Indicator
   ) +
   labs(
     x = "Year",
@@ -1150,7 +1150,7 @@ personnel_df |>
   ggplot_point_line(
     year,
     value,
-    group = name
+    group_col = name
   )
 ```
 

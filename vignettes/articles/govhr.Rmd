@@ -62,7 +62,7 @@ Once the data is treated, you might want to assess the coverage of the data. A s
 # assess coverage (share of non-missing values) by employment status
 compute_coverage(
   personnel_clean,
-  group = "employment_status"
+  group_cols = "employment_status"
 )
 ```
 
@@ -91,6 +91,6 @@ Another government may want to know whether there was an increase in the number 
 # growth in headcount from the first to the last reference date, by service type
 compute_growth(
   bra_hrmis_personnel,
-  group = "educat7"
+  group_col = "educat7"
 )
 ```
