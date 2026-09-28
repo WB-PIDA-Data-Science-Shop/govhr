@@ -282,7 +282,7 @@ compute_growth_decomposition <- function(
 #'     previous period's overall average.
 #' }
 #'
-#' \strong{Why it adds up exactly.} Shares sum to one in each period, so
+#' \strong{Proof of identity.} Shares sum to one in each period, so
 #' subtracting the previous period's average compensation from every group
 #' average leaves the change unaltered:
 #' \deqn{\Delta \bar{C}_t = \sum_{g \in K \cup E} s_{g,t} (C_{g,t} - \bar{C}_{t-1}) -
@@ -294,11 +294,6 @@ compute_growth_decomposition <- function(
 #' average is what gives the between, entry and exit terms their meaning:
 #' moving staff raises the average only if they move to groups that are
 #' paid above average.
-#'
-#' \strong{Example.} Group A goes from 100 to 50 staff at 1,000; group B from
-#' 100 to 150 staff at 2,000. Average compensation rises from 1,500 to 1,750.
-#' No pay changed, so within = cross = 0, and
-#' between = (-0.25)(1,000 - 1,500) + (0.25)(2,000 - 1,500) = 250.
 #'
 #' @references Foster, L., Haltiwanger, J. and Krizan, C. J. (2001).
 #'   Aggregate productivity growth: lessons from microeconomic evidence. In
@@ -322,10 +317,6 @@ compute_wage_decomposition <- function(
   )
   agg_by <- c(group_cols, "ref_date")
 
-  # totals at t and t-1, computed within `by` x ref_date. Summing headcount_lag
-  # across this period's rows correctly reconstructs total headcount at t-1,
-  # since every group has a row for every ref_date (from the nesting-complete
-  # grid upstream) -- the roster is stable even though membership isn't.
   dt[, `:=`(
     total_headcount     = sum(headcount),
     total_headcount_lag = sum(headcount_lag, na.rm = TRUE),
@@ -333,7 +324,6 @@ compute_wage_decomposition <- function(
     total_wagebill_lag  = sum(wagebill_lag, na.rm = TRUE)
   ), by = agg_by]
 
-  # NA rather than NaN when a period has nobody in it
   dt[, `:=`(
     avg_compensation     = data.table::fifelse(
       total_headcount > 0, total_wagebill / total_headcount, NA_real_
@@ -353,8 +343,6 @@ compute_wage_decomposition <- function(
   )]
   dt[, delta_share := share - share_lag]
 
-  # row-level terms; 0 wherever the transition type doesn't apply, rather
-  # than NA, so they sum cleanly without na.rm masking real problems
   dt[, `:=`(
     within_term  = data.table::fifelse(
       transition_type == "continuing", share_lag * delta_compensation, 0
