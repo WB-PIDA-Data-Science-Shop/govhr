@@ -7,7 +7,8 @@
 compute_growth_decomposition(
   data,
   group_cols = NULL,
-  measure_col = "gross_salary_lcu"
+  measure_col = "gross_salary_lcu",
+  simplify = TRUE
 )
 }
 \arguments{
@@ -16,20 +17,85 @@ compute_growth_decomposition(
 \item{group_cols}{A character vector specifying the names of the columns to group by.}
 
 \item{measure_col}{A string specifying the name of the column containing the measure of interest (default is "gross_salary_lcu").}
+
+\item{simplify}{Logical. If \code{TRUE} (default), return only \code{group_cols},
+\code{ref_date}, \code{transition_type} and the effect columns
+(\code{employment_effect}, \code{compensation_effect}, \code{interaction_effect},
+\code{entry_effect}, \code{exit_effect}, \code{total_effect}). If \code{FALSE}, also return
+the intermediate columns (headcount, compensation, wagebill, their lags
+and observation flags). \code{compute_wage_decomposition()} requires
+\code{simplify = FALSE}.}
 }
 \value{
-A data.table with headcount, compensation, wagebill, wagebill_lag,
-the continuing-period decomposition (employment/compensation/interaction
-effects), entry/exit effects, is_observed, and a \code{transition_type} label
-for each row: "start" (panel's first period for this group -- left-
-censored, no baseline available), "continuing" (observed this period
-and last), "entry" (observed now, not last period -- a genuinely new
-group_cols combination, or a reappearance after any length of absence),
-or "exit" (not observed now -- covers both the period a group first
-disappears, which carries the real dollar effect, and every subsequent
-period it remains absent, which correctly carries a zero effect since
-nothing further changed).
+A data.table with one row per group x period, a \code{transition_type}
+label for each row: "start" (panel's first period for this group), "continuing" (observed this
+period and last), "entry" (observed this, but not in the last), or
+"exit" (not observed in this period but observed in the last period). In addition,
+employment, compensation and interaction effects on the wagebill.
 }
 \description{
 Compute growth decomposition of wagebill
+}
+\details{
+The function explains how each group's wagebill changes from one period
+to the next, decomposing the change into an effect due to headcount, an effect
+due to average pay, and an effect due to both moving together.
+
+\strong{1. Building the panel.} Rows with a missing value in any of
+\code{group_cols} are dropped, and rows with a missing \code{measure_col} are
+ignored. For each group \eqn{g} (a combination of \code{group_cols}) and
+period \eqn{t} (\code{ref_date}):
+\itemize{
+\item headcount \eqn{N_{g,t}}: number of records;
+\item compensation \eqn{C_{g,t}}: mean of \code{measure_col};
+\item wagebill \eqn{W_{g,t} = \sum_i w_i = N_{g,t} \, C_{g,t}}{W = sum(w_i) = N * C}.
+}
+Every group is then expanded to every period between the first and last
+\code{ref_date} in the data, at the frequency detected by
+\code{guess_date_frequency()} (year, quarter, month, ...). A group absent in
+a period gets \eqn{N = 0}, \eqn{W = 0} and \eqn{C} = \code{NA}, so gaps are
+explicit rather than silently skipped. Each row is compared with the
+same group's previous period, \eqn{t-1}.
+
+\strong{2. Continuing groups} (observed at \eqn{t-1} and \eqn{t}). Write
+\eqn{\Delta N = N_t - N_{t-1}}{dN = N_t - N_(t-1)} and
+\eqn{\Delta C = C_t - C_{t-1}}{dC = C_t - C_(t-1)}. Since
+\eqn{W_t = (N_{t-1} + \Delta N)(C_{t-1} + \Delta C)}{W_t = (N_(t-1) + dN) * (C_(t-1) + dC)},
+expanding the product gives us the following identity:
+\deqn{W_t - W_{t-1} = \underbrace{C_{t-1} \Delta N}_{\text{employment}} +
+  \underbrace{N_{t-1} \Delta C}_{\text{compensation}} +
+  \underbrace{\Delta N \, \Delta C}_{\text{interaction}}}{W_t - W_(t-1) = C_(t-1) * dN + N_(t-1) * dC + dN * dC}
+\itemize{
+\item \code{employment_effect} \eqn{= C_{t-1} \Delta N}{= C_(t-1) * dN}: the
+change had pay stayed at last period's average and only headcount
+changed.
+\item \code{compensation_effect} \eqn{= N_{t-1} \Delta C}{= N_(t-1) * dC}:
+the change had headcount stayed at last period's level and only
+average pay changed.
+\item \code{interaction_effect} \eqn{= \Delta N \, \Delta C}{= dN * dC}: the
+extra change from both moving at once (new staff paid the new
+average).
+}
+
+\strong{3. Entry and exit.} When a group is missing in one of the two
+periods, \eqn{\Delta C}{dC} is undefined, so the three effects above are
+\code{NA} and the entire change is attributed to entry or exit:
+\itemize{
+\item entry (absent at \eqn{t-1}, present at \eqn{t}):
+\code{entry_effect} \eqn{= W_t}{= W_t}.
+\item exit (present at \eqn{t-1}, absent at \eqn{t}):
+\code{exit_effect} \eqn{= -W_{t-1}}{= -W_(t-1)}. Later periods in which
+the group stays absent are also labelled "exit" but carry
+\code{exit_effect} = 0, as nothing further changed. A group absent from
+the panel's first period is likewise "exit" with 0 until it enters.
+}
+A group that disappears and later reappears therefore shows one exit,
+zero-effect "exit" rows during the gap, and one entry.
+
+\strong{4. Total effect.} \code{total_effect} is the sum of the effects that
+apply to the row, so it always equals \eqn{W_t - W_{t-1}}{W_t - W_(t-1)}
+(with \eqn{W = 0} when unobserved). It is \code{NA} in the panel's first
+period ("start"), which has no baseline. Consequently, summing
+\code{total_effect} over time for a group recovers its wagebill in the last
+period minus its wagebill in the first period.
 }

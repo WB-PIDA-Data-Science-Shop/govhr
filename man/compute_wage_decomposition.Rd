@@ -2,29 +2,107 @@
 % Please edit documentation in R/growth_decomposition.R
 \name{compute_wage_decomposition}
 \alias{compute_wage_decomposition}
-\title{Decompose aggregate average-compensation growth into within, between,
-cross, entry, and exit effects (Foster-Haltiwanger-Krizan style)}
+\title{Decompose average-compensation growth}
 \usage{
-compute_wage_decomposition(growth_decomp, group_cols = NULL)
+compute_wage_decomposition(growth_decomp, group_cols = NULL, simplify = TRUE)
 }
 \arguments{
-\item{growth_decomp}{Output of compute_growth_decomposition()}
+\item{growth_decomp}{Output of \code{compute_growth_decomposition(simplify = FALSE)}.}
 
-\item{group_cols}{Optional character vector of columns identifying a higher-level
-unit (e.g. "country_code") within which shares/composition are computed
-separately. NULL pools all rows into one global composition per ref_date.}
+\item{group_cols}{Optional character vector of columns identifying a
+higher-level unit (e.g. "country_code") within which the decomposition
+is computed separately. Must be a subset of the grouping columns used to
+build \code{growth_decomp}. \code{NULL} pools all groups into one workforce.}
+
+\item{simplify}{Logical. If \code{TRUE} (default), return only \code{group_cols},
+\code{ref_date} and the effect columns (\code{within_effect}, \code{between_effect},
+\code{cross_effect}, \code{entry_effect}, \code{exit_effect}, \code{total_effect}). If
+\code{FALSE}, also return total headcount, total wagebill and average
+compensation, each for the current and the previous period
+(\code{total_headcount}, \code{total_headcount_lag}, \code{total_wagebill},
+\code{total_wagebill_lag}, \code{avg_compensation}, \code{avg_compensation_lag}).}
 }
 \value{
-A data.table, one row per ref_date (or per ref_date x \code{group_cols}),
-with avg_compensation, avg_compensation_lag, within_effect,
-between_effect, cross_effect, entry_effect, exit_effect, and total_effect
-(which equals avg_compensation - avg_compensation_lag by construction,
-except at the panel's first period, which is NA -- no lagged baseline).
+A data.table with one row per reference date (per unit of
+\code{group_cols}, if given) and the effects described in Details.
+\code{total_effect} is the change in average compensation; it is \code{NA} when
+either period has no employees, which includes the panel's first period.
 }
 \description{
-Takes the per-group output of compute_growth_decomposition() and answers
-a different question than that function does: not "why did group i's own
-wagebill change" but "why did average compensation across ALL groups
-combined change" -- specifically, how much is pay growth within groups
-versus a shift in headcount share toward higher- or lower-paid groups.
+Explains why average compensation across the whole workforce changes from
+one period to the next: because pay changed inside groups, or because
+staff shifted between higher- and lower-paid groups. This complements
+\code{\link[=compute_growth_decomposition]{compute_growth_decomposition()}}, which explains each group's own
+wagebill.
+}
+\details{
+\strong{Setup.} A group \eqn{g} is a row of \code{growth_decomp} (one
+combination of the grouping columns used there). In period \eqn{t}, let
+\eqn{N_{g,t}}{N_g,t} be the group's headcount, \eqn{C_{g,t}}{C_g,t} its
+average compensation, \eqn{N_t = \sum_g N_{g,t}}{N_t = sum_g N_g,t} the
+total headcount and \eqn{s_{g,t} = N_{g,t} / N_t}{s_g,t = N_g,t / N_t} the
+group's share of headcount. Average compensation of the workforce is total
+wagebill over total headcount, which is the share-weighted mean of group
+averages:
+\deqn{\bar{C}_t = \frac{W_t}{N_t} = \sum_g s_{g,t} \, C_{g,t}}{avgC_t = W_t / N_t = sum_g s_g,t * C_g,t}
+As in \code{\link[=compute_growth_decomposition]{compute_growth_decomposition()}}, each group is continuing
+(\eqn{g \in K}{g in K}: present in both periods), entering
+(\eqn{g \in E}{g in E}: present only in \eqn{t}) or exiting
+(\eqn{g \in X}{g in X}: present only in \eqn{t-1}).
+
+\strong{Decomposition.} Following Foster, Haltiwanger and Krizan (2001),
+with \eqn{\Delta}{d} the change from \eqn{t-1} to \eqn{t}:
+\deqn{\Delta \bar{C}_t =
+  \underbrace{\sum_{g \in K} s_{g,t-1} \Delta C_g}_{\text{within}} +
+  \underbrace{\sum_{g \in K} \Delta s_g (C_{g,t-1} - \bar{C}_{t-1})}_{\text{between}} +
+  \underbrace{\sum_{g \in K} \Delta s_g \, \Delta C_g}_{\text{cross}} +
+  \underbrace{\sum_{g \in E} s_{g,t} (C_{g,t} - \bar{C}_{t-1})}_{\text{entry}} -
+  \underbrace{\sum_{g \in X} s_{g,t-1} (C_{g,t-1} - \bar{C}_{t-1})}_{\text{exit}}}{d avgC = within + between + cross + entry + exit}
+\itemize{
+\item \strong{Within}
+(\eqn{\sum_K s_{g,t-1} \Delta C_g}{sum_K s_g,t-1 * dC_g}): pay growth
+inside continuing groups, weighted by their previous-period headcount
+shares. Pure pay effect.
+\item \strong{Between}
+(\eqn{\sum_K \Delta s_g (C_{g,t-1} - \bar{C}_{t-1})}{sum_K ds_g * (C_g,t-1 - avgC_t-1)}):
+movement of headcount toward groups paid above the previous period's
+overall average (positive) or below it (negative), at previous-period
+pay. Pure composition effect.
+\item \strong{Cross}
+(\eqn{\sum_K \Delta s_g \, \Delta C_g}{sum_K ds_g * dC_g}): positive
+when the groups gaining headcount share are also the ones whose pay
+grows fastest.
+\item \strong{Entry}
+(\eqn{\sum_E s_{g,t} (C_{g,t} - \bar{C}_{t-1})}{sum_E s_g,t * (C_g,t - avgC_t-1)}):
+new groups raise the average if they pay more than the previous
+period's overall average.
+\item \strong{Exit}
+(\eqn{-\sum_X s_{g,t-1} (C_{g,t-1} - \bar{C}_{t-1})}{-sum_X s_g,t-1 * (C_g,t-1 - avgC_t-1)}):
+departing groups raise the average if they were paid less than the
+previous period's overall average.
+}
+
+\strong{Why it adds up exactly.} Shares sum to one in each period, so
+subtracting the previous period's average compensation from every group
+average leaves the change unaltered:
+\deqn{\Delta \bar{C}_t = \sum_{g \in K \cup E} s_{g,t} (C_{g,t} - \bar{C}_{t-1}) -
+  \sum_{g \in K \cup X} s_{g,t-1} (C_{g,t-1} - \bar{C}_{t-1})}{d avgC = sum_(K,E) s_g,t (C_g,t - avgC_t-1) - sum_(K,X) s_g,t-1 (C_g,t-1 - avgC_t-1)}
+Substituting \eqn{s_{g,t} = s_{g,t-1} + \Delta s_g}{s_g,t = s_g,t-1 + ds_g}
+and \eqn{C_{g,t} = C_{g,t-1} + \Delta C_g}{C_g,t = C_g,t-1 + dC_g} for
+continuing groups yields the within, between and cross terms; the entry
+and exit terms are what remain. Measuring against the previous period's
+average is what gives the between, entry and exit terms their meaning:
+moving staff raises the average only if they move to groups that are
+paid above average.
+
+\strong{Example.} Group A goes from 100 to 50 staff at 1,000; group B from
+100 to 150 staff at 2,000. Average compensation rises from 1,500 to 1,750.
+No pay changed, so within = cross = 0, and
+between = (-0.25)(1,000 - 1,500) + (0.25)(2,000 - 1,500) = 250.
+}
+\references{
+Foster, L., Haltiwanger, J. and Krizan, C. J. (2001).
+Aggregate productivity growth: lessons from microeconomic evidence. In
+Hulten, C. R., Dean, E. R. and Harper, M. J. (eds.), \emph{New Developments
+in Productivity Analysis}, pp. 303-372. University of Chicago Press.
 }

@@ -252,9 +252,9 @@ if (getRversion() >= "2.15.1") {
     "wagebill_lag",
     # compute_wage_decomposition
     "total_headcount",
-    "total_headcount_prev",
+    "total_headcount_lag",
     "total_wagebill",
-    "total_wagebill_prev",
+    "total_wagebill_lag",
     "avg_compensation",
     "avg_compensation_lag",
     "share",
