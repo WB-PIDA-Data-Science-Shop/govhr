@@ -2,8 +2,12 @@
 
 S3method(compute_growth_decomposition,data.frame)
 S3method(compute_growth_decomposition,tbl_dbi)
+S3method(compute_headcount,data.frame)
+S3method(compute_headcount,tbl_dbi)
 S3method(compute_percentile,data.frame)
 S3method(compute_percentile,tbl_dbi)
+S3method(compute_wagebill,data.frame)
+S3method(compute_wagebill,tbl_dbi)
 export(add_contract_to_event)
 export(apply_baseline_index)
 export(classify_personnel_event)
@@ -24,6 +28,7 @@ export(compute_global_coverage)
 export(compute_growth)
 export(compute_growth_decomposition)
 export(compute_growth_summary)
+export(compute_headcount)
 export(compute_movement_cost)
 export(compute_pension_ratio)
 export(compute_percentile)
@@ -248,6 +253,7 @@ importFrom(rlang,
   as_label,
   as_name,
   as_string,
+  check_dots_empty,
   enquo,
   enquos,
   ensym,

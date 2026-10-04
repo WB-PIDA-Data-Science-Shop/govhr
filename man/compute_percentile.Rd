@@ -59,6 +59,5 @@ Rows with a missing \code{measure_col} are dropped. Missing values in
 \code{binwidth} must be a whole number because bins are assigned with
 \code{floor(measure_col / binwidth)}, and fractional widths are not exact in
 floating point: \code{0.3 / 0.1} is \verb{2.9999...}, which would put 0.3 in the
-0.2 bin. For finer bins, rescale \code{measure_col} first (e.g. multiply by
-10).
+0.2 bin.
 }

@@ -8,22 +8,13 @@ drop_missing <- function(data, cols){
     filter(!!!conditions)
 }
 
-compute_headcount <- function(data, group_cols = NULL){
-  if("ref_date" %in% group_cols){
-    stop("`ref_date` should not be included in `group_cols`")
-  }
-
-  headcount <- data |>
-    summarise(
-      headcount = n_distinct(personnel_id),
-      .by = all_of(
-        c(group_cols, "ref_date")
-      )
-    ) |>
+build_calendar <- function(data) {
+  calendar <- data |>
+    distinct(ref_date) |>
     mutate(
-      share_headcount = headcount / sum(headcount, na.rm = TRUE),
-      .by = "ref_date"
+      prev_date = lag(ref_date, order_by = ref_date),
+      next_date = lead(ref_date, order_by = ref_date)
     )
-  
-  headcount
+
+  calendar
 }

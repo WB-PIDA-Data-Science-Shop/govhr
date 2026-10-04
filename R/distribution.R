@@ -34,6 +34,7 @@ compute_percentile <- function(data, ...) {
 
 #' @rdname compute_percentile
 #' @importFrom data.table .N .SD := as.data.table data.table setnames setorderv
+#' @importFrom rlang check_dots_empty
 #' @export
 compute_percentile.data.frame <- function(
   data,
@@ -43,6 +44,8 @@ compute_percentile.data.frame <- function(
   latest_measure = FALSE,
   ...
 ) {
+  rlang::check_dots_empty()
+
   check_binwidth(binwidth)
 
   if (latest_measure) {
@@ -90,7 +93,7 @@ compute_percentile.data.frame <- function(
 #' @rdname compute_percentile
 #' @importFrom dplyr all_of coalesce collect inner_join join_by left_join
 #'   mutate n rename select semi_join summarise
-#' @importFrom rlang sym syms
+#' @importFrom rlang check_dots_empty sym syms
 #' @importFrom tibble tibble
 #' @export
 compute_percentile.tbl_dbi <- function(
@@ -101,6 +104,8 @@ compute_percentile.tbl_dbi <- function(
   latest_measure = FALSE,
   ...
 ) {
+  rlang::check_dots_empty()
+
   check_binwidth(binwidth)
 
   measure <- rlang::sym(measure_col)

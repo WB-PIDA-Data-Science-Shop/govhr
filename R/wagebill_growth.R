@@ -90,6 +90,7 @@ compute_growth_decomposition <- function(data, ...) {
 
 #' @rdname compute_growth_decomposition
 #' @importFrom data.table .N := shift setorderv fcase fifelse fcoalesce
+#' @importFrom rlang check_dots_empty
 #' @export
 compute_growth_decomposition.data.frame <- function(
   data,
@@ -98,6 +99,8 @@ compute_growth_decomposition.data.frame <- function(
   simplify = TRUE,
   ...
 ) {
+  rlang::check_dots_empty()
+
   if ("ref_date" %in% group_cols) {
     stop("`ref_date` should not be included in `group_cols`")
   }
@@ -238,7 +241,7 @@ compute_growth_decomposition.data.frame <- function(
 #' @rdname compute_growth_decomposition
 #' @importFrom dplyr all_of coalesce distinct if_else inner_join lag left_join
 #'   mutate n select summarise
-#' @importFrom rlang sym
+#' @importFrom rlang check_dots_empty sym
 #' @export
 compute_growth_decomposition.tbl_dbi <- function(
   data,
@@ -247,6 +250,8 @@ compute_growth_decomposition.tbl_dbi <- function(
   simplify = TRUE,
   ...
 ) {
+  rlang::check_dots_empty()
+
   if ("ref_date" %in% group_cols) {
     stop("`ref_date` should not be included in `group_cols`")
   }
