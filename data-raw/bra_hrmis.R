@@ -177,7 +177,10 @@ est_tbl$adm1_code <- NULL
 est_tbl$est_parent <- NULL
 est_tbl$est_child <- NULL
 
-bra_hrmis_est <- est_tbl
+# 2018 has no salary records, so it is dropped from every module
+bra_hrmis_est <- 
+  est_tbl |>
+  filter(lubridate::year(ref_date) != 2018)
 
 ## lets select a random set of contracts, personnel and establishments for the lazy load
 
@@ -282,11 +285,13 @@ personnel_list <-
 
 bra_hrmis_contract <- 
   contract_tbl |>
-  filter(personnel_id %in% personnel_list)
+  filter(personnel_id %in% personnel_list) |>
+  filter(lubridate::year(ref_date) != 2018)
 
 bra_hrmis_personnel <- 
   personnel_tbl |>
-  filter(personnel_id %in% personnel_list)
+  filter(personnel_id %in% personnel_list) |>
+  filter(lubridate::year(ref_date) != 2018)
 
 bra_hrmis <- 
   bra_hrmis |> 
@@ -296,7 +301,8 @@ bra_hrmis_allowance <-
   allowance_tbl |>
   left_join(contract_tbl |> select(contract_id, personnel_id, ref_date) |> distinct(),
             by = c("contract_id", "ref_date")) |>
-  filter(personnel_id %in% personnel_list)
+  filter(personnel_id %in% personnel_list) |>
+  filter(lubridate::year(ref_date) != 2018)
 
 # write-out ---------------------------------------------------------------
 usethis::use_data(bra_hrmis, overwrite = TRUE)

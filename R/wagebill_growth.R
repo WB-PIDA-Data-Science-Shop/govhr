@@ -113,8 +113,8 @@ compute_growth_decomposition.data.frame <- function(
     keep,
     .(
       headcount = .N,
-      wagebill  = sum(get(measure_col)),
-      wage      = mean(get(measure_col))
+      wagebill = sum(get(measure_col)),
+      wage = mean(get(measure_col))
     ),
     by = by_cols
   ]
@@ -124,8 +124,7 @@ compute_growth_decomposition.data.frame <- function(
   panel <- calendar
 
   if (!is.null(group_cols)) {
-    panel <- unique(wagebill[, ..group_cols])[
-      ,
+    panel <- unique(wagebill[, ..group_cols])[,
       .(ref_date = calendar$ref_date),
       by = group_cols
     ]
@@ -135,8 +134,8 @@ compute_growth_decomposition.data.frame <- function(
 
   panel[, `:=`(
     is_observed = !is.na(headcount),
-    headcount   = data.table::fcoalesce(as.numeric(headcount), 0),
-    wagebill    = data.table::fcoalesce(wagebill, 0)
+    headcount = data.table::fcoalesce(as.numeric(headcount), 0),
+    wagebill = data.table::fcoalesce(wagebill, 0)
   )]
 
   data.table::setorderv(panel, by_cols)
@@ -144,37 +143,45 @@ compute_growth_decomposition.data.frame <- function(
   panel[,
     `:=`(
       headcount_lag = data.table::shift(headcount, type = "lag"),
-      wage_lag      = data.table::shift(wage, type = "lag"),
-      wagebill_lag  = data.table::shift(wagebill, type = "lag"),
-      observed_lag  = data.table::shift(is_observed, type = "lag")
+      wage_lag = data.table::shift(wage, type = "lag"),
+      wagebill_lag = data.table::shift(wagebill, type = "lag"),
+      observed_lag = data.table::shift(is_observed, type = "lag")
     ),
     by = group_cols
   ]
 
-  panel[, transition_type := data.table::fcase(
-    !is_observed,        "exit",
-    is.na(observed_lag), "start",
-    observed_lag,        "continuing",
-    default = "entry"
-  )]
+  panel[,
+    transition_type := data.table::fcase(
+      !is_observed        , "exit"       ,
+      is.na(observed_lag) , "start"      ,
+      observed_lag        , "continuing" ,
+      default = "entry"
+    )
+  ]
 
   # deltas are only defined for continuing groups, NA propagates to the
   # employment, wage and interaction effects
   panel[, `:=`(
     delta_headcount = data.table::fifelse(
-      transition_type == "continuing", headcount - headcount_lag, NA_real_
+      transition_type == "continuing",
+      headcount - headcount_lag,
+      NA_real_
     ),
     delta_wage = data.table::fifelse(
-      transition_type == "continuing", wage - wage_lag, NA_real_
+      transition_type == "continuing",
+      wage - wage_lag,
+      NA_real_
     )
   )]
 
   panel[, `:=`(
-    employment_effect  = wage_lag * delta_headcount,
-    wage_effect        = headcount_lag * delta_wage,
+    employment_effect = wage_lag * delta_headcount,
+    wage_effect = headcount_lag * delta_wage,
     interaction_effect = delta_headcount * delta_wage,
     entry_effect = data.table::fifelse(
-      transition_type == "entry", wagebill, NA_real_
+      transition_type == "entry",
+      wagebill,
+      NA_real_
     ),
     exit_effect = data.table::fifelse(
       transition_type == "exit",
@@ -184,23 +191,44 @@ compute_growth_decomposition.data.frame <- function(
   )]
 
   # entry and exit effects are exclusive, and both are NA at start
-  panel[, total_effect := data.table::fifelse(
-    transition_type == "continuing",
-    employment_effect + wage_effect + interaction_effect,
-    data.table::fcoalesce(entry_effect, exit_effect)
-  )]
+  panel[,
+    total_effect := data.table::fifelse(
+      transition_type == "continuing",
+      employment_effect + wage_effect + interaction_effect,
+      data.table::fcoalesce(entry_effect, exit_effect)
+    )
+  ]
 
   out_cols <- c(
-    by_cols, "transition_type", "headcount", "headcount_lag", "wage",
-    "wage_lag", "employment_effect", "wage_effect", "interaction_effect",
-    "entry_effect", "delta_wage", "exit_effect", "total_effect", "wagebill",
-    "wagebill_lag", "is_observed", "observed_lag"
+    by_cols,
+    "transition_type",
+    "headcount",
+    "headcount_lag",
+    "wage",
+    "wage_lag",
+    "employment_effect",
+    "wage_effect",
+    "interaction_effect",
+    "entry_effect",
+    "delta_wage",
+    "exit_effect",
+    "total_effect",
+    "wagebill",
+    "wagebill_lag",
+    "is_observed",
+    "observed_lag"
   )
 
   if (simplify) {
     out_cols <- c(
-      by_cols, "transition_type", "employment_effect", "wage_effect",
-      "interaction_effect", "entry_effect", "exit_effect", "total_effect"
+      by_cols,
+      "transition_type",
+      "employment_effect",
+      "wage_effect",
+      "interaction_effect",
+      "entry_effect",
+      "exit_effect",
+      "total_effect"
     )
   }
 
@@ -208,6 +236,9 @@ compute_growth_decomposition.data.frame <- function(
 }
 
 #' @rdname compute_growth_decomposition
+#' @importFrom dplyr all_of coalesce distinct if_else inner_join lag left_join
+#'   mutate n select summarise
+#' @importFrom rlang sym
 #' @export
 compute_growth_decomposition.tbl_dbi <- function(
   data,
@@ -216,7 +247,7 @@ compute_growth_decomposition.tbl_dbi <- function(
   simplify = TRUE,
   ...
 ) {
-  if("ref_date" %in% group_cols){
+  if ("ref_date" %in% group_cols) {
     stop("`ref_date` should not be included in `group_cols`")
   }
 
@@ -227,11 +258,11 @@ compute_growth_decomposition.tbl_dbi <- function(
     drop_missing(
       c(measure_col, group_cols)
     ) |>
-    summarise(
-      headcount = n(),
+    dplyr::summarise(
+      headcount = dplyr::n(),
       wagebill = sum(!!measure, na.rm = TRUE),
       wage = mean(!!measure, na.rm = TRUE),
-      .by = all_of(group_cols_with_date)
+      .by = dplyr::all_of(group_cols_with_date)
     )
 
   # complete the group x date panel, as in compute_wagebill(), so lag()
@@ -241,9 +272,9 @@ compute_growth_decomposition.tbl_dbi <- function(
 
   panel <- calendar
 
-  if(!is.null(group_cols)){
+  if (!is.null(group_cols)) {
     group_values <- wagebill |>
-      select(all_of(group_cols)) |>
+      dplyr::select(all_of(group_cols)) |>
       distinct()
 
     panel <- calendar |>
@@ -274,9 +305,11 @@ compute_growth_decomposition.tbl_dbi <- function(
     ) |>
     mutate(
       transition_type = if_else(
-        !is_observed, "exit",
+        !is_observed,
+        "exit",
         if_else(
-          is.na(observed_lag), "start",
+          is.na(observed_lag),
+          "start",
           if_else(observed_lag, "continuing", "entry")
         )
       )
@@ -284,8 +317,16 @@ compute_growth_decomposition.tbl_dbi <- function(
     mutate(
       # deltas are only defined for continuing groups, NA propagates to the
       # employment, wage and interaction effects
-      delta_headcount = if_else(transition_type == "continuing", headcount - headcount_lag, NA_real_),
-      delta_wage = if_else(transition_type == "continuing", wage - wage_lag, NA_real_),
+      delta_headcount = if_else(
+        transition_type == "continuing",
+        headcount - headcount_lag,
+        NA_real_
+      ),
+      delta_wage = if_else(
+        transition_type == "continuing",
+        wage - wage_lag,
+        NA_real_
+      ),
       employment_effect = wage_lag * delta_headcount,
       wage_effect = headcount_lag * delta_wage,
       interaction_effect = delta_headcount * delta_wage,
@@ -304,18 +345,35 @@ compute_growth_decomposition.tbl_dbi <- function(
     ) |>
     select(
       all_of(group_cols_with_date),
-      transition_type, headcount, headcount_lag, wage, wage_lag,
-      employment_effect, wage_effect, interaction_effect, entry_effect,
-      delta_wage, exit_effect, total_effect, wagebill, wagebill_lag,
-      is_observed, observed_lag
+      transition_type,
+      headcount,
+      headcount_lag,
+      wage,
+      wage_lag,
+      employment_effect,
+      wage_effect,
+      interaction_effect,
+      entry_effect,
+      delta_wage,
+      exit_effect,
+      total_effect,
+      wagebill,
+      wagebill_lag,
+      is_observed,
+      observed_lag
     )
 
   if (simplify) {
     decomposition <- decomposition |>
       select(
         all_of(group_cols_with_date),
-        transition_type, employment_effect, wage_effect, interaction_effect,
-        entry_effect, exit_effect, total_effect
+        transition_type,
+        employment_effect,
+        wage_effect,
+        interaction_effect,
+        entry_effect,
+        exit_effect,
+        total_effect
       )
   }
 
@@ -421,84 +479,123 @@ compute_wage_decomposition <- function(
   group_cols = NULL,
   simplify = TRUE
 ) {
-
   dt <- data.table::copy(data.table::as.data.table(growth_decomp))
   validate_columns_exist(
     dt,
-    c("headcount", "headcount_lag", "wagebill", "wagebill_lag", "wage",
-      "wage_lag", "delta_wage", "observed_lag"),
+    c(
+      "headcount",
+      "headcount_lag",
+      "wagebill",
+      "wagebill_lag",
+      "wage",
+      "wage_lag",
+      "delta_wage",
+      "observed_lag"
+    ),
     "growth_decomp (use compute_growth_decomposition(simplify = FALSE))"
   )
   agg_by <- c(group_cols, "ref_date")
 
-  dt[, `:=`(
-    total_headcount     = sum(headcount),
-    total_headcount_lag = sum(headcount_lag, na.rm = TRUE),
-    total_wagebill      = sum(wagebill),
-    total_wagebill_lag  = sum(wagebill_lag, na.rm = TRUE)
-  ), by = agg_by]
+  dt[,
+    `:=`(
+      total_headcount = sum(headcount),
+      total_headcount_lag = sum(headcount_lag, na.rm = TRUE),
+      total_wagebill = sum(wagebill),
+      total_wagebill_lag = sum(wagebill_lag, na.rm = TRUE)
+    ),
+    by = agg_by
+  ]
 
   dt[, `:=`(
-    avg_wage     = data.table::fifelse(
-      total_headcount > 0, total_wagebill / total_headcount, NA_real_
+    avg_wage = data.table::fifelse(
+      total_headcount > 0,
+      total_wagebill / total_headcount,
+      NA_real_
     ),
     avg_wage_lag = data.table::fifelse(
-      total_headcount_lag > 0, total_wagebill_lag / total_headcount_lag, NA_real_
+      total_headcount_lag > 0,
+      total_wagebill_lag / total_headcount_lag,
+      NA_real_
     )
   )]
 
   dt[, `:=`(
-    share     = data.table::fifelse(
-      total_headcount > 0, headcount / total_headcount, NA_real_
+    share = data.table::fifelse(
+      total_headcount > 0,
+      headcount / total_headcount,
+      NA_real_
     ),
     share_lag = data.table::fifelse(
-      total_headcount_lag > 0, headcount_lag / total_headcount_lag, NA_real_
+      total_headcount_lag > 0,
+      headcount_lag / total_headcount_lag,
+      NA_real_
     )
   )]
   dt[, delta_share := share - share_lag]
 
   dt[, `:=`(
-    within_term  = data.table::fifelse(
-      transition_type == "continuing", share_lag * delta_wage, 0
+    within_term = data.table::fifelse(
+      transition_type == "continuing",
+      share_lag * delta_wage,
+      0
     ),
     between_term = data.table::fifelse(
-      transition_type == "continuing", delta_share * (wage_lag - avg_wage_lag), 0
+      transition_type == "continuing",
+      delta_share * (wage_lag - avg_wage_lag),
+      0
     ),
-    cross_term   = data.table::fifelse(
-      transition_type == "continuing", delta_share * delta_wage, 0
+    cross_term = data.table::fifelse(
+      transition_type == "continuing",
+      delta_share * delta_wage,
+      0
     ),
-    entry_term   = data.table::fifelse(
-      transition_type == "entry", share * (wage - avg_wage_lag), 0
+    entry_term = data.table::fifelse(
+      transition_type == "entry",
+      share * (wage - avg_wage_lag),
+      0
     ),
-    exit_term    = data.table::fifelse(
+    exit_term = data.table::fifelse(
       transition_type == "exit" & observed_lag %in% TRUE,
-      -share_lag * (wage_lag - avg_wage_lag), 0
+      -share_lag * (wage_lag - avg_wage_lag),
+      0
     )
   )]
 
-  period_decomp <- dt[, .(
-    total_headcount      = total_headcount[1],
-    total_headcount_lag  = total_headcount_lag[1],
-    total_wagebill       = total_wagebill[1],
-    total_wagebill_lag   = total_wagebill_lag[1],
-    avg_wage     = avg_wage[1],
-    avg_wage_lag = avg_wage_lag[1],
-    within_effect  = sum(within_term),
-    between_effect = sum(between_term),
-    cross_effect   = sum(cross_term),
-    entry_effect   = sum(entry_term),
-    exit_effect    = sum(exit_term)
-  ), by = agg_by]
+  period_decomp <- dt[,
+    .(
+      total_headcount = total_headcount[1],
+      total_headcount_lag = total_headcount_lag[1],
+      total_wagebill = total_wagebill[1],
+      total_wagebill_lag = total_wagebill_lag[1],
+      avg_wage = avg_wage[1],
+      avg_wage_lag = avg_wage_lag[1],
+      within_effect = sum(within_term),
+      between_effect = sum(between_term),
+      cross_effect = sum(cross_term),
+      entry_effect = sum(entry_term),
+      exit_effect = sum(exit_term)
+    ),
+    by = agg_by
+  ]
 
-  period_decomp[, total_effect := data.table::fifelse(
-    is.na(avg_wage) | is.na(avg_wage_lag), NA_real_,
-    within_effect + between_effect + cross_effect + entry_effect + exit_effect
-  )]
+  period_decomp[,
+    total_effect := data.table::fifelse(
+      is.na(avg_wage) | is.na(avg_wage_lag),
+      NA_real_,
+      within_effect + between_effect + cross_effect + entry_effect + exit_effect
+    )
+  ]
 
   if (simplify) {
     out_cols <- c(
-      group_cols, "ref_date", "within_effect", "between_effect",
-      "cross_effect", "entry_effect", "exit_effect", "total_effect"
+      group_cols,
+      "ref_date",
+      "within_effect",
+      "between_effect",
+      "cross_effect",
+      "entry_effect",
+      "exit_effect",
+      "total_effect"
     )
     period_decomp <- period_decomp[, ..out_cols]
   }

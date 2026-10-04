@@ -5,7 +5,7 @@
 \alias{bra_hrmis_contract}
 \title{HRMIS Contract Dataset}
 \format{
-A data frame with 16,434 rows and 19 variables:
+A data frame with 14,773 rows and 19 variables:
 \describe{
 \item{contract_id}{Unique identifier assigned to each contract.}
 \item{personnel_id}{Unique identifier assigned to each worker.}

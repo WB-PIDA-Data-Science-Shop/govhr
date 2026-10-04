@@ -5,7 +5,7 @@
 \alias{bra_hrmis_personnel}
 \title{HRMIS Personnel Dataset}
 \format{
-A data frame with 15,681 rows and 11 variables:
+A data frame with 14,106 rows and 11 variables:
 \describe{
 \item{personnel_id}{Unique identifier assigned to each worker.}
 \item{ref_date}{Reference date of the HRMIS record.}

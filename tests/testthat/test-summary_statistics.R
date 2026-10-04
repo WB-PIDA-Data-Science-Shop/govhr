@@ -73,7 +73,7 @@ test_that("compute_density bins values and pct/cum_pct sum correctly within each
     wage = c(1:10, 1:10)
   )
 
-  out <- compute_density(df, group_col = "group", measure_col = "wage", binwidth = 2)
+  out <- compute_density(df, measure_col = "wage", group_cols = "group", binwidth = 2)
 
   # pct should sum to 1 within each group
   totals <- tapply(out$pct, out$group, sum)

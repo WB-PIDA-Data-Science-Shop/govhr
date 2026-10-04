@@ -268,7 +268,20 @@ if (getRversion() >= "2.15.1") {
     "exit_term",
     "within_effect",
     "between_effect",
-    "cross_effect"
+    "cross_effect",
+    # compute_density
+    "count",
+    "bin_id",
+    "bin_lower",
+    "bin_upper",
+    "bin_id_below",
+    "count_below",
+    "cum_count",
+    "n_bins",
+    "pct",
+    "cum_pct",
+    "lower",
+    "upper"
   ))
 }
 

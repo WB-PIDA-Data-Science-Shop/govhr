@@ -295,7 +295,7 @@
 #' The dataset follows the GovHR contract module data dictionary and is intended
 #' for workforce analytics, payroll analysis, and personnel microsimulation.
 #'
-#' @format A data frame with 16,434 rows and 19 variables:
+#' @format A data frame with 14,773 rows and 19 variables:
 #' \describe{
 #'   \item{contract_id}{Unique identifier assigned to each contract.}
 #'   \item{personnel_id}{Unique identifier assigned to each worker.}
@@ -352,7 +352,7 @@
 #' intended for workforce analytics, demographic analysis, and personnel
 #' microsimulation.
 #'
-#' @format A data frame with 15,681 rows and 11 variables:
+#' @format A data frame with 14,106 rows and 11 variables:
 #' \describe{
 #'   \item{personnel_id}{Unique identifier assigned to each worker.}
 #'   \item{ref_date}{Reference date of the HRMIS record.}
@@ -400,7 +400,7 @@
 #' intended to support organizational analysis, workforce reporting, and
 #' aggregation of personnel and contract records.
 #'
-#' @format A data frame with 65 rows and 6 variables:
+#' @format A data frame with 570 rows and 7 variables:
 #' \describe{
 #'   \item{est_name_native}{Official establishment name in the native language (Portuguese).}
 #'   \item{est_id}{Unique identifier assigned to each establishment.}
@@ -601,7 +601,7 @@ NULL
 #' `contract_id`–`ref_date`–`allowance_type` combination. Monetary values are
 #' reported in local currency units (LCU).
 #'
-#' @format A data frame with 60,430 rows and 5 variables:
+#' @format A data frame with 55,600 rows and 5 variables:
 #' \describe{
 #'   \item{contract_id}{Character. Unique identifier for the employment
 #'   contract associated with the allowance.}
