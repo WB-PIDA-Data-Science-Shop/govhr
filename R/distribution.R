@@ -1,5 +1,5 @@
 
-#' Compute the distribution of a measure
+#' Compute the percentile of a measure
 #'
 #' Bins `measure_col` at a fixed width and reports each bin's share and
 #' cumulative share of observations within each group, filling empty bins with
@@ -10,7 +10,7 @@
 #' @param measure_col Character. Numeric column to bin.
 #' @param group_cols Character vector of columns to group by, or `NULL` for no
 #'   grouping.
-#' @param binwidth Numeric. Width of each bin. Default `1`.
+#' @param binwidth Positive whole number. Width of each bin. Default `1`.
 #' @param latest_measure Logical. Restrict to the latest reference date.
 #'   Default `FALSE`.
 #' @param ... Arguments passed to methods.
@@ -22,15 +22,20 @@
 #' @details Rows with a missing `measure_col` are dropped. Missing values in
 #'   `group_cols` are kept as their own group.
 #'
+#'   `binwidth` must be a whole number because bins are assigned with
+#'   `floor(measure_col / binwidth)`, and fractional widths are not exact in
+#'   floating point: `0.3 / 0.1` is `2.9999...`, which would put 0.3 in the
+#'   0.2 bin.
+#'
 #' @export
-compute_density <- function(data, ...) {
-  UseMethod("compute_density")
+compute_percentile <- function(data, ...) {
+  UseMethod("compute_percentile")
 }
 
-#' @rdname compute_density
+#' @rdname compute_percentile
 #' @importFrom data.table .N .SD := as.data.table data.table setnames setorderv
 #' @export
-compute_density.data.frame <- function(
+compute_percentile.data.frame <- function(
   data,
   measure_col,
   group_cols = NULL,
@@ -38,8 +43,10 @@ compute_density.data.frame <- function(
   latest_measure = FALSE,
   ...
 ) {
+  check_binwidth(binwidth)
+
   if (latest_measure) {
-    data <- data[data[["ref_date"]] == max(data[["ref_date"]]), ]
+    data <- data[which(data[["ref_date"]] == max(data[["ref_date"]], na.rm = TRUE)), ]
   }
 
   dt <- data.table::as.data.table(data)
@@ -80,13 +87,13 @@ compute_density.data.frame <- function(
   binned[]
 }
 
-#' @rdname compute_density
+#' @rdname compute_percentile
 #' @importFrom dplyr all_of coalesce collect inner_join join_by left_join
 #'   mutate n rename select semi_join summarise
 #' @importFrom rlang sym syms
 #' @importFrom tibble tibble
 #' @export
-compute_density.tbl_dbi <- function(
+compute_percentile.tbl_dbi <- function(
   data,
   measure_col,
   group_cols = NULL,
@@ -94,6 +101,8 @@ compute_density.tbl_dbi <- function(
   latest_measure = FALSE,
   ...
 ) {
+  check_binwidth(binwidth)
+
   measure <- rlang::sym(measure_col)
 
   if (latest_measure) {
@@ -213,6 +222,15 @@ compute_density.tbl_dbi <- function(
     )
 }
 
+# fractional widths are not exact in floating point, see compute_percentile()
+check_binwidth <- function(binwidth) {
+  if (
+    !is.numeric(binwidth) || length(binwidth) != 1 || is.na(binwidth) ||
+      binwidth < 1 || binwidth != round(binwidth)
+  ) {
+    stop("`binwidth` must be a positive whole number.")
+  }
+}
 
 #' Compute Deciles of a Measure
 #'
@@ -248,7 +266,7 @@ compute_decile <- function(
   }
 
   if (latest_measure) {
-    dt <- dt[ref_date == max(ref_date)]
+    dt <- dt[ref_date == max(ref_date, na.rm = TRUE)]
   }
 
   dt[, decile := dplyr::ntile(get(measure_col), 10), by = by_cols]

@@ -269,7 +269,7 @@ if (getRversion() >= "2.15.1") {
     "within_effect",
     "between_effect",
     "cross_effect",
-    # compute_density
+    # compute_percentile
     "count",
     "bin_id",
     "bin_lower",
