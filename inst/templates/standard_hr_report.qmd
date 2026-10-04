@@ -170,7 +170,7 @@ wagebill_shares_dt |>
 ```{r wagebill-decomposition}
 contract_df |> 
   compute_wagebill(
-    wage_vars = c("gross_salary_lcu"),
+    measure_cols = c("gross_salary_lcu"),
     groups = c("occupation_native")
   ) |> 
   filter(

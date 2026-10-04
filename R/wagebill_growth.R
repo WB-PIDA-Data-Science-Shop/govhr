@@ -1,4 +1,10 @@
 #' Compute growth decomposition of wagebill
+#' 
+compute_growth_decomposition <- function(data, ...){
+  UseMethod("compute_growth_decomposition")
+}
+
+#' Compute growth decomposition of wagebill
 #'
 #' @param data A data frame containing the data to be analyzed. It should include columns for the grouping variables, a column for the reference date, and a column for the measure of interest (e.g., gross salary).
 #' @param group_cols A character vector specifying the names of the columns to group by.
@@ -83,7 +89,7 @@
 #' @importFrom data.table .N := shift setorderv fcase fifelse
 #' @importFrom tidyr complete nesting
 #' @export
-compute_growth_decomposition <- function(
+compute_growth_decomposition.data.frame <- function(
   data,
   group_cols = NULL,
   measure_col = "gross_salary_lcu",
@@ -207,6 +213,102 @@ compute_growth_decomposition <- function(
   }
 
   summary_table[, ..out_cols]
+}
+
+compute_growth_decomposition.tbl_dbi <- function(data, measure_col = "gross_salary_lcu", group_cols = NULL){
+  if("ref_date" %in% group_cols){
+    stop("`ref_date` should not be included in `group_cols`")
+  }
+
+  group_cols_with_date <- c(group_cols, "ref_date")
+  measure <- rlang::sym(measure_col)
+
+  wagebill <- data |>
+    drop_missing(
+      c(measure_col, group_cols)
+    ) |>
+    summarise(
+      headcount = n(),
+      wagebill = sum(!!measure, na.rm = TRUE),
+      wage = mean(!!measure, na.rm = TRUE),
+      .by = all_of(group_cols_with_date)
+    )
+
+  # complete the group x date panel, as in compute_wagebill(), so lag()
+  # always refers to the previous period of the calendar
+  calendar <- data |>
+    distinct(ref_date)
+
+  panel <- calendar
+
+  if(!is.null(group_cols)){
+    group_values <- wagebill |>
+      select(all_of(group_cols)) |>
+      distinct()
+
+    panel <- calendar |>
+      mutate(key = 1) |>
+      inner_join(
+        group_values |> mutate(key = 1),
+        by = "key"
+      ) |>
+      select(-key)
+  }
+
+  panel |>
+    left_join(
+      wagebill,
+      by = group_cols_with_date
+    ) |>
+    mutate(
+      is_observed = !is.na(headcount),
+      headcount = coalesce(headcount, 0),
+      wagebill = coalesce(wagebill, 0)
+    ) |>
+    mutate(
+      headcount_lag = lag(headcount, order_by = ref_date),
+      wage_lag = lag(wage, order_by = ref_date),
+      wagebill_lag = lag(wagebill, order_by = ref_date),
+      observed_lag = lag(is_observed, order_by = ref_date),
+      .by = all_of(group_cols)
+    ) |>
+    mutate(
+      transition_type = if_else(
+        !is_observed, "exit",
+        if_else(
+          is.na(observed_lag), "start",
+          if_else(observed_lag, "continuing", "entry")
+        )
+      )
+    ) |>
+    mutate(
+      # deltas are only defined for continuing groups, NA propagates to the
+      # employment, wage and interaction effects
+      delta_headcount = if_else(transition_type == "continuing", headcount - headcount_lag, NA_real_),
+      delta_wage = if_else(transition_type == "continuing", wage - wage_lag, NA_real_),
+      employment_effect = wage_lag * delta_headcount,
+      wage_effect = headcount_lag * delta_wage,
+      interaction_effect = delta_headcount * delta_wage,
+      entry_effect = if_else(transition_type == "entry", wagebill, NA_real_),
+      exit_effect = if_else(
+        transition_type == "exit",
+        if_else(coalesce(observed_lag, FALSE), -wagebill_lag, 0),
+        NA_real_
+      ),
+      # entry and exit effects are exclusive, and both are NA at start
+      total_effect = if_else(
+        transition_type == "continuing",
+        employment_effect + wage_effect + interaction_effect,
+        coalesce(entry_effect, exit_effect)
+      )
+    ) |>
+    select(
+      all_of(group_cols_with_date),
+      transition_type, headcount, headcount_lag, wage, wage_lag,
+      employment_effect, wage_effect, interaction_effect, entry_effect,
+      delta_wage, exit_effect, total_effect, wagebill, wagebill_lag,
+      is_observed, observed_lag
+    )
 }
 
 #' Decompose average-compensation growth

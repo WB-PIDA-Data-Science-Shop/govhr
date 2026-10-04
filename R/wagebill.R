@@ -1,97 +1,93 @@
-
-#' Compute wage bill aggregates with optional macro-fiscal shares
+#' Compute the Wagebill
 #'
-#' @description
-#' Computes aggregate wage bill statistics from contract-level salary data.
-#' The function converts salary variables to constant purchasing power parity
-#' (PPP) using macro indicators, then aggregates by specified grouping variables.
-#' Optionally computes wage bill shares relative to macro-fiscal aggregates
-#' (e.g., GDP, public expenditure, revenue).
+#' Sums `measure_col` within each group and reference date, and reports each
+#' group's share of the total wagebill and its growth from the previous
+#' reference date.
 #'
-#' @param contracts A data.frame or tibble containing contract-level salary data.
-#'   Must include the columns specified in `wage_vars` and `groups`.
-#' @param wage_vars Character vector of salary column names to aggregate.
-#'   Defaults to `c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")`.
-#' @param group_cols Character vector of grouping columns for aggregation.
-#'   Defaults to `c("country_code", "year")`.
-#' @param share_macro Logical; if `TRUE`, computes wage bill shares relative
-#'   to macro-fiscal aggregates specified in `macro_vars`. Defaults to `FALSE`.
-#' @param macro_vars Character vector of macro indicator column names to use
-#'   as denominators when `share_macro = TRUE`. Defaults to
-#'   `c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu")`.
-#' @param drop_na Logical; if `TRUE`, removes `NA` values before aggregation.
-#'   Defaults to `TRUE`.
-#' @param groups Deprecated. Use `group_cols` instead.
-#' @param contract_df Deprecated. Use `contracts` instead.
+#' @param data Data frame containing a `ref_date` column and the measure.
+#' @param measure_col Character. Numeric column to sum. Default
+#'   `"gross_salary_lcu"`.
+#' @param group_cols Character vector of columns to group by, or `NULL` for no
+#'   grouping. Must not include `ref_date`.
 #'
-#' @returns A wage bill table with optional grouping variables,
-#'   an `indicator` column (describing the wage variable and level of analysis),
-#'   and a `value` column. When `share_macro = TRUE`, values represent
-#'   shares (wage bill / macro aggregate).
+#' @returns A data frame with the grouping columns, `ref_date`, `wagebill`,
+#'   `share_wagebill` (only when `group_cols` is not `NULL`) and
+#'   `wagebill_growth`.
+#'
+#' @details
+#' Missing values in `measure_col` are ignored. When `group_cols` is not
+#' `NULL`, every group is expanded to every `ref_date` in `data`, so a group
+#' absent in a period gets `wagebill = NA` rather than being dropped; groups
+#' with `NA` in `group_cols` are kept. `wagebill_growth` is the relative change
+#' from the group's previous reference date, and is `NA` in the first period
+#' or when either period's wagebill is `NA`.
+#'
+#' @seealso [compute_growth_decomposition()] to decompose wagebill changes into
+#'   employment and compensation effects.
 #'
 #' @examples
-#' # Compute wage bill totals by country and year
-#' \dontrun{
 #' compute_wagebill(
-#'   contract_df = govhr::bra_hrmis_contract,
-#'   wage_vars = c("gross_salary_lcu"),
-#'   groups = c("country_code", "year")
+#'   bra_hrmis_contract,
+#'   group_cols = "contract_type"
 #' )
-#'
-#' # Compute wage bill as share of GDP and public expenditure
-#' compute_wagebill(
-#'   contract_df = govhr::bra_hrmis_contract,
-#'   wage_vars = c("gross_salary_lcu", "net_salary_lcu"),
-#'   groups = c("country_code", "year"),
-#'   share_macro = TRUE,
-#'   macro_vars = c("gdp_lcu", "pexpenditure_lcu")
-#' )
-#' }
-#'
-#' @seealso
-#' \code{\link{convert_constant_ppp}} for PPP conversion
-#' \code{\link{compute_fastsummary}} for general aggregation
-#' \code{\link{compute_fastshare}} for share computation (when `share_macro = TRUE`)
 #'
 #' @export
 compute_wagebill <- function(
-  contracts,
-  wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
-  group_cols = c("country_code", "year"),
-  share_macro = FALSE,
-  macro_vars = c(
-    "gdp_lcu",
-    "pexpenditure_lcu",
-    "prevenue_lcu",
-    "taxrevenue_lcu"
-  ),
-  drop_na = TRUE,
-  groups = NULL,
-  contract_df = NULL
+  data,
+  measure_col = "gross_salary_lcu",
+  group_cols = NULL
 ) {
-  group_cols <- resolve_renamed_arg(group_cols, groups, "groups", "group_cols")
-  contracts <- resolve_renamed_arg(contracts, contract_df, "contract_df", "contracts")
-  data_ppp <- contracts |>
-    convert_constant_ppp(
-      cols = wage_vars
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
+  }
+
+  group_cols_with_date <- c(group_cols, "ref_date")
+
+  wagebill <- data |>
+    summarise(
+      wagebill = sum(!!rlang::sym(measure_col), na.rm = TRUE),
+      .by = all_of(
+        group_cols_with_date
+      )
     )
 
-  if (share_macro) {
-    data_ppp |>
-      compute_fastshare(
-        cols = wage_vars,
-        macro_cols = macro_vars,
-        group_cols = group_cols,
-        fns = "sum",
-        output = "long"
+  if (!is.null(group_cols)) {
+    wagebill <- wagebill |>
+      mutate(
+        share_wagebill = wagebill / sum(wagebill, na.rm = TRUE),
+        .by = "ref_date"
       )
-  } else {
-    data_ppp |>
-      compute_fastsummary(
-        cols = wage_vars,
-        group_cols = group_cols,
-        fns = "sum",
-        output = "long"
+
+    # complete implicit missing reference dates
+    calendar <- data |>
+      distinct(ref_date)
+
+    group_values <- data |>
+      select(all_of(group_cols)) |>
+      distinct()
+
+    wagebill <- calendar |>
+      mutate(key = 1) |>
+      inner_join(
+        group_values |> mutate(key = 1),
+        by = "key"
+      ) |>
+      select(-key) |>
+      # keep missing groups: sql joins do not match NA keys by default
+      left_join(
+        wagebill,
+        by = group_cols_with_date,
+        na_matches = "na"
       )
   }
+
+  wagebill <- wagebill |>
+    mutate(
+      wagebill_lag = lag(wagebill, order_by = ref_date),
+      wagebill_growth = (wagebill - wagebill_lag) / wagebill_lag,
+      .by = all_of(group_cols)
+    ) |>
+    select(-wagebill_lag)
+
+  wagebill
 }

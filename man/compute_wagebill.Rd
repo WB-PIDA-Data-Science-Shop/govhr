@@ -2,78 +2,45 @@
 % Please edit documentation in R/wagebill.R
 \name{compute_wagebill}
 \alias{compute_wagebill}
-\title{Compute wage bill aggregates with optional macro-fiscal shares}
+\title{Compute the Wagebill}
 \usage{
-compute_wagebill(
-  contracts,
-  wage_vars = c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu"),
-  group_cols = c("country_code", "year"),
-  share_macro = FALSE,
-  macro_vars = c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu"),
-  drop_na = TRUE,
-  groups = NULL,
-  contract_df = NULL
-)
+compute_wagebill(data, measure_col = "gross_salary_lcu", group_cols = NULL)
 }
 \arguments{
-\item{contracts}{A data.frame or tibble containing contract-level salary data.
-Must include the columns specified in \code{wage_vars} and \code{groups}.}
+\item{data}{Data frame containing a \code{ref_date} column and the measure.}
 
-\item{wage_vars}{Character vector of salary column names to aggregate.
-Defaults to \code{c("gross_salary_lcu", "net_salary_lcu", "base_salary_lcu")}.}
+\item{measure_col}{Character. Numeric column to sum. Default
+\code{"gross_salary_lcu"}.}
 
-\item{group_cols}{Character vector of grouping columns for aggregation.
-Defaults to \code{c("country_code", "year")}.}
-
-\item{share_macro}{Logical; if \code{TRUE}, computes wage bill shares relative
-to macro-fiscal aggregates specified in \code{macro_vars}. Defaults to \code{FALSE}.}
-
-\item{macro_vars}{Character vector of macro indicator column names to use
-as denominators when \code{share_macro = TRUE}. Defaults to
-\code{c("gdp_lcu", "pexpenditure_lcu", "prevenue_lcu", "taxrevenue_lcu")}.}
-
-\item{drop_na}{Logical; if \code{TRUE}, removes \code{NA} values before aggregation.
-Defaults to \code{TRUE}.}
-
-\item{groups}{Deprecated. Use \code{group_cols} instead.}
-
-\item{contract_df}{Deprecated. Use \code{contracts} instead.}
+\item{group_cols}{Character vector of columns to group by, or \code{NULL} for no
+grouping. Must not include \code{ref_date}.}
 }
 \value{
-A wage bill table with optional grouping variables,
-an \code{indicator} column (describing the wage variable and level of analysis),
-and a \code{value} column. When \code{share_macro = TRUE}, values represent
-shares (wage bill / macro aggregate).
+A data frame with the grouping columns, \code{ref_date}, \code{wagebill},
+\code{share_wagebill} (only when \code{group_cols} is not \code{NULL}) and
+\code{wagebill_growth}.
 }
 \description{
-Computes aggregate wage bill statistics from contract-level salary data.
-The function converts salary variables to constant purchasing power parity
-(PPP) using macro indicators, then aggregates by specified grouping variables.
-Optionally computes wage bill shares relative to macro-fiscal aggregates
-(e.g., GDP, public expenditure, revenue).
+Sums \code{measure_col} within each group and reference date, and reports each
+group's share of the total wagebill and its growth from the previous
+reference date.
+}
+\details{
+Missing values in \code{measure_col} are ignored. When \code{group_cols} is not
+\code{NULL}, every group is expanded to every \code{ref_date} in \code{data}, so a group
+absent in a period gets \code{wagebill = NA} rather than being dropped; groups
+with \code{NA} in \code{group_cols} are kept. \code{wagebill_growth} is the relative change
+from the group's previous reference date, and is \code{NA} in the first period
+or when either period's wagebill is \code{NA}.
 }
 \examples{
-# Compute wage bill totals by country and year
-\dontrun{
 compute_wagebill(
-  contract_df = govhr::bra_hrmis_contract,
-  wage_vars = c("gross_salary_lcu"),
-  groups = c("country_code", "year")
+  bra_hrmis_contract,
+  group_cols = "contract_type"
 )
-
-# Compute wage bill as share of GDP and public expenditure
-compute_wagebill(
-  contract_df = govhr::bra_hrmis_contract,
-  wage_vars = c("gross_salary_lcu", "net_salary_lcu"),
-  groups = c("country_code", "year"),
-  share_macro = TRUE,
-  macro_vars = c("gdp_lcu", "pexpenditure_lcu")
-)
-}
 
 }
 \seealso{
-\code{\link{convert_constant_ppp}} for PPP conversion
-\code{\link{compute_fastsummary}} for general aggregation
-\code{\link{compute_fastshare}} for share computation (when \code{share_macro = TRUE})
+\code{\link[=compute_growth_decomposition]{compute_growth_decomposition()}} to decompose wagebill changes into
+employment and compensation effects.
 }
