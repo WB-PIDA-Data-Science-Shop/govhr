@@ -65,21 +65,42 @@ contract_rename_est_df <- contract_df |>
     est_id = str_remove_all(est_id, "\\d+|-")
   )
 
-personnel_reallocation_df <- contract_rename_est_df |>
-  detect_reallocation(
-    personnel_hire = personnel_hire_df
+# a person can hold contracts in several establishments at once, so combine
+# them into one label per person and date (e.g. "AL + SEDUC"). a reallocation
+# is then any change in that set of establishments
+personnel_est_df <- contract_rename_est_df |>
+  distinct(personnel_id, ref_date, est_id) |>
+  summarise(
+    est_set = paste(sort(est_id), collapse = " + "),
+    .by = c(personnel_id, ref_date)
+  )
+
+# compute_transition() dates each move to the first period in the new set of
+# establishments, so a person's first observation is never a reallocation.
+# moves on a hire date are re-entries after a gap, already counted as hires
+personnel_reallocation_df <- personnel_est_df |>
+  compute_transition(
+    id_col = "personnel_id",
+    group_cols = "est_set"
+  ) |>
+  anti_join(
+    personnel_hire_df |> distinct(personnel_id, ref_date),
+    by = c("personnel_id", "ref_date")
+  ) |>
+  mutate(
+    type_event = "reallocation"
+  ) |>
+  select(
+    personnel_id, ref_date, type_event
   )
 
 # join all
-personnel_movement_df <- list(
+personnel_movement_df <- bind_rows(
   personnel_hire_df,
   personnel_fire_df,
   personnel_retired_df,
   personnel_reallocation_df
-) |>
-  reduce(
-    bind_rows
-  )
+)
 
 # write-out ---------------------------------------------------------------
 personnel_movement_df |>

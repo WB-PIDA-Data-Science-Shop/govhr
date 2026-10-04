@@ -164,6 +164,15 @@ if (getRversion() >= "2.15.1") {
     ".contrib",
     "tenure_days",
     "tenure_years",
+    # compute_transition
+    "grouping",
+    "prev_group",
+    "to",
+    "from_date",
+    "transitions",
+    "n_duplicates",
+    "n_rows",
+    "n_ids",
     # .compute_transition_pair
     ".pid",
     "from_group",

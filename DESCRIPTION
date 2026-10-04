@@ -40,6 +40,9 @@ Imports:
     forcats,
     ggstats
 Suggests: 
+    DBI,
+    dbplyr,
+    duckdb,
     readr,
     testthat (>= 3.0.0),
     reactable
