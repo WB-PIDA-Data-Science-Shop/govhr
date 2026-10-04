@@ -2,12 +2,13 @@
 % Please edit documentation in R/wagebill_growth.R
 \name{compute_wage_decomposition}
 \alias{compute_wage_decomposition}
-\title{Decompose average-compensation growth}
+\title{Decompose average-wage growth}
 \usage{
 compute_wage_decomposition(growth_decomp, group_cols = NULL, simplify = TRUE)
 }
 \arguments{
-\item{growth_decomp}{Output of \code{compute_growth_decomposition(simplify = FALSE)}.}
+\item{growth_decomp}{Output of
+\code{compute_growth_decomposition(simplify = FALSE)}.}
 
 \item{group_cols}{Optional character vector of columns identifying a
 higher-level unit (e.g. "country_code") within which the decomposition
@@ -18,18 +19,18 @@ build \code{growth_decomp}. \code{NULL} pools all groups into one workforce.}
 \code{ref_date} and the effect columns (\code{within_effect}, \code{between_effect},
 \code{cross_effect}, \code{entry_effect}, \code{exit_effect}, \code{total_effect}). If
 \code{FALSE}, also return total headcount, total wagebill and average
-compensation, each for the current and the previous period
+wage, each for the current and the previous period
 (\code{total_headcount}, \code{total_headcount_lag}, \code{total_wagebill},
-\code{total_wagebill_lag}, \code{avg_compensation}, \code{avg_compensation_lag}).}
+\code{total_wagebill_lag}, \code{avg_wage}, \code{avg_wage_lag}).}
 }
 \value{
 A data.table with one row per reference date (per unit of
 \code{group_cols}, if given) and the effects described in Details.
-\code{total_effect} is the change in average compensation; it is \code{NA} when
+\code{total_effect} is the change in average wage; it is \code{NA} when
 either period has no employees, which includes the panel's first period.
 }
 \description{
-Explains why average compensation across the whole workforce changes from
+Explains why the average wage across the whole workforce changes from
 one period to the next: because pay changed inside groups, or because
 staff shifted between higher- and lower-paid groups. This complements
 \code{\link[=compute_growth_decomposition]{compute_growth_decomposition()}}, which explains each group's own
@@ -39,9 +40,9 @@ wagebill.
 \strong{Setup.} A group \eqn{g} is a row of \code{growth_decomp} (one
 combination of the grouping columns used there). In period \eqn{t}, let
 \eqn{N_{g,t}}{N_g,t} be the group's headcount, \eqn{C_{g,t}}{C_g,t} its
-average compensation, \eqn{N_t = \sum_g N_{g,t}}{N_t = sum_g N_g,t} the
+average wage (\code{wage}), \eqn{N_t = \sum_g N_{g,t}}{N_t = sum_g N_g,t} the
 total headcount and \eqn{s_{g,t} = N_{g,t} / N_t}{s_g,t = N_g,t / N_t} the
-group's share of headcount. Average compensation of the workforce is total
+group's share of headcount. The average wage of the workforce is total
 wagebill over total headcount, which is the share-weighted mean of group
 averages:
 \deqn{\bar{C}_t = \frac{W_t}{N_t} = \sum_g s_{g,t} \, C_{g,t}}{avgC_t = W_t / N_t = sum_g s_g,t * C_g,t}
@@ -83,7 +84,7 @@ previous period's overall average.
 }
 
 \strong{Proof of identity.} Shares sum to one in each period, so
-subtracting the previous period's average compensation from every group
+subtracting the previous period's average wage from every group
 average leaves the change unaltered:
 \deqn{\Delta \bar{C}_t = \sum_{g \in K \cup E} s_{g,t} (C_{g,t} - \bar{C}_{t-1}) -
   \sum_{g \in K \cup X} s_{g,t-1} (C_{g,t-1} - \bar{C}_{t-1})}{d avgC = sum_(K,E) s_g,t (C_g,t - avgC_t-1) - sum_(K,X) s_g,t-1 (C_g,t-1 - avgC_t-1)}

@@ -1,62 +1,59 @@
 #' Compute growth decomposition of wagebill
-#' 
-compute_growth_decomposition <- function(data, ...){
-  UseMethod("compute_growth_decomposition")
-}
-
-#' Compute growth decomposition of wagebill
 #'
-#' @param data A data frame containing the data to be analyzed. It should include columns for the grouping variables, a column for the reference date, and a column for the measure of interest (e.g., gross salary).
-#' @param group_cols A character vector specifying the names of the columns to group by.
-#' @param measure_col A string specifying the name of the column containing the measure of interest (default is "gross_salary_lcu").
+#' @param data Data frame or remote table (`tbl_dbi`) containing a `ref_date`
+#'   column, the grouping columns and the measure.
+#' @param group_cols Character vector of columns to group by, or `NULL` for no
+#'   grouping. Must not include `ref_date`.
+#' @param measure_col Character. Numeric column to decompose. Default
+#'   `"gross_salary_lcu"`.
 #' @param simplify Logical. If `TRUE` (default), return only `group_cols`,
 #'   `ref_date`, `transition_type` and the effect columns
-#'   (`employment_effect`, `compensation_effect`, `interaction_effect`,
+#'   (`employment_effect`, `wage_effect`, `interaction_effect`,
 #'   `entry_effect`, `exit_effect`, `total_effect`). If `FALSE`, also return
-#'   the intermediate columns (headcount, compensation, wagebill, their lags
-#'   and observation flags). `compute_wage_decomposition()` requires
-#'   `simplify = FALSE`.
+#'   the intermediate columns (`headcount`, `wage`, `wagebill`, their lags,
+#'   `delta_wage`, `is_observed` and `observed_lag`).
+#'   [compute_wage_decomposition()] requires `simplify = FALSE`.
+#' @param ... Arguments passed to methods.
 #'
-#' @returns A data.table with one row per group x period, a `transition_type`
-#'   label for each row: "start" (panel's first period for this group), "continuing" (observed this
-#'   period and last), "entry" (observed this, but not in the last), or
-#'   "exit" (not observed in this period but observed in the last period). In addition,
-#'   employment, compensation and interaction effects on the wagebill.
+#' @returns A data.table (a lazy table for `tbl_dbi` input) with one row per
+#'   group x reference date, containing the grouping columns, `ref_date`,
+#'   `transition_type` and the columns selected by `simplify`.
+#'   `transition_type` is "start" (panel's first period), "continuing"
+#'   (observed this period and last), "entry" (observed this period but not
+#'   last) or "exit" (not observed this period).
 #'
 #' @details
 #' The function explains how each group's wagebill changes from one period
 #' to the next, decomposing the change into an effect due to headcount, an effect
 #' due to average pay, and an effect due to both moving together.
 #'
-#' \strong{1. Building the panel.} Rows with a missing value in any of
-#' `group_cols` are dropped, and rows with a missing `measure_col` are
-#' ignored. For each group \eqn{g} (a combination of `group_cols`) and
-#' period \eqn{t} (`ref_date`):
+#' \strong{1. Building the panel.} Rows with a missing value in `measure_col`
+#' or any of `group_cols` are dropped. For each group \eqn{g} (a combination
+#' of `group_cols`) and period \eqn{t} (`ref_date`):
 #' \itemize{
 #'   \item headcount \eqn{N_{g,t}}: number of records;
-#'   \item compensation \eqn{C_{g,t}}: mean of `measure_col`;
+#'   \item wage \eqn{C_{g,t}}: mean of `measure_col`;
 #'   \item wagebill \eqn{W_{g,t} = \sum_i w_i = N_{g,t} \, C_{g,t}}{W = sum(w_i) = N * C}.
 #' }
-#' Every group is then expanded to every period between the first and last
-#' `ref_date` in the data, at the frequency detected by
-#' `guess_date_frequency()` (year, quarter, month, ...). A group absent in
-#' a period gets \eqn{N = 0}, \eqn{W = 0} and \eqn{C} = `NA`, so gaps are
-#' explicit rather than silently skipped. Each row is compared with the
-#' same group's previous period, \eqn{t-1}.
+#' Every group is then expanded to every `ref_date` in `data`. A group absent
+#' in a period gets \eqn{N = 0}, \eqn{W = 0} and \eqn{C} = `NA`, so gaps are
+#' explicit rather than silently skipped. Reference dates absent from the
+#' whole of `data` are not added. Each row is compared with the same group's
+#' previous reference date, \eqn{t-1}.
 #'
 #' \strong{2. Continuing groups} (observed at \eqn{t-1} and \eqn{t}). Write
 #' \eqn{\Delta N = N_t - N_{t-1}}{dN = N_t - N_(t-1)} and
-#' \eqn{\Delta C = C_t - C_{t-1}}{dC = C_t - C_(t-1)}. Since
+#' \eqn{\Delta C = C_t - C_{t-1}}{dC = C_t - C_(t-1)} (`delta_wage`). Since
 #' \eqn{W_t = (N_{t-1} + \Delta N)(C_{t-1} + \Delta C)}{W_t = (N_(t-1) + dN) * (C_(t-1) + dC)},
 #' expanding the product gives us the following identity:
 #' \deqn{W_t - W_{t-1} = \underbrace{C_{t-1} \Delta N}_{\text{employment}} +
-#'   \underbrace{N_{t-1} \Delta C}_{\text{compensation}} +
+#'   \underbrace{N_{t-1} \Delta C}_{\text{wage}} +
 #'   \underbrace{\Delta N \, \Delta C}_{\text{interaction}}}{W_t - W_(t-1) = C_(t-1) * dN + N_(t-1) * dC + dN * dC}
 #' \itemize{
 #'   \item `employment_effect` \eqn{= C_{t-1} \Delta N}{= C_(t-1) * dN}: the
 #'     change had pay stayed at last period's average and only headcount
 #'     changed.
-#'   \item `compensation_effect` \eqn{= N_{t-1} \Delta C}{= N_(t-1) * dC}:
+#'   \item `wage_effect` \eqn{= N_{t-1} \Delta C}{= N_(t-1) * dC}:
 #'     the change had headcount stayed at last period's level and only
 #'     average pay changed.
 #'   \item `interaction_effect` \eqn{= \Delta N \, \Delta C}{= dN * dC}: the
@@ -86,136 +83,139 @@ compute_growth_decomposition <- function(data, ...){
 #' `total_effect` over time for a group recovers its wagebill in the last
 #' period minus its wagebill in the first period.
 #'
-#' @importFrom data.table .N := shift setorderv fcase fifelse
-#' @importFrom tidyr complete nesting
+#' @export
+compute_growth_decomposition <- function(data, ...) {
+  UseMethod("compute_growth_decomposition")
+}
+
+#' @rdname compute_growth_decomposition
+#' @importFrom data.table .N := shift setorderv fcase fifelse fcoalesce
 #' @export
 compute_growth_decomposition.data.frame <- function(
   data,
   group_cols = NULL,
   measure_col = "gross_salary_lcu",
-  simplify = TRUE
+  simplify = TRUE,
+  ...
 ) {
-  dt <- data.table::as.data.table(data)
-
-  if (!is.null(group_cols)) {
-    keep <- rowSums(is.na(dt[, ..group_cols])) == 0
-    dt <- dt[keep]
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
   }
 
   by_cols <- c(group_cols, "ref_date")
 
-  summary_table <- dt[
-    !is.na(get(measure_col)),
+  dt <- data.table::as.data.table(data)
+  calendar <- unique(dt[, "ref_date"])
+
+  keep <- stats::complete.cases(dt[, c(measure_col, group_cols), with = FALSE])
+
+  wagebill <- dt[
+    keep,
     .(
-      headcount    = .N,
-      compensation = mean(get(measure_col)),
-      wagebill     = sum(get(measure_col))
+      headcount = .N,
+      wagebill  = sum(get(measure_col)),
+      wage      = mean(get(measure_col))
     ),
     by = by_cols
   ]
 
-  summary_table[, is_observed := TRUE]
+  # complete the group x date panel, as in the tbl_dbi method, so shift()
+  # always refers to the previous period of the calendar
+  panel <- calendar
 
-  min_date <- min(data$ref_date)
-  max_date <- max(data$ref_date)
-  date_interval <- guess_date_frequency(data)
-
-  # complete dataset with all combinations of group_cols and ref_date, filling in missing values
   if (!is.null(group_cols)) {
-    summary_table <- summary_table |>
-      tidyr::complete(
-        tidyr::nesting(!!!rlang::syms(group_cols)),
-        ref_date = seq(min_date, max_date, by = date_interval),
-        fill = list(headcount = 0, compensation = NA_real_)
-      )
-  } else {
-    summary_table <- summary_table |>
-      tidyr::complete(
-        ref_date = seq(min_date, max_date, by = date_interval),
-        fill = list(headcount = 0, compensation = NA_real_)
-      )
+    panel <- unique(wagebill[, ..group_cols])[
+      ,
+      .(ref_date = calendar$ref_date),
+      by = group_cols
+    ]
   }
 
-  summary_table <- data.table::as.data.table(summary_table)
-  summary_table[is.na(is_observed), is_observed := FALSE]
-  summary_table[is.na(wagebill), wagebill := 0]  # unobserved periods contribute $0
+  panel <- wagebill[panel, on = by_cols]
 
-  data.table::setorderv(summary_table, by_cols)
+  panel[, `:=`(
+    is_observed = !is.na(headcount),
+    headcount   = data.table::fcoalesce(as.numeric(headcount), 0),
+    wagebill    = data.table::fcoalesce(wagebill, 0)
+  )]
 
-  summary_table[,
+  data.table::setorderv(panel, by_cols)
+
+  panel[,
     `:=`(
-      headcount_lag    = data.table::shift(headcount, type = "lag"),
-      compensation_lag = data.table::shift(compensation, type = "lag"),
-      wagebill_lag     = data.table::shift(wagebill, type = "lag"),
-      observed_lag     = data.table::shift(is_observed, type = "lag")
+      headcount_lag = data.table::shift(headcount, type = "lag"),
+      wage_lag      = data.table::shift(wage, type = "lag"),
+      wagebill_lag  = data.table::shift(wagebill, type = "lag"),
+      observed_lag  = data.table::shift(is_observed, type = "lag")
     ),
     by = group_cols
   ]
 
-  summary_table[, transition_type := data.table::fcase(
-    is.na(observed_lag) & is_observed,   "start",
-    !observed_lag & is_observed,         "entry",
-    is.na(observed_lag) & !is_observed,  "exit",
-    observed_lag & !is_observed,         "exit",
-    !observed_lag & !is_observed,        "exit",
-    observed_lag & is_observed,          "continuing"
+  panel[, transition_type := data.table::fcase(
+    !is_observed,        "exit",
+    is.na(observed_lag), "start",
+    observed_lag,        "continuing",
+    default = "entry"
   )]
 
-  summary_table[, `:=`(
-    delta_headcount    = headcount - headcount_lag,
-    delta_compensation = compensation - compensation_lag
-  )]
-
-  summary_table[, `:=`(
-    employment_effect   = compensation_lag * delta_headcount,
-    compensation_effect = headcount_lag * delta_compensation,
-    interaction_effect  = delta_headcount * delta_compensation
-  )]
-
-  summary_table[
-    transition_type != "continuing",
-    `:=`(
-      delta_headcount = NA_real_, delta_compensation = NA_real_,
-      employment_effect = NA_real_, compensation_effect = NA_real_,
-      interaction_effect = NA_real_
+  # deltas are only defined for continuing groups, NA propagates to the
+  # employment, wage and interaction effects
+  panel[, `:=`(
+    delta_headcount = data.table::fifelse(
+      transition_type == "continuing", headcount - headcount_lag, NA_real_
+    ),
+    delta_wage = data.table::fifelse(
+      transition_type == "continuing", wage - wage_lag, NA_real_
     )
-  ]
+  )]
 
-  summary_table[, `:=`(entry_effect = NA_real_, exit_effect = NA_real_)]
-  summary_table[transition_type == "entry", entry_effect := wagebill]
-  
-  summary_table[
-    transition_type == "exit",
-    exit_effect := data.table::fifelse(observed_lag %in% TRUE, -wagebill_lag, 0)
-  ]
+  panel[, `:=`(
+    employment_effect  = wage_lag * delta_headcount,
+    wage_effect        = headcount_lag * delta_wage,
+    interaction_effect = delta_headcount * delta_wage,
+    entry_effect = data.table::fifelse(
+      transition_type == "entry", wagebill, NA_real_
+    ),
+    exit_effect = data.table::fifelse(
+      transition_type == "exit",
+      data.table::fifelse(observed_lag %in% TRUE, -wagebill_lag, 0),
+      NA_real_
+    )
+  )]
 
-  summary_table[, total_effect := data.table::fcase(
+  # entry and exit effects are exclusive, and both are NA at start
+  panel[, total_effect := data.table::fifelse(
     transition_type == "continuing",
-    employment_effect + compensation_effect + interaction_effect,
-    transition_type == "entry", entry_effect,
-    transition_type == "exit", exit_effect,
-    default = NA_real_  # "start": genuinely unknown baseline
+    employment_effect + wage_effect + interaction_effect,
+    data.table::fcoalesce(entry_effect, exit_effect)
   )]
 
   out_cols <- c(
-    group_cols, "ref_date", "transition_type", "headcount", "headcount_lag",
-    "compensation", "compensation_lag", "employment_effect",
-    "compensation_effect", "interaction_effect", "entry_effect", "delta_compensation",
-    "exit_effect", "total_effect", "wagebill", "wagebill_lag", "is_observed", "observed_lag"
+    by_cols, "transition_type", "headcount", "headcount_lag", "wage",
+    "wage_lag", "employment_effect", "wage_effect", "interaction_effect",
+    "entry_effect", "delta_wage", "exit_effect", "total_effect", "wagebill",
+    "wagebill_lag", "is_observed", "observed_lag"
   )
 
   if (simplify) {
     out_cols <- c(
-      group_cols, "ref_date", "transition_type", "employment_effect",
-      "compensation_effect", "interaction_effect", "entry_effect",
-      "exit_effect", "total_effect"
+      by_cols, "transition_type", "employment_effect", "wage_effect",
+      "interaction_effect", "entry_effect", "exit_effect", "total_effect"
     )
   }
 
-  summary_table[, ..out_cols]
+  panel[, ..out_cols]
 }
 
-compute_growth_decomposition.tbl_dbi <- function(data, measure_col = "gross_salary_lcu", group_cols = NULL){
+#' @rdname compute_growth_decomposition
+#' @export
+compute_growth_decomposition.tbl_dbi <- function(
+  data,
+  group_cols = NULL,
+  measure_col = "gross_salary_lcu",
+  simplify = TRUE,
+  ...
+) {
   if("ref_date" %in% group_cols){
     stop("`ref_date` should not be included in `group_cols`")
   }
@@ -255,7 +255,7 @@ compute_growth_decomposition.tbl_dbi <- function(data, measure_col = "gross_sala
       select(-key)
   }
 
-  panel |>
+  decomposition <- panel |>
     left_join(
       wagebill,
       by = group_cols_with_date
@@ -309,17 +309,29 @@ compute_growth_decomposition.tbl_dbi <- function(data, measure_col = "gross_sala
       delta_wage, exit_effect, total_effect, wagebill, wagebill_lag,
       is_observed, observed_lag
     )
+
+  if (simplify) {
+    decomposition <- decomposition |>
+      select(
+        all_of(group_cols_with_date),
+        transition_type, employment_effect, wage_effect, interaction_effect,
+        entry_effect, exit_effect, total_effect
+      )
+  }
+
+  decomposition
 }
 
-#' Decompose average-compensation growth
+#' Decompose average-wage growth
 #'
-#' Explains why average compensation across the whole workforce changes from
+#' Explains why the average wage across the whole workforce changes from
 #' one period to the next: because pay changed inside groups, or because
 #' staff shifted between higher- and lower-paid groups. This complements
 #' [compute_growth_decomposition()], which explains each group's own
 #' wagebill.
 #'
-#' @param growth_decomp Output of `compute_growth_decomposition(simplify = FALSE)`.
+#' @param growth_decomp Output of
+#'   `compute_growth_decomposition(simplify = FALSE)`.
 #' @param group_cols Optional character vector of columns identifying a
 #'   higher-level unit (e.g. "country_code") within which the decomposition
 #'   is computed separately. Must be a subset of the grouping columns used to
@@ -328,22 +340,22 @@ compute_growth_decomposition.tbl_dbi <- function(data, measure_col = "gross_sala
 #'   `ref_date` and the effect columns (`within_effect`, `between_effect`,
 #'   `cross_effect`, `entry_effect`, `exit_effect`, `total_effect`). If
 #'   `FALSE`, also return total headcount, total wagebill and average
-#'   compensation, each for the current and the previous period
+#'   wage, each for the current and the previous period
 #'   (`total_headcount`, `total_headcount_lag`, `total_wagebill`,
-#'   `total_wagebill_lag`, `avg_compensation`, `avg_compensation_lag`).
+#'   `total_wagebill_lag`, `avg_wage`, `avg_wage_lag`).
 #'
 #' @returns A data.table with one row per reference date (per unit of
 #'   `group_cols`, if given) and the effects described in Details.
-#'   `total_effect` is the change in average compensation; it is `NA` when
+#'   `total_effect` is the change in average wage; it is `NA` when
 #'   either period has no employees, which includes the panel's first period.
 #'
 #' @details
 #' \strong{Setup.} A group \eqn{g} is a row of `growth_decomp` (one
 #' combination of the grouping columns used there). In period \eqn{t}, let
 #' \eqn{N_{g,t}}{N_g,t} be the group's headcount, \eqn{C_{g,t}}{C_g,t} its
-#' average compensation, \eqn{N_t = \sum_g N_{g,t}}{N_t = sum_g N_g,t} the
+#' average wage (`wage`), \eqn{N_t = \sum_g N_{g,t}}{N_t = sum_g N_g,t} the
 #' total headcount and \eqn{s_{g,t} = N_{g,t} / N_t}{s_g,t = N_g,t / N_t} the
-#' group's share of headcount. Average compensation of the workforce is total
+#' group's share of headcount. The average wage of the workforce is total
 #' wagebill over total headcount, which is the share-weighted mean of group
 #' averages:
 #' \deqn{\bar{C}_t = \frac{W_t}{N_t} = \sum_g s_{g,t} \, C_{g,t}}{avgC_t = W_t / N_t = sum_g s_g,t * C_g,t}
@@ -385,7 +397,7 @@ compute_growth_decomposition.tbl_dbi <- function(data, measure_col = "gross_sala
 #' }
 #'
 #' \strong{Proof of identity.} Shares sum to one in each period, so
-#' subtracting the previous period's average compensation from every group
+#' subtracting the previous period's average wage from every group
 #' average leaves the change unaltered:
 #' \deqn{\Delta \bar{C}_t = \sum_{g \in K \cup E} s_{g,t} (C_{g,t} - \bar{C}_{t-1}) -
 #'   \sum_{g \in K \cup X} s_{g,t-1} (C_{g,t-1} - \bar{C}_{t-1})}{d avgC = sum_(K,E) s_g,t (C_g,t - avgC_t-1) - sum_(K,X) s_g,t-1 (C_g,t-1 - avgC_t-1)}
@@ -413,8 +425,8 @@ compute_wage_decomposition <- function(
   dt <- data.table::copy(data.table::as.data.table(growth_decomp))
   validate_columns_exist(
     dt,
-    c("headcount", "headcount_lag", "wagebill", "wagebill_lag", "compensation",
-      "compensation_lag", "delta_compensation", "observed_lag"),
+    c("headcount", "headcount_lag", "wagebill", "wagebill_lag", "wage",
+      "wage_lag", "delta_wage", "observed_lag"),
     "growth_decomp (use compute_growth_decomposition(simplify = FALSE))"
   )
   agg_by <- c(group_cols, "ref_date")
@@ -427,10 +439,10 @@ compute_wage_decomposition <- function(
   ), by = agg_by]
 
   dt[, `:=`(
-    avg_compensation     = data.table::fifelse(
+    avg_wage     = data.table::fifelse(
       total_headcount > 0, total_wagebill / total_headcount, NA_real_
     ),
-    avg_compensation_lag = data.table::fifelse(
+    avg_wage_lag = data.table::fifelse(
       total_headcount_lag > 0, total_wagebill_lag / total_headcount_lag, NA_real_
     )
   )]
@@ -447,20 +459,20 @@ compute_wage_decomposition <- function(
 
   dt[, `:=`(
     within_term  = data.table::fifelse(
-      transition_type == "continuing", share_lag * delta_compensation, 0
+      transition_type == "continuing", share_lag * delta_wage, 0
     ),
     between_term = data.table::fifelse(
-      transition_type == "continuing", delta_share * (compensation_lag - avg_compensation_lag), 0
+      transition_type == "continuing", delta_share * (wage_lag - avg_wage_lag), 0
     ),
     cross_term   = data.table::fifelse(
-      transition_type == "continuing", delta_share * delta_compensation, 0
+      transition_type == "continuing", delta_share * delta_wage, 0
     ),
     entry_term   = data.table::fifelse(
-      transition_type == "entry", share * (compensation - avg_compensation_lag), 0
+      transition_type == "entry", share * (wage - avg_wage_lag), 0
     ),
     exit_term    = data.table::fifelse(
       transition_type == "exit" & observed_lag %in% TRUE,
-      -share_lag * (compensation_lag - avg_compensation_lag), 0
+      -share_lag * (wage_lag - avg_wage_lag), 0
     )
   )]
 
@@ -469,8 +481,8 @@ compute_wage_decomposition <- function(
     total_headcount_lag  = total_headcount_lag[1],
     total_wagebill       = total_wagebill[1],
     total_wagebill_lag   = total_wagebill_lag[1],
-    avg_compensation     = avg_compensation[1],
-    avg_compensation_lag = avg_compensation_lag[1],
+    avg_wage     = avg_wage[1],
+    avg_wage_lag = avg_wage_lag[1],
     within_effect  = sum(within_term),
     between_effect = sum(between_term),
     cross_effect   = sum(cross_term),
@@ -479,7 +491,7 @@ compute_wage_decomposition <- function(
   ), by = agg_by]
 
   period_decomp[, total_effect := data.table::fifelse(
-    is.na(avg_compensation) | is.na(avg_compensation_lag), NA_real_,
+    is.na(avg_wage) | is.na(avg_wage_lag), NA_real_,
     within_effect + between_effect + cross_effect + entry_effect + exit_effect
   )]
 

@@ -1,11 +1,13 @@
 test_that("mid-panel gap produces exit then entry, not a fabricated collapse", {
   d <- data.frame(
-    dept = "A",
-    ref_date = as.Date(c("2020-01-01", "2023-01-01")),  # 2021, 2022 missing
-    gross_salary_lcu = c(100000, 130000)
+    dept = c("A", "A", rep("B", 4)),
+    # dept A missing in 2021 and 2022; dept B keeps those dates in the calendar
+    ref_date = as.Date(c("2020-01-01", "2023-01-01", paste0(2020:2023, "-01-01"))),
+    gross_salary_lcu = c(100000, 130000, rep(50000, 4))
   )
 
   res <- compute_growth_decomposition(d, group_cols = "dept")
+  res <- res[res$dept == "A", ]
 
   expect_equal(res[res$ref_date == as.Date("2021-01-01"), "transition_type"] |> dplyr::pull(), "exit")
   expect_equal(res[res$ref_date == as.Date("2022-01-01"), "transition_type"] |> dplyr::pull(), "exit")
@@ -68,11 +70,13 @@ test_that("a balanced panel is entirely 'continuing' after the first period", {
 
 test_that("a multi-period gap has no 'gap' label -- only entry/exit", {
   d <- data.frame(
-    dept = "A",
-    ref_date = as.Date(c("2020-01-01", "2023-01-01")),  # 2021, 2022 missing
-    gross_salary_lcu = c(100000, 130000)
+    dept = c("A", "A", rep("B", 4)),
+    # dept A missing in 2021 and 2022; dept B keeps those dates in the calendar
+    ref_date = as.Date(c("2020-01-01", "2023-01-01", paste0(2020:2023, "-01-01"))),
+    gross_salary_lcu = c(100000, 130000, rep(50000, 4))
   )
   res <- compute_growth_decomposition(d, group_cols = "dept")
+  res <- res[res$dept == "A", ]
   expect_false("gap" %in% res$transition_type)
   types <- setNames(res$transition_type, as.character(res$ref_date))
   expect_equal(unname(types["2021-01-01"]), "exit")
@@ -82,11 +86,13 @@ test_that("a multi-period gap has no 'gap' label -- only entry/exit", {
 
 test_that("exit_effect fires once at the boundary, zero for the rest of the gap", {
   d <- data.frame(
-    dept = "A",
-    ref_date = as.Date(c("2020-01-01", "2023-01-01")),
-    gross_salary_lcu = c(100000, 130000)
+    dept = c("A", "A", rep("B", 4)),
+    # dept A missing in 2021 and 2022; dept B keeps those dates in the calendar
+    ref_date = as.Date(c("2020-01-01", "2023-01-01", paste0(2020:2023, "-01-01"))),
+    gross_salary_lcu = c(100000, 130000, rep(50000, 4))
   )
   res <- compute_growth_decomposition(d, group_cols = "dept")
+  res <- res[res$dept == "A", ]
   eff <- setNames(res$exit_effect, as.character(res$ref_date))
   expect_equal(unname(eff["2021-01-01"]), -100000)  # the real drop
   expect_equal(unname(eff["2022-01-01"]), 0)         # still gone, no new change
@@ -121,7 +127,7 @@ test_that("pure composition shift with no pay changes shows up entirely as betwe
   expect_equal(row2021$cross_effect, 0, tolerance = 1e-8)
   expect_equal(row2021$between_effect, 250, tolerance = 1e-8)
   expect_gt(row2021$between_effect, 0)
-  expect_equal(row2021$total_effect, row2021$avg_compensation - row2021$avg_compensation_lag)
+  expect_equal(row2021$total_effect, row2021$avg_wage - row2021$avg_wage_lag)
 })
 
 test_that("pure within-group raises with no reallocation shows up entirely as within_effect", {
@@ -138,7 +144,7 @@ test_that("pure within-group raises with no reallocation shows up entirely as wi
   expect_equal(row2021$between_effect, 0, tolerance = 1e-8)
   expect_equal(row2021$cross_effect, 0, tolerance = 1e-8)
   expect_gt(row2021$within_effect, 0)
-  expect_equal(row2021$total_effect, row2021$avg_compensation - row2021$avg_compensation_lag)
+  expect_equal(row2021$total_effect, row2021$avg_wage - row2021$avg_wage_lag)
 })
 
 test_that("identity holds with entry, exit, and within effects all present at once", {
@@ -155,7 +161,7 @@ test_that("identity holds with entry, exit, and within effects all present at on
   row2021 <- wd[ref_date == as.Date("2021-01-01")]
   expect_true(row2021$entry_effect != 0)
   expect_true(row2021$exit_effect != 0)
-  expect_equal(row2021$total_effect, row2021$avg_compensation - row2021$avg_compensation_lag)
+  expect_equal(row2021$total_effect, row2021$avg_wage - row2021$avg_wage_lag)
 })
 
 test_that("the panel's first period has NA total_effect, not a spurious number", {
@@ -165,7 +171,7 @@ test_that("the panel's first period has NA total_effect, not a spurious number",
   gd <- compute_growth_decomposition(raw, group_cols = "dept", simplify = FALSE)
   wd <- compute_wage_decomposition(gd, group_cols = "dept", simplify = FALSE)
   expect_true(is.na(wd$total_effect[1]))
-  expect_true(is.na(wd$avg_compensation_lag[1]))
+  expect_true(is.na(wd$avg_wage_lag[1]))
 })
 
 test_that("group_cols = 'country' computes composition separately per country", {
@@ -194,10 +200,47 @@ test_that("simplify = TRUE returns only group, date, transition type and effects
   res <- compute_growth_decomposition(d, group_cols = "dept")
   expect_equal(names(res), c(
     "dept", "ref_date", "transition_type", "employment_effect",
-    "compensation_effect", "interaction_effect", "entry_effect",
+    "wage_effect", "interaction_effect", "entry_effect",
     "exit_effect", "total_effect"
   ))
   expect_error(compute_wage_decomposition(res), "simplify = FALSE")
+})
+
+test_that("simplify = FALSE returns the same columns as the tbl_dbi method", {
+  d <- data.frame(
+    dept = "A",
+    ref_date = as.Date(c("2020-01-01", "2021-01-01")),
+    gross_salary_lcu = c(100000, 105000)
+  )
+  res <- compute_growth_decomposition(d, group_cols = "dept", simplify = FALSE)
+  expect_equal(names(res), c(
+    "dept", "ref_date", "transition_type", "headcount", "headcount_lag",
+    "wage", "wage_lag", "employment_effect", "wage_effect",
+    "interaction_effect", "entry_effect", "delta_wage", "exit_effect",
+    "total_effect", "wagebill", "wagebill_lag", "is_observed", "observed_lag"
+  ))
+})
+
+test_that("reference dates absent from the whole data are not added", {
+  d <- data.frame(
+    dept = "A",
+    ref_date = as.Date(c("2020-01-01", "2023-01-01")),
+    gross_salary_lcu = c(100000, 130000)
+  )
+  res <- compute_growth_decomposition(d, group_cols = "dept")
+  expect_equal(res$ref_date, as.Date(c("2020-01-01", "2023-01-01")))
+  expect_equal(res$transition_type, c("start", "continuing"))
+  expect_equal(res$total_effect[2], 30000)
+})
+
+test_that("month-end reference dates do not create spurious periods", {
+  d <- data.frame(
+    dept = "A",
+    ref_date = as.Date(c("2020-01-31", "2020-02-29", "2020-03-31")),
+    gross_salary_lcu = c(1, 2, 3)
+  )
+  res <- compute_growth_decomposition(d, group_cols = "dept")
+  expect_equal(res$transition_type, c("start", "continuing", "continuing"))
 })
 
 test_that("compute_wage_decomposition simplify = TRUE keeps only group, date and effects", {
@@ -215,5 +258,5 @@ test_that("compute_wage_decomposition simplify = TRUE keeps only group, date and
   ))
   full <- compute_wage_decomposition(gd, group_cols = "country", simplify = FALSE)
   expect_equal(full$total_effect, wd$total_effect)
-  expect_true(all(c("total_headcount_lag", "avg_compensation_lag") %in% names(full)))
+  expect_true(all(c("total_headcount_lag", "avg_wage_lag") %in% names(full)))
 })
