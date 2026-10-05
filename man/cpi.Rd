@@ -32,7 +32,7 @@ The monthly consumer price index (CPI) for all items, by country, from the
 International Monetary Fund (IMF). A CPI tracks how the prices of everyday
 goods and services change over time, so it can turn nominal wages into
 real wages that are comparable across months and years. It is the data
-behind \code{\link[=deflate_to_real]{deflate_to_real()}}.
+underlying \code{\link[=deflate_to_real]{deflate_to_real()}}.
 }
 \details{
 Covers 191 countries. How far back each country's series goes varies, and

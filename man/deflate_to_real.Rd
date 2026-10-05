@@ -4,7 +4,7 @@
 \alias{deflate_to_real}
 \title{Deflate a nominal LCU column to real values}
 \usage{
-deflate_to_real(col, ref_date, country_code, base_year = 2021)
+deflate_to_real(col, ref_date, country_code, base_month = "2021-12-01")
 }
 \arguments{
 \item{col}{Numeric vector. The nominal LCU values to deflate (a data column).}
@@ -16,19 +16,20 @@ matched to that month's CPI.}
 \item{country_code}{Character. Either a scalar (e.g. \code{"MOZ"}) recycled
 across all rows, or a character column of ISO3 country codes.}
 
-\item{base_year}{Integer scalar. The base year to deflate to. Defaults to
-\code{2021}.}
+\item{base_month}{The month whose prices the values are expressed in,
+given as its first day in \code{"YYYY-MM-01"} format (or as a
+\code{Date}). Defaults to \code{"2021-12-01"}.}
 }
 \value{
 A numeric vector of the same length as \code{col}, expressed in
-constant \code{base_year} LCU prices. Returns \code{NA} (with a warning)
-for any row where CPI is missing for the given country and month, or for
-the country's base year.
+constant LCU prices of \code{base_month}. Returns \code{NA} (with a
+warning) for any row where CPI is missing for its own month, or for the
+country's base month.
 }
 \description{
 Converts nominal values (e.g. wages in local currency units, LCU) into real
-values expressed in constant LCU prices of a chosen base year, using monthly
-consumer price index (CPI) data:
+values expressed in constant LCU prices of a chosen base month, using
+monthly consumer price index (CPI) data:
 \deqn{\text{real} = \text{nominal} \times \frac{\text{CPI}_{base}}{\text{CPI}_{month}}}
 }
 \details{
@@ -36,9 +37,11 @@ CPI data comes from \link{cpi}, the IMF's monthly all-items CPI. Each
 observation is deflated with the CPI of its own month, rather than an
 annual average, so values within the same year are made comparable too.
 
-The base-year CPI is the average of the country's monthly CPI over
-\code{base_year}. A real value therefore reads as "in average
-\code{base_year} prices".
+The base month must be within each country's CPI data. With the default
+(December 2021), this holds for every country except the 15 listed in
+\link{cpi}, whose series stop before or start after that month. For
+those, pick a \code{base_month} within their data; otherwise the result
+is \code{NA}, and the warning shows the months each country covers.
 }
 \examples{
 library(dplyr)
@@ -57,8 +60,8 @@ data |>
 data |>
   dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, country_code))
 
-# Custom base year
+# Custom base month
 data |>
-  dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, country_code, base_year = 2015))
+  dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, country_code, base_month = "2015-01-01"))
 
 }

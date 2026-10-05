@@ -318,8 +318,8 @@ convert_constant_ppp <- function(data, cols) {
 #' Deflate a nominal LCU column to real values
 #'
 #' Converts nominal values (e.g. wages in local currency units, LCU) into real
-#' values expressed in constant LCU prices of a chosen base year, using monthly
-#' consumer price index (CPI) data:
+#' values expressed in constant LCU prices of a chosen base month, using
+#' monthly consumer price index (CPI) data:
 #' \deqn{\text{real} = \text{nominal} \times \frac{\text{CPI}_{base}}{\text{CPI}_{month}}}
 #'
 #' @param col Numeric vector. The nominal LCU values to deflate (a data column).
@@ -328,22 +328,25 @@ convert_constant_ppp <- function(data, cols) {
 #'   matched to that month's CPI.
 #' @param country_code Character. Either a scalar (e.g. \code{"MOZ"}) recycled
 #'   across all rows, or a character column of ISO3 country codes.
-#' @param base_year Integer scalar. The base year to deflate to. Defaults to
-#'   \code{2021}.
+#' @param base_month The month whose prices the values are expressed in,
+#'   given as its first day in \code{"YYYY-MM-01"} format (or as a
+#'   \code{Date}). Defaults to \code{"2021-12-01"}.
 #'
 #' @returns A numeric vector of the same length as \code{col}, expressed in
-#'   constant \code{base_year} LCU prices. Returns \code{NA} (with a warning)
-#'   for any row where CPI is missing for the given country and month, or for
-#'   the country's base year.
+#'   constant LCU prices of \code{base_month}. Returns \code{NA} (with a
+#'   warning) for any row where CPI is missing for its own month, or for the
+#'   country's base month.
 #'
 #' @details
 #' CPI data comes from [govhr::cpi], the IMF's monthly all-items CPI. Each
 #' observation is deflated with the CPI of its own month, rather than an
 #' annual average, so values within the same year are made comparable too.
 #'
-#' The base-year CPI is the average of the country's monthly CPI over
-#' \code{base_year}. A real value therefore reads as "in average
-#' \code{base_year} prices".
+#' The base month must be within each country's CPI data. With the default
+#' (December 2021), this holds for every country except the 15 listed in
+#' [govhr::cpi], whose series stop before or start after that month. For
+#' those, pick a \code{base_month} within their data; otherwise the result
+#' is \code{NA}, and the warning shows the months each country covers.
 #'
 #' @examples
 #' library(dplyr)
@@ -362,17 +365,20 @@ convert_constant_ppp <- function(data, cols) {
 #' data |>
 #'   dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, country_code))
 #'
-#' # Custom base year
+#' # Custom base month
 #' data |>
-#'   dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, country_code, base_year = 2015))
+#'   dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, country_code, base_month = "2015-01-01"))
 #'
 #' @importFrom tibble tibble
 #' @importFrom lubridate floor_date
-#' @import dplyr
+#' @importFrom dplyr left_join mutate select filter
 #' @export
-deflate_to_real <- function(col, ref_date, country_code, base_year = 2021) {
-  if(!is.numeric(base_year) || length(base_year) != 1 || is.na(base_year)){
-    stop("`base_year` must be a single year, e.g. 2021.")
+deflate_to_real <- function(col, ref_date, country_code, base_month = "2021-12-01") {
+  # an explicit format makes as.Date() return NA instead of erroring
+  base_month <- as.Date(base_month, format = "%Y-%m-%d")
+
+  if(length(base_month) != 1 || is.na(base_month) || format(base_month, "%d") != "01"){
+    stop("`base_month` must be a single date on the first of a month, e.g. \"2021-12-01\".")
   }
 
   # match on the month, so any day of the month finds its CPI
@@ -383,41 +389,48 @@ deflate_to_real <- function(col, ref_date, country_code, base_year = 2021) {
   )
 
   cpi_lookup <- govhr::cpi |>
-    select(
+    dplyr::select(
       country_code,
       ref_month = "ref_date",
       cpi_month = "cpi"
     )
 
+  # keep only the country and its base CPI, so the join below does not
+  # duplicate `ref_month`
   base_cpi_lookup <- cpi_lookup |>
-    filter(
-      as.integer(format(.data[["ref_month"]], "%Y")) == base_year
+    dplyr::filter(
+      .data[["ref_month"]] == base_month
     ) |>
-    summarise(
-      cpi_base = mean(.data[["cpi_month"]]),
-      .by = "country_code"
+    dplyr::select(
+      country_code,
+      cpi_base = "cpi_month"
     )
 
   deflated <- input_tbl |>
-    left_join(
+    dplyr::left_join(
       cpi_lookup,
       by = c("country_code", "ref_month"),
       relationship = "many-to-one"
     ) |>
-    left_join(
+    dplyr::left_join(
       base_cpi_lookup,
       by = "country_code",
       relationship = "many-to-one"
     )
 
-  warn_missing_cpi(deflated, base_year)
+  warn_missing_cpi(deflated, base_month)
 
-  deflated$col * deflated$cpi_base / deflated$cpi_month
+  deflated <- deflated |>
+    dplyr::mutate(
+      deflated_col = .data[["col"]] * .data[["cpi_base"]] / .data[["cpi_month"]]
+    )
+  
+  deflated[["deflated_col"]]
 }
 
 # warn about the country-months that deflate_to_real() could not deflate,
 # so a silent NA does not slip into downstream analysis
-warn_missing_cpi <- function(deflated, base_year){
+warn_missing_cpi <- function(deflated, base_month){
   has_value <- !is.na(deflated$col)
 
   no_month <- unique(
@@ -441,13 +454,22 @@ warn_missing_cpi <- function(deflated, base_year){
   )
 
   if(length(no_base) > 0){
+    # show what each country covers, so the user can pick a valid base_month
+    coverage <- vapply(
+      no_base,
+      function(code){
+        dates <- govhr::cpi$ref_date[govhr::cpi$country_code == code]
+        paste0(code, " (", format(min(dates), "%Y-%m"), " to ", format(max(dates), "%Y-%m"), ")")
+      },
+      character(1)
+    )
     warning(
-      "No CPI in base year ", base_year, " for ",
-      paste(no_base, collapse = ", "), ", deflated to NA."
+      "No CPI in base month ", format(base_month, "%Y-%m"), " for ",
+      paste(coverage, collapse = ", "),
+      ", deflated to NA. Choose a `base_month` within each country's CPI data."
     )
   }
 }
-
 
 merge_wrapper <- function(...) {
   y <- merge(all.x = TRUE, ...)
@@ -696,53 +718,6 @@ classify_text <- function(
     setnames("id", id_col)
 
   result[]
-}
-
-#' Sample groups and return all rows for those groups
-#'
-#' sample_group() randomly samples a specified number of unique values from a
-#' grouping column and returns all rows belonging to the sampled groups.
-#'
-#' @param data A data.frame, tibble, or data.table.
-#' @param group_col Unquoted column name used to define groups.
-#' @param n Integer; number of distinct groups to sample. If greater than the
-#'   number of available groups, all groups are returned.
-#'
-#' @returns An object of the same class as `.data` (tibble -> tibble,
-#'   data.table -> data.table, data.frame -> data.frame) containing only rows
-#'   whose group value was sampled.
-#'
-#' @examples
-#' df <- tibble::tibble(id = 1:8, grp = rep(letters[1:4], each = 2))
-#' sample_group(df, grp, 2)
-#'
-#' @export
-#' @importFrom data.table as.data.table is.data.table
-#' @importFrom rlang ensym as_string
-#' @importFrom tibble is_tibble as_tibble
-sample_group <- function(data, group_col, n) {
-  dt <- data.table::as.data.table(data)
-  group_sym <- rlang::ensym(group_col)
-  group_col <- rlang::as_string(group_sym)
-
-  uniq_vals <- unique(dt[[group_col]])
-  if (length(uniq_vals) == 0 || as.integer(n) <= 0) {
-    return(dt[0]) # empty result with same cols (data.table)
-  }
-
-  n_draw <- min(length(uniq_vals), as.integer(n))
-  sampled_vals <- sample(uniq_vals, size = n_draw)
-
-  res_dt <- dt[get(group_col) %in% sampled_vals]
-
-  # return in same "type" the user passed: tibble -> tibble, data.frame -> data.frame, data.table -> data.table
-  if (tibble::is_tibble(data)) {
-    tibble::as_tibble(res_dt)
-  } else if (data.table::is.data.table(data)) {
-    res_dt
-  } else {
-    as.data.frame(res_dt)
-  }
 }
 
 #' Convert data to match original class
