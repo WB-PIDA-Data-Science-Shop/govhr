@@ -1,74 +1,94 @@
-#' Generate Standard HR Analytics Report
+#' Generate the standard HR report
 #'
-#' @description
-#' Produces a comprehensive HTML analytics report for harmonized HR data using
-#' a Quarto template. The report includes descriptive statistics, visualizations,
-#' and optional quality control diagnostics across Contract, Personnel, and
-#' Establishment modules.
+#' Produces an HTML report with the standard workforce and wagebill
+#' indicators: headcount, hires and separations, moves between
+#' establishments, the wagebill and its growth, average wages, and the
+#' composition and distribution of pay.
 #'
-#' @param contracts A data.table containing the Contract module data with
-#'   harmonized column names according to \code{\link{dictionary}}.
-#'   Should include columns such as contract_id, personnel_id, est_id,
-#'   ref_date, salary fields, and occupation information.
-#' @param personnel A data.table containing the Personnel module data with
-#'   harmonized column names. Should include personnel_id and demographic
-#'   information.
-#' @param establishments A data.table containing the Establishment module data with
-#'   harmonized column names. Should include est_id and establishment
-#'   characteristics.
-#' @param country_code The reference country code. Must be specified in the three-letter, World Bank standard (e.g., BRA for Brazil).
-#' @param output Character string specifying the output file name. Defaults to
-#'   "hr_report.html". The file will be created in the current working
-#'   directory.
-#' @param contract_dt Deprecated. Use `contracts` instead.
-#' @param personnel_dt Deprecated. Use `personnel` instead.
-#' @param est_dt Deprecated. Use `establishments` instead.
+#' @param contracts Data frame or remote database table (`tbl_dbi`) with the
+#'   contract data, one row per contract and reference date. Must contain
+#'   `personnel_id`, `ref_date`, `est_id`, `gross_salary_lcu`,
+#'   `base_salary_lcu` and `allowance_lcu`.
+#' @param personnel Data frame or remote database table (`tbl_dbi`) with the
+#'   personnel data. Must contain `personnel_id`, `ref_date` and
+#'   `employment_status`. For database input, it must live in the same
+#'   database as `contracts`.
+#' @param binwidth Positive whole number. Width of the pay bins in the wage
+#'   distribution, in the same currency as the pay columns. See
+#'   [compute_wagebill_analytics()].
+#' @param output Character. Path of the HTML file to create. Default
+#'   `"standard_report.html"`, in the working directory.
 #'
-#' @returns An HR report, in HTML.
+#' @returns The path to the report, invisibly.
+#'
+#' @details
+#' The indicators are computed by [compute_workforce_analytics()] and
+#' [compute_wagebill_analytics()], so the report shows the same numbers those
+#' functions return. Database tables are processed in the database, and only
+#' the results are brought into memory.
+#'
+#' Employment status comes from `personnel` and is matched to `contracts` by
+#' `personnel_id` and `ref_date`.
+#'
+#' Pay is used as given. To compare pay across years, convert it to real
+#' terms first, for example with [deflate_to_real()].
 #'
 #' @examples
 #' \dontrun{
-#' # Generate HR analytics report for Brazilian HRMIS data
-#' generate_hr_report(
-#'   contract_dt = bra_hrmis_contract,
-#'   personnel_dt = bra_hrmis_personnel,
-#'   establishments = bra_hrmis_est,
-#'   country_code = "BRA",
-#'   output = "brazil_hr_report.html"
+#' generate_standard_report(
+#'   contracts = bra_hrmis_contract,
+#'   personnel = bra_hrmis_personnel,
+#'   binwidth = 1000,
+#'   output = "brazil_report.html"
 #' )
 #' }
 #'
-#' @seealso
-#' \code{\link{dictionary}} for the harmonization dictionary.
-#'
-#' @importFrom rmarkdown render
+#' @importFrom dplyr all_of collect distinct left_join select
 #' @export
-generate_hr_report <- function(
+generate_standard_report <- function(
   contracts,
   personnel,
-  establishments,
-  country_code,
-  output = "hr_report.html",
-  contract_dt = NULL,
-  personnel_dt = NULL,
-  est_dt = NULL
+  binwidth,
+  output = "standard_report.html"
 ) {
-  contracts <- resolve_renamed_arg(contracts, contract_dt, "contract_dt", "contracts")
-  personnel <- resolve_renamed_arg(personnel, personnel_dt, "personnel_dt", "personnel")
-  establishments <- resolve_renamed_arg(establishments, est_dt, "est_dt", "establishments")
-  qmd_path <- system.file(
-    "templates",
-    "standard_hr_report.qmd",
-    package = "govhr"
+  # establishments and pay come from the contracts, employment status from
+  # the personnel data
+  employment_status <- personnel |>
+    select(all_of(c("personnel_id", "ref_date", "employment_status"))) |>
+    distinct()
+
+  workforce_data <- contracts |>
+    left_join(employment_status, by = c("personnel_id", "ref_date"))
+
+  # compute everything here, so the template only draws. collect() brings
+  # database results into memory and leaves data frames unchanged
+  workforce <- compute_workforce_analytics(workforce_data) |>
+    purrr::map(collect)
+  wagebill <- compute_wagebill_analytics(contracts, binwidth = binwidth) |>
+    purrr::map(collect)
+
+  # render a copy of the template, since the folder of an installed package
+  # may be read-only
+  render_dir <- tempfile("govhr_report_")
+  dir.create(render_dir)
+  on.exit(unlink(render_dir, recursive = TRUE), add = TRUE)
+
+  template <- file.path(render_dir, "standard_report.Rmd")
+  file.copy(
+    system.file("templates", "standard_report.Rmd", package = "govhr"),
+    template
   )
 
-  rmarkdown::render(
-    input = qmd_path,
-    params = list(
-      contract_dt = contracts,
-      personnel_dt = personnel,
-      country_code = country_code
-    ),
-    output_file = output
+  output_dir <- dirname(normalizePath(output, mustWork = FALSE))
+
+  report <- rmarkdown::render(
+    input = template,
+    output_file = basename(output),
+    output_dir = output_dir,
+    params = list(workforce = workforce, wagebill = wagebill),
+    envir = new.env(),
+    quiet = TRUE
   )
+
+  invisible(report)
 }

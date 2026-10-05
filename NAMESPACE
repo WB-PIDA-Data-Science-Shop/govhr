@@ -75,7 +75,7 @@ export(fix_retirement_age)
 export(fix_salary_components)
 export(fix_underage_workers)
 export(fix_working_hours)
-export(generate_hr_report)
+export(generate_standard_report)
 export(get_data360_api)
 export(get_metadata360)
 export(ggplot_coef)
@@ -273,7 +273,6 @@ importFrom(rlang,
   sym,
   syms
 )
-importFrom(rmarkdown,render)
 importFrom(scales,
   cut_short_scale,
   label_number,
