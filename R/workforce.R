@@ -20,8 +20,9 @@
 #'   \item{movement}{Headcount, hires, separations and their rates for each
 #'     `ref_date`, from [compute_movement()]. Hires are `NA` on the first date
 #'     and separations on the last, since there is nothing to compare with.}
-#'   \item{transitions}{Number of people moving between establishments, by
-#'     origin (`from`), destination (`to`) and the date they arrived
+#'   \item{transitions}{One row per move between establishments, with
+#'     `personnel_id`, origin (`from`), destination (`to`), when the person
+#'     joined the origin (`from_date`) and when they arrived at the destination
 #'     (`ref_date`), from [compute_transition()].}
 #' }
 #' Each table has the class its function returns for `data`: data.tables for
@@ -75,7 +76,7 @@ compute_workforce_analytics <- function(data){
     data,
     id_col = "personnel_id",
     group_cols = "est_id",
-    summarize = TRUE
+    summarize = FALSE
   )
 
   list(

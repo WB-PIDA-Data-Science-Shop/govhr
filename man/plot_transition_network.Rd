@@ -4,14 +4,20 @@
 \alias{plot_transition_network}
 \title{Plot transition network}
 \usage{
-plot_transition_network(data)
+plot_transition_network(data, interactive = TRUE)
 }
 \arguments{
 \item{data}{Data frame with one row per move and \code{from} and \code{to} columns,
 as returned by \code{\link[=compute_transition]{compute_transition()}} with \code{summarize = FALSE}.}
+
+\item{interactive}{Logical. If \code{TRUE} (default), return an interactive
+chart that shows each establishment's name on hover. If \code{FALSE}, return a
+static ggplot, for outputs such as Word that cannot show interactive
+charts.}
 }
 \value{
-A ggiraph girafe object.
+A ggiraph girafe object, or a ggplot object when
+\code{interactive = FALSE}.
 }
 \description{
 Draws career transitions as a directed graph, with edge width proportional to

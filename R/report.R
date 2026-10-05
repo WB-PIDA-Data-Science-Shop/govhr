@@ -1,6 +1,6 @@
 #' Generate the standard HR report
 #'
-#' Produces an HTML report with the standard workforce and wagebill
+#' Produces an HTML or Word report with the standard workforce and wagebill
 #' indicators: headcount, hires and separations, moves between
 #' establishments, the wagebill and its growth, average wages, and the
 #' composition and distribution of pay.
@@ -16,8 +16,12 @@
 #' @param binwidth Positive whole number. Width of the pay bins in the wage
 #'   distribution, in the same currency as the pay columns. See
 #'   [compute_wagebill_analytics()].
-#' @param output Character. Path of the HTML file to create. Default
-#'   `"standard_report.html"`, in the working directory.
+#' @param format Character. `"html"` (default) for an HTML report or
+#'   `"docx"` for a Word document. In Word, the network of transitions is a
+#'   static image rather than an interactive chart.
+#' @param output Character. Path of the file to create. Default
+#'   `"standard_report.html"` or `"standard_report.docx"`, depending on
+#'   `format`, in the working directory.
 #'
 #' @returns The path to the report, invisibly.
 #'
@@ -41,6 +45,14 @@
 #'   binwidth = 1000,
 #'   output = "brazil_report.html"
 #' )
+#'
+#' # the same report as a Word document
+#' generate_standard_report(
+#'   contracts = bra_hrmis_contract,
+#'   personnel = bra_hrmis_personnel,
+#'   binwidth = 1000,
+#'   format = "docx"
+#' )
 #' }
 #'
 #' @importFrom dplyr all_of collect distinct left_join select
@@ -49,8 +61,12 @@ generate_standard_report <- function(
   contracts,
   personnel,
   binwidth,
-  output = "standard_report.html"
+  format = c("html", "docx"),
+  output = paste0("standard_report.", format)
 ) {
+  # output's default is only evaluated after this, so it uses the chosen format
+  format <- match.arg(format)
+
   # establishments and pay come from the contracts, employment status from
   # the personnel data
   employment_status <- personnel |>
@@ -81,8 +97,15 @@ generate_standard_report <- function(
 
   output_dir <- dirname(normalizePath(output, mustWork = FALSE))
 
+  output_format <- switch(
+    format,
+    html = rmarkdown::html_document(toc = TRUE),
+    docx = rmarkdown::word_document(toc = TRUE)
+  )
+
   report <- rmarkdown::render(
     input = template,
+    output_format = output_format,
     output_file = basename(output),
     output_dir = output_dir,
     params = list(workforce = workforce, wagebill = wagebill),

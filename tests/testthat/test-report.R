@@ -55,3 +55,27 @@ test_that("reports missing columns before rendering", {
     "missing required columns"
   )
 })
+
+test_that("renders a Word report", {
+  skip_if_not(rmarkdown::pandoc_available(), "pandoc is not available")
+
+  output <- tempfile(fileext = ".docx")
+  on.exit(unlink(output))
+
+  generate_standard_report(
+    report_contracts,
+    report_personnel,
+    binwidth = 100,
+    format = "docx",
+    output = output
+  )
+
+  expect_true(file.exists(output))
+})
+
+test_that("names the default output after the format", {
+  expect_equal(
+    eval(formals(generate_standard_report)$output, list(format = "docx")),
+    "standard_report.docx"
+  )
+})

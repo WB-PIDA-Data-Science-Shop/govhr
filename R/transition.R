@@ -367,8 +367,13 @@ plot_transfer_heatmap <- function(data) {
 #'
 #' @param data Data frame with one row per move and `from` and `to` columns,
 #'   as returned by [compute_transition()] with `summarize = FALSE`.
+#' @param interactive Logical. If `TRUE` (default), return an interactive
+#'   chart that shows each establishment's name on hover. If `FALSE`, return a
+#'   static ggplot, for outputs such as Word that cannot show interactive
+#'   charts.
 #'
-#' @returns A ggiraph girafe object.
+#' @returns A ggiraph girafe object, or a ggplot object when
+#'   `interactive = FALSE`.
 #'
 #' @importFrom dplyr across mutate pull row_number
 #' @importFrom ggplot2 aes coord_cartesian expansion margin scale_color_manual
@@ -382,7 +387,7 @@ plot_transfer_heatmap <- function(data) {
 #' 
 #' @keywords internal
 #' @export
-plot_transition_network <- function(data) {
+plot_transition_network <- function(data, interactive = TRUE) {
   edges <- govhr::fastcount(data, .data[["from"]], .data[["to"]], name = "weight") |>
     # coerce to character to ensure that as_tble_graph produces a `name` column
     dplyr::mutate(
@@ -459,6 +464,10 @@ plot_transition_network <- function(data) {
       legend.position = "none",
       plot.margin = ggplot2::margin(10, 10, 10, 10)
     )
+
+  if (!interactive) {
+    return(plot)
+  }
 
   ggiraph::girafe(
     ggobj = plot,

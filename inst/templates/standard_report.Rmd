@@ -28,17 +28,12 @@ theme_set(theme_minimal(base_size = 13))
 workforce <- params$workforce
 wagebill <- params$wagebill
 
-# keep the `n` establishments with the largest `value_col` on the latest date,
-# so charts by establishment stay readable
-top_establishments <- function(data, value_col, n = 5) {
-  latest <- data |>
-    filter(ref_date == max(ref_date), !is.na(.data[[value_col]])) |>
-    slice_max(.data[[value_col]], n = n, with_ties = FALSE)
-
-  data |>
-    filter(est_id %in% latest$est_id) |>
-    mutate(est_id = as.character(est_id))
-}
+# the five establishments with the most staff on the latest date, shown in
+# every chart by establishment so the charts stay readable
+top_establishments <- workforce$headcount_by_est |>
+  filter(ref_date == max(ref_date)) |>
+  slice_max(headcount, n = 5, with_ties = FALSE) |>
+  pull(est_id)
 ```
 
 # Workforce
@@ -58,9 +53,14 @@ The five establishments with the most staff on the latest date.
 
 ```{r headcount-by-est}
 workforce$headcount_by_est |>
-  top_establishments("headcount") |>
-  plot_trend(group_col = "est_id", y_col = "headcount", y_label = "Headcount") +
-  labs(color = "Establishment")
+  filter(est_id %in% top_establishments) |>
+  plot_trend(
+    group_col = "est_id",
+    y_col = "headcount",
+    y_label = "Headcount"
+  ) +
+  labs(color = "Establishment") +
+  theme(legend.position = "bottom")
 ```
 
 ## Hires and separations
@@ -85,19 +85,19 @@ plot_movement(
 )
 ```
 
-## Moves between establishments
+## Transitions
 
-The ten most common moves between establishments, added up over all dates.
+Total number of transitions between establishments by personnel.
 
 ```{r transitions}
-top_moves <- workforce$transitions |>
-  summarise(moves = sum(transitions), .by = c(from, to)) |>
-  slice_max(moves, n = 10, with_ties = FALSE)
-
-if (nrow(top_moves) == 0) {
+if (nrow(workforce$transitions) == 0) {
   cat("No moves between establishments were recorded.")
 } else {
-  knitr::kable(top_moves, col.names = c("From", "To", "Moves"))
+  # Word cannot show interactive charts, so draw a static network there
+  plot_transition_network(
+    workforce$transitions,
+    interactive = knitr::is_html_output()
+  )
 }
 ```
 
@@ -119,20 +119,26 @@ Change in the wagebill since the previous date.
 ```{r wagebill-growth}
 wagebill$wagebill |>
   filter(!is.na(wagebill_growth)) |>
-  plot_trend(group_col = "ref_date", y_col = "wagebill_growth", y_label = "Growth") +
+  plot_trend(
+    group_col = "ref_date",
+    y_col = "wagebill_growth",
+    y_label = "Growth"
+  ) +
   scale_y_continuous(labels = scales::label_percent()) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "grey50")
 ```
 
 ## Wagebill by establishment
 
-The five establishments with the largest wagebill on the latest date.
+The wagebill of the five establishments with the most staff on the latest
+date.
 
 ```{r wagebill-by-est}
 wagebill$wagebill_by_est |>
-  top_establishments("wagebill") |>
+  filter(est_id %in% top_establishments) |>
   plot_trend(group_col = "est_id", y_col = "wagebill", y_label = "Wagebill") +
-  labs(color = "Establishment")
+  labs(color = "Establishment") +
+  theme(legend.position = "bottom")
 ```
 
 ## Average wage

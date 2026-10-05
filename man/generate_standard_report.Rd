@@ -8,7 +8,8 @@ generate_standard_report(
   contracts,
   personnel,
   binwidth,
-  output = "standard_report.html"
+  format = c("html", "docx"),
+  output = paste0("standard_report.", format)
 )
 }
 \arguments{
@@ -26,14 +27,19 @@ database as \code{contracts}.}
 distribution, in the same currency as the pay columns. See
 \code{\link[=compute_wagebill_analytics]{compute_wagebill_analytics()}}.}
 
-\item{output}{Character. Path of the HTML file to create. Default
-\code{"standard_report.html"}, in the working directory.}
+\item{format}{Character. \code{"html"} (default) for an HTML report or
+\code{"docx"} for a Word document. In Word, the network of transitions is a
+static image rather than an interactive chart.}
+
+\item{output}{Character. Path of the file to create. Default
+\code{"standard_report.html"} or \code{"standard_report.docx"}, depending on
+\code{format}, in the working directory.}
 }
 \value{
 The path to the report, invisibly.
 }
 \description{
-Produces an HTML report with the standard workforce and wagebill
+Produces an HTML or Word report with the standard workforce and wagebill
 indicators: headcount, hires and separations, moves between
 establishments, the wagebill and its growth, average wages, and the
 composition and distribution of pay.
@@ -57,6 +63,14 @@ generate_standard_report(
   personnel = bra_hrmis_personnel,
   binwidth = 1000,
   output = "brazil_report.html"
+)
+
+# the same report as a Word document
+generate_standard_report(
+  contracts = bra_hrmis_contract,
+  personnel = bra_hrmis_personnel,
+  binwidth = 1000,
+  format = "docx"
 )
 }
 
