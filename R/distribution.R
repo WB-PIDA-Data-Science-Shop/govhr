@@ -10,7 +10,8 @@
 #' @param measure_col Character. Numeric column to bin.
 #' @param group_cols Character vector of columns to group by, or `NULL` for no
 #'   grouping.
-#' @param binwidth Positive whole number. Width of each bin. Default `1`.
+#' @param binwidth Positive whole number. Width of each bin. Default `NULL`
+#'   picks a width from the data; see Details.
 #' @param latest_measure Logical. Restrict to the latest reference date.
 #'   Default `FALSE`.
 #' @param ... Arguments passed to methods.
@@ -27,6 +28,13 @@
 #'   floating point: `0.3 / 0.1` is `2.9999...`, which would put 0.3 in the
 #'   0.2 bin.
 #'
+#'   When `binwidth` is `NULL`, it is chosen with the Freedman-Diaconis rule,
+#'   which is based on the spread of the middle half of the values, so a few
+#'   extreme values do not throw it off. The width is then adjusted so that
+#'   the bulk of the values (1st to 99th percentile) spans 20 to 60 bins, and
+#'   rounded up to 1, 2 or 5 times a power of ten. With `latest_measure =
+#'   TRUE`, it is based on the latest reference date only.
+#'
 #' @export
 compute_percentile <- function(data, ...) {
   UseMethod("compute_percentile")
@@ -40,17 +48,21 @@ compute_percentile.data.frame <- function(
   data,
   measure_col,
   group_cols = NULL,
-  binwidth = 1,
+  binwidth = NULL,
   latest_measure = FALSE,
   ...
 ) {
   rlang::check_dots_empty()
 
-  check_binwidth(binwidth)
-
   if (latest_measure) {
     data <- data[which(data[["ref_date"]] == max(data[["ref_date"]], na.rm = TRUE)), ]
   }
+
+  # estimated from the rows being binned, so after the latest_measure filter
+  if (is.null(binwidth)) {
+    binwidth <- estimate_binwidth(data, measure_col)
+  }
+  check_binwidth(binwidth)
 
   dt <- data.table::as.data.table(data)
   dt[, bin := floor(get(measure_col) / binwidth) * binwidth]
@@ -100,13 +112,11 @@ compute_percentile.tbl_dbi <- function(
   data,
   measure_col,
   group_cols = NULL,
-  binwidth = 1,
+  binwidth = NULL,
   latest_measure = FALSE,
   ...
 ) {
   rlang::check_dots_empty()
-
-  check_binwidth(binwidth)
 
   measure <- rlang::sym(measure_col)
 
@@ -122,6 +132,12 @@ compute_percentile.tbl_dbi <- function(
         by = "ref_date"
       )
   }
+
+  # estimated from the rows being binned, so after the latest_measure filter
+  if (is.null(binwidth)) {
+    binwidth <- estimate_binwidth(data, measure_col)
+  }
+  check_binwidth(binwidth)
 
   data <- data |>
     drop_missing(measure_col) |>
@@ -235,6 +251,61 @@ check_binwidth <- function(binwidth) {
   ) {
     stop("`binwidth` must be a positive whole number.")
   }
+}
+
+#' Estimate a bin width for a pay distribution
+#'
+#' Picks a bin width with the Freedman-Diaconis rule, which is based on the
+#' spread of the middle half of the data (the interquartile range), so a few
+#' very high salaries do not distort it. Because that rule gives ever narrower
+#' bins as the data grows, the width is then kept so that the bulk of the
+#' distribution (1st to 99th percentile) spans between `min_bins` and
+#' `max_bins` bins. Finally it is rounded up to a readable width: 1, 2 or 5
+#' times a power of ten.
+#'
+#' @param data Data frame or remote database table (`tbl_dbi`).
+#' @param measure_col Character. Name of the pay column.
+#' @param min_bins,max_bins Whole numbers. Fewest and most bins allowed between
+#'   the 1st and 99th percentile, before rounding. Default 20 and 60.
+#'
+#' @returns A positive whole number, usable as `binwidth` in
+#'   [compute_percentile()].
+#'
+#' @keywords internal
+#' @importFrom dplyr collect filter n summarise
+#' @importFrom stats quantile
+estimate_binwidth <- function(data, measure_col, min_bins = 20, max_bins = 60) {
+  pay <- data |>
+    filter(!is.na(.data[[measure_col]])) |>
+    summarise(
+      n_records = n(),
+      p01 = quantile(.data[[measure_col]], 0.01, na.rm = TRUE),
+      p25 = quantile(.data[[measure_col]], 0.25, na.rm = TRUE),
+      p75 = quantile(.data[[measure_col]], 0.75, na.rm = TRUE),
+      p99 = quantile(.data[[measure_col]], 0.99, na.rm = TRUE)
+    ) |>
+    collect()
+
+  if (pay$n_records == 0) {
+    stop("`", measure_col, "` has no non-missing values")
+  }
+
+  freedman_diaconis <- 2 * (pay$p75 - pay$p25) / pay$n_records^(1 / 3)
+
+  # keep the bulk of the distribution between min_bins and max_bins bins
+  bulk <- pay$p99 - pay$p01
+  binwidth <- min(max(freedman_diaconis, bulk / max_bins), bulk / min_bins)
+
+  # pay that barely varies would give a width below 1, which
+  # compute_percentile() does not accept
+  if (binwidth < 1) {
+    return(1)
+  }
+
+  # round up to 1, 2 or 5 times a power of ten
+  magnitude <- 10^floor(log10(binwidth))
+  steps <- c(1, 2, 5, 10) * magnitude
+  steps[steps >= binwidth][1]
 }
 
 #' Compute Deciles of a Measure

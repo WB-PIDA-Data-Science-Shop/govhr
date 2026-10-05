@@ -108,3 +108,49 @@ test_that("compute_percentile keeps missing groups, drops missing measures and e
     NA
   )
 })
+
+# ---- compute_percentile: default binwidth ------------------------------------
+
+# skewed pay, like real salaries, over two reference dates
+set.seed(2)
+skewed_wages <- data.frame(
+  ref_date = as.Date(rep(c("2020-01-01", "2021-01-01"), each = 2000)),
+  wage = round(c(rlnorm(2000, 7, 0.6), rlnorm(2000, 8, 0.6)))
+)
+
+# width of the bins compute_percentile() used
+bin_width <- function(out) unique(diff(sort(unique(out$bin))))
+
+test_that("compute_percentile estimates binwidth when it is not given", {
+  out <- compute_percentile(skewed_wages, measure_col = "wage")
+
+  expect_equal(bin_width(out), estimate_binwidth(skewed_wages, "wage"))
+})
+
+test_that("compute_percentile uses a given binwidth over the estimate", {
+  out <- compute_percentile(skewed_wages, measure_col = "wage", binwidth = 250)
+
+  expect_equal(bin_width(out), 250)
+})
+
+test_that("compute_percentile estimates binwidth from the latest date only", {
+  out <- compute_percentile(skewed_wages, measure_col = "wage", latest_measure = TRUE)
+  latest <- skewed_wages[skewed_wages$ref_date == max(skewed_wages$ref_date), ]
+
+  expect_equal(bin_width(out), estimate_binwidth(latest, "wage"))
+})
+
+test_that("compute_percentile estimates the same binwidth on a database table", {
+  skip_if_not_installed("duckdb")
+  skip_if_not_installed("dbplyr")
+
+  # silence duckdb's notice about where it stores extensions
+  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  DBI::dbWriteTable(con, "wages", skewed_wages)
+
+  out <- compute_percentile(dplyr::tbl(con, "wages"), measure_col = "wage") |>
+    dplyr::collect()
+
+  expect_equal(bin_width(out), estimate_binwidth(skewed_wages, "wage"))
+})

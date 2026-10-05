@@ -14,8 +14,8 @@
 #'   `employment_status`. For database input, it must live in the same
 #'   database as `contracts`.
 #' @param binwidth Positive whole number. Width of the pay bins in the wage
-#'   distribution, in the same currency as the pay columns. See
-#'   [compute_wagebill_analytics()].
+#'   distribution, in the same currency as the pay columns. Default `NULL`
+#'   picks a width from the data. See [compute_wagebill_analytics()].
 #' @param format Character. `"html"` (default) for an HTML report or
 #'   `"docx"` for a Word document. In Word, the network of transitions is a
 #'   static image rather than an interactive chart.
@@ -42,7 +42,6 @@
 #' generate_standard_report(
 #'   contracts = bra_hrmis_contract,
 #'   personnel = bra_hrmis_personnel,
-#'   binwidth = 1000,
 #'   output = "brazil_report.html"
 #' )
 #'
@@ -50,7 +49,6 @@
 #' generate_standard_report(
 #'   contracts = bra_hrmis_contract,
 #'   personnel = bra_hrmis_personnel,
-#'   binwidth = 1000,
 #'   format = "docx"
 #' )
 #' }
@@ -60,15 +58,12 @@
 generate_standard_report <- function(
   contracts,
   personnel,
-  binwidth,
+  binwidth = NULL,
   format = c("html", "docx"),
   output = paste0("standard_report.", format)
 ) {
-  # output's default is only evaluated after this, so it uses the chosen format
   format <- match.arg(format)
 
-  # establishments and pay come from the contracts, employment status from
-  # the personnel data
   employment_status <- personnel |>
     select(all_of(c("personnel_id", "ref_date", "employment_status"))) |>
     distinct()
@@ -76,12 +71,10 @@ generate_standard_report <- function(
   workforce_data <- contracts |>
     left_join(employment_status, by = c("personnel_id", "ref_date"))
 
-  # compute everything here, so the template only draws. collect() brings
-  # database results into memory and leaves data frames unchanged
-  workforce <- compute_workforce_analytics(workforce_data) |>
-    purrr::map(collect)
-  wagebill <- compute_wagebill_analytics(contracts, binwidth = binwidth) |>
-    purrr::map(collect)
+  
+  workforce <- compute_workforce_analytics(workforce_data)
+
+  wagebill <- compute_wagebill_analytics(contracts, binwidth = binwidth)
 
   # render a copy of the template, since the folder of an installed package
   # may be read-only
@@ -90,6 +83,7 @@ generate_standard_report <- function(
   on.exit(unlink(render_dir, recursive = TRUE), add = TRUE)
 
   template <- file.path(render_dir, "standard_report.Rmd")
+  
   file.copy(
     system.file("templates", "standard_report.Rmd", package = "govhr"),
     template

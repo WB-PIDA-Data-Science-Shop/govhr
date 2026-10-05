@@ -11,7 +11,8 @@
 #'   the columns named in `measure_col` and `wage_component_cols`.
 #' @param binwidth Positive whole number. Width of the pay bins used for the
 #'   wage distribution, in the same currency as `measure_col` (for example
-#'   `1e6` for wages in the millions). See [compute_percentile()].
+#'   `1e6` for wages in the millions). Default `NULL` picks a width from the
+#'   data, as described in [compute_percentile()].
 #' @param measure_col Character. Pay column used for totals, averages and the
 #'   distribution. Default `"gross_salary_lcu"`.
 #' @param wage_component_cols Character vector of pay columns that add up to
@@ -59,14 +60,14 @@
 #' )
 #' contracts$gross_salary_lcu <- contracts$base_salary_lcu + contracts$allowance_lcu
 #'
-#' compute_wagebill_analytics(contracts, binwidth = 100)
+#' compute_wagebill_analytics(contracts)
 #'
 #' @importFrom dplyr all_of mutate select union_all
 #' @importFrom purrr map reduce
 #' @export
 compute_wagebill_analytics <- function(
   data,
-  binwidth,
+  binwidth = NULL,
   measure_col = "gross_salary_lcu",
   wage_component_cols = c("base_salary_lcu", "allowance_lcu")
 ){

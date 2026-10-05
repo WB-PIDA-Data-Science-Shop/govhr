@@ -6,7 +6,7 @@
 \usage{
 compute_wagebill_analytics(
   data,
-  binwidth,
+  binwidth = NULL,
   measure_col = "gross_salary_lcu",
   wage_component_cols = c("base_salary_lcu", "allowance_lcu")
 )
@@ -18,7 +18,8 @@ the columns named in \code{measure_col} and \code{wage_component_cols}.}
 
 \item{binwidth}{Positive whole number. Width of the pay bins used for the
 wage distribution, in the same currency as \code{measure_col} (for example
-\code{1e6} for wages in the millions). See \code{\link[=compute_percentile]{compute_percentile()}}.}
+\code{1e6} for wages in the millions). Default \code{NULL} picks a width from the
+data, as described in \code{\link[=compute_percentile]{compute_percentile()}}.}
 
 \item{measure_col}{Character. Pay column used for totals, averages and the
 distribution. Default \code{"gross_salary_lcu"}.}
@@ -76,6 +77,6 @@ contracts <- data.frame(
 )
 contracts$gross_salary_lcu <- contracts$base_salary_lcu + contracts$allowance_lcu
 
-compute_wagebill_analytics(contracts, binwidth = 100)
+compute_wagebill_analytics(contracts)
 
 }

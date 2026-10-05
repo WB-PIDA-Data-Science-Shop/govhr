@@ -7,7 +7,7 @@
 generate_standard_report(
   contracts,
   personnel,
-  binwidth,
+  binwidth = NULL,
   format = c("html", "docx"),
   output = paste0("standard_report.", format)
 )
@@ -24,8 +24,8 @@ personnel data. Must contain \code{personnel_id}, \code{ref_date} and
 database as \code{contracts}.}
 
 \item{binwidth}{Positive whole number. Width of the pay bins in the wage
-distribution, in the same currency as the pay columns. See
-\code{\link[=compute_wagebill_analytics]{compute_wagebill_analytics()}}.}
+distribution, in the same currency as the pay columns. Default \code{NULL}
+picks a width from the data. See \code{\link[=compute_wagebill_analytics]{compute_wagebill_analytics()}}.}
 
 \item{format}{Character. \code{"html"} (default) for an HTML report or
 \code{"docx"} for a Word document. In Word, the network of transitions is a
@@ -61,7 +61,6 @@ terms first, for example with \code{\link[=deflate_to_real]{deflate_to_real()}}.
 generate_standard_report(
   contracts = bra_hrmis_contract,
   personnel = bra_hrmis_personnel,
-  binwidth = 1000,
   output = "brazil_report.html"
 )
 
@@ -69,7 +68,6 @@ generate_standard_report(
 generate_standard_report(
   contracts = bra_hrmis_contract,
   personnel = bra_hrmis_personnel,
-  binwidth = 1000,
   format = "docx"
 )
 }

@@ -12,7 +12,7 @@ compute_percentile(data, ...)
   data,
   measure_col,
   group_cols = NULL,
-  binwidth = 1,
+  binwidth = NULL,
   latest_measure = FALSE,
   ...
 )
@@ -21,7 +21,7 @@ compute_percentile(data, ...)
   data,
   measure_col,
   group_cols = NULL,
-  binwidth = 1,
+  binwidth = NULL,
   latest_measure = FALSE,
   ...
 )
@@ -37,7 +37,8 @@ the grouping columns and, if \code{latest_measure = TRUE}, a \code{ref_date} col
 \item{group_cols}{Character vector of columns to group by, or \code{NULL} for no
 grouping.}
 
-\item{binwidth}{Positive whole number. Width of each bin. Default \code{1}.}
+\item{binwidth}{Positive whole number. Width of each bin. Default \code{NULL}
+picks a width from the data; see Details.}
 
 \item{latest_measure}{Logical. Restrict to the latest reference date.
 Default \code{FALSE}.}
@@ -60,4 +61,10 @@ Rows with a missing \code{measure_col} are dropped. Missing values in
 \code{floor(measure_col / binwidth)}, and fractional widths are not exact in
 floating point: \code{0.3 / 0.1} is \verb{2.9999...}, which would put 0.3 in the
 0.2 bin.
+
+When \code{binwidth} is \code{NULL}, it is chosen with the Freedman-Diaconis rule,
+which is based on the spread of the middle half of the values, so a few
+extreme values do not throw it off. The width is then adjusted so that
+the bulk of the values (1st to 99th percentile) spans 20 to 60 bins, and
+rounded up to 1, 2 or 5 times a power of ten. With \code{latest_measure = TRUE}, it is based on the latest reference date only.
 }
