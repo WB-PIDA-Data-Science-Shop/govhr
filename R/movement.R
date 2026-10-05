@@ -311,7 +311,7 @@ compute_movement_cost <- function(
 #'
 #' Counts, for each reference date, how many people are active, how many
 #' joined since the previous date (hires) and how many are gone by the next
-#' date (separations). Hire and separation rates are also returned.
+#' date (separations). Hire, separation, and replacement rates are also returned.
 #'
 #' @param data Data frame or remote database table (`tbl_dbi`) with one row
 #'   per person-record. Must contain `personnel_id`, `ref_date` and the column
@@ -418,7 +418,8 @@ compute_movement.data.frame <- function(
   ][
     , `:=`(
       hire_rate = hires / headcount,
-      separation_rate = separations / headcount
+      separation_rate = separations / headcount,
+      replacement_rate = hires / separations
     )
   ]
 
@@ -494,11 +495,12 @@ compute_movement.tbl_dbi <- function(
       hires = if_else(is.na(prev_date), NA_real_, hires),
       separations = if_else(is.na(next_date), NA_real_, separations),
       hire_rate = hires / headcount,
-      separation_rate = separations / headcount
+      separation_rate = separations / headcount,
+      replacement_rate = hires / separations
     ) |>
     select(
       all_of(c("ref_date", group_cols)),
-      headcount, hires, separations, hire_rate, separation_rate
+      headcount, hires, separations, hire_rate, separation_rate, replacement_rate
     )
 }
 

@@ -61,3 +61,65 @@ test_that("grouped plot helpers accept ref_date without a ref_date column", {
   expect_no_error(plot_compression_ratio(compression, group_col = "ref_date"))
   expect_no_error(plot_movement_cost(costs, group_col = "ref_date"))
 })
+# ---- plot_movement -----------------------------------------------------------
+
+movement_hr <- data.frame(
+  personnel_id = c(1, 2, 1, 3, 1, 3),
+  ref_date = as.Date(rep(c("2020-01-01", "2021-01-01", "2022-01-01"), each = 2)),
+  gender = c("F", "M", "F", "M", "F", "M"),
+  employment_status = "active"
+)
+
+test_that("plot_movement plots the column matching movement and measurement", {
+  movement <- compute_movement(movement_hr)
+
+  hire_count <- plot_movement(movement)
+  separation_rate <- plot_movement(
+    movement,
+    movement_type = "separation",
+    measurement_type = "rate"
+  )
+
+  expect_equal(rlang::as_label(hire_count$mapping$y), "hires")
+  expect_equal(hire_count$labels$y, "Hires")
+  expect_equal(rlang::as_label(separation_rate$mapping$y), "separation_rate")
+  expect_equal(separation_rate$labels$y, "Separation rate")
+})
+
+test_that("plot_movement leaves out dates without hires to compare with", {
+  plot <- plot_movement(compute_movement(movement_hr))
+
+  # the first date has no previous date, so its hires are NA
+  expect_equal(plot$data$ref_date, as.Date(c("2021-01-01", "2022-01-01")))
+})
+
+test_that("plot_movement draws one line per group", {
+  movement <- compute_movement(movement_hr, group_cols = "gender")
+
+  grouped <- plot_movement(movement, group_cols = "gender")
+
+  expect_equal(rlang::as_label(grouped$mapping$colour), "gender")
+  expect_null(plot_movement(movement, group_cols = "ref_date")$mapping$colour)
+})
+
+test_that("plot_movement rejects unknown movement types", {
+  movement <- compute_movement(movement_hr)
+
+  expect_error(plot_movement(movement, movement_type = "fire"), "should be one of")
+  expect_error(plot_movement(movement, group_cols = c("a", "b")), "single column")
+})
+
+test_that("plot_movement accepts a lazy database table", {
+  skip_if_not_installed("duckdb")
+  skip_if_not_installed("dbplyr")
+
+  # silence duckdb's notice about where it stores extensions
+  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  DBI::dbWriteTable(con, "movement_hr", movement_hr)
+
+  plot <- plot_movement(compute_movement(dplyr::tbl(con, "movement_hr")))
+
+  expect_s3_class(plot, "ggplot")
+  expect_equal(nrow(plot$data), 2L)
+})

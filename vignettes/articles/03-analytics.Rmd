@@ -52,17 +52,9 @@ Beyond the stock of personnel, governments are often interested in the flows of 
 ```{r}
 movement <- compute_movement(govhr::bra_hrmis_personnel)
 
-# hires are NA on the first date, which has no previous date to compare with
-movement |>
-  filter(!is.na(hires)) |>
-  rename(indicator = hires) |>
-  plot_movement(
-    movement_type = "hire",
-    measurement_type = "count",
-    group_cols = "ref_date"
-  )
+plot_movement(movement, movement_type = "hire", measurement_type = "count")
 ```
-Again, if you are interested in how these flows vary across groups, you can use the `group_cols` argument.
+Again, if you are interested in how these flows vary across groups, you can use the `group_cols` argument. Here we plot the separation rate by gender.
 
 ```{r}
 movement_gender <- compute_movement(
@@ -70,14 +62,12 @@ movement_gender <- compute_movement(
   group_cols = "gender"
 )
 
-movement_gender |>
-  filter(!is.na(hires)) |>
-  rename(indicator = hires) |>
-  plot_movement(
-    movement_type = "hire",
-    measurement_type = "count",
-    group_cols = "gender"
-  )
+plot_movement(
+  movement_gender,
+  movement_type = "separation",
+  measurement_type = "rate",
+  group_cols = "gender"
+)
 ```
 
 ## Wagebill analytics

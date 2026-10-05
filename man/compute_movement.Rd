@@ -53,7 +53,7 @@ A data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
 \description{
 Counts, for each reference date, how many people are active, how many
 joined since the previous date (hires) and how many are gone by the next
-date (separations). Hire and separation rates are also returned.
+date (separations). Hire, separation, and replacement rates are also returned.
 }
 \details{
 The previous and next dates are the neighbouring dates found in the data,
