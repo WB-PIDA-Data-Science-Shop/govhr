@@ -307,105 +307,201 @@ compute_movement_cost <- function(
   out[]
 }
 
-#' Function to compute workforce movement for hires, fires, retirement, or turnover
+#' Compute movements as hires and separations
 #'
-#' @param data A data frame containing personnel data.
-#' @param movement_type A string indicating the type of movement: "hire", "fire", "retirement", or "turnover".
-#' @param measurement_type A string indicating the measurement type: "count" or "rate". Ignored for turnover, which is a ratio.
-#' @param group_cols A character vector of columns to group by, or `"ref_date"` for no grouping.
+#' Counts, for each reference date, how many people are active, how many
+#' joined since the previous date (hires) and how many are gone by the next
+#' date (separations). Hire, separation, and replacement rates are also returned.
 #'
-#' @returns A data.table containing the aggregated movement data.
+#' @param data Data frame or remote database table (`tbl_dbi`) with one row
+#'   per person-record. Must contain `personnel_id`, `ref_date` and the column
+#'   named in `status_col`.
+#' @param group_cols Character vector of columns to group by, such as
+#'   `"est_id"`, or `NULL` (default) for the whole workforce. Must not include
+#'   `ref_date`.
+#' @param status_col Character. Column holding employment status. Only rows
+#'   equal to `"active"` are counted. Default `"employment_status"`.
+#' @param ... Arguments passed to methods.
 #'
-#' @importFrom data.table as.data.table setDT
+#' @returns A table with one row per `ref_date` and group, containing:
+#' \describe{
+#'   \item{headcount}{Number of active people.}
+#'   \item{hires}{People active on this date but not on the previous one. `NA`
+#'     on the first date, which has nothing to compare with.}
+#'   \item{separations}{People active on this date but not on the next one. `NA`
+#'     on the last date.}
+#'   \item{hire_rate, separation_rate}{`hires` and `separations` divided by
+#'     `headcount`.}
+#' }
+#' A data.table for data frame input; a lazy table for `tbl_dbi` input (use
+#' [dplyr::collect()] to bring it into memory).
 #'
-#' @details The function computes workforce movement counts or rates, based on the specified movement type. For hires, fires, and retirements, it calculates either the count or rate of events. For turnover, it calculates the ratio of hires to separations (including retirements). The data is grouped by the specified columns.
+#' @details
+#' The previous and next dates are the neighbouring dates found in the data,
+#' so the dates do not need to be evenly spaced.
+#'
+#' People are counted once per date, even if they hold several contracts. A
+#' separation is any exit from active status, including retirement.
+#'
+#' With `group_cols`, each person is counted in the group they belong to on
+#' that date. Moving from one group to another is neither a hire nor a
+#' separation; use [compute_transition()] to count those moves.
+#'
+#' @examples
+#' hr <- data.frame(
+#'   personnel_id = c(1, 2, 1, 3, 1, 3),
+#'   ref_date = as.Date(rep(c("2020-01-01", "2021-01-01", "2022-01-01"), each = 2)),
+#'   employment_status = "active"
+#' )
+#' compute_movement(hr)
+#'
 #' @export
-compute_workforce_movement <- function(
+compute_movement <- function(data, ...) {
+  UseMethod("compute_movement")
+}
+
+#' @rdname compute_movement
+#' @importFrom data.table := .N as.data.table data.table fifelse setorderv shift
+#' @importFrom rlang check_dots_empty
+#' @export
+compute_movement.data.frame <- function(
   data,
-  movement_type,
-  measurement_type,
-  group_cols
+  group_cols = NULL,
+  status_col = "employment_status",
+  ...
 ) {
-  dt <- as.data.table(data)
+  rlang::check_dots_empty()
 
-  min_date <- as.character(min(dt[["ref_date"]]))
-  max_date <- as.character(max(dt[["ref_date"]]))
-
-  if (!measurement_type %in% c("count", "rate")) {
-    stop("Invalid measurement_type. Must be 'count' or 'rate'.")
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
   }
 
-  freq_ref_date <- guess_date_frequency(dt)
-  by_cols <- unique(c("ref_date", group_cols))
+  dt <- data.table::as.data.table(data)
+  active <- dt[get(status_col) == "active"]
 
-  if (movement_type %in% c("hire", "fire", "retirement")) {
-    movement_dt <- govhr::classify_personnel_event(
-      dt,
-      event_type = movement_type,
-      id_col = "personnel_id",
-      start_date = min_date,
-      end_date = max_date,
-      status_col = "employment_status",
-      freq = freq_ref_date
+  # one row per person and date, so people with several contracts count once
+  person_dates <- unique(active[, .(personnel_id, ref_date)])
+  person_groups <- unique(
+    active[, c("personnel_id", "ref_date", group_cols), with = FALSE]
+  )
+
+  # previous and next date for each date in the data
+  dates <- sort(unique(person_dates$ref_date))
+  calendar <- data.table::data.table(
+    ref_date = dates,
+    prev_date = data.table::shift(dates),
+    next_date = data.table::shift(dates, type = "lead")
+  )
+
+  events <- calendar[person_dates, on = "ref_date"]
+
+  # hired: no active record on the previous date. NA when there is no
+  # previous date to compare with
+  events[, hire := data.table::fifelse(is.na(prev_date), NA, TRUE)]
+  events[person_dates, on = .(personnel_id, prev_date = ref_date), hire := FALSE]
+
+  # separated: no active record on the next date
+  events[, separation := data.table::fifelse(is.na(next_date), NA, TRUE)]
+  events[
+    person_dates,
+    on = .(personnel_id, next_date = ref_date),
+    separation := FALSE
+  ]
+
+  movement <- events[person_groups, on = c("personnel_id", "ref_date")][
+    , .(
+      headcount = .N,
+      hires = sum(hire),
+      separations = sum(separation)
+    ),
+    by = c("ref_date", group_cols)
+  ][
+    , `:=`(
+      hire_rate = hires / headcount,
+      separation_rate = separations / headcount,
+      replacement_rate = hires / separations
     )
-    setDT(movement_dt)
+  ]
 
-    movement_data <- if (measurement_type == "count") {
-      movement_dt[,
-        .(indicator = sum(type_event == movement_type)),
-        by = by_cols
-      ]
-    } else {
-      movement_dt[,
-        .(indicator = mean(type_event == movement_type)),
-        by = by_cols
-      ]
-    }
-  } else if (movement_type == "turnover") {
-    hire_dt <- govhr::detect_personnel_event(
-      dt,
-      event_type = "hire",
-      id_col = "personnel_id",
-      start_date = min_date,
-      end_date = max_date,
-      status_col = "employment_status",
-      freq = freq_ref_date
-    )
+  data.table::setorderv(movement, c("ref_date", group_cols))
 
-    setDT(hire_dt)
+  movement[]
+}
 
-    hire_data <- dt[hire_dt, on = c("personnel_id", "ref_date")][,
-      .(hires = .N),
-      by = by_cols
-    ]
+#' @rdname compute_movement
+#' @importFrom dplyr all_of anti_join coalesce distinct filter if_else inner_join
+#'   join_by left_join mutate n select summarise
+#' @importFrom rlang .data check_dots_empty
+#' @export
+compute_movement.tbl_dbi <- function(
+  data,
+  group_cols = NULL,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
 
-    fire_dt <- govhr::detect_personnel_event(
-      dt,
-      event_type = "fire",
-      id_col = "personnel_id",
-      start_date = min_date,
-      end_date = max_date,
-      status_col = "employment_status",
-      freq = freq_ref_date
-    )
-
-    retirement_dt <- govhr::detect_retirement(dt)
-
-    # combine fired and retired personnel for turnover calculation
-    separations_dt <- rbind(fire_dt, retirement_dt)
-    setDT(separations_dt)
-    separations_dt <- dt[separations_dt, on = c("personnel_id", "ref_date")][,
-      .(separations = .N),
-      by = by_cols
-    ]
-
-    movement_data <- merge(hire_data, separations_dt, by = by_cols, all = TRUE)
-    movement_data[, indicator := hires / separations]
-
-    movement_data <- movement_data[!is.na(indicator)]
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
   }
 
-  movement_data[]
+  active <- data |>
+    filter(.data[[status_col]] == "active")
+
+  # one row per person and date, so people with several contracts count once
+  person_dates <- active |>
+    select(all_of(c("personnel_id", "ref_date"))) |>
+    distinct()
+
+  person_groups <- active |>
+    select(all_of(c("personnel_id", "ref_date", group_cols))) |>
+    distinct()
+
+  # previous and next date for each date in the data
+  calendar <- build_calendar(person_dates)
+
+  events <- person_dates |>
+    inner_join(calendar, by = "ref_date")
+
+  # hired: no active record on the previous date
+  hires <- events |>
+    filter(!is.na(prev_date)) |>
+    anti_join(person_dates, by = join_by(personnel_id, prev_date == ref_date)) |>
+    select(all_of(c("personnel_id", "ref_date"))) |>
+    mutate(hire = 1)
+
+  # separated: no active record on the next date
+  separations <- events |>
+    filter(!is.na(next_date)) |>
+    anti_join(person_dates, by = join_by(personnel_id, next_date == ref_date)) |>
+    select(all_of(c("personnel_id", "ref_date"))) |>
+    mutate(separation = 1)
+
+  person_groups |>
+    inner_join(calendar, by = "ref_date") |>
+    left_join(hires, by = c("personnel_id", "ref_date")) |>
+    left_join(separations, by = c("personnel_id", "ref_date")) |>
+    # SQL's SUM() returns NULL, not 0, when nobody was hired (separated), so
+    # people without an event are counted as 0 first
+    summarise(
+      headcount = n(),
+      hires = sum(coalesce(hire, 0), na.rm = TRUE),
+      separations = sum(coalesce(separation, 0), na.rm = TRUE),
+      .by = all_of(c("ref_date", "prev_date", "next_date", group_cols))
+    ) |>
+    # no previous (next) date to compare with, so hires (separations) are
+    # unknown
+    mutate(
+      hires = if_else(is.na(prev_date), NA_real_, hires),
+      separations = if_else(is.na(next_date), NA_real_, separations),
+      hire_rate = hires / headcount,
+      separation_rate = separations / headcount,
+      replacement_rate = hires / separations
+    ) |>
+    select(
+      all_of(c("ref_date", group_cols)),
+      headcount, hires, separations, hire_rate, separation_rate, replacement_rate
+    )
 }
 
 #' Estimate historical non-retirement exit rates from panel data

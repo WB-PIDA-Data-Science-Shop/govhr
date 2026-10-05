@@ -1,9 +1,9 @@
 Package: govhr
 Type: Package
-Title: Clean and analyze data that informs human resource management
-Version: 0.4.0
+Title: Clean and analyze data to inform human resource management
+Version: 0.4.1
 Description: This package is a toolkit developed by the World Bank. It cleans, harmonizes, and analyzes human resource data with a standardized methodology.
-License: MIT + file LICENSE
+License: CC0
 Encoding: UTF-8
 LazyData: true
 LazyDataCompression: xz
@@ -40,12 +40,15 @@ Imports:
     forcats,
     ggstats
 Suggests: 
+    DBI,
+    dbplyr,
+    duckdb,
     readr,
     testthat (>= 3.0.0),
     reactable
 Config/testthat/edition: 3
 Depends: 
-    R (>= 3.5)
+    R (>= 4.1.0)
 URL: https://wb-pida-data-science-shop.github.io/govhr/
 Config/Needs/website: rmarkdown, remotes, polyglotr, AleKoure/labourR, DT, tidyr, here, tibble, arrow
 Authors@R: c(

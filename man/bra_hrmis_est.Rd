@@ -5,7 +5,7 @@
 \alias{bra_hrmis_est}
 \title{HRMIS Establishment Dataset}
 \format{
-A data frame with 65 rows and 6 variables:
+A data frame with 570 rows and 7 variables:
 \describe{
 \item{est_name_native}{Official establishment name in the native language (Portuguese).}
 \item{est_id}{Unique identifier assigned to each establishment.}

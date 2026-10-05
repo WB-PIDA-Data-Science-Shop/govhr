@@ -47,38 +47,26 @@ plot_trend(headcount_trend_gender, group_col = c("gender"))
 
 ## Movement
 
-Beyond the stock of personnel, governments are often interested in the flows of personnel into and out of the public sector. The `compute_workforce_movement` function allows users to compute the number of new hires and separations by reference date, while the companion plotting function `plot_movement` visualizes these flows.
+Beyond the stock of personnel, governments are often interested in the flows of personnel into and out of the public sector. The `compute_movement` function counts, for each reference date, the number of active personnel, new hires and separations, along with hire and separation rates. The companion plotting function `plot_movement` visualizes these flows.
 
 ```{r}
-movement_hire_count <- compute_workforce_movement(
-  govhr::bra_hrmis_personnel,
-  movement_type = "hire",
-  measurement_type = "count",
-  group_cols = "ref_date"
-)
+movement <- compute_movement(govhr::bra_hrmis_personnel)
 
-plot_movement(
-    movement_hire_count,
-    movement_type = "hire",
-    measurement_type = "count",
-    group_cols = "ref_date"
-)
+plot_movement(movement, movement_type = "hire", measurement_type = "count")
 ```
-Again, if you are interested in how these flows vary across groups, you can modify the `group_cols` argument to include additional grouping variables.
+Again, if you are interested in how these flows vary across groups, you can use the `group_cols` argument. Here we plot the separation rate by gender.
 
 ```{r}
-movement_hire_gender_count <- compute_workforce_movement(
+movement_gender <- compute_movement(
   govhr::bra_hrmis_personnel,
-  movement_type = "hire",
-  measurement_type = "count",
-  group_cols = c("ref_date", "gender")
+  group_cols = "gender"
 )
 
 plot_movement(
-    movement_hire_gender_count,
-    movement_type = "hire",
-    measurement_type = "count",
-    group_cols = "gender"
+  movement_gender,
+  movement_type = "separation",
+  measurement_type = "rate",
+  group_cols = "gender"
 )
 ```
 

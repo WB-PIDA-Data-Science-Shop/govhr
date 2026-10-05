@@ -135,7 +135,7 @@ bra_hrmis[, gross_salary_real := deflate_to_real(
   gross_salary_lcu,
   ref_date,
   country_code,
-  base_year = 2021
+  base_month = "2021-12-01"
 )]
 ```
 

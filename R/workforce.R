@@ -1,0 +1,103 @@
+#' Compute standard workforce indicators
+#'
+#' Produces a standard set of workforce indicators in one call: how many
+#' people work in government, where they work, how many join and leave, and
+#' how many move between establishments. Each indicator comes from an existing
+#' govhr function, so the results match what those functions return on their
+#' own.
+#'
+#' @param contracts Data frame or remote database table (`tbl_dbi`) with the
+#'   contract data, one row per contract and reference date. Must contain
+#'   `personnel_id`, `ref_date` and `est_id`.
+#' @param personnel Data frame or remote database table (`tbl_dbi`) with the
+#'   personnel data. Must contain `personnel_id`, `ref_date` and
+#'   `employment_status` (with `"active"` marking people currently employed).
+#'   For database input, it must live in the same database as `contracts`.
+#'
+#' @returns A named list of tables:
+#' \describe{
+#'   \item{headcount}{Headcount for each `ref_date`, from [compute_headcount()].}
+#'   \item{headcount_by_est}{Headcount and share of the total for each
+#'     establishment and `ref_date`, from [compute_headcount()].}
+#'   \item{movement}{Headcount, hires, separations and their rates for each
+#'     `ref_date`, from [compute_movement()]. Hires are `NA` on the first date
+#'     and separations on the last, since there is nothing to compare with.}
+#'   \item{transitions}{One row per move between establishments, with
+#'     `personnel_id`, origin (`from`), destination (`to`), when the person
+#'     joined the origin (`from_date`) and when they arrived at the destination
+#'     (`ref_date`), from [compute_transition()].}
+#' }
+#' Each table has the class its function returns for `contracts`: data.tables
+#' for data frame input, lazy tables for `tbl_dbi` input (use
+#' [dplyr::collect()] to bring them into memory).
+#'
+#' @details
+#' Only active personnel are counted: each contract is matched to `personnel`
+#' by `personnel_id` and `ref_date`, and kept only if `employment_status` is
+#' `"active"` on that date. Contracts with no matching personnel record are
+#' left out. Each indicator function then picks the method for the class of
+#' the data, so a database table is processed in the database.
+#'
+#' Hires and separations are counted per person, so someone holding several
+#' contracts on the same date is counted once.
+#'
+#' A person recorded in more than one establishment on the same date has no
+#' single position that period, so [compute_transition()] leaves them out of
+#' `transitions` and warns about it.
+#'
+#' @examples
+#' contracts <- data.frame(
+#'   personnel_id = rep(1:3, each = 3),
+#'   ref_date = rep(as.Date(c("2020-01-01", "2021-01-01", "2022-01-01")), times = 3),
+#'   est_id = c("A", "A", "A", "B", "B", "A", "A", "A", "B")
+#' )
+#' personnel <- data.frame(
+#'   personnel_id = rep(1:3, each = 3),
+#'   ref_date = rep(as.Date(c("2020-01-01", "2021-01-01", "2022-01-01")), times = 3),
+#'   employment_status = c(
+#'     "active", "active", "active",
+#'     "inactive", "active", "active",
+#'     "active", "active", "inactive"
+#'   )
+#' )
+#' compute_workforce_analytics(contracts, personnel)
+#'
+#' @export
+compute_workforce_analytics <- function(contracts, personnel){
+  check_required_cols(
+    contracts,
+    c("personnel_id", "ref_date", "est_id"),
+    arg = "contracts"
+  )
+  check_required_cols(
+    personnel,
+    c("personnel_id", "ref_date", "employment_status"),
+    arg = "personnel"
+  )
+
+  data <- keep_active_contracts(contracts, personnel)
+
+  # 1.1. headcount: overall
+  headcount <- compute_headcount(data)
+
+  # 1.2. headcount: by establishment
+  headcount_by_est <- compute_headcount(data, group_cols = "est_id")
+
+  # 2.1. hires and separations: overall
+  movement <- compute_movement(data)
+
+  # 2.2. transitions: by establishment
+  transitions <- compute_transition(
+    data,
+    id_col = "personnel_id",
+    group_cols = "est_id",
+    summarize = FALSE
+  )
+
+  list(
+    headcount = headcount,
+    headcount_by_est = headcount_by_est,
+    movement = movement,
+    transitions = transitions
+  )
+}

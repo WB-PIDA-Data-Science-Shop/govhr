@@ -5,7 +5,7 @@
 \alias{bra_hrmis_allowance}
 \title{Brazil HRMIS Allowance Module}
 \format{
-A data frame with 60,430 rows and 5 variables:
+A data frame with 55,600 rows and 5 variables:
 \describe{
 \item{contract_id}{Character. Unique identifier for the employment
 contract associated with the allowance.}

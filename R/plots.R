@@ -308,35 +308,89 @@ plot_segment <- function(data, col, group_col, group = NULL) {
     ggplot2::labs(x = col, y = group_col)
 }
 
-#' Plot personnel movement over time
+#' Plot hires or separations over time
 #'
-#' @param data A data frame containing the movement data with columns `ref_date`, `indicator`, and optionally a grouping column.
-#' @param movement_type A string indicating the type of movement: "hire", "fire", or "turnover".
-#' @param measurement_type A string indicating the measurement type: "count" or "rate".
-#' @param group_cols A character vector of columns to group by, or `"ref_date"` for no grouping.
+#' Draws hires or separations for each reference date, as counts or rates,
+#' from the output of [compute_movement()].
 #'
-#' @returns A ggplot2 object representing the personnel movement over time.
+#' @param data Output of [compute_movement()]. A lazy table (`tbl_dbi`) is
+#'   brought into memory first.
+#' @param movement_type Character. `"hire"` (default) or `"separation"`.
+#' @param measurement_type Character. `"count"` (default) or `"rate"`.
+#' @param group_cols Character. A column to draw one line per group, such as
+#'   `"gender"`. It should be one of the `group_cols` used in
+#'   [compute_movement()]. `NULL` (default) or `"ref_date"` draws a single
+#'   line.
 #'
-#' @importFrom ggplot2 ggplot aes geom_point geom_line labs scale_y_continuous
-#' @importFrom dplyr n_distinct
+#' @returns A ggplot2 object.
+#'
+#' @details Dates with no hires or separations to compare with (`NA` in
+#'   `data`), such as the first date for hires, are left out of the plot.
+#'
+#' @examples
+#' hr <- data.frame(
+#'   personnel_id = c(1, 2, 1, 3, 1, 3),
+#'   ref_date = as.Date(rep(c("2020-01-01", "2021-01-01", "2022-01-01"), each = 2)),
+#'   employment_status = "active"
+#' )
+#' movement <- compute_movement(hr)
+#' plot_movement(movement, movement_type = "separation", measurement_type = "rate")
+#'
+#' @importFrom ggplot2 ggplot aes geom_point geom_line labs scale_color_manual
+#'   scale_y_continuous
+#' @importFrom dplyr collect filter n_distinct
 #' @importFrom grDevices colorRampPalette
 #'
 #' @export
-plot_movement <- function(data, movement_type, measurement_type, group_cols) {
-  plot <- data |>
+plot_movement <- function(
+  data,
+  movement_type = c("hire", "separation"),
+  measurement_type = c("count", "rate"),
+  group_cols = NULL
+) {
+  movement_type <- match.arg(movement_type)
+  measurement_type <- match.arg(measurement_type)
+
+  if (length(group_cols) > 1) {
+    stop("`group_cols` must be a single column")
+  }
+
+  # the compute_movement() column to plot, e.g. "hires" or "separation_rate"
+  measure_col <- if (measurement_type == "count") {
+    paste0(movement_type, "s")
+  } else {
+    paste0(movement_type, "_rate")
+  }
+
+  # collect() leaves in-memory data unchanged
+  plot_data <- data |>
+    collect() |>
+    filter(!is.na(.data[[measure_col]]))
+
+  plot <- plot_data |>
     ggplot(
-      aes(.data[["ref_date"]], .data[["indicator"]])
+      aes(.data[["ref_date"]], .data[[measure_col]])
     ) +
     geom_point() +
     geom_line() +
     labs(
       x = "Time",
-      y = ifelse(measurement_type == "rate", "Share", "Count")
+      y = paste0(
+        if (movement_type == "hire") "Hire" else "Separation",
+        if (measurement_type == "count") "s" else " rate"
+      )
     )
 
-  if (group_cols != "ref_date") {
-    n_groups <- dplyr::n_distinct(
-      data[[group_cols]],
+  if (measurement_type == "rate") {
+    plot <- plot +
+      scale_y_continuous(
+        labels = scales::percent_format()
+      )
+  }
+
+  if (!(is.null(group_cols) || group_cols == "ref_date")) {
+    n_groups <- n_distinct(
+      plot_data[[group_cols]],
       na.rm = TRUE
     )
     orange_palette <- colorRampPalette(c("#C34729", "#F5C6A0"))(n_groups)
@@ -345,41 +399,7 @@ plot_movement <- function(data, movement_type, measurement_type, group_cols) {
         color = .data[[group_cols]],
         group = .data[[group_cols]]
       ) +
-      ggplot2::scale_color_manual(values = orange_palette)
-  }
-
-  if (
-    movement_type %in%
-      c("hire", "fire", "retirement") &
-      measurement_type == "rate"
-  ) {
-    plot <- plot +
-      scale_y_continuous(
-        labels = scales::percent_format()
-      )
-  } else if (movement_type == "turnover") {
-    plot <- plot +
-      scale_y_continuous(
-        labels = scales::label_number(accuracy = 0.1)
-      ) +
-      geom_hline(
-        yintercept = 1,
-        linetype = "dashed",
-        color = "#004181"
-      ) +
-      ggplot2::annotate(
-        "text",
-        x = as.Date(max(data[["ref_date"]])) -
-          (as.Date(max(data[["ref_date"]])) -
-            as.Date(min(data[["ref_date"]]))) *
-            0.05,
-        y = 1.15,
-        label = "Replacement rate = 1",
-        color = "#004181"
-      ) +
-      labs(
-        y = "Replacement rate"
-      )
+      scale_color_manual(values = orange_palette)
   }
 
   plot

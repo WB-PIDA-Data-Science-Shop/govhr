@@ -1,0 +1,172 @@
+---
+title: "Standard HR Report"
+output:
+  html_document:
+    toc: true
+params:
+  workforce: NULL
+  wagebill: NULL
+---
+
+```{r setup, include = FALSE}
+# the indicators are computed by generate_standard_report(); this template
+# only draws them
+library(dplyr)
+library(ggplot2)
+library(govhr)
+
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 9,
+  fig.height = 5
+)
+
+theme_set(theme_minimal(base_size = 13))
+
+workforce <- params$workforce
+wagebill <- params$wagebill
+
+# the five establishments with the most staff on the latest date, shown in
+# every chart by establishment so the charts stay readable
+top_establishments <- workforce$headcount_by_est |>
+  filter(ref_date == max(ref_date)) |>
+  slice_max(headcount, n = 5, with_ties = FALSE) |>
+  pull(est_id)
+```
+
+# Workforce
+
+## Headcount
+
+Number of people working in government on each date.
+
+```{r headcount}
+workforce$headcount |>
+  plot_trend(group_col = "ref_date", y_col = "headcount", y_label = "Headcount")
+```
+
+## Headcount by establishment
+
+The five establishments with the most staff on the latest date.
+
+```{r headcount-by-est}
+workforce$headcount_by_est |>
+  filter(est_id %in% top_establishments) |>
+  plot_trend(
+    group_col = "est_id",
+    y_col = "headcount",
+    y_label = "Headcount"
+  ) +
+  labs(color = "Establishment") +
+  theme(legend.position = "bottom")
+```
+
+## Hires and separations
+
+Hires are people active on a date but not on the previous one; separations
+are people active on a date but not on the next one, including retirements.
+Both are shown as a share of headcount.
+
+```{r hires}
+plot_movement(
+  workforce$movement,
+  movement_type = "hire",
+  measurement_type = "rate"
+)
+```
+
+```{r separations}
+plot_movement(
+  workforce$movement,
+  movement_type = "separation",
+  measurement_type = "rate"
+)
+```
+
+## Transitions
+
+Total number of transitions between establishments by personnel.
+
+```{r transitions}
+if (nrow(workforce$transitions) == 0) {
+  cat("No moves between establishments were recorded.")
+} else {
+  # Word cannot show interactive charts, so draw a static network there
+  plot_transition_network(
+    workforce$transitions,
+    interactive = knitr::is_html_output()
+  )
+}
+```
+
+# Wagebill
+
+## Total wagebill
+
+Total pay across all contracts on each date.
+
+```{r wagebill}
+wagebill$wagebill |>
+  plot_trend(group_col = "ref_date", y_col = "wagebill", y_label = "Wagebill")
+```
+
+## Wagebill growth
+
+Change in the wagebill since the previous date.
+
+```{r wagebill-growth}
+wagebill$wagebill |>
+  filter(!is.na(wagebill_growth)) |>
+  plot_trend(
+    group_col = "ref_date",
+    y_col = "wagebill_growth",
+    y_label = "Growth"
+  ) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50")
+```
+
+## Wagebill by establishment
+
+The wagebill of the five establishments with the most staff on the latest
+date.
+
+```{r wagebill-by-est}
+wagebill$wagebill_by_est |>
+  filter(est_id %in% top_establishments) |>
+  plot_trend(group_col = "est_id", y_col = "wagebill", y_label = "Wagebill") +
+  labs(color = "Establishment") +
+  theme(legend.position = "bottom")
+```
+
+## Average wage
+
+Average pay per contract on each date.
+
+```{r wage}
+wagebill$wage |>
+  plot_trend(group_col = "ref_date", y_col = "wage", y_label = "Average wage")
+```
+
+## Pay composition
+
+Share of the wagebill paid through each pay component.
+
+```{r composition}
+wagebill$composition |>
+  ggplot(aes(ref_date, share_wagebill, fill = component)) +
+  geom_area() +
+  scale_y_continuous(labels = scales::label_percent()) +
+  labs(x = "Time", y = "Share of wagebill", fill = "Component") +
+  theme(legend.position = "bottom")
+```
+
+## Pay distribution
+
+Share of contracts in each pay band, pooling all dates.
+
+```{r distribution}
+plot_histogram(wagebill$distribution)
+```
