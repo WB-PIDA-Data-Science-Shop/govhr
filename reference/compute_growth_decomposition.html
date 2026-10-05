@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,10 +39,24 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_growth_decomposition</span><span class="op">(</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_growth_decomposition</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'data.frame'</span></span>
+<span><span class="fu">compute_growth_decomposition</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  group_cols <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  measure_col <span class="op">=</span> <span class="st">"gross_salary_lcu"</span></span>
+<span>  measure_col <span class="op">=</span> <span class="st">"gross_salary_lcu"</span>,</span>
+<span>  simplify <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'tbl_dbi'</span></span>
+<span><span class="fu">compute_growth_decomposition</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  group_cols <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  measure_col <span class="op">=</span> <span class="st">"gross_salary_lcu"</span>,</span>
+<span>  simplify <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -51,30 +65,91 @@
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data frame containing the data to be analyzed. It should include columns for the grouping variables, a column for the reference date, and a column for the measure of interest (e.g., gross salary).</p></dd>
+<dd><p>Data frame or remote table (<code>tbl_dbi</code>) containing a <code>ref_date</code>
+column, the grouping columns and the measure.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Arguments passed to methods.</p></dd>
 
 
 <dt id="arg-group-cols">group_cols<a class="anchor" aria-label="anchor" href="#arg-group-cols"></a></dt>
-<dd><p>A character vector specifying the names of the columns to group by.</p></dd>
+<dd><p>Character vector of columns to group by, or <code>NULL</code> for no
+grouping. Must not include <code>ref_date</code>.</p></dd>
 
 
 <dt id="arg-measure-col">measure_col<a class="anchor" aria-label="anchor" href="#arg-measure-col"></a></dt>
-<dd><p>A string specifying the name of the column containing the measure of interest (default is "gross_salary_lcu").</p></dd>
+<dd><p>Character. Numeric column to decompose. Default
+<code>"gross_salary_lcu"</code>.</p></dd>
+
+
+<dt id="arg-simplify">simplify<a class="anchor" aria-label="anchor" href="#arg-simplify"></a></dt>
+<dd><p>Logical. If <code>TRUE</code> (default), return only <code>group_cols</code>,
+<code>ref_date</code>, <code>transition_type</code> and the effect columns
+(<code>employment_effect</code>, <code>wage_effect</code>, <code>interaction_effect</code>,
+<code>entry_effect</code>, <code>exit_effect</code>, <code>total_effect</code>). If <code>FALSE</code>, also return
+the intermediate columns (<code>headcount</code>, <code>wage</code>, <code>wagebill</code>, their lags,
+<code>delta_wage</code>, <code>is_observed</code> and <code>observed_lag</code>).
+<code><a href="compute_wage_decomposition.html">compute_wage_decomposition()</a></code> requires <code>simplify = FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data.table with headcount, compensation, wagebill, wagebill_lag,
-the continuing-period decomposition (employment/compensation/interaction
-effects), entry/exit effects, is_observed, and a <code>transition_type</code> label
-for each row: "start" (panel's first period for this group – left-
-censored, no baseline available), "continuing" (observed this period
-and last), "entry" (observed now, not last period – a genuinely new
-group_cols combination, or a reappearance after any length of absence),
-or "exit" (not observed now – covers both the period a group first
-disappears, which carries the real dollar effect, and every subsequent
-period it remains absent, which correctly carries a zero effect since
-nothing further changed).</p>
+    <p>A data.table (a lazy table for <code>tbl_dbi</code> input) with one row per
+group x reference date, containing the grouping columns, <code>ref_date</code>,
+<code>transition_type</code> and the columns selected by <code>simplify</code>.
+<code>transition_type</code> is "start" (panel's first period), "continuing"
+(observed this period and last), "entry" (observed this period but not
+last) or "exit" (not observed this period).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The function explains how each group's wagebill changes from one period
+to the next, decomposing the change into an effect due to headcount, an effect
+due to average pay, and an effect due to both moving together.</p>
+<p><strong>1. Building the panel.</strong> Rows with a missing value in <code>measure_col</code>
+or any of <code>group_cols</code> are dropped. For each group \(g\) (a combination
+of <code>group_cols</code>) and period \(t\) (<code>ref_date</code>):</p><ul><li><p>headcount \(N_{g,t}\): number of records;</p></li>
+<li><p>wage \(C_{g,t}\): mean of <code>measure_col</code>;</p></li>
+<li><p>wagebill \(W_{g,t} = \sum_i w_i = N_{g,t} \, C_{g,t}\).</p></li>
+</ul><p>Every group is then expanded to every <code>ref_date</code> in <code>data</code>. A group absent
+in a period gets \(N = 0\), \(W = 0\) and \(C\) = <code>NA</code>, so gaps are
+explicit rather than silently skipped. Reference dates absent from the
+whole of <code>data</code> are not added. Each row is compared with the same group's
+previous reference date, \(t-1\).</p>
+<p><strong>2. Continuing groups</strong> (observed at \(t-1\) and \(t\)). Write
+\(\Delta N = N_t - N_{t-1}\) and
+\(\Delta C = C_t - C_{t-1}\) (<code>delta_wage</code>). Since
+\(W_t = (N_{t-1} + \Delta N)(C_{t-1} + \Delta C)\),
+expanding the product gives us the following identity:
+$$W_t - W_{t-1} = \underbrace{C_{t-1} \Delta N}_{\text{employment}} +
+  \underbrace{N_{t-1} \Delta C}_{\text{wage}} +
+  \underbrace{\Delta N \, \Delta C}_{\text{interaction}}$$</p><ul><li><p><code>employment_effect</code> \(= C_{t-1} \Delta N\): the
+change had pay stayed at last period's average and only headcount
+changed.</p></li>
+<li><p><code>wage_effect</code> \(= N_{t-1} \Delta C\):
+the change had headcount stayed at last period's level and only
+average pay changed.</p></li>
+<li><p><code>interaction_effect</code> \(= \Delta N \, \Delta C\): the
+extra change from both moving at once (new staff paid the new
+average).</p></li>
+</ul><p><strong>3. Entry and exit.</strong> When a group is missing in one of the two
+periods, \(\Delta C\) is undefined, so the three effects above are
+<code>NA</code> and the entire change is attributed to entry or exit:</p><ul><li><p>entry (absent at \(t-1\), present at \(t\)):
+<code>entry_effect</code> \(= W_t\).</p></li>
+<li><p>exit (present at \(t-1\), absent at \(t\)):
+<code>exit_effect</code> \(= -W_{t-1}\). Later periods in which
+the group stays absent are also labelled "exit" but carry
+<code>exit_effect</code> = 0, as nothing further changed. A group absent from
+the panel's first period is likewise "exit" with 0 until it enters.</p></li>
+</ul><p>A group that disappears and later reappears therefore shows one exit,
+zero-effect "exit" rows during the gap, and one entry.</p>
+<p><strong>4. Total effect.</strong> <code>total_effect</code> is the sum of the effects that
+apply to the row, so it always equals \(W_t - W_{t-1}\)
+(with \(W = 0\) when unobserved). It is <code>NA</code> in the panel's first
+period ("start"), which has no baseline. Consequently, summing
+<code>total_effect</code> over time for a group recovers its wagebill in the last
+period minus its wagebill in the first period.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

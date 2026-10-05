@@ -14,7 +14,7 @@ bra_hrmis_personnel
 
 ## Format
 
-A data frame with 15,681 rows and 11 variables:
+A data frame with 14,106 rows and 11 variables:
 
 - personnel_id:
 

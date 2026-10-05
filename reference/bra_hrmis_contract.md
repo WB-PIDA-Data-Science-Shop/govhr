@@ -14,7 +14,7 @@ bra_hrmis_contract
 
 ## Format
 
-A data frame with 16,434 rows and 19 variables:
+A data frame with 14,773 rows and 19 variables:
 
 - contract_id:
 

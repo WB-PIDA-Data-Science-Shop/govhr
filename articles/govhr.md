@@ -47,8 +47,7 @@ handles the data engineering or, as we prefer to call it, the
 harmonization. The frontend handles analytics, including functions that
 compute indicators and visualizes them in plots.
 
-![govhr:
-architecture](../../../../../.cache/R/renv/library/govhr-cc4d26e5/linux-ubuntu-noble/R-4.6/x86_64-pc-linux-gnu/govhr/www/govhr.svg)
+![govhr: architecture](govhr.svg)
 
 govhr: architecture
 
@@ -93,7 +92,7 @@ personnel_clean <- clean_hr_data(
 #>   - Removed 0 duplicate records
 #>   - Fixed invalid dates (set out-of-bounds to NA)
 #>   - Handled age issues (flagged underage and over-retirement)
-#> Cleaning complete. 15681 records retained (0 removed).
+#> Cleaning complete. 14106 records retained (0 removed).
 ```
 
 Once the data is treated, you might want to assess the coverage of the
@@ -115,7 +114,7 @@ compute_coverage(
 #>  3 active            ref_date        100  
 #>  4 pensioner         ref_date        100  
 #>  5 active            birth_date      100  
-#>  6 pensioner         birth_date       99.3
+#>  6 pensioner         birth_date       99.2
 #>  7 active            age             100  
 #>  8 pensioner         age             100  
 #>  9 active            gender          100  
@@ -168,11 +167,11 @@ compute_growth(
 #> # A tibble: 7 × 2
 #>   educat7                                  growth_rate
 #>   <chr>                                          <dbl>
-#> 1 Secondary complete                              61.6
-#> 2 Higher than secondary but not university        27.7
-#> 3 Secondary incomplete                            17.5
-#> 4 Primary complete                                11.3
-#> 5 Primary incomplete                             -10  
-#> 6 University incomplete or complete               44.2
-#> 7 No education                                     0
+#> 1 Secondary complete                              56.7
+#> 2 Higher than secondary but not university        29.6
+#> 3 Secondary incomplete                             9.4
+#> 4 Primary complete                                15.7
+#> 5 Primary incomplete                              -5.7
+#> 6 University incomplete or complete               40.7
+#> 7 No education                                   -25
 ```

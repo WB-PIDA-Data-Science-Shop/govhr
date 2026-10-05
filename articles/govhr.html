@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -107,7 +107,7 @@ backend handles the data engineering or, as we prefer to call it, the
 harmonization. The frontend handles analytics, including functions that
 compute indicators and visualizes them in plots.</p>
 <div class="float">
-<img src="../../../../../.cache/R/renv/library/govhr-cc4d26e5/linux-ubuntu-noble/R-4.6/x86_64-pc-linux-gnu/govhr/www/govhr.svg" alt="govhr: architecture"><div class="figcaption">govhr: architecture</div>
+<img src="govhr.svg" alt="govhr: architecture"><div class="figcaption">govhr: architecture</div>
 </div>
 <div class="section level3">
 <h3 id="harmonization">Harmonization<a class="anchor" aria-label="anchor" href="#harmonization"></a>
@@ -145,7 +145,7 @@ starting point to formalize your own treatment plan.</p>
 <span><span class="co">#&gt;   - Removed 0 duplicate records</span></span>
 <span><span class="co">#&gt;   - Fixed invalid dates (set out-of-bounds to NA)</span></span>
 <span><span class="co">#&gt;   - Handled age issues (flagged underage and over-retirement)</span></span>
-<span><span class="co">#&gt; Cleaning complete. 15681 records retained (0 removed).</span></span></code></pre></div>
+<span><span class="co">#&gt; Cleaning complete. 14106 records retained (0 removed).</span></span></code></pre></div>
 <p>Once the data is treated, you might want to assess the coverage of
 the data. A set of functions, such as <code>compute_coverage</code>,
 allow you to quickly check this aspect of quality of the data.</p>
@@ -163,7 +163,7 @@ allow you to quickly check this aspect of quality of the data.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> active            ref_date        100  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> pensioner         ref_date        100  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> active            birth_date      100  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> pensioner         birth_date       99.3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> pensioner         birth_date       99.2</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> active            age             100  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> pensioner         age             100  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> active            gender          100  </span></span>
@@ -208,13 +208,13 @@ by group.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 2</span></span></span>
 <span><span class="co">#&gt;   educat7                                  growth_rate</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Secondary complete                              61.6</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Higher than secondary but not university        27.7</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Secondary incomplete                            17.5</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Primary complete                                11.3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Primary incomplete                             -<span style="color: #BB0000;">10</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> University incomplete or complete               44.2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> No education                                     0</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Secondary complete                              56.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Higher than secondary but not university        29.6</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Secondary incomplete                             9.4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Primary complete                                15.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Primary incomplete                              -<span style="color: #BB0000;">5.7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> University incomplete or complete               40.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> No education                                   -<span style="color: #BB0000;">25</span></span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

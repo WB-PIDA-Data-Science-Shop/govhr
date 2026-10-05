@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -129,41 +129,29 @@ still take the reference date into account.</p>
 </h2>
 <p>Beyond the stock of personnel, governments are often interested in
 the flows of personnel into and out of the public sector. The
-<code>compute_workforce_movement</code> function allows users to compute
-the number of new hires and separations by reference date, while the
-companion plotting function <code>plot_movement</code> visualizes these
-flows.</p>
+<code>compute_movement</code> function counts, for each reference date,
+the number of active personnel, new hires and separations, along with
+hire and separation rates. The companion plotting function
+<code>plot_movement</code> visualizes these flows.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">movement_hire_count</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_workforce_movement.html">compute_workforce_movement</a></span><span class="op">(</span></span>
-<span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
-<span>  movement_type <span class="op">=</span> <span class="st">"hire"</span>,</span>
-<span>  measurement_type <span class="op">=</span> <span class="st">"count"</span>,</span>
-<span>  group_cols <span class="op">=</span> <span class="st">"ref_date"</span></span>
-<span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">movement</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_movement.html">compute_movement</a></span><span class="op">(</span><span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/plot_movement.html">plot_movement</a></span><span class="op">(</span></span>
-<span>    <span class="va">movement_hire_count</span>,</span>
-<span>    movement_type <span class="op">=</span> <span class="st">"hire"</span>,</span>
-<span>    measurement_type <span class="op">=</span> <span class="st">"count"</span>,</span>
-<span>    group_cols <span class="op">=</span> <span class="st">"ref_date"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/plot_movement.html">plot_movement</a></span><span class="op">(</span><span class="va">movement</span>, movement_type <span class="op">=</span> <span class="st">"hire"</span>, measurement_type <span class="op">=</span> <span class="st">"count"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="03-analytics_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="700">
 Again, if you are interested in how these flows vary across groups, you
-can modify the <code>group_cols</code> argument to include additional
-grouping variables.</p>
+can use the <code>group_cols</code> argument. Here we plot the
+separation rate by gender.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">movement_hire_gender_count</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_workforce_movement.html">compute_workforce_movement</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">movement_gender</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_movement.html">compute_movement</a></span><span class="op">(</span></span>
 <span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
-<span>  movement_type <span class="op">=</span> <span class="st">"hire"</span>,</span>
-<span>  measurement_type <span class="op">=</span> <span class="st">"count"</span>,</span>
-<span>  group_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ref_date"</span>, <span class="st">"gender"</span><span class="op">)</span></span>
+<span>  group_cols <span class="op">=</span> <span class="st">"gender"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot_movement.html">plot_movement</a></span><span class="op">(</span></span>
-<span>    <span class="va">movement_hire_gender_count</span>,</span>
-<span>    movement_type <span class="op">=</span> <span class="st">"hire"</span>,</span>
-<span>    measurement_type <span class="op">=</span> <span class="st">"count"</span>,</span>
-<span>    group_cols <span class="op">=</span> <span class="st">"gender"</span></span>
+<span>  <span class="va">movement_gender</span>,</span>
+<span>  movement_type <span class="op">=</span> <span class="st">"separation"</span>,</span>
+<span>  measurement_type <span class="op">=</span> <span class="st">"rate"</span>,</span>
+<span>  group_cols <span class="op">=</span> <span class="st">"gender"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="03-analytics_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="700"></p>
 </div>

@@ -14,7 +14,7 @@ bra_hrmis_est
 
 ## Format
 
-A data frame with 65 rows and 6 variables:
+A data frame with 570 rows and 7 variables:
 
 - est_name_native:
 

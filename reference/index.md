@@ -41,8 +41,6 @@
   : Compute cross-section summary
 - [`compute_decile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_decile.md)
   : Compute Deciles of a Measure
-- [`compute_density()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_density.md)
-  : Function to compute the distribution function of a variable
 - [`compute_fastchange()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastchange.md)
   : Calculate year-over-year growth for a numeric column
 - [`compute_fastshare()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastshare.md)
@@ -62,11 +60,17 @@
   : Compute growth decomposition of wagebill
 - [`compute_growth_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_growth_summary.md)
   : Compute growth rate summary
+- [`compute_headcount()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_headcount.md)
+  : Compute headcount by group
+- [`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md)
+  : Compute movements as hires and separations
 - [`compute_movement_cost()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement_cost.md)
   : Function to compute the total cost associated with personnel
   movements
 - [`compute_pension_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_pension_ratio.md)
   : Compute ratio of last salary to first pension for retired workers
+- [`compute_percentile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_percentile.md)
+  : Compute the percentile of a measure
 - [`compute_quantile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_quantile.md)
   : Function to compute quantiles of a measure column within groups and
   reference dates
@@ -76,19 +80,22 @@
   : Compute an actuarial service table from a personnel panel
 - [`compute_time_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_time_trend.md)
   : Compute time trend
+- [`compute_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_transition.md)
+  : Compute career transitions
 - [`compute_trend_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_trend_summary.md)
   : Compute trend summary
 - [`compute_value_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_value_consistency.md)
   : Compute the proportion of consistent values in a data frame
+- [`compute_wage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wage.md)
+  : Compute the average wage
 - [`compute_wage_decomposition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wage_decomposition.md)
-  : Decompose aggregate average-compensation growth into within,
-  between, cross, entry, and exit effects (Foster-Haltiwanger-Krizan
-  style)
+  : Decompose average-wage growth
 - [`compute_wagebill()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wagebill.md)
-  : Compute wage bill aggregates with optional macro-fiscal shares
-- [`compute_workforce_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_workforce_movement.md)
-  : Function to compute workforce movement for hires, fires, retirement,
-  or turnover
+  : Compute the wagebill
+- [`compute_wagebill_analytics()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wagebill_analytics.md)
+  : Compute standard wagebill indicators
+- [`compute_workforce_analytics()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_workforce_analytics.md)
+  : Compute standard workforce indicators
 - [`contract_rules`](https://wb-pida-data-science-shop.github.io/govhr/reference/contract_rules.md)
   : Contract Validation Rules
 - [`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.md)
@@ -103,20 +110,18 @@
   : World Bank Country and Lending Groups
 - [`cp_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/cp_ratio.md)
   : Compute a compression ratio between two percentiles
+- [`cpi`](https://wb-pida-data-science-shop.github.io/govhr/reference/cpi.md)
+  : Monthly consumer price index (CPI) by country
 - [`cv()`](https://wb-pida-data-science-shop.github.io/govhr/reference/cv.md)
   : Compute the coefficient of variation (CV)
 - [`dedup_values()`](https://wb-pida-data-science-shop.github.io/govhr/reference/dedup_values.md)
   : Deduplicate values within grouped data
 - [`deflate_to_real()`](https://wb-pida-data-science-shop.github.io/govhr/reference/deflate_to_real.md)
   : Deflate a nominal LCU column to real values
-- [`detect_career_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_career_transition.md)
-  : Detect career transitions
 - [`detect_inconsistent_cols()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_inconsistent_cols.md)
   : Detect inconsistent columns in a data frame
 - [`detect_personnel_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_personnel_event.md)
   : Detect Personnel Events
-- [`detect_reallocation()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_reallocation.md)
-  : Detect personnel reallocation events
 - [`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md)
   : Detect personnel retirement events
 - [`dictionary`](https://wb-pida-data-science-shop.github.io/govhr/reference/dictionary.md)
@@ -149,8 +154,8 @@
   : Flag or remove underage workers
 - [`fix_working_hours()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fix_working_hours.md)
   : Fix invalid working hours
-- [`generate_hr_report()`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_hr_report.md)
-  : Generate Standard HR Analytics Report
+- [`generate_standard_report()`](https://wb-pida-data-science-shop.github.io/govhr/reference/generate_standard_report.md)
+  : Generate the standard HR report
 - [`get_data360_api()`](https://wb-pida-data-science-shop.github.io/govhr/reference/get_data360_api.md)
   : This function retrieves data from the Data360 API.
 - [`get_metadata360()`](https://wb-pida-data-science-shop.github.io/govhr/reference/get_metadata360.md)
@@ -200,7 +205,7 @@
 - [`plot_model_wage_fes()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_model_wage_fes.md)
   : Plot fixed effects from a wage model fit
 - [`plot_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_movement.md)
-  : Plot personnel movement over time
+  : Plot hires or separations over time
 - [`plot_movement_cost()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_movement_cost.md)
   : Plot movement cost
 - [`plot_segment()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_segment.md)

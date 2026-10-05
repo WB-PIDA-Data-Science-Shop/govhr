@@ -13,7 +13,7 @@ data(bra_hrmis_allowance)
 
 ## Format
 
-A data frame with 60,430 rows and 5 variables:
+A data frame with 55,600 rows and 5 variables:
 
 - contract_id:
 

@@ -8,16 +8,24 @@ than by name.
 ## Usage
 
 ``` r
-plot_transition_network(data)
+plot_transition_network(data, interactive = TRUE)
 ```
 
 ## Arguments
 
 - data:
 
-  Data frame with `from` and `to` columns, as returned by
-  [`detect_career_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_career_transition.md).
+  Data frame with one row per move and `from` and `to` columns, as
+  returned by
+  [`compute_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_transition.md)
+  with `summarize = FALSE`.
+
+- interactive:
+
+  Logical. If `TRUE` (default), return an interactive chart that shows
+  each establishment's name on hover. If `FALSE`, return a static
+  ggplot, for outputs such as Word that cannot show interactive charts.
 
 ## Value
 
-A ggiraph girafe object.
+A ggiraph girafe object, or a ggplot object when `interactive = FALSE`.

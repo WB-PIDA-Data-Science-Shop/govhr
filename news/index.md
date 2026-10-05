@@ -1,5 +1,12 @@
 # Changelog
 
+## govhr 0.4.1
+
+This release: - Standardizes an architecture for workforce and wage bill
+analytics. - Increases computational performance by implementing backend
+duckplyr and data.table APIs. - Cleans up the repository, including
+removing spielplatz folder. - Updates and streamlines documentation.
+
 ## govhr 0.4.0
 
 This release: - Introduces novel wage bill modelling and demographic
