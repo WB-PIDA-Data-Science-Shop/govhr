@@ -235,6 +235,7 @@ importFrom(igraph,gorder)
 importFrom(janitor,clean_names)
 importFrom(jsonlite,fromJSON)
 importFrom(lubridate,
+  floor_date,
   years,
   ymd
 )

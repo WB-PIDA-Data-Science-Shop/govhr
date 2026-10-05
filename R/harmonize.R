@@ -317,24 +317,33 @@ convert_constant_ppp <- function(data, cols) {
 
 #' Deflate a nominal LCU column to real values
 #'
-#' Convert nominal wages (LCU prices) into real wages expressed in constant LCU prices of a specified base year using:
-#' \deqn{\text{real} = \text{nominal} \times \frac{\text{CPI}_{base}}{\text{CPI}_{ref}}}
+#' Converts nominal values (e.g. wages in local currency units, LCU) into real
+#' values expressed in constant LCU prices of a chosen base year, using monthly
+#' consumer price index (CPI) data:
+#' \deqn{\text{real} = \text{nominal} \times \frac{\text{CPI}_{base}}{\text{CPI}_{month}}}
 #'
 #' @param col Numeric vector. The nominal LCU values to deflate (a data column).
 #' @param ref_date A vector coercible to \code{Date} (or a \code{Date} column).
-#'   The reference date for each observation; the year is extracted internally.
+#'   The reference date for each observation. Any day within a month is
+#'   matched to that month's CPI.
 #' @param country_code Character. Either a scalar (e.g. \code{"MOZ"}) recycled
 #'   across all rows, or a character column of ISO3 country codes.
 #' @param base_year Integer scalar. The base year to deflate to. Defaults to
 #'   \code{2021}.
 #'
 #' @returns A numeric vector of the same length as \code{col}, expressed in
-#'   constant \code{base_year} LCU prices. Returns \code{NA} for any row where
-#'   CPI data is missing for the given country/year combination.
+#'   constant \code{base_year} LCU prices. Returns \code{NA} (with a warning)
+#'   for any row where CPI is missing for the given country and month, or for
+#'   the country's base year.
 #'
 #' @details
-#' CPI data is sourced from [govhr::macro_indicators], which must contain
-#' columns \code{country_code}, \code{year}, and \code{cpi}.
+#' CPI data comes from [govhr::cpi], the IMF's monthly all-items CPI. Each
+#' observation is deflated with the CPI of its own month, rather than an
+#' annual average, so values within the same year are made comparable too.
+#'
+#' The base-year CPI is the average of the country's monthly CPI over
+#' \code{base_year}. A real value therefore reads as "in average
+#' \code{base_year} prices".
 #'
 #' @examples
 #' library(dplyr)
@@ -358,60 +367,35 @@ convert_constant_ppp <- function(data, cols) {
 #'   dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, country_code, base_year = 2015))
 #'
 #' @importFrom tibble tibble
+#' @importFrom lubridate floor_date
 #' @import dplyr
 #' @export
 deflate_to_real <- function(col, ref_date, country_code, base_year = 2021) {
-  year <- as.integer(format(as.Date(ref_date), "%Y"))
-
-  input_tbl <- tibble(
-    country_code = country_code,
-    year = year,
-    col = col
-  )
-
-  cpi_lookup <- govhr::macro_indicators |>
-    select(country_code, year, cpi)
-
-  base_cpi_lookup <- govhr::macro_indicators |>
-    filter(year == base_year) |>
-    select(country_code, base_cpi = cpi)
-
-  input_tbl |>
-    left_join(
-      cpi_lookup,
-      by = c("country_code", "year"),
-      relationship = "many-to-one"
-    ) |>
-    left_join(
-      base_cpi_lookup,
-      by = "country_code",
-      relationship = "many-to-one"
-    ) |>
-    mutate(result = col * (.data[["base_cpi"]] / .data[["cpi"]])) |>
-    pull(.data[["result"]])
-}
-
-deflate_to_real_monthly <- function(col, ref_date, country_code, cpi){
-  missing_cols <- setdiff(c("ref_date", "country_code", "cpi"), names(cpi))
-  if(length(missing_cols) > 0){
-    stop(
-      "`cpi` should be the output of harmonize_cpi(), missing columns: ",
-      paste(missing_cols, collapse = ", ")
-    )
+  if(!is.numeric(base_year) || length(base_year) != 1 || is.na(base_year)){
+    stop("`base_year` must be a single year, e.g. 2021.")
   }
 
   # match on the month, so any day of the month finds its CPI
-  input_tbl <- tibble::tibble(
+  input_tbl <- tibble(
     col = col,
     ref_month = lubridate::floor_date(as.Date(ref_date), "month"),
     country_code = country_code
   )
 
-  cpi_lookup <- cpi |>
-    transmute(
-      ref_month = lubridate::floor_date(as.Date(ref_date), "month"),
+  cpi_lookup <- govhr::cpi |>
+    select(
       country_code,
-      cpi
+      ref_month = "ref_date",
+      cpi_month = "cpi"
+    )
+
+  base_cpi_lookup <- cpi_lookup |>
+    filter(
+      as.integer(format(.data[["ref_month"]], "%Y")) == base_year
+    ) |>
+    summarise(
+      cpi_base = mean(.data[["cpi_month"]]),
+      .by = "country_code"
     )
 
   deflated <- input_tbl |>
@@ -419,27 +403,49 @@ deflate_to_real_monthly <- function(col, ref_date, country_code, cpi){
       cpi_lookup,
       by = c("country_code", "ref_month"),
       relationship = "many-to-one"
+    ) |>
+    left_join(
+      base_cpi_lookup,
+      by = "country_code",
+      relationship = "many-to-one"
     )
 
-  no_cpi <- deflated |>
-    filter(
-      !is.na(col),
-      is.na(cpi)
-    ) |>
-    distinct(country_code, ref_month)
+  warn_missing_cpi(deflated, base_year)
 
-  if(nrow(no_cpi) > 0){
+  deflated$col * deflated$cpi_base / deflated$cpi_month
+}
+
+# warn about the country-months that deflate_to_real() could not deflate,
+# so a silent NA does not slip into downstream analysis
+warn_missing_cpi <- function(deflated, base_year){
+  has_value <- !is.na(deflated$col)
+
+  no_month <- unique(
+    deflated[has_value & is.na(deflated$cpi_month), c("country_code", "ref_month")]
+  )
+
+  if(nrow(no_month) > 0){
+    labels <- paste(no_month$country_code, format(no_month$ref_month, "%Y-%m"))
     warning(
-      "No CPI for ", nrow(no_cpi), " country-month(s), deflated to NA: ",
-      paste(
-        utils::head(paste(no_cpi$country_code, format(no_cpi$ref_month, "%Y-%m")), 10),
-        collapse = ", "
-      ),
-      if(nrow(no_cpi) > 10) ", ..."
+      "No CPI for ", nrow(no_month), " country-month(s), deflated to NA: ",
+      paste(labels[seq_len(min(10, length(labels)))], collapse = ", "),
+      if(length(labels) > 10) ", ..."
     )
   }
 
-  deflated$col * 100 / deflated$cpi
+  # rows already reported above are skipped, so each row warns only once
+  no_base <- unique(
+    deflated$country_code[
+      has_value & !is.na(deflated$cpi_month) & is.na(deflated$cpi_base)
+    ]
+  )
+
+  if(length(no_base) > 0){
+    warning(
+      "No CPI in base year ", base_year, " for ",
+      paste(no_base, collapse = ", "), ", deflated to NA."
+    )
+  }
 }
 
 

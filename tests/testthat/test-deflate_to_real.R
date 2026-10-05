@@ -1,32 +1,83 @@
 # tests/testthat/test-deflate_to_real.R
 library(testthat)
 
-mock_macro <- tibble::tibble(
-  country_code = c("AAA", "AAA", "AAA", "BBB", "BBB", "BBB"),
-  year         = c(2019L, 2020L, 2021L, 2019L, 2020L, 2021L),
-  cpi          = c(80.0, 90.0, 100.0, 50.0, 75.0, 100.0)
-)
+# expected values are computed from govhr::cpi, so the tests check the
+# formula rather than numbers that move whenever the CPI data is refreshed
+bra_cpi <- govhr::cpi[govhr::cpi$country_code == "BRA", ]
 
-test_that("deflate_to_real deflates correctly to default base year (2021)", {
+cpi_in_month <- function(month){
+  bra_cpi$cpi[bra_cpi$ref_date == as.Date(month)]
+}
+
+cpi_in_year <- function(year){
+  mean(bra_cpi$cpi[format(bra_cpi$ref_date, "%Y") == year])
+}
+
+test_that("deflate_to_real deflates to average prices of the default base year (2021)", {
   result <- deflate_to_real(10000, as.Date("2019-01-01"), "BRA")
 
-  expect_equal(result, 11178.01, tolerance = 0.01)
+  expected <- 10000 * cpi_in_year("2021") / cpi_in_month("2019-01-01")
+  expect_equal(result, expected)
+  expect_gt(result, 10000)
 })
 
-test_that("deflate_to_real returns unchanged value when observation is at the base year", {
-  result <- deflate_to_real(10000, as.Date("2021-06-15"), "BRA")
+test_that("deflate_to_real matches any day of the month to that month's CPI", {
+  first_day <- deflate_to_real(10000, as.Date("2019-01-01"), "BRA")
+  mid_month <- deflate_to_real(10000, as.Date("2019-01-17"), "BRA")
 
-  expect_equal(result, 10000)
+  expect_equal(mid_month, first_day)
+})
+
+test_that("deflate_to_real distinguishes months within the same year", {
+  result <- deflate_to_real(
+    c(10000, 10000),
+    as.Date(c("2021-01-01", "2021-12-01")),
+    "BRA"
+  )
+
+  expect_false(result[1] == result[2])
 })
 
 test_that("deflate_to_real respects a custom base_year", {
   result <- deflate_to_real(10000, as.Date("2021-01-01"), "BRA", base_year = 2019)
 
-  expect_equal(result, 8946.14, tolerance = 0.01)
+  expected <- 10000 * cpi_in_year("2019") / cpi_in_month("2021-01-01")
+  expect_equal(result, expected)
+  expect_lt(result, 10000)
 })
 
-test_that("deflate_to_real returns NA for an unknown country code", {
-  result <- deflate_to_real(10000, as.Date("2019-01-01"), "ZZZ")
+test_that("deflate_to_real accepts a column of country codes", {
+  result <- deflate_to_real(
+    c(10000, 10000),
+    as.Date(c("2019-01-01", "2019-01-01")),
+    c("BRA", "MOZ")
+  )
+
+  expect_length(result, 2)
+  expect_equal(result[1], deflate_to_real(10000, as.Date("2019-01-01"), "BRA"))
+  expect_false(anyNA(result))
+})
+
+test_that("deflate_to_real returns NA with a warning for an unknown country code", {
+  expect_warning(
+    result <- deflate_to_real(10000, as.Date("2019-01-01"), "ZZZ"),
+    "No CPI"
+  )
 
   expect_true(is.na(result))
+})
+
+test_that("deflate_to_real does not warn about values that are already NA", {
+  expect_no_warning(
+    result <- deflate_to_real(NA_real_, as.Date("2019-01-01"), "ZZZ")
+  )
+
+  expect_true(is.na(result))
+})
+
+test_that("deflate_to_real rejects an invalid base_year", {
+  expect_error(
+    deflate_to_real(10000, as.Date("2019-01-01"), "BRA", base_year = c(2019, 2020)),
+    "base_year"
+  )
 })

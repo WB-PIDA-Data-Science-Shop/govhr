@@ -15,8 +15,7 @@ drop_missing(data, cols)
 \code{data} with rows containing \code{NA} in any of \code{cols} removed.
 }
 \description{
-Keeps only the rows where every column in \code{cols} is non-missing. Unlike
-\code{\link[stats:complete.cases]{stats::complete.cases()}}, this builds a regular \code{filter()} call, so it
-works on both in-memory data frames and lazy database tables (\code{tbl_dbi}).
+Keeps only the rows where every column in \code{cols} is non-missing. This
+implementation was designed for use with duckplyr databases.
 }
 \keyword{internal}
