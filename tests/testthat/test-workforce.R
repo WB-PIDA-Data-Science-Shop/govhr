@@ -1,7 +1,7 @@
-# ---- compute_workforce -------------------------------------------------------
-# compute_workforce() passes `data` to each indicator function as is, so these
-# tests check that a data frame, a tibble and a duckdb table give the same
-# indicators, and that each one keeps the class its method returns.
+# ---- compute_workforce_analytics ---------------------------------------------
+# compute_workforce_analytics() passes `data` to each indicator function as
+# is, so these tests check that a data frame, a tibble and a duckdb table give
+# the same indicators, and that each one keeps the class its method returns.
 
 workforce <- data.frame(
   personnel_id = rep(1:3, each = 3),
@@ -27,7 +27,7 @@ collect_indicators <- function(indicators) {
 }
 
 test_that("returns the four indicators", {
-  result <- compute_workforce(workforce)
+  result <- compute_workforce_analytics(workforce)
 
   expect_named(
     result,
@@ -42,15 +42,15 @@ test_that("does not modify the input", {
   input <- data.table::as.data.table(workforce)
   before <- data.table::copy(input)
 
-  compute_workforce(input)
+  compute_workforce_analytics(input)
 
   expect_identical(input, before)
 })
 
 test_that("a tibble gives the same indicators as a data frame", {
   expect_equal(
-    collect_indicators(compute_workforce(tibble::as_tibble(workforce))),
-    collect_indicators(compute_workforce(workforce))
+    collect_indicators(compute_workforce_analytics(tibble::as_tibble(workforce))),
+    collect_indicators(compute_workforce_analytics(workforce))
   )
 })
 
@@ -63,7 +63,7 @@ test_that("a duckdb table is processed by the tbl_dbi methods", {
   on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
   DBI::dbWriteTable(con, "workforce", workforce)
 
-  result <- compute_workforce(dplyr::tbl(con, "workforce"))
+  result <- compute_workforce_analytics(dplyr::tbl(con, "workforce"))
 
   expect_s3_class(result$headcount, "tbl_dbi")
   expect_s3_class(result$headcount_by_est, "tbl_dbi")
@@ -71,13 +71,13 @@ test_that("a duckdb table is processed by the tbl_dbi methods", {
   expect_s3_class(result$transitions, "tbl_dbi")
   expect_equal(
     collect_indicators(result),
-    collect_indicators(compute_workforce(workforce))
+    collect_indicators(compute_workforce_analytics(workforce))
   )
 })
 
 test_that("reports missing columns", {
   expect_error(
-    compute_workforce(workforce[c("personnel_id", "ref_date")]),
+    compute_workforce_analytics(workforce[c("personnel_id", "ref_date")]),
     "est_id, employment_status"
   )
 })

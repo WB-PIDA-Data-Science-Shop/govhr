@@ -1,6 +1,6 @@
-#' Compute core workforce indicators
+#' Compute standard workforce indicators
 #'
-#' Produces the standard set of workforce indicators in one call: how many
+#' Produces a standard set of workforce indicators in one call: how many
 #' people work in government, where they work, how many join and leave, and
 #' how many move between establishments. Each indicator comes from an existing
 #' govhr function, so the results match what those functions return on their
@@ -50,10 +50,10 @@
 #'     "active", "active", "inactive"
 #'   )
 #' )
-#' compute_workforce(workforce)
+#' compute_workforce_analytics(workforce)
 #'
 #' @export
-compute_workforce <- function(data){
+compute_workforce_analytics <- function(data){
   required_cols <- c("personnel_id", "ref_date", "est_id", "employment_status")
   # colnames() rather than names(), which does not list a tbl_dbi's columns
   missing_cols <- setdiff(required_cols, colnames(data))

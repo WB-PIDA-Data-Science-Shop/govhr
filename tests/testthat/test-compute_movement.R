@@ -51,7 +51,7 @@ for (backend in backends) {
       result,
       c(
         "ref_date", "headcount", "hires", "separations",
-        "hire_rate", "separation_rate"
+        "hire_rate", "separation_rate", "replacement_rate"
       )
     )
     expect_equal(result$headcount, c(2, 2, 2))
@@ -59,6 +59,8 @@ for (backend in backends) {
     expect_equal(result$separations, c(1, 0, NA))
     expect_equal(result$hire_rate, c(NA, 0.5, 0))
     expect_equal(result$separation_rate, c(0.5, 0, NA))
+    # one hire and no separations in 2021, so nobody is being replaced
+    expect_equal(result$replacement_rate, c(NA, Inf, NA))
   })
 
   test_that(paste0("counts people with several contracts once (", backend, ")"), {

@@ -221,17 +221,13 @@ bra_wagebill |>
 
 ```{r fig.alt="Scatter plot with connected lines showing the number of new hires by reference date from September 2014 to September 2018. Points represent hiring events detected in the personnel data."}
 personnel_hire_df <- personnel_df |> 
-  detect_personnel_event(
-    id_col = "personnel_id",
-    event_type = "hire",
-    start_date = "2014-09-01",
-    end_date = "2018-09-01"
+  compute_movement(
+    id_col = "personnel_id"
   )
 
 personnel_hire_df |> 
-  count(ref_date) |> 
   ggplot(
-    aes(ref_date, n)
+    aes(ref_date, hires)
   ) +
   geom_point() +
   geom_line() +

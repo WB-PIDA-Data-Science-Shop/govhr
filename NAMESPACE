@@ -10,6 +10,8 @@ S3method(compute_percentile,data.frame)
 S3method(compute_percentile,tbl_dbi)
 S3method(compute_transition,data.frame)
 S3method(compute_transition,tbl_dbi)
+S3method(compute_wage,data.frame)
+S3method(compute_wage,tbl_dbi)
 S3method(compute_wagebill,data.frame)
 S3method(compute_wagebill,tbl_dbi)
 export(add_contract_to_event)
@@ -47,7 +49,8 @@ export(compute_value_consistency)
 export(compute_wage)
 export(compute_wage_decomposition)
 export(compute_wagebill)
-export(compute_workforce)
+export(compute_wagebill_analytics)
+export(compute_workforce_analytics)
 export(convert_constant_ppp)
 export(count_entity)
 export(count_unique)
@@ -174,7 +177,8 @@ importFrom(dplyr,
   summarise,
   symdiff,
   ungroup,
-  union
+  union,
+  union_all
 )
 importFrom(dtplyr,lazy_dt)
 importFrom(fixest,fixef)

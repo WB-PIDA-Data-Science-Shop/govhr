@@ -2,28 +2,73 @@
 % Please edit documentation in R/wage.R
 \name{compute_wage}
 \alias{compute_wage}
-\title{Compute average wage}
+\alias{compute_wage.data.frame}
+\alias{compute_wage.tbl_dbi}
+\title{Compute the average wage}
 \usage{
-compute_wage(data, measure_col = "gross_salary_lcu", group_cols = NULL)
+compute_wage(data, ...)
+
+\method{compute_wage}{data.frame}(
+  data,
+  measure_col = "gross_salary_lcu",
+  group_cols = NULL,
+  reference_group_col = "ref_date",
+  ...
+)
+
+\method{compute_wage}{tbl_dbi}(
+  data,
+  measure_col = "gross_salary_lcu",
+  group_cols = NULL,
+  reference_group_col = "ref_date",
+  ...
+)
 }
 \arguments{
-\item{data}{Data frame containing a \code{ref_date} column and the measure.}
+\item{data}{Data frame or remote database table (\code{tbl_dbi}) with the
+column named in \code{reference_group_col} and the pay column named in
+\code{measure_col}.}
 
-\item{measure_col}{Character. Numeric column to average. Default is \code{"gross_salary_lcu"}.}
+\item{...}{Arguments passed to methods.}
 
-\item{group_cols}{Character vector of columns to group by. Default is \code{NULL}.}
+\item{measure_col}{Character. Name of the pay column to average. Default
+\code{"gross_salary_lcu"}.}
+
+\item{group_cols}{Character vector of columns to group by, or \code{NULL} to
+average over everyone. Must not include \code{reference_group_col}.}
+
+\item{reference_group_col}{Character. Name of the column that defines the
+reference groups, usually a date. Growth compares each reference group
+with the one before it in sorted order. Default \code{"ref_date"}.}
 }
 \value{
-A data frame with the average wage by group and reference date.
+A table with the grouping columns, \code{reference_group_col}, \code{wage}
+(the average of \code{measure_col}) and \code{wage_growth} (the change from the
+previous reference group as a proportion, so \code{0.1} means 10\% growth). A
+data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
+\code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
-Computes the average wage by group.
+Computes the average wage for each group within each reference group,
+usually a reference date, and how much it grew since the previous
+reference group.
+}
+\details{
+The average is taken over rows, so with contract data it is the average
+pay per contract. Missing wage values are skipped. If every wage value for
+a group in a reference group is missing, its wage is \code{NA}.
+
+As in \code{\link[=compute_wagebill]{compute_wagebill()}}, every group appears in every reference group in
+\code{data}. A group with no records in a reference group gets \code{wage = NA}, so
+gaps stay visible and growth is never measured across a gap.
+
+\code{wage_growth} is \code{NA} in the first reference group, and whenever the
+current or previous wage is \code{NA}.
 }
 \examples{
 compute_wage(
   bra_hrmis_contract,
-  measure_col = "gross_salary_lcu",
-  group_cols = c("occupation_native")
+  group_cols = "contract_type"
 )
 
 }
