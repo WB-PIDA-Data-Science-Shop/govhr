@@ -7,7 +7,9 @@
 generate_standard_report(
   contracts,
   personnel,
+  establishment,
   binwidth = NULL,
+  base_month = "2021-12-01",
   format = c("html", "docx"),
   output = paste0("standard_report.", format)
 )
@@ -23,9 +25,16 @@ personnel data. Must contain \code{personnel_id}, \code{ref_date} and
 \code{employment_status}. For database input, it must live in the same
 database as \code{contracts}.}
 
+\item{establishment}{Data frame or remote database table (\code{tbl_dbi}) with
+the establishment data. Must contain \code{est_id} and \code{country_code}. For
+database input, it must live in the same database as \code{contracts}.}
+
 \item{binwidth}{Positive whole number. Width of the pay bins in the wage
 distribution, in the same currency as the pay columns. Default \code{NULL}
 picks a width from the data. See \code{\link[=compute_wagebill_analytics]{compute_wagebill_analytics()}}.}
+
+\item{base_month}{The month whose prices pay is expressed in, given as its
+first day. Default \code{"2021-12-01"}. See \code{\link[=compute_wagebill_analytics]{compute_wagebill_analytics()}}.}
 
 \item{format}{Character. \code{"html"} (default) for an HTML report or
 \code{"docx"} for a Word document. In Word, the network of transitions is a
@@ -50,17 +59,17 @@ The indicators are computed by \code{\link[=compute_workforce_analytics]{compute
 functions return. Database tables are processed in the database, and only
 the results are brought into memory.
 
-Employment status comes from \code{personnel} and is matched to \code{contracts} by
-\code{personnel_id} and \code{ref_date}.
-
-Pay is used as given. To compare pay across years, convert it to real
-terms first, for example with \code{\link[=deflate_to_real]{deflate_to_real()}}.
+Only active personnel are counted: employment status comes from
+\code{personnel} and is matched to \code{contracts} by \code{personnel_id} and \code{ref_date}.
+Pay is converted to constant prices of \code{base_month} with
+\code{\link[=deflate_to_real]{deflate_to_real()}}, using the country of each contract's establishment.
 }
 \examples{
 \dontrun{
 generate_standard_report(
   contracts = bra_hrmis_contract,
   personnel = bra_hrmis_personnel,
+  establishment = bra_hrmis_est,
   output = "brazil_report.html"
 )
 
@@ -68,6 +77,7 @@ generate_standard_report(
 generate_standard_report(
   contracts = bra_hrmis_contract,
   personnel = bra_hrmis_personnel,
+  establishment = bra_hrmis_est,
   format = "docx"
 )
 }

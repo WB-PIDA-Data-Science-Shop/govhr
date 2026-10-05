@@ -5,16 +5,31 @@
 \title{Compute standard wagebill indicators}
 \usage{
 compute_wagebill_analytics(
-  data,
+  contracts,
+  personnel,
+  establishment,
   binwidth = NULL,
   measure_col = "gross_salary_lcu",
-  wage_component_cols = c("base_salary_lcu", "allowance_lcu")
+  wage_component_cols = c("base_salary_lcu", "allowance_lcu"),
+  base_month = "2021-12-01"
 )
 }
 \arguments{
-\item{data}{Data frame or remote database table (\code{tbl_dbi}) with one row
-per contract and reference date. Must contain \code{ref_date}, \code{est_id}, and
-the columns named in \code{measure_col} and \code{wage_component_cols}.}
+\item{contracts}{Data frame or remote database table (\code{tbl_dbi}) with the
+contract data, one row per contract and reference date. Must contain
+\code{personnel_id}, \code{ref_date}, \code{est_id}, and the columns named in
+\code{measure_col} and \code{wage_component_cols}, with pay in nominal local
+currency.}
+
+\item{personnel}{Data frame or remote database table (\code{tbl_dbi}) with the
+personnel data. Must contain \code{personnel_id}, \code{ref_date} and
+\code{employment_status} (with \code{"active"} marking people currently employed).
+For database input, it must live in the same database as \code{contracts}.}
+
+\item{establishment}{Data frame or remote database table (\code{tbl_dbi}) with
+the establishment data. Must contain \code{est_id} and \code{country_code}, used
+to pick the consumer price index for each contract. For database input,
+it must live in the same database as \code{contracts}.}
 
 \item{binwidth}{Positive whole number. Width of the pay bins used for the
 wage distribution, in the same currency as \code{measure_col} (for example
@@ -27,6 +42,10 @@ distribution. Default \code{"gross_salary_lcu"}.}
 \item{wage_component_cols}{Character vector of pay columns that add up to
 total pay, used for the composition of the wagebill. Default
 \code{c("base_salary_lcu", "allowance_lcu")}.}
+
+\item{base_month}{The month whose prices pay is expressed in, given as its
+first day (for example \code{"2021-12-01"}). Passed to \code{\link[=deflate_to_real]{deflate_to_real()}}.
+Default \code{"2021-12-01"}.}
 }
 \value{
 A named list of tables:
@@ -44,9 +63,9 @@ and \code{ref_date}, from \code{\link[=compute_wage]{compute_wage()}}.}
 \item{distribution}{Share of contracts in each pay bin, from
 \code{\link[=compute_percentile]{compute_percentile()}}.}
 }
-Each table has the class its function returns for \code{data}: data.tables for
-data frame input, lazy tables for \code{tbl_dbi} input (use \code{\link[dplyr:collect]{dplyr::collect()}} to
-bring them into memory).
+Each table has the class its function returns for \code{contracts}: data.tables
+for data frame input, lazy tables for \code{tbl_dbi} input (use
+\code{\link[dplyr:collect]{dplyr::collect()}} to bring them into memory).
 }
 \description{
 Produces a standard set of wagebill indicators in one call: how much
@@ -56,11 +75,21 @@ comes from an existing govhr function, so the results match what those
 functions return on their own.
 }
 \details{
-\code{data} is passed as is to each indicator function, which picks the method
-for its class, so a database table is processed in the database.
+Only the pay of active personnel is counted: each contract is matched to
+\code{personnel} by \code{personnel_id} and \code{ref_date}, and kept only if
+\code{employment_status} is \code{"active"} on that date. Contracts with no matching
+personnel record are left out.
 
-Pay is used as given. To compare pay across years, convert it to real
-terms first, for example with \code{\link[=deflate_to_real]{deflate_to_real()}}.
+All pay is in real terms, so it can be compared across years: the columns
+in \code{measure_col} and \code{wage_component_cols} are converted to constant prices
+of \code{base_month} with \code{\link[=deflate_to_real]{deflate_to_real()}}, using the country of each
+contract's establishment. Column names are kept as they are. Contracts in
+an establishment missing from \code{establishment} have no country, so their pay
+becomes \code{NA}, with a warning.
+
+Each indicator function picks the method for the class of the data, so a
+database table is processed in the database. Only the distinct countries
+and reference dates are brought into memory, to look up their price index.
 
 In \code{composition}, each component's share is of the sum of
 \code{wage_component_cols}, so the shares add up to 1 within each \code{ref_date}.
@@ -70,6 +99,7 @@ to one date first to see a single year.
 }
 \examples{
 contracts <- data.frame(
+  personnel_id = c(1, 2, 3, 1, 2, 3),
   ref_date = as.Date(rep(c("2020-01-01", "2021-01-01"), each = 3)),
   est_id = c("A", "A", "B", "A", "B", "B"),
   base_salary_lcu = c(800, 900, 1000, 850, 950, 1100),
@@ -77,6 +107,14 @@ contracts <- data.frame(
 )
 contracts$gross_salary_lcu <- contracts$base_salary_lcu + contracts$allowance_lcu
 
-compute_wagebill_analytics(contracts)
+personnel <- data.frame(
+  personnel_id = c(1, 2, 3, 1, 2, 3),
+  ref_date = as.Date(rep(c("2020-01-01", "2021-01-01"), each = 3)),
+  employment_status = c("active", "active", "active", "active", "active", "pensioner")
+)
+
+establishment <- data.frame(est_id = c("A", "B"), country_code = "BRA")
+
+compute_wagebill_analytics(contracts, personnel, establishment)
 
 }

@@ -13,9 +13,14 @@
 #'   personnel data. Must contain `personnel_id`, `ref_date` and
 #'   `employment_status`. For database input, it must live in the same
 #'   database as `contracts`.
+#' @param establishment Data frame or remote database table (`tbl_dbi`) with
+#'   the establishment data. Must contain `est_id` and `country_code`. For
+#'   database input, it must live in the same database as `contracts`.
 #' @param binwidth Positive whole number. Width of the pay bins in the wage
 #'   distribution, in the same currency as the pay columns. Default `NULL`
 #'   picks a width from the data. See [compute_wagebill_analytics()].
+#' @param base_month The month whose prices pay is expressed in, given as its
+#'   first day. Default `"2021-12-01"`. See [compute_wagebill_analytics()].
 #' @param format Character. `"html"` (default) for an HTML report or
 #'   `"docx"` for a Word document. In Word, the network of transitions is a
 #'   static image rather than an interactive chart.
@@ -31,17 +36,17 @@
 #' functions return. Database tables are processed in the database, and only
 #' the results are brought into memory.
 #'
-#' Employment status comes from `personnel` and is matched to `contracts` by
-#' `personnel_id` and `ref_date`.
-#'
-#' Pay is used as given. To compare pay across years, convert it to real
-#' terms first, for example with [deflate_to_real()].
+#' Only active personnel are counted: employment status comes from
+#' `personnel` and is matched to `contracts` by `personnel_id` and `ref_date`.
+#' Pay is converted to constant prices of `base_month` with
+#' [deflate_to_real()], using the country of each contract's establishment.
 #'
 #' @examples
 #' \dontrun{
 #' generate_standard_report(
 #'   contracts = bra_hrmis_contract,
 #'   personnel = bra_hrmis_personnel,
+#'   establishment = bra_hrmis_est,
 #'   output = "brazil_report.html"
 #' )
 #'
@@ -49,32 +54,32 @@
 #' generate_standard_report(
 #'   contracts = bra_hrmis_contract,
 #'   personnel = bra_hrmis_personnel,
+#'   establishment = bra_hrmis_est,
 #'   format = "docx"
 #' )
 #' }
 #'
-#' @importFrom dplyr all_of collect distinct left_join select
 #' @export
 generate_standard_report <- function(
   contracts,
   personnel,
+  establishment,
   binwidth = NULL,
+  base_month = "2021-12-01",
   format = c("html", "docx"),
   output = paste0("standard_report.", format)
 ) {
   format <- match.arg(format)
 
-  employment_status <- personnel |>
-    select(all_of(c("personnel_id", "ref_date", "employment_status"))) |>
-    distinct()
+  workforce <- compute_workforce_analytics(contracts, personnel)
 
-  workforce_data <- contracts |>
-    left_join(employment_status, by = c("personnel_id", "ref_date"))
-
-  
-  workforce <- compute_workforce_analytics(workforce_data)
-
-  wagebill <- compute_wagebill_analytics(contracts, binwidth = binwidth)
+  wagebill <- compute_wagebill_analytics(
+    contracts,
+    personnel,
+    establishment,
+    binwidth = binwidth,
+    base_month = base_month
+  )
 
   # render a copy of the template, since the folder of an installed package
   # may be read-only

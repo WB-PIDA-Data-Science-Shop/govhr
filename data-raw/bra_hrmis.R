@@ -56,10 +56,10 @@ set.seed(123)
 
 # import clean data -------------------------------------------------------
 ### lets select the data to be lazy loaded
-contract_tbl <- arrow::read_parquet("spielplatz/data/contract_alagoas_tbl.parquet")
-personnel_tbl <- arrow::read_parquet("spielplatz/data/personnel_alagoas_tbl.parquet")
-est_tbl <- arrow::read_parquet("spielplatz/data/est_alagoas_tbl.parquet")
-allowance_tbl <- arrow::read_parquet("spielplatz/data/allowance_alagoas_tbl.parquet")
+contract_tbl <- arrow::read_parquet("data-raw/contract_alagoas_tbl.parquet")
+personnel_tbl <- arrow::read_parquet("data-raw/personnel_alagoas_tbl.parquet")
+est_tbl <- arrow::read_parquet("data-raw/est_alagoas_tbl.parquet")
+allowance_tbl <- arrow::read_parquet("data-raw/allowance_alagoas_tbl.parquet")
 
 
 ### aligning the data with the latest dictionary

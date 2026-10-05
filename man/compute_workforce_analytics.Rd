@@ -4,14 +4,17 @@
 \alias{compute_workforce_analytics}
 \title{Compute standard workforce indicators}
 \usage{
-compute_workforce_analytics(data)
+compute_workforce_analytics(contracts, personnel)
 }
 \arguments{
-\item{data}{Data frame or remote database table (\code{tbl_dbi}) with one row
-per person (or contract) and reference date. Must contain \code{personnel_id},
-\code{ref_date}, \code{est_id} and \code{employment_status} (with \code{"active"} marking
-people currently employed). Contract and personnel data usually need to be
-joined first.}
+\item{contracts}{Data frame or remote database table (\code{tbl_dbi}) with the
+contract data, one row per contract and reference date. Must contain
+\code{personnel_id}, \code{ref_date} and \code{est_id}.}
+
+\item{personnel}{Data frame or remote database table (\code{tbl_dbi}) with the
+personnel data. Must contain \code{personnel_id}, \code{ref_date} and
+\code{employment_status} (with \code{"active"} marking people currently employed).
+For database input, it must live in the same database as \code{contracts}.}
 }
 \value{
 A named list of tables:
@@ -27,9 +30,9 @@ and separations on the last, since there is nothing to compare with.}
 joined the origin (\code{from_date}) and when they arrived at the destination
 (\code{ref_date}), from \code{\link[=compute_transition]{compute_transition()}}.}
 }
-Each table has the class its function returns for \code{data}: data.tables for
-data frame input, lazy tables for \code{tbl_dbi} input (use \code{\link[dplyr:collect]{dplyr::collect()}} to
-bring them into memory).
+Each table has the class its function returns for \code{contracts}: data.tables
+for data frame input, lazy tables for \code{tbl_dbi} input (use
+\code{\link[dplyr:collect]{dplyr::collect()}} to bring them into memory).
 }
 \description{
 Produces a standard set of workforce indicators in one call: how many
@@ -39,8 +42,11 @@ govhr function, so the results match what those functions return on their
 own.
 }
 \details{
-\code{data} is passed as is to each indicator function, which picks the method
-for its class, so a database table is processed in the database.
+Only active personnel are counted: each contract is matched to \code{personnel}
+by \code{personnel_id} and \code{ref_date}, and kept only if \code{employment_status} is
+\code{"active"} on that date. Contracts with no matching personnel record are
+left out. Each indicator function then picks the method for the class of
+the data, so a database table is processed in the database.
 
 Hires and separations are counted per person, so someone holding several
 contracts on the same date is counted once.
@@ -50,16 +56,20 @@ single position that period, so \code{\link[=compute_transition]{compute_transit
 \code{transitions} and warns about it.
 }
 \examples{
-workforce <- data.frame(
+contracts <- data.frame(
   personnel_id = rep(1:3, each = 3),
   ref_date = rep(as.Date(c("2020-01-01", "2021-01-01", "2022-01-01")), times = 3),
-  est_id = c("A", "A", "A", "B", "B", "A", "A", "A", "B"),
+  est_id = c("A", "A", "A", "B", "B", "A", "A", "A", "B")
+)
+personnel <- data.frame(
+  personnel_id = rep(1:3, each = 3),
+  ref_date = rep(as.Date(c("2020-01-01", "2021-01-01", "2022-01-01")), times = 3),
   employment_status = c(
     "active", "active", "active",
     "inactive", "active", "active",
     "active", "active", "inactive"
   )
 )
-compute_workforce_analytics(workforce)
+compute_workforce_analytics(contracts, personnel)
 
 }

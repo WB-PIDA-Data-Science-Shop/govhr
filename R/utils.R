@@ -71,3 +71,59 @@ cut_age <- function(
     right = FALSE
   )
 }
+
+#' Check that a table has the columns a function needs
+#'
+#' @param data A data frame or lazy database table.
+#' @param required_cols A character vector of column names `data` must have.
+#' @param arg Character. Name of the argument holding `data`, used in the
+#'   error message.
+#'
+#' @return `data`, invisibly. Stops with an error listing the missing columns
+#'   if there are any.
+#'
+#' @keywords internal
+check_required_cols <- function(data, required_cols, arg = "data"){
+  # colnames() rather than names(), which does not list a tbl_dbi's columns
+  missing_cols <- setdiff(required_cols, colnames(data))
+
+  if(length(missing_cols) > 0){
+    stop(
+      "`", arg, "` is missing required columns: ",
+      paste(missing_cols, collapse = ", ")
+    )
+  }
+
+  invisible(data)
+}
+
+#' Keep the contracts of active personnel
+#'
+#' Matches each contract to the personnel module by `personnel_id` and
+#' `ref_date`, and keeps only the contracts of people whose
+#' `employment_status` is `"active"` on that date. Contracts with no matching
+#' personnel record are dropped.
+#'
+#' @param contracts A data frame or lazy database table with `personnel_id`
+#'   and `ref_date`.
+#' @param personnel A data frame or lazy database table with `personnel_id`,
+#'   `ref_date` and `employment_status`. For lazy tables, it must live in the
+#'   same database as `contracts`.
+#'
+#' @return `contracts`, filtered to active personnel, with an
+#'   `employment_status` column taken from `personnel` (always `"active"`).
+#'
+#' @importFrom dplyr across all_of any_of distinct filter inner_join select
+#' @importFrom rlang .data
+#' @keywords internal
+keep_active_contracts <- function(contracts, personnel){
+  # one row per person and date, so the join does not duplicate contracts
+  active_personnel <- personnel |>
+    filter(.data[["employment_status"]] == "active") |>
+    distinct(across(all_of(c("personnel_id", "ref_date", "employment_status"))))
+
+  # status comes from the personnel module, so drop any copy in contracts
+  contracts |>
+    select(-any_of("employment_status")) |>
+    inner_join(active_personnel, by = c("personnel_id", "ref_date"))
+}

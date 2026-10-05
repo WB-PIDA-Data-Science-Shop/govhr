@@ -22,6 +22,11 @@ report_personnel <- data.frame(
   )
 )
 
+report_establishment <- data.frame(
+  est_id = c("A", "B"),
+  country_code = "BRA"
+)
+
 test_that("renders an HTML report with every section", {
   skip_if_not(rmarkdown::pandoc_available(), "pandoc is not available")
 
@@ -31,6 +36,7 @@ test_that("renders an HTML report with every section", {
   report <- generate_standard_report(
     report_contracts,
     report_personnel,
+    report_establishment,
     binwidth = 100,
     output = output
   )
@@ -49,6 +55,7 @@ test_that("reports missing columns before rendering", {
     generate_standard_report(
       report_contracts[c("personnel_id", "ref_date", "est_id")],
       report_personnel,
+      report_establishment,
       binwidth = 100,
       output = tempfile(fileext = ".html")
     ),
@@ -65,6 +72,7 @@ test_that("renders a Word report", {
   generate_standard_report(
     report_contracts,
     report_personnel,
+    report_establishment,
     binwidth = 100,
     format = "docx",
     output = output
