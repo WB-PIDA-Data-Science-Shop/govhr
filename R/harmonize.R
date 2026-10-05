@@ -391,6 +391,58 @@ deflate_to_real <- function(col, ref_date, country_code, base_year = 2021) {
     pull(.data[["result"]])
 }
 
+deflate_to_real_monthly <- function(col, ref_date, country_code, cpi){
+  missing_cols <- setdiff(c("ref_date", "country_code", "cpi"), names(cpi))
+  if(length(missing_cols) > 0){
+    stop(
+      "`cpi` should be the output of harmonize_cpi(), missing columns: ",
+      paste(missing_cols, collapse = ", ")
+    )
+  }
+
+  # match on the month, so any day of the month finds its CPI
+  input_tbl <- tibble::tibble(
+    col = col,
+    ref_month = lubridate::floor_date(as.Date(ref_date), "month"),
+    country_code = country_code
+  )
+
+  cpi_lookup <- cpi |>
+    transmute(
+      ref_month = lubridate::floor_date(as.Date(ref_date), "month"),
+      country_code,
+      cpi
+    )
+
+  deflated <- input_tbl |>
+    left_join(
+      cpi_lookup,
+      by = c("country_code", "ref_month"),
+      relationship = "many-to-one"
+    )
+
+  no_cpi <- deflated |>
+    filter(
+      !is.na(col),
+      is.na(cpi)
+    ) |>
+    distinct(country_code, ref_month)
+
+  if(nrow(no_cpi) > 0){
+    warning(
+      "No CPI for ", nrow(no_cpi), " country-month(s), deflated to NA: ",
+      paste(
+        utils::head(paste(no_cpi$country_code, format(no_cpi$ref_month, "%Y-%m")), 10),
+        collapse = ", "
+      ),
+      if(nrow(no_cpi) > 10) ", ..."
+    )
+  }
+
+  deflated$col * 100 / deflated$cpi
+}
+
+
 merge_wrapper <- function(...) {
   y <- merge(all.x = TRUE, ...)
 

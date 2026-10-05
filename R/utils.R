@@ -1,8 +1,7 @@
 #' Drop rows with missing values in selected columns
 #'
-#' Keeps only the rows where every column in `cols` is non-missing. Unlike
-#' [stats::complete.cases()], this builds a regular `filter()` call, so it
-#' works on both in-memory data frames and lazy database tables (`tbl_dbi`).
+#' Keeps only the rows where every column in `cols` is non-missing. This
+#' implementation was designed for use with duckplyr databases.
 #'
 #' @param data A data frame or lazy database table.
 #' @param cols A character vector of column names that must not be `NA`.
