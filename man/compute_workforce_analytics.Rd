@@ -2,7 +2,7 @@
 % Please edit documentation in R/workforce.R
 \name{compute_workforce_analytics}
 \alias{compute_workforce_analytics}
-\title{Compute core workforce indicators}
+\title{Compute standard workforce indicators}
 \usage{
 compute_workforce_analytics(data)
 }
@@ -31,7 +31,7 @@ data frame input, lazy tables for \code{tbl_dbi} input (use \code{\link[dplyr:co
 bring them into memory).
 }
 \description{
-Produces the standard set of workforce indicators in one call: how many
+Produces a standard set of workforce indicators in one call: how many
 people work in government, where they work, how many join and leave, and
 how many move between establishments. Each indicator comes from an existing
 govhr function, so the results match what those functions return on their

@@ -294,7 +294,16 @@ if (getRversion() >= "2.15.1") {
     "pct",
     "cum_pct",
     "lower",
-    "upper"
+    "upper",
+    # compute_movement
+    "hire",
+    "separation",
+    "prev_date",
+    "next_date",
+    "hire_rate",
+    "separation_rate",
+    # compute_wage
+    "wage_growth"
   ))
 }
 

@@ -48,7 +48,7 @@ Suggests:
     reactable
 Config/testthat/edition: 3
 Depends: 
-    R (>= 3.5)
+    R (>= 4.1.0)
 URL: https://wb-pida-data-science-shop.github.io/govhr/
 Config/Needs/website: rmarkdown, remotes, polyglotr, AleKoure/labourR, DT, tidyr, here, tibble, arrow
 Authors@R: c(

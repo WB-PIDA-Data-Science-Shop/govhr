@@ -367,7 +367,11 @@ convert_constant_ppp <- function(data, cols) {
 #'
 #' # Custom base month
 #' data |>
-#'   dplyr::mutate(wage_real = deflate_to_real(wage_lcu, survey_date, country_code, base_month = "2015-01-01"))
+#'   dplyr::mutate(
+#'     wage_real = deflate_to_real(
+#'       wage_lcu, survey_date, country_code, base_month = "2015-01-01"
+#'     )
+#'   )
 #'
 #' @importFrom tibble tibble
 #' @importFrom lubridate floor_date

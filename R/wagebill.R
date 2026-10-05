@@ -14,8 +14,8 @@
 #'   `1e6` for wages in the millions). See [compute_percentile()].
 #' @param measure_col Character. Pay column used for totals, averages and the
 #'   distribution. Default `"gross_salary_lcu"`.
-#' @param wage_component_cols Character vector of wage columns that add up to total
-#'   pay, used for the composition of the wages. Default
+#' @param wage_component_cols Character vector of pay columns that add up to
+#'   total pay, used for the composition of the wagebill. Default
 #'   `c("base_salary_lcu", "allowance_lcu")`.
 #'
 #' @returns A named list of tables:
@@ -45,7 +45,7 @@
 #' terms first, for example with [deflate_to_real()].
 #'
 #' In `composition`, each component's share is of the sum of
-#' `component_cols`, so the shares add up to 1 within each `ref_date`.
+#' `wage_component_cols`, so the shares add up to 1 within each `ref_date`.
 #'
 #' The `distribution` pools contracts from all reference dates. Filter `data`
 #' to one date first to see a single year.
@@ -62,6 +62,7 @@
 #' compute_wagebill_analytics(contracts, binwidth = 100)
 #'
 #' @importFrom dplyr all_of mutate select union_all
+#' @importFrom purrr map reduce
 #' @export
 compute_wagebill_analytics <- function(
   data,
@@ -69,7 +70,7 @@ compute_wagebill_analytics <- function(
   measure_col = "gross_salary_lcu",
   wage_component_cols = c("base_salary_lcu", "allowance_lcu")
 ){
-  required_cols <- unique(c("ref_date", "est_id", measure_col, component_cols))
+  required_cols <- unique(c("ref_date", "est_id", measure_col, wage_component_cols))
   # colnames() rather than names(), which does not list a tbl_dbi's columns
   missing_cols <- setdiff(required_cols, colnames(data))
   if(length(missing_cols) > 0){
@@ -92,8 +93,9 @@ compute_wagebill_analytics <- function(
     group_cols = "est_id"
   )
 
-  # 3. wage composition: one wagebill per pay component, stacked into a long table.
-  # union_all() rather than bind_rows(), which does not accept database tables
+  # 3. wage composition: one wagebill per pay component, stacked into a long
+  # table. union_all() rather than bind_rows(), which does not accept database
+  # tables
   wage_composition <- wage_component_cols |>
     purrr::map(
       \(component_col) compute_wagebill(data, measure_col = component_col) |>
@@ -122,7 +124,7 @@ compute_wagebill_analytics <- function(
     wagebill_by_est = wagebill_by_est,
     wage = wage,
     wage_by_est = wage_by_est,
-    composition = composition,
+    composition = wage_composition,
     distribution = distribution
   )
 }

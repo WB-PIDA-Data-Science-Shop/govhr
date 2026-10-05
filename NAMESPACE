@@ -251,8 +251,10 @@ importFrom(plotly,
   plot_ly
 )
 importFrom(purrr,
+  map,
   map_dbl,
   map_dfr,
+  reduce,
   set_names
 )
 importFrom(rlang,

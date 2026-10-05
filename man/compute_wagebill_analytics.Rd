@@ -2,19 +2,19 @@
 % Please edit documentation in R/wagebill.R
 \name{compute_wagebill_analytics}
 \alias{compute_wagebill_analytics}
-\title{Compute core wagebill indicators}
+\title{Compute standard wagebill indicators}
 \usage{
 compute_wagebill_analytics(
   data,
   binwidth,
   measure_col = "gross_salary_lcu",
-  component_cols = c("base_salary_lcu", "allowance_lcu")
+  wage_component_cols = c("base_salary_lcu", "allowance_lcu")
 )
 }
 \arguments{
 \item{data}{Data frame or remote database table (\code{tbl_dbi}) with one row
 per contract and reference date. Must contain \code{ref_date}, \code{est_id}, and
-the columns named in \code{measure_col} and \code{component_cols}.}
+the columns named in \code{measure_col} and \code{wage_component_cols}.}
 
 \item{binwidth}{Positive whole number. Width of the pay bins used for the
 wage distribution, in the same currency as \code{measure_col} (for example
@@ -23,8 +23,8 @@ wage distribution, in the same currency as \code{measure_col} (for example
 \item{measure_col}{Character. Pay column used for totals, averages and the
 distribution. Default \code{"gross_salary_lcu"}.}
 
-\item{component_cols}{Character vector of pay columns that add up to total
-pay, used for the composition of the wagebill. Default
+\item{wage_component_cols}{Character vector of pay columns that add up to
+total pay, used for the composition of the wagebill. Default
 \code{c("base_salary_lcu", "allowance_lcu")}.}
 }
 \value{
@@ -48,7 +48,7 @@ data frame input, lazy tables for \code{tbl_dbi} input (use \code{\link[dplyr:co
 bring them into memory).
 }
 \description{
-Produces the standard set of wagebill indicators in one call: how much
+Produces a standard set of wagebill indicators in one call: how much
 government spends on pay, where that spending goes, how average pay
 evolves, what pay is made of, and how pay is distributed. Each indicator
 comes from an existing govhr function, so the results match what those
@@ -62,7 +62,7 @@ Pay is used as given. To compare pay across years, convert it to real
 terms first, for example with \code{\link[=deflate_to_real]{deflate_to_real()}}.
 
 In \code{composition}, each component's share is of the sum of
-\code{component_cols}, so the shares add up to 1 within each \code{ref_date}.
+\code{wage_component_cols}, so the shares add up to 1 within each \code{ref_date}.
 
 The \code{distribution} pools contracts from all reference dates. Filter \code{data}
 to one date first to see a single year.
