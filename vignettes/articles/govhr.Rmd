@@ -31,7 +31,7 @@ The `govhr` package offers solutions to these challenges. It provides a set of o
 
 `govhr` has two components: a backend and a frontend. The backend handles the data engineering or, as we prefer to call it, the harmonization. The frontend handles analytics, including functions that compute indicators and visualizes them in plots.
 
-![govhr: architecture](`r system.file("www", "govhr.svg", package = "govhr")`)
+![govhr: architecture](govhr.svg)
 
 ## Harmonization
 

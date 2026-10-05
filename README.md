@@ -41,4 +41,4 @@ remotes::install_github("WB-PIDA-Data-Science-Shop/govhr")
 
 ## License
 
-`govhr` is licensed under the MIT License. However, it comes with no guarantees and the package developers cannot be held responsible for any issues arising from its use.
+`govhr` is licensed under Creative Commons. However, it comes with no guarantees and the package developers cannot be held responsible for any issues arising from its use.
