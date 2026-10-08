@@ -302,6 +302,17 @@ if (getRversion() >= "2.15.1") {
     "next_date",
     "hire_rate",
     "separation_rate",
+    # detect_movement, detect_retirement, compute_retirement
+    "hired",
+    "separated",
+    "retired",
+    "record_date",
+    "next_pension",
+    "next_return",
+    "x.ref_date",
+    "retirement",
+    "retirements",
+    "retirement_rate",
     # compute_wage
     "wage_growth"
   ))

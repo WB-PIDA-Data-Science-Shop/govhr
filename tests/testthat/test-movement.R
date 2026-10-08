@@ -29,10 +29,12 @@ test_that("classify_personnel_event('hire') flags a genuine mid-panel hire and e
 })
 
 test_that("classify_personnel_event('retirement') flags the active->pensioner transition", {
+  # person 2 keeps 2021-01-01 in the calendar of active dates, as in a full
+  # panel
   df <- data.table::data.table(
-    personnel_id = 1,
-    ref_date = as.Date(c("2019-01-01", "2020-01-01", "2021-01-01")),
-    employment_status = c("active", "active", "pensioner")
+    personnel_id = rep(1:2, each = 3),
+    ref_date = rep(as.Date(c("2019-01-01", "2020-01-01", "2021-01-01")), 2),
+    employment_status = c("active", "active", "pensioner", rep("active", 3))
   )
 
   out <- classify_personnel_event(
@@ -42,7 +44,7 @@ test_that("classify_personnel_event('retirement') flags the active->pensioner tr
     start_date = "2019-01-01",
     end_date = "2021-01-01",
     status_col = "employment_status"
-  )
+  )[personnel_id == 1]
 
   # retirement is detected on the last *active* record before the pensioner
   # status appears, i.e. 2020-01-01, not 2021-01-01
@@ -77,11 +79,14 @@ test_that("compute_movement_cost sums wage only for personnel with a genuine hir
 })
 
 test_that("compute_movement_cost with latest_measure = TRUE keeps only the max ref_date across event types", {
+  # id 3 keeps 2021-01-01 in the calendar of active dates, as in a full panel
   df <- data.table::data.table(
-    personnel_id = c(1, 2, 2),
-    ref_date = as.Date(c("2020-01-01", "2020-01-01", "2021-01-01")),
-    employment_status = c("active", "active", "pensioner"),
-    wage = c(100, 200, 200)
+    personnel_id = c(1, 2, 2, 3, 3),
+    ref_date = as.Date(c(
+      "2020-01-01", "2020-01-01", "2021-01-01", "2020-01-01", "2021-01-01"
+    )),
+    employment_status = c("active", "active", "pensioner", "active", "active"),
+    wage = c(100, 200, 200, 300, 300)
   )
 
   out <- compute_movement_cost(
