@@ -38,7 +38,8 @@
 #'
 #' @importFrom data.table as.data.table
 #' @export
-validate_data <- function(
+validate_data <- 
+  function(
   data,
   input_rules,
   output_format = c("report", "object")

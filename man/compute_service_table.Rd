@@ -14,13 +14,17 @@ compute_service_table(
   radix = 1e+05,
   smooth = FALSE,
   span = 0.75,
-  personnel_dt = NULL
+  personnel_dt = NULL,
+  include_all = TRUE
 )
 }
 \arguments{
-\item{personnel}{A data.table (or data.frame/tibble, coerced
-automatically) containing the personnel panel. Passed straight through
-to \code{estimate_decrement_rates()}.}
+\item{personnel}{A data frame (data.table, data.frame or tibble) or a
+remote database table (\code{tbl_dbi}, e.g. DuckDB) containing the
+personnel panel. Passed straight through to
+\code{estimate_decrement_rates()}, so for a database table the heavy
+step runs in the database; its small pooled result is then collected
+and the life table is built in R.}
 
 \item{age_col}{A single string naming the age column.}
 
@@ -55,9 +59,16 @@ for noise reduction on strata that have no gap at all.}
 \code{smooth = TRUE}. Defaults to \code{0.75}.}
 
 \item{personnel_dt}{Deprecated. Use \code{personnel} instead.}
+
+\item{include_all}{Logical. Whether to return the full life table
+(\code{TRUE}, the default) or only \code{age_col}, \code{group_cols},
+\code{px} and \code{ex} (\code{FALSE}).}
 }
 \value{
-A data.table with one row per age / \code{group_cols}:
+A data.table (also for \code{tbl_dbi} input) with one row per
+age / \code{group_cols}. With \code{include_all = FALSE}, only the
+\code{age_col}, \code{group_cols}, \code{px} and \code{ex} columns are
+kept:
 \describe{
 \item{age_col, group_cols}{As supplied.}
 \item{px}{Probability of remaining active from age x to x+1.}

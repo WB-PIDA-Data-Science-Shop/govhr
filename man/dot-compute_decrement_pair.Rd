@@ -65,9 +65,11 @@ age/group/outcome combination.}
 }
 }
 \description{
-Internal workhorse intended to be called by \code{roll_snapshot_pairs()}
-inside a future \code{estimate_decrement_rates()}, mirroring the role
-\code{.compute_transition_pair()} plays for movement rates. Given two
+Single-pair reference implementation of the counts that
+\code{estimate_decrement_rates()} computes for all pairs at once. It can be
+driven by \code{roll_snapshot_pairs()}, mirroring the role
+\code{.compute_transition_pair()} plays for movement rates, and is kept
+for tests and benchmarks (\code{data-raw/bench/decrement_rates.R}). Given two
 consecutive panel snapshots (\code{snap_t0} at T0 and \code{snap_t1} at
 T1), this function:
 

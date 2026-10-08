@@ -14,6 +14,9 @@ S3method(compute_wage,data.frame)
 S3method(compute_wage,tbl_dbi)
 S3method(compute_wagebill,data.frame)
 S3method(compute_wagebill,tbl_dbi)
+S3method(estimate_decrement_rates,data.frame)
+S3method(estimate_decrement_rates,default)
+S3method(estimate_decrement_rates,tbl_dbi)
 export(add_contract_to_event)
 export(apply_baseline_index)
 export(classify_personnel_event)
@@ -132,6 +135,7 @@ importFrom(data.table,
   rbindlist,
   rleidv,
   setDT,
+  setcolorder,
   setkeyv,
   setnames,
   setorderv,
@@ -148,6 +152,7 @@ importFrom(dplyr,
   coalesce,
   collect,
   count,
+  cross_join,
   desc,
   distinct,
   everything,

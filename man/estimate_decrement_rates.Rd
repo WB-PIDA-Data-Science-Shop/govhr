@@ -2,23 +2,45 @@
 % Please edit documentation in R/demographics.R
 \name{estimate_decrement_rates}
 \alias{estimate_decrement_rates}
+\alias{estimate_decrement_rates.data.frame}
+\alias{estimate_decrement_rates.tbl_dbi}
+\alias{estimate_decrement_rates.default}
 \title{Estimate empirical decrement rates from a personnel panel}
 \usage{
-estimate_decrement_rates(
+estimate_decrement_rates(personnel, ..., personnel_dt = NULL)
+
+\method{estimate_decrement_rates}{data.frame}(
   personnel,
-  age_col,
-  status_col,
-  personnel_id_col,
-  ref_date_col,
-  group_cols,
-  personnel_dt = NULL
+  age_col = "age",
+  status_col = "employment_status",
+  personnel_id_col = "personnel_id",
+  ref_date_col = "ref_date",
+  group_cols = NULL,
+  ...
 )
+
+\method{estimate_decrement_rates}{tbl_dbi}(
+  personnel,
+  age_col = "age",
+  status_col = "employment_status",
+  personnel_id_col = "personnel_id",
+  ref_date_col = "ref_date",
+  group_cols = NULL,
+  ...
+)
+
+\method{estimate_decrement_rates}{default}(personnel, ...)
 }
 \arguments{
-\item{personnel}{A data.table (or data.frame/tibble, coerced
-automatically) containing the personnel panel: multiple snapshots of
-the same population over time, identified by \code{ref_date_col}. Must
-contain at least two distinct, non-missing reference dates.}
+\item{personnel}{A data frame (data.table, data.frame or tibble) or a
+remote database table (\code{tbl_dbi}, e.g. DuckDB) containing the
+personnel panel: multiple snapshots of the same population over time,
+identified by \code{ref_date_col}. Must contain at least two distinct,
+non-missing reference dates.}
+
+\item{...}{Arguments passed to methods.}
+
+\item{personnel_dt}{Deprecated. Use \code{personnel} instead.}
 
 \item{age_col}{A single string naming the (integer, or coercible to
 integer) age column.}
@@ -38,13 +60,13 @@ identifies each snapshot.}
 
 \item{group_cols}{A character vector of additional columns (e.g. gender,
 occupation, service type) to estimate separate rates by, alongside age.}
-
-\item{personnel_dt}{Deprecated. Use \code{personnel} instead.}
 }
 \value{
-A data.table with one row per age / \code{group_cols} / outcome
+A table with one row per age / \code{group_cols} / outcome
 type, pooled across every consecutive snapshot pair in
-\code{personnel_dt}:
+\code{personnel} -- a data.table for data frame input, or a lazy table
+for \code{tbl_dbi} input (use \code{dplyr::collect()} to bring it into
+memory):
 \describe{
 \item{age_col, group_cols}{The age and grouping columns, as supplied.}
 \item{status_col}{The outcome type this row's rate applies to --
@@ -60,9 +82,9 @@ outcome by the next snapshot, summed the same way.}
 \item{decrement_rate}{The pooled rate, \code{exits / pop}. This is the
 empirical \code{qx} (or \code{px}, for the \code{"active"} row) to
 feed into a life table.}
-\item{n_periods}{Number of distinct snapshot pairs that contributed to
-this age/group/outcome cell -- a quick way to spot ages resting on
-very little data.}
+\item{n_periods}{Number of distinct snapshot pairs in which this
+age/group had anyone at risk (the same for every outcome row of the
+age/group) -- a quick way to spot ages resting on very little data.}
 }
 }
 \description{
@@ -73,8 +95,8 @@ another kind of exit, or simply staying active. These are the raw
 ingredients (\code{qx}-style decrement rates) for building an actuarial
 life table, e.g. with a life-table function that chains them across age.
 
-The function walks every consecutive pair of snapshots in
-\code{personnel_dt}, tracks the same individuals from one snapshot to the
+The function covers every consecutive pair of snapshots in
+\code{personnel}, tracks the same individuals from one snapshot to the
 next, and pools the results into one stable rate per age/group/outcome
 using all of the data available, rather than relying on any single pair
 of snapshots (which can be noisy for ages with few people).
@@ -88,9 +110,9 @@ collapsing two different axes, and this function only ever does the
 first one:
 \itemize{
 \item \emph{Time}, here: every consecutive snapshot pair in
-\code{personnel_dt} (2015-2016, 2016-2017, ...) is walked via
-\code{roll_snapshot_pairs()}, and each pair's exposure/outcome counts
-are pooled into one age-indexed rate. This function never chains
+\code{personnel} (2015-2016, 2016-2017, ...) contributes its
+exposure/outcome counts, and these are pooled into one age-indexed
+rate. This function never chains
 anything across \emph{age} -- that is a separate step (a life-table
 function operating purely on this function's output).
 }
@@ -103,14 +125,24 @@ people at risk. A plain average of the per-period rates would let a
 noisy, thin period swing the estimate just as much as a large one --
 this deliberately avoids that.
 
-\strong{Cohort tracking, not independent aggregation.} Within each
-snapshot pair, exposure and outcomes are computed by joining the same
-individuals from T0 to T1 on \code{personnel_id_col} (see
-\code{.compute_decrement_pair()}), not by aggregating each snapshot
-separately and matching on age afterward. This matters: someone who was
-already a pensioner at T0 and remains one at T1 is never miscounted as a
-newly observed exit, and each person's age/group is taken from T0, so
-there is no fragile assumption that snapshots are exactly one year apart.
+\strong{Cohort tracking, not independent aggregation.} Exposure and
+outcomes follow the same individuals from T0 to T1 by
+\code{personnel_id_col}, rather than aggregating each snapshot separately
+and matching on age afterward. This matters: someone who was already a
+pensioner at T0 and remains one at T1 is never miscounted as a newly
+observed exit, and each person's age/group is taken from T0, so there is
+no fragile assumption that snapshots are exactly one year apart.
+
+\strong{How each person's T1 status is found.} All snapshot pairs are
+handled in one pass rather than one pair at a time. The panel is sorted
+once by person and snapshot, so each person's next record is simply the
+row below. A person active at T0 takes the status on that row as their
+outcome if it belongs to the same person at the very next snapshot;
+otherwise (no record at T1, or an \code{NA} status there) the outcome is
+\code{"non-retirement-exit"}. This avoids joining every snapshot pair on
+\code{personnel_id_col}, which dominates the run time on large panels
+with character IDs. \code{.compute_decrement_pair()} computes the same
+counts for a single pair and is kept as a reference implementation.
 
 \strong{The outcome vocabulary is derived from the data.} Aside from the
 synthetic \code{"non-retirement-exit"} (assigned to anyone who drops out
@@ -120,7 +152,23 @@ in your data -- including \code{"active"} itself, so you get a stay
 probability alongside every exit-type probability. This means the
 function keeps working unmodified if your data's status vocabulary
 differs from what was used to build or test it (e.g. adding a
-\code{"deceased"} status requires no code change).
+\code{"deceased"} status requires no code change). The vocabulary is
+shared by all snapshot pairs: a status observed in only some years still
+gets a (zero-count) row in every age/group, so all outcome rows of an
+age/group pool over the same exposure and sum to 1.
+
+\strong{Database tables.} For a \code{tbl_dbi}, the same steps run inside
+the database as SQL: each person's next record comes from a
+\code{LEAD()} window over their snapshots, and only the pooled table is
+returned, lazily. Nothing the size of the panel is brought into R, so
+panels too large for memory can be processed (DuckDB spills to disk). A
+few small queries do run straight away: the snapshot dates and statuses
+(for the checks and the outcome vocabulary) and the duplicate count.
+
+\strong{Duplicates.} \code{personnel} is expected to be unique at the
+\code{personnel_id_col}/\code{ref_date_col} level. If it is not, a
+warning reports the number of duplicate rows and one row per person and
+snapshot is kept.
 
 \strong{Caveat.} The literal string \code{"active"} is currently
 hardcoded as the value of \code{status_col} that defines who is exposed
@@ -151,5 +199,5 @@ estimate_decrement_rates(
 
 }
 \seealso{
-\code{\link{.compute_decrement_pair}}, \code{\link{roll_snapshot_pairs}}
+\code{\link{.compute_decrement_pair}}, \code{\link{smooth_decrement_rates}}
 }

@@ -193,61 +193,237 @@ test_that("t0_date and t1_date are attached correctly", {
 
 # ---------------------------------------------------------------------------
 # estimate_decrement_rates() -- pooling across period-pairs
+#
+# Behaviour tests run on a data frame (data.table method) and on a duckdb
+# table (tbl_dbi method), so the two implementations are held to the same
+# results.
 # ---------------------------------------------------------------------------
-test_that("errors when fewer than 2 snapshots are present", {
-  dt <- make_snap("P1", "2020-01-01", 50L, "active")
-  expect_error(
-    estimate_decrement_rates(dt, "age", "employment_status", "personnel_id", "ref_date", NULL),
-    "2 personnel snapshots"
+backends <- c("data.frame", "duckdb")
+
+# run estimate_decrement_rates() on `data` or a duckdb copy of it, and return
+# a data.table sorted the same way for both backends
+run_decrements <- function(backend, data, group_cols = NULL) {
+  if (backend == "duckdb") {
+    skip_if_not_installed("duckdb")
+    skip_if_not_installed("dbplyr")
+
+    # silence duckdb's notice about where it stores extensions
+    con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+    on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+
+    DBI::dbWriteTable(con, "personnel", as.data.frame(data))
+    data <- dplyr::tbl(con, "personnel")
+  }
+
+  result <- data.table::as.data.table(dplyr::collect(
+    estimate_decrement_rates(
+      data, "age", "employment_status", "personnel_id", "ref_date", group_cols
+    )
+  ))
+  data.table::setorderv(result, c("age", group_cols, "employment_status"))
+  result[]
+}
+
+for (backend in backends) {
+  test_that(paste0("errors when fewer than 2 snapshots are present (", backend, ")"), {
+    dt <- make_snap("P1", "2020-01-01", 50L, "active")
+    expect_error(
+      run_decrements(backend, dt),
+      "`personnel` must contain at least 2 snapshots .*found 1"
+    )
+  })
+
+  test_that(paste0("returns the documented columns (", backend, ")"), {
+    out <- run_decrements(backend, decrement_pair_snaps() |> data.table::rbindlist(), "gender")
+    expect_named(
+      out,
+      c("age", "gender", "employment_status", "pop", "exits", "n_periods", "decrement_rate")
+    )
+  })
+
+  test_that(paste0("pooled decrement rates match hand-calculated values exactly (", backend, ")"), {
+    out <- run_decrements(backend, deterministic_panel())
+    expect_equal(out[age == 50 & employment_status == "pensioner"]$decrement_rate, 0.25)
+    expect_equal(out[age == 51 & employment_status == "pensioner"]$decrement_rate, 0.50)
+    expect_equal(out[age == 52 & employment_status == "pensioner"]$decrement_rate, 0.00)
+    expect_equal(out[age == 52 & employment_status == "active"]$decrement_rate, 1.00)
+  })
+
+  test_that(paste0("pooling sums exposure/events across period-pairs, not a mean of per-period rates (", backend, ")"), {
+    # age 60/pensioner: pair 1 has pop=2, 1 retires (rate 0.5);
+    # pair 2 has pop=11, 1 retires (rate 1/11). pooled rate must be
+    # (1+1)/(2+11) = 2/13, NOT the naive mean (0.5 + 1/11)/2
+    panel <- data.table::rbindlist(list(
+      make_snap(paste0("A", 1:2), "2020-01-01", 60L, "active"),
+      make_snap(paste0("A", 1:2), "2021-01-01", 61L, c("pensioner", "active")),
+      make_snap(paste0("B", 1:11), "2021-01-01", 60L, "active"),
+      make_snap(paste0("B", 1:11), "2022-01-01", 61L, c("pensioner", rep("active", 10)))
+    ), use.names = TRUE, fill = TRUE)
+
+    out <- run_decrements(backend, panel)
+    row <- out[age == 60 & employment_status == "pensioner"]
+    expect_equal(row$pop, 13L)
+    expect_equal(row$exits, 2L)
+    expect_equal(row$decrement_rate, 2 / 13)
+    expect_equal(row$n_periods, 2L)
+  })
+
+  test_that(paste0("output rates sum to 1 per age/group after pooling (", backend, ")"), {
+    out <- run_decrements(backend, deterministic_panel())
+    sums <- out[, .(total = sum(decrement_rate)), by = age]
+    expect_equal(sums$total, rep(1, nrow(sums)))
+  })
+
+  test_that(paste0("rates sum to 1 when an outcome status only appears in some snapshots (", backend, ")"), {
+    # regression test: the outcome vocabulary used to be built per snapshot
+    # pair, so "pensioner" (seen only at 2021) and "deceased" (seen only at
+    # 2022) were pooled over just one pair's exposure (pop 4 and 3) while
+    # "active" was pooled over both (pop 7) -- rates summed to 1.30
+    panel <- data.table::rbindlist(list(
+      make_snap(paste0("A", 1:4), "2020-01-01", 50L, "active"),
+      make_snap(paste0("A", 1:4), "2021-01-01", 50L, c("active", "active", "active", "pensioner")),
+      make_snap(paste0("A", 1:3), "2022-01-01", 50L, c("active", "active", "deceased"))
+    ))
+    out <- run_decrements(backend, panel)
+
+    expect_equal(out$pop, rep(7L, 4))
+    expect_equal(out$n_periods, rep(2L, 4))
+    expect_equal(
+      out[, stats::setNames(exits, employment_status)],
+      c(active = 5L, deceased = 1L, `non-retirement-exit` = 0L, pensioner = 1L)
+    )
+    expect_equal(sum(out$decrement_rate), 1)
+  })
+
+  test_that(paste0("a person missing from the next snapshot is a non-retirement-exit, even if they reappear later (", backend, ")"), {
+    # P2 is absent at 2021 and back at 2022: the 2020 -> 2021 pair must count
+    # an exit, and the 2021 -> 2022 pair must not count P2 as exposed at all
+    panel <- data.table::rbindlist(list(
+      make_snap(c("P1", "P2"), "2020-01-01", 40L, "active"),
+      make_snap("P1", "2021-01-01", 41L, "active"),
+      make_snap(c("P1", "P2"), "2022-01-01", c(42L, 42L), "active")
+    ))
+    out <- run_decrements(backend, panel)
+
+    expect_equal(out[age == 40 & employment_status == "non-retirement-exit"]$exits, 1L)
+    expect_equal(out[age == 40]$pop, rep(2L, nrow(out[age == 40])))
+    expect_equal(out[age == 41]$pop, rep(1L, nrow(out[age == 41])))
+    expect_false(42L %in% out$age)  # last snapshot is never exposure
+  })
+
+  test_that(paste0("an NA status at the next snapshot is a non-retirement-exit (", backend, ")"), {
+    panel <- data.table::rbindlist(list(
+      make_snap(c("P1", "P2"), "2020-01-01", 40L, "active"),
+      make_snap(c("P1", "P2"), "2021-01-01", 41L, c("active", NA))
+    ))
+    out <- run_decrements(backend, panel)
+    expect_equal(out[employment_status == "non-retirement-exit"]$exits, 1L)
+    expect_false(anyNA(out$employment_status))
+  })
+
+  test_that(paste0("NA values in group_cols form their own group (", backend, ")"), {
+    panel <- data.table::rbindlist(list(
+      make_snap(c("P1", "P2"), "2020-01-01", 40L, "active", gender = c("F", NA)),
+      make_snap(c("P1", "P2"), "2021-01-01", 41L, c("active", "pensioner"), gender = c("F", NA))
+    ))
+    out <- run_decrements(backend, panel, "gender")
+    expect_equal(out[is.na(gender) & employment_status == "pensioner"]$exits, 1L)
+    expect_equal(out[gender == "F" & employment_status == "active"]$exits, 1L)
+  })
+
+  test_that(paste0("duplicate personnel_id/ref_date rows warn and are counted once (", backend, ")"), {
+    clean <- deterministic_panel()
+    dupes <- rbind(clean, clean[personnel_id %in% c("P1", "P5")])
+    expect_warning(out <- run_decrements(backend, dupes), "4 duplicate rows")
+    expect_equal(out, run_decrements(backend, clean))
+  })
+
+  test_that(paste0("clean (unique) panels raise no warning (", backend, ")"), {
+    expect_no_warning(run_decrements(backend, deterministic_panel()))
+  })
+
+  test_that(paste0("the deprecated personnel_dt argument still works (", backend, ")"), {
+    data <- deterministic_panel()
+    if (backend == "duckdb") {
+      skip_if_not_installed("duckdb")
+      con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+      on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+      DBI::dbWriteTable(con, "personnel", as.data.frame(data))
+      data <- dplyr::tbl(con, "personnel")
+    }
+    expect_warning(
+      out <- estimate_decrement_rates(
+        personnel_dt = data, age_col = "age", status_col = "employment_status",
+        personnel_id_col = "personnel_id", ref_date_col = "ref_date", group_cols = NULL
+      ),
+      "deprecated"
+    )
+    out <- data.table::as.data.table(dplyr::collect(out))
+    data.table::setorderv(out, c("age", "employment_status"))
+    expect_equal(out, run_decrements(backend, deterministic_panel()))
+  })
+}
+
+test_that("the data.frame and duckdb methods agree on a larger grouped panel", {
+  panel <- gapped_panel()
+  panel[, gender := rep_len(c("F", "M", NA), .N)]
+  expect_equal(
+    run_decrements("duckdb", panel, "gender"),
+    run_decrements("data.frame", panel, "gender")
   )
 })
 
-test_that("non-data.table input is coerced automatically", {
+test_that("data frame input returns a data.table", {
   df <- as.data.frame(deterministic_panel())
   out <- estimate_decrement_rates(df, "age", "employment_status", "personnel_id", "ref_date", NULL)
   expect_s3_class(out, "data.table")
 })
 
-test_that("pooled decrement rates match hand-calculated values exactly", {
+test_that("tbl_dbi input returns a lazy table", {
+  skip_if_not_installed("duckdb")
+  skip_if_not_installed("dbplyr")
+  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  DBI::dbWriteTable(con, "personnel", as.data.frame(deterministic_panel()))
+
   out <- estimate_decrement_rates(
-    deterministic_panel(), "age", "employment_status",
-    "personnel_id", "ref_date", NULL
+    dplyr::tbl(con, "personnel"), "age", "employment_status", "personnel_id", "ref_date", NULL
   )
-  expect_equal(out[age == 50 & employment_status == "pensioner"]$decrement_rate, 0.25)
-  expect_equal(out[age == 51 & employment_status == "pensioner"]$decrement_rate, 0.50)
-  expect_equal(out[age == 52 & employment_status == "pensioner"]$decrement_rate, 0.00)
-  expect_equal(out[age == 52 & employment_status == "active"]$decrement_rate, 1.00)
+  expect_s3_class(out, "tbl_lazy")
 })
 
-test_that("pooling sums exposure/events across period-pairs, not a mean of per-period rates", {
-  # age 60/pensioner: pair 1 has pop=2, 1 retires (rate 0.5);
-  # pair 2 has pop=11, 1 retires (rate 1/11). pooled rate must be
-  # (1+1)/(2+11) = 2/13, NOT the naive mean (0.5 + 1/11)/2
-  panel <- data.table::rbindlist(list(
-    make_snap(paste0("A", 1:2), "2020-01-01", 60L, "active"),
-    make_snap(paste0("A", 1:2), "2021-01-01", 61L, c("pensioner", "active")),
-    make_snap(paste0("B", 1:11), "2021-01-01", 60L, "active"),
-    make_snap(paste0("B", 1:11), "2022-01-01", 61L, c("pensioner", rep("active", 10)))
-  ), use.names = TRUE, fill = TRUE)
-
-  out <- estimate_decrement_rates(panel, "age", "employment_status", "personnel_id", "ref_date", NULL)
-  row <- out[age == 60 & employment_status == "pensioner"]
-  expect_equal(row$pop, 13L)
-  expect_equal(row$exits, 2L)
-  expect_equal(row$decrement_rate, 2 / 13)
-  expect_equal(row$n_periods, 2L)
+test_that("unsupported input errors naming the argument", {
+  expect_error(
+    estimate_decrement_rates(list(a = 1), "age", "employment_status", "personnel_id", "ref_date", NULL),
+    "`personnel` must be a data frame or a lazy database table"
+  )
 })
 
-test_that("group_cols = NULL is supported (single, ungrouped table)", {
-  out <- estimate_decrement_rates(deterministic_panel(), "age", "employment_status", "personnel_id", "ref_date", NULL)
-  expect_s3_class(out, "data.table")
-  expect_true(all(c("age", "employment_status", "decrement_rate") %in% names(out)))
+test_that("pooled output over one pair matches .compute_decrement_pair()", {
+  snaps <- decrement_pair_snaps()
+  pair <- .compute_decrement_pair(
+    snaps$snap_t0, snaps$snap_t1,
+    age_col = "age", status_col = "employment_status",
+    personnel_id_col = "personnel_id", ref_date_col = "ref_date",
+    group_cols = "gender"
+  )
+  out <- estimate_decrement_rates(
+    rbind(snaps$snap_t0, snaps$snap_t1),
+    "age", "employment_status", "personnel_id", "ref_date", "gender"
+  )
+  key <- c("age", "gender", "employment_status")
+  data.table::setorderv(pair, key)
+  expect_equal(out[, .(age, gender, employment_status, pop, exits, decrement_rate)],
+               pair[, .(age, gender, employment_status, pop, exits, decrement_rate)])
+  expect_true(all(out$n_periods == 1L))
 })
 
-test_that("output rates sum to 1 per age/group after pooling", {
-  out <- estimate_decrement_rates(deterministic_panel(), "age", "employment_status", "personnel_id", "ref_date", NULL)
-  sums <- out[, .(total = sum(decrement_rate)), by = age]
-  expect_equal(sums$total, rep(1, nrow(sums)))
+test_that("the caller's data.table is not re-keyed or re-ordered", {
+  panel <- deterministic_panel()[c(16:9, 1:8)]
+  before <- data.table::copy(panel)
+  estimate_decrement_rates(panel, "age", "employment_status", "personnel_id", "ref_date", NULL)
+  expect_null(data.table::key(panel))
+  expect_equal(panel, before)
 })
 
 # ---------------------------------------------------------------------------
@@ -312,6 +488,26 @@ test_that("group_cols = NULL works (regression: on = group_cols join used to fai
   expect_error(smooth_decrement_rates(raw, "age", "employment_status", NULL), NA)
 })
 
+test_that("smooth_decrement_rates() accepts the lazy duckdb output of estimate_decrement_rates()", {
+  # the tbl_dbi method of estimate_decrement_rates() returns a lazy table;
+  # smoothing (loess) runs in R, so the small pooled table is collected first
+  skip_if_not_installed("duckdb")
+  skip_if_not_installed("dbplyr")
+  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  panel <- gapped_panel()
+  DBI::dbWriteTable(con, "personnel", as.data.frame(panel))
+
+  lazy <- estimate_decrement_rates(
+    dplyr::tbl(con, "personnel"), "age", "employment_status", "personnel_id", "ref_date", NULL
+  )
+  raw <- estimate_decrement_rates(panel, "age", "employment_status", "personnel_id", "ref_date", NULL)
+
+  from_db <- smooth_decrement_rates(lazy, "age", "employment_status", NULL)
+  expect_s3_class(from_db, "data.table")
+  expect_equal(from_db, smooth_decrement_rates(raw, "age", "employment_status", NULL))
+})
+
 # ---------------------------------------------------------------------------
 # compute_service_table() -- age-chaining
 # ---------------------------------------------------------------------------
@@ -327,6 +523,69 @@ test_that("lx/Lx/Tx/ex chain matches hand-calculated values exactly", {
   expect_equal(st$Lx, c(87.5, 56.25, 37.5))
   expect_equal(st$Tx, c(181.25, 93.75, 37.5))
   expect_equal(st$ex, c(1.8125, 1.25, 1.0))
+})
+
+test_that("compute_service_table() accepts a duckdb table and matches the data frame result", {
+  # regression test: estimate_decrement_rates() returns a lazy table for
+  # tbl_dbi input, which the life-table chain must collect before using
+  skip_if_not_installed("duckdb")
+  skip_if_not_installed("dbplyr")
+  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  DBI::dbWriteTable(con, "personnel", as.data.frame(deterministic_panel()))
+
+  args <- list("age", "employment_status", "personnel_id", "ref_date",
+               group_cols = NULL, radix = 100, smooth = FALSE)
+  from_db <- do.call(compute_service_table, c(list(dplyr::tbl(con, "personnel")), args))
+  from_df <- do.call(compute_service_table, c(list(deterministic_panel()), args))
+  expect_equal(from_db, from_df)
+})
+
+test_that("compute_service_table(smooth = TRUE) accepts a duckdb table and matches the data frame result", {
+  skip_if_not_installed("duckdb")
+  skip_if_not_installed("dbplyr")
+  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  panel <- gapped_panel()
+  panel[, gender := "M"]
+  DBI::dbWriteTable(con, "personnel", as.data.frame(panel))
+
+  args <- list("age", "employment_status", "personnel_id", "ref_date",
+               group_cols = "gender", smooth = TRUE)
+  from_db <- do.call(compute_service_table, c(list(dplyr::tbl(con, "personnel")), args))
+  from_df <- do.call(compute_service_table, c(list(panel), args))
+  expect_s3_class(from_db, "data.table")
+  expect_equal(from_db, from_df)
+})
+
+test_that("compute_service_table() returns the full life table by default", {
+  st <- compute_service_table(
+    deterministic_panel(), "age", "employment_status",
+    "personnel_id", "ref_date", group_cols = NULL, radix = 100, smooth = FALSE
+  )
+  expect_named(st, c("age", "px", "lx", "lx_next", "Lx", "Tx", "ex"))
+})
+
+test_that("include_all = FALSE keeps only age, group_cols, px and ex", {
+  full <- compute_service_table(
+    deterministic_panel(), "age", "employment_status",
+    "personnel_id", "ref_date", group_cols = NULL, radix = 100, smooth = FALSE
+  )
+  short <- compute_service_table(
+    deterministic_panel(), "age", "employment_status",
+    "personnel_id", "ref_date", group_cols = NULL, radix = 100, smooth = FALSE,
+    include_all = FALSE
+  )
+  expect_named(short, c("age", "px", "ex"))
+  expect_equal(short, full[, .(age, px, ex)])
+
+  panel <- deterministic_panel()
+  panel[, gender := "M"]
+  grouped <- compute_service_table(
+    panel, "age", "employment_status", "personnel_id", "ref_date",
+    group_cols = "gender", smooth = FALSE, include_all = FALSE
+  )
+  expect_named(grouped, c("age", "gender", "px", "ex"))
 })
 
 test_that("ex is invariant to the choice of radix", {

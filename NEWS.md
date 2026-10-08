@@ -1,3 +1,12 @@
+# govhr (development version)
+- Speeds up `estimate_decrement_rates()` (about 5x on large panels with character ids) by finding each person's next-snapshot status in one sorted pass instead of one join per snapshot pair.
+- Fixes `estimate_decrement_rates()` rates not summing to 1 when a status (e.g. `"deceased"`) only appears in some snapshots.
+- `estimate_decrement_rates()` now warns when `personnel` is not unique at the `personnel_id_col`/`ref_date_col` level, and no longer re-keys the caller's data.table.
+- `estimate_decrement_rates()` is now a generic with a `tbl_dbi` method, so it runs inside a database (e.g. DuckDB) and returns a lazy table. Previously a `tbl_dbi` was silently pulled into memory in full. Other input now errors with a message naming the argument.
+- `smooth_decrement_rates()` and `compute_service_table()` accept database tables: the heavy step runs in the database and the small pooled result is collected, so both still return a data.table.
+- `compute_service_table()` gains `include_all` (default `TRUE`); set it to `FALSE` to keep only the age, group, `px` and `ex` columns.
+- Adds `data-raw/bench/decrement_rates.R`, benchmarking the old and new implementations (including DuckDB) across panel sizes.
+
 # govhr 0.4.1
 This release:
 - Standardizes an architecture for workforce and wage bill analytics.

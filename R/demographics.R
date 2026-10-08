@@ -1,9 +1,11 @@
 #' Compute Decrement Outcome Counts for a Single Consecutive Snapshot Pair
 #'
 #' @description
-#' Internal workhorse intended to be called by \code{roll_snapshot_pairs()}
-#' inside a future \code{estimate_decrement_rates()}, mirroring the role
-#' \code{.compute_transition_pair()} plays for movement rates. Given two
+#' Single-pair reference implementation of the counts that
+#' \code{estimate_decrement_rates()} computes for all pairs at once. It can be
+#' driven by \code{roll_snapshot_pairs()}, mirroring the role
+#' \code{.compute_transition_pair()} plays for movement rates, and is kept
+#' for tests and benchmarks (\code{data-raw/bench/decrement_rates.R}). Given two
 #' consecutive panel snapshots (\code{snap_t0} at T0 and \code{snap_t1} at
 #' T1), this function:
 #'
@@ -186,16 +188,17 @@
 #' ingredients (\code{qx}-style decrement rates) for building an actuarial
 #' life table, e.g. with a life-table function that chains them across age.
 #'
-#' The function walks every consecutive pair of snapshots in
-#' \code{personnel_dt}, tracks the same individuals from one snapshot to the
+#' The function covers every consecutive pair of snapshots in
+#' \code{personnel}, tracks the same individuals from one snapshot to the
 #' next, and pools the results into one stable rate per age/group/outcome
 #' using all of the data available, rather than relying on any single pair
 #' of snapshots (which can be noisy for ages with few people).
 #'
-#' @param personnel A data.table (or data.frame/tibble, coerced
-#'   automatically) containing the personnel panel: multiple snapshots of
-#'   the same population over time, identified by \code{ref_date_col}. Must
-#'   contain at least two distinct, non-missing reference dates.
+#' @param personnel A data frame (data.table, data.frame or tibble) or a
+#'   remote database table (\code{tbl_dbi}, e.g. DuckDB) containing the
+#'   personnel panel: multiple snapshots of the same population over time,
+#'   identified by \code{ref_date_col}. Must contain at least two distinct,
+#'   non-missing reference dates.
 #' @param age_col A single string naming the (integer, or coercible to
 #'   integer) age column.
 #' @param status_col A single string naming the employment status column,
@@ -210,11 +213,14 @@
 #'   identifies each snapshot.
 #' @param group_cols A character vector of additional columns (e.g. gender,
 #'   occupation, service type) to estimate separate rates by, alongside age.
+#' @param ... Arguments passed to methods.
 #' @param personnel_dt Deprecated. Use `personnel` instead.
 #'
-#' @returns A data.table with one row per age / \code{group_cols} / outcome
+#' @returns A table with one row per age / \code{group_cols} / outcome
 #'   type, pooled across every consecutive snapshot pair in
-#'   \code{personnel_dt}:
+#'   \code{personnel} -- a data.table for data frame input, or a lazy table
+#'   for \code{tbl_dbi} input (use \code{dplyr::collect()} to bring it into
+#'   memory):
 #'   \describe{
 #'     \item{age_col, group_cols}{The age and grouping columns, as supplied.}
 #'     \item{status_col}{The outcome type this row's rate applies to --
@@ -230,9 +236,9 @@
 #'     \item{decrement_rate}{The pooled rate, \code{exits / pop}. This is the
 #'       empirical \code{qx} (or \code{px}, for the \code{"active"} row) to
 #'       feed into a life table.}
-#'     \item{n_periods}{Number of distinct snapshot pairs that contributed to
-#'       this age/group/outcome cell -- a quick way to spot ages resting on
-#'       very little data.}
+#'     \item{n_periods}{Number of distinct snapshot pairs in which this
+#'       age/group had anyone at risk (the same for every outcome row of the
+#'       age/group) -- a quick way to spot ages resting on very little data.}
 #'   }
 #'
 #' @details
@@ -244,9 +250,9 @@
 #' first one:
 #' \itemize{
 #'   \item \emph{Time}, here: every consecutive snapshot pair in
-#'     \code{personnel_dt} (2015-2016, 2016-2017, ...) is walked via
-#'     \code{roll_snapshot_pairs()}, and each pair's exposure/outcome counts
-#'     are pooled into one age-indexed rate. This function never chains
+#'     \code{personnel} (2015-2016, 2016-2017, ...) contributes its
+#'     exposure/outcome counts, and these are pooled into one age-indexed
+#'     rate. This function never chains
 #'     anything across \emph{age} -- that is a separate step (a life-table
 #'     function operating purely on this function's output).
 #' }
@@ -259,14 +265,24 @@
 #' noisy, thin period swing the estimate just as much as a large one --
 #' this deliberately avoids that.
 #'
-#' \strong{Cohort tracking, not independent aggregation.} Within each
-#' snapshot pair, exposure and outcomes are computed by joining the same
-#' individuals from T0 to T1 on \code{personnel_id_col} (see
-#' \code{.compute_decrement_pair()}), not by aggregating each snapshot
-#' separately and matching on age afterward. This matters: someone who was
-#' already a pensioner at T0 and remains one at T1 is never miscounted as a
-#' newly observed exit, and each person's age/group is taken from T0, so
-#' there is no fragile assumption that snapshots are exactly one year apart.
+#' \strong{Cohort tracking, not independent aggregation.} Exposure and
+#' outcomes follow the same individuals from T0 to T1 by
+#' \code{personnel_id_col}, rather than aggregating each snapshot separately
+#' and matching on age afterward. This matters: someone who was already a
+#' pensioner at T0 and remains one at T1 is never miscounted as a newly
+#' observed exit, and each person's age/group is taken from T0, so there is
+#' no fragile assumption that snapshots are exactly one year apart.
+#'
+#' \strong{How each person's T1 status is found.} All snapshot pairs are
+#' handled in one pass rather than one pair at a time. The panel is sorted
+#' once by person and snapshot, so each person's next record is simply the
+#' row below. A person active at T0 takes the status on that row as their
+#' outcome if it belongs to the same person at the very next snapshot;
+#' otherwise (no record at T1, or an \code{NA} status there) the outcome is
+#' \code{"non-retirement-exit"}. This avoids joining every snapshot pair on
+#' \code{personnel_id_col}, which dominates the run time on large panels
+#' with character IDs. \code{.compute_decrement_pair()} computes the same
+#' counts for a single pair and is kept as a reference implementation.
 #'
 #' \strong{The outcome vocabulary is derived from the data.} Aside from the
 #' synthetic \code{"non-retirement-exit"} (assigned to anyone who drops out
@@ -276,7 +292,23 @@
 #' probability alongside every exit-type probability. This means the
 #' function keeps working unmodified if your data's status vocabulary
 #' differs from what was used to build or test it (e.g. adding a
-#' \code{"deceased"} status requires no code change).
+#' \code{"deceased"} status requires no code change). The vocabulary is
+#' shared by all snapshot pairs: a status observed in only some years still
+#' gets a (zero-count) row in every age/group, so all outcome rows of an
+#' age/group pool over the same exposure and sum to 1.
+#'
+#' \strong{Database tables.} For a \code{tbl_dbi}, the same steps run inside
+#' the database as SQL: each person's next record comes from a
+#' \code{LEAD()} window over their snapshots, and only the pooled table is
+#' returned, lazily. Nothing the size of the panel is brought into R, so
+#' panels too large for memory can be processed (DuckDB spills to disk). A
+#' few small queries do run straight away: the snapshot dates and statuses
+#' (for the checks and the outcome vocabulary) and the duplicate count.
+#'
+#' \strong{Duplicates.} \code{personnel} is expected to be unique at the
+#' \code{personnel_id_col}/\code{ref_date_col} level. If it is not, a
+#' warning reports the number of duplicate rows and one row per person and
+#' snapshot is kept.
 #'
 #' \strong{Caveat.} The literal string \code{"active"} is currently
 #' hardcoded as the value of \code{status_col} that defines who is exposed
@@ -305,59 +337,101 @@
 #' )
 #' }
 #'
-#' @seealso \code{\link{.compute_decrement_pair}}, \code{\link{roll_snapshot_pairs}}
+#' @seealso \code{\link{.compute_decrement_pair}}, \code{\link{smooth_decrement_rates}}
 #' @export
-estimate_decrement_rates <- function(personnel,
-                                     age_col,
-                                     status_col,
-                                     personnel_id_col,
-                                     ref_date_col,
-                                     group_cols, personnel_dt = NULL) {
-  personnel <- resolve_renamed_arg(personnel, personnel_dt, "personnel_dt", "personnel")
-  
-  
-  # Validate inputs
-  if (!data.table::is.data.table(personnel)) {
-
-    personnel <- as.data.table(personnel)
-
+estimate_decrement_rates <- function(personnel, ..., personnel_dt = NULL) {
+  ### the deprecated name has to be resolved before dispatch, since
+  ### dispatch looks at the class of `personnel`
+  if (!is.null(personnel_dt)) {
+    personnel <- resolve_renamed_arg(personnel, personnel_dt, "personnel_dt", "personnel")
+    return(estimate_decrement_rates(personnel, ...))
   }
 
+  UseMethod("estimate_decrement_rates")
+}
 
-  # Get sorted unique reference dates
-  all_dates <- sort(unique(personnel[[ref_date_col]]))
-  all_dates <- all_dates[!is.na(all_dates)]
+#' @rdname estimate_decrement_rates
+#' @importFrom data.table := as.data.table setnames setorderv shift fifelse setcolorder
+#' @importFrom rlang check_dots_empty
+#' @export
+estimate_decrement_rates.data.frame <- function(personnel,
+                                                age_col = "age",
+                                                status_col = "employment_status",
+                                                personnel_id_col = "personnel_id",
+                                                ref_date_col = "ref_date",
+                                                group_cols = NULL,
+                                                ...) {
+  rlang::check_dots_empty()
 
-  # check if there are gaps in all_dates
-  # if (any(diff(all_dates) != 1)) {
+  by_cols <- c(age_col, group_cols)
 
-  #   ### fill the missing snapshots within the panels by filling in personnel records available 
-  #   ### within
+  ### work on a subset copy holding only the columns we need, so the
+  ### caller's table is never re-keyed or re-ordered by the sort below
+  panel <- as.data.table(personnel)[
+    !is.na(get(ref_date_col)),
+    c(personnel_id_col, ref_date_col, status_col, by_cols),
+    with = FALSE
+  ]
 
-  # }
+  all_dates <- sort(unique(panel[[ref_date_col]]))
+  .check_panel_snapshots(length(all_dates), arg = "personnel", ref_date_col = ref_date_col)
 
-  if (length(all_dates) < 2) {
-    stop(
-      "At least 2 personnel snapshots required to estimate decrement rates. ",
-      "Found ",
-      length(all_dates),
-      " snapshot(s).",
-      call. = FALSE
-    )
+  ### number the snapshots 1, 2, 3, ... so "the next snapshot" is simply
+  ### .snap + 1, whatever the actual spacing between reference dates
+  data.table::setnames(panel, c(personnel_id_col, status_col), c(".pid", ".status"))
+  panel[, .snap := match(get(ref_date_col), all_dates)] ## dates become integers
+  panel[, (ref_date_col) := NULL] ##gets rid of the dates
+  panel[, .status := as.character(.status)]
+
+  ### sort once by person and snapshot: each person's records now sit
+  ### together in date order, so their next record is just the row below.
+  ### shift() copies the row below up one row -- a single linear pass, with
+  ### none of the id matching a join would need (which is what makes this
+  ### much faster than joining each snapshot pair on personnel_id_col).
+  ### .next_gap is the number of snapshots to that row: 1 is the very next
+  ### snapshot, 0 a duplicate, NA a different person (or no row at all)
+  setorderv(panel, c(".pid", ".snap")) 
+  add_next_gap <- function(dt) {
+    dt[, .next_gap := data.table::fifelse(
+      .pid == data.table::shift(.pid, type = "lead"),
+      data.table::shift(.snap, type = "lead") - .snap,
+      NA_integer_
+    )]
+  }
+  add_next_gap(panel)
+
+  ### the panel should be unique at personnel_id/ref_date level (enforced by
+  ### QC upstream). once sorted, a duplicate is a row whose next row is the
+  ### same person at the same snapshot -- detectable for free here. left in,
+  ### a duplicate would be miscounted as a non-retirement-exit, so keep one
+  ### row per person and snapshot
+  dup_rows <- panel[, which(.next_gap == 0L)]
+  if (length(dup_rows) > 0L) {
+    .warn_decrement_duplicates(length(dup_rows), personnel_id_col, ref_date_col)
+    panel <- panel[-dup_rows]
+    add_next_gap(panel)
   }
 
+  ### each row's outcome is the status on the row below if that row is the
+  ### same person at the very next snapshot; otherwise (no record at the
+  ### next snapshot, or an NA status there) they left outside of retirement
+  panel[, .outcome := data.table::fifelse(
+    .next_gap == 1L,
+    data.table::shift(.status, type = "lead"),
+    NA_character_
+  )]
+  panel[is.na(.outcome), .outcome := "non-retirement-exit"]
 
-  ### roll through the panel, computing decrement counts for each consecutive
-  ### snapshot pair, then rbindlist() them all together into a single table
-  decrement_dt <- roll_snapshot_pairs(panel_dt = personnel,
-                                      date_col = ref_date_col,
-                                      f = .compute_decrement_pair,
-                                      # extra args forwarded to .compute_decrement_pair:
-                                      age_col = age_col,
-                                      status_col = status_col,
-                                      personnel_id_col = personnel_id_col,
-                                      ref_date_col = ref_date_col,
-                                      group_cols = group_cols)
+  ### the exposure cohort: everyone active in any snapshot but the last,
+  ### keeping only the columns the counts below need
+  cohort <- panel[
+    .status == "active" & .snap < length(all_dates),
+    c(".snap", by_cols, ".outcome"),
+    with = FALSE
+  ]
+  cohort[, (age_col) := as.integer(get(age_col))]
+
+  outcome_types <- .decrement_outcome_types(panel[.snap > 1L, .status])
 
   ### pool across every period-pair into one stable rate per
   ### age/group/outcome: sum exposure and events first, then divide --
@@ -365,16 +439,178 @@ estimate_decrement_rates <- function(personnel,
   ### with tiny exposure (e.g. pop = 2) the same as one with pop = 500;
   ### summing first lets each period-pair contribute in proportion to its
   ### actual exposure, which is the standard actuarial pooling approach
-  pooled_dt <- decrement_dt[,
-    .(pop = sum(pop, na.rm = TRUE), 
-      exits = sum(exits, na.rm = TRUE), 
-      n_periods = .N),
-    by = c(age_col, group_cols, status_col)
+  pop_dt <- cohort[, .(pop = .N), by = c(".snap", by_cols)][
+    , .(pop = sum(pop), n_periods = .N), by = by_cols
   ]
+  exits_dt <- cohort[, .(exits = .N), by = c(by_cols, ".outcome")]
+  data.table::setnames(exits_dt, ".outcome", status_col)
+
+  ### every exposed age/group reports a rate for every outcome type, with
+  ### explicit zeros where nobody had that outcome
+  pooled_dt <- pop_dt[rep(seq_len(nrow(pop_dt)), each = length(outcome_types))]
+  pooled_dt[, (status_col) := rep(outcome_types, times = nrow(pop_dt))]
+  pooled_dt[, exits := 0L]
+  pooled_dt[exits_dt, exits := i.exits, on = c(by_cols, status_col)]
   pooled_dt[, decrement_rate := exits / pop]
-  setorderv(pooled_dt, c(age_col, group_cols, status_col))
+
+  data.table::setcolorder(
+    pooled_dt,
+    c(by_cols, status_col, "pop", "exits", "n_periods", "decrement_rate")
+  )
+  setorderv(pooled_dt, c(by_cols, status_col))
 
   return(pooled_dt[])
+}
+
+#' @rdname estimate_decrement_rates
+#' @importFrom dplyr across all_of arrange case_when collect count cross_join
+#'   distinct filter group_by if_else inner_join lead mutate n n_distinct pull
+#'   rename row_number select summarise ungroup
+#' @importFrom rlang .data !!! check_dots_empty
+#' @export
+estimate_decrement_rates.tbl_dbi <- function(personnel,
+                                             age_col = "age",
+                                             status_col = "employment_status",
+                                             personnel_id_col = "personnel_id",
+                                             ref_date_col = "ref_date",
+                                             group_cols = NULL,
+                                             ...) {
+  rlang::check_dots_empty()
+
+  by_cols <- c(age_col, group_cols)
+
+  ### the same steps as the data.frame method, written as dplyr verbs that
+  ### dbplyr turns into SQL -- the panel itself never leaves the database
+  panel <- personnel |>
+    filter(!is.na(.data[[ref_date_col]])) |>
+    select(all_of(c(personnel_id_col, ref_date_col, status_col, by_cols))) |>
+    rename(all_of(c(.pid = personnel_id_col, .ref = ref_date_col, .status = status_col)))
+
+  ### the snapshot dates and the statuses seen on each: a small table
+  ### (dates x statuses), brought into R for the checks below
+  snap_status <- collect(distinct(panel, .ref, .status))
+  all_dates <- sort(unique(snap_status$.ref))
+  .check_panel_snapshots(length(all_dates), arg = "personnel", ref_date_col = ref_date_col)
+
+  ### duplicates at the personnel_id/ref_date level: count the surplus rows,
+  ### then keep one row per person and snapshot
+  n_dup <- panel |>
+    count(.pid, .ref, name = ".n") |>
+    filter(.n > 1L) |>
+    summarise(.n_dup = sum(.n - 1L, na.rm = TRUE)) |>
+    pull(.n_dup)
+  if (isTRUE(n_dup > 0)) {
+    .warn_decrement_duplicates(n_dup, personnel_id_col, ref_date_col)
+    panel <- panel |>
+      group_by(.pid, .ref) |>
+      dbplyr::window_order(.status) |>
+      filter(row_number() == 1L) |>
+      ungroup()
+    snap_status <- collect(distinct(panel, .ref, .status))
+  }
+
+  outcome_types <- .decrement_outcome_types(
+    snap_status$.status[snap_status$.ref > all_dates[1L]]
+  )
+
+  ### small lookup tables go to the database inline (copy_inline()), so no
+  ### write access is needed: the snapshot number of each date, and the
+  ### outcome vocabulary
+  con <- dbplyr::remote_con(personnel)
+  snaps <- dbplyr::copy_inline(
+    con, data.frame(.ref = all_dates, .snap = seq_along(all_dates))
+  )
+  outcomes <- dbplyr::copy_inline(
+    con, stats::setNames(data.frame(outcome_types), status_col)
+  )
+
+  ### number the snapshots, then read each person's next record with a
+  ### LEAD() window ordered by snapshot -- the SQL counterpart of sorting by
+  ### person and snapshot and looking at the row below. ages are floored
+  ### before casting, matching as.integer() in R (a bare SQL cast rounds)
+  n_snaps <- length(all_dates)
+  cohort <- panel |>
+    inner_join(snaps, by = ".ref") |>
+    group_by(.pid) |>
+    dbplyr::window_order(.snap) |>
+    mutate(.next_snap = lead(.snap), .next_status = lead(.status)) |>
+    ungroup() |>
+    filter(.status == "active", .snap < !!n_snaps) |>
+    mutate(
+      !!age_col := as.integer(floor(.data[[age_col]])),
+      .outcome = case_when(
+        .next_snap == .snap + 1L & !is.na(.next_status) ~ .next_status,
+        TRUE ~ "non-retirement-exit"
+      )
+    )
+
+  ### aggregate the cohort once, to one row per age/group with its exposure
+  ### and one exit count per outcome type (.exits_1, .exits_2, ...). the
+  ### window above is expensive, and referencing `cohort` twice (once for
+  ### exposure, once for exits) would make the database compute it twice.
+  ### exposure is pooled across period-pairs before dividing (see the
+  ### data.frame method)
+  exit_cols <- paste0(".exits_", seq_along(outcome_types))
+  count_exits <- stats::setNames(
+    lapply(outcome_types, function(type) {
+      rlang::expr(sum(if_else(.outcome == !!type, 1L, 0L), na.rm = TRUE))
+    }),
+    exit_cols
+  )
+  pooled <- cohort |>
+    group_by(across(all_of(by_cols))) |>
+    summarise(
+      pop = as.integer(n()),
+      n_periods = as.integer(n_distinct(.snap)),
+      !!!count_exits,
+      .groups = "drop"
+    )
+
+  ### one row per outcome type for every exposed age/group, taking that
+  ### outcome's exit count (zero where nobody had it)
+  pick_exits <- lapply(seq_along(outcome_types), function(i) {
+    rlang::expr(.data[[!!status_col]] == !!outcome_types[i] ~ !!rlang::sym(exit_cols[i]))
+  })
+
+  pooled |>
+    cross_join(outcomes) |>
+    mutate(exits = as.integer(case_when(!!!pick_exits))) |>
+    mutate(decrement_rate = as.double(exits) / pop) |>
+    select(all_of(c(by_cols, status_col, "pop", "exits", "n_periods", "decrement_rate"))) |>
+    arrange(across(all_of(c(by_cols, status_col))))
+}
+
+#' @rdname estimate_decrement_rates
+#' @export
+estimate_decrement_rates.default <- function(personnel, ...) {
+  stop_unsupported_data(personnel, "personnel")
+}
+
+### checks and rules shared by the data.frame and tbl_dbi methods, so the two
+### cannot drift apart
+
+#' @noRd
+.warn_decrement_duplicates <- function(n_dup, personnel_id_col, ref_date_col) {
+  warning(
+    "`personnel` has ", n_dup, " duplicate rows at the ",
+    personnel_id_col, "/", ref_date_col, " level, which should be unique. ",
+    "Keeping one row per person and snapshot; decrement counts for the ",
+    "affected people depend on which row is kept.",
+    call. = FALSE
+  )
+}
+
+### the outcome vocabulary is every status observed at any snapshot that can
+### be a t1 (i.e. all but the first), plus the synthetic
+### "non-retirement-exit". it is shared by all snapshot pairs, so every
+### outcome row of an age/group pools over the same exposure and the rates
+### sum to 1 -- even for a status that only shows up in some years
+#' @noRd
+.decrement_outcome_types <- function(t1_statuses) {
+  union(
+    sort(unique(as.character(t1_statuses[!is.na(t1_statuses)]))),
+    "non-retirement-exit"
+  )
 }
 
 
@@ -454,10 +690,11 @@ estimate_decrement_rates <- function(personnel,
 #' still sum to exactly 1 after smoothing (independently smoothing every
 #' outcome type would not preserve that).
 #'
-#' @param decrements A data.table (or coercible) shaped like the output of
-#'   \code{estimate_decrement_rates()}: one row per age / \code{group_cols} /
-#'   \code{status_col}, with a \code{pop} (exposure) and \code{decrement_rate}
-#'   column.
+#' @param decrements A data frame or lazy database table (\code{tbl_dbi})
+#'   shaped like the output of \code{estimate_decrement_rates()}: one row per
+#'   age / \code{group_cols} / \code{status_col}, with a \code{pop}
+#'   (exposure) and \code{decrement_rate} column. A lazy table is collected
+#'   into memory first; it is small, and the smoothing runs in R.
 #' @param age_col A single string naming the age column.
 #' @param status_col A single string naming the outcome-type column.
 #' @param group_cols A character vector of stratifying columns (e.g. gender),
@@ -468,9 +705,9 @@ estimate_decrement_rates <- function(personnel,
 #'   \code{.smooth_rate_curve()}. Defaults to \code{0.75}.
 #' @param decrement_dt Deprecated. Use `decrements` instead.
 #'
-#' @returns A data.table with one row per age / \code{group_cols} /
-#'   \code{status_col}, spanning the full observed age range within each
-#'   group with no gaps:
+#' @returns A data.table (also for \code{tbl_dbi} input) with one row per
+#'   age / \code{group_cols} / \code{status_col}, spanning the full observed
+#'   age range within each group with no gaps:
 #'   \describe{
 #'     \item{age_col, group_cols}{As supplied.}
 #'     \item{status_col}{The outcome type, including \code{active_value}.}
@@ -506,7 +743,11 @@ smooth_decrement_rates <- function(decrements,
                                    span = 0.75, decrement_dt = NULL) {
   decrements <- resolve_renamed_arg(decrements, decrement_dt, "decrement_dt", "decrements")
 
-  decrements <- as.data.table(decrements)
+  ### a lazy database table (e.g. the tbl_dbi output of
+  ### estimate_decrement_rates()) is collected first: it is small (one row
+  ### per age/group/status), and loess has to run in R anyway. collect() is
+  ### a no-op for data frames
+  decrements <- as.data.table(collect(decrements))
 
   ### the age grid to graduate onto: the full observed age range within
   ### each group, computed once across all outcome types (not per-status)
@@ -578,9 +819,12 @@ smooth_decrement_rates <- function(decrements,
 #' complete, gapless, reasonably stable \code{qx} curve to produce a sensible
 #' result.
 #'
-#' @param personnel A data.table (or data.frame/tibble, coerced
-#'   automatically) containing the personnel panel. Passed straight through
-#'   to \code{estimate_decrement_rates()}.
+#' @param personnel A data frame (data.table, data.frame or tibble) or a
+#'   remote database table (\code{tbl_dbi}, e.g. DuckDB) containing the
+#'   personnel panel. Passed straight through to
+#'   \code{estimate_decrement_rates()}, so for a database table the heavy
+#'   step runs in the database; its small pooled result is then collected
+#'   and the life table is built in R.
 #' @param age_col A single string naming the age column.
 #' @param status_col A single string naming the employment status column. The
 #'   value \code{"active"} identifies the "stayed" outcome that the survival
@@ -606,8 +850,14 @@ smooth_decrement_rates <- function(decrements,
 #' @param span Numeric. Forwarded to \code{smooth_decrement_rates()} when
 #'   \code{smooth = TRUE}. Defaults to \code{0.75}.
 #' @param personnel_dt Deprecated. Use `personnel` instead.
+#' @param include_all Logical. Whether to return the full life table
+#'   (\code{TRUE}, the default) or only \code{age_col}, \code{group_cols},
+#'   \code{px} and \code{ex} (\code{FALSE}).
 #'
-#' @returns A data.table with one row per age / \code{group_cols}:
+#' @returns A data.table (also for \code{tbl_dbi} input) with one row per
+#'   age / \code{group_cols}. With \code{include_all = FALSE}, only the
+#'   \code{age_col}, \code{group_cols}, \code{px} and \code{ex} columns are
+#'   kept:
 #'   \describe{
 #'     \item{age_col, group_cols}{As supplied.}
 #'     \item{px}{Probability of remaining active from age x to x+1.}
@@ -670,18 +920,24 @@ compute_service_table <- function(personnel,
                                   group_cols,
                                   radix = 100000,
                                   smooth = FALSE,
-                                  span = 0.75, personnel_dt = NULL) {
+                                  span = 0.75, 
+                                  personnel_dt = NULL,
+                                  include_all = TRUE) {
   personnel <- resolve_renamed_arg(personnel, personnel_dt, "personnel_dt", "personnel")
 
   ## compute the decrement rates using the estimate_decrement_rates function
-  ## across all time periods and groupings
+  ## across all time periods and groupings. for a database table this runs in
+  ## the database and returns a lazy table; the pooled result is small, so
+  ## collect() it (a no-op for data frames) for the data.table chain below
   decrement_dt <-
     estimate_decrement_rates(personnel = personnel,
                              age_col = age_col,
                              status_col = status_col,
                              personnel_id_col = personnel_id_col,
                              ref_date_col = ref_date_col,
-                             group_cols = group_cols)
+                             group_cols = group_cols) |>
+    collect() |>
+    as.data.table()
 
   ### the chain below needs a complete, gapless, stable qx curve -- raw
   ### pooled counts don't guarantee that (an age with zero exposure
@@ -763,6 +1019,12 @@ compute_service_table <- function(personnel,
 
   ### ex = expected remaining years of service for someone currently age x
   survival_dt[, ex := Tx / lx]
+
+  ### keep only the headline columns if asked; group_cols = NULL simply
+  ### drops out of c()
+  if (!isTRUE(include_all)) {
+    survival_dt <- survival_dt[, c(age_col, group_cols, "px", "ex"), with = FALSE]
+  }
 
   return(survival_dt[])
 }
