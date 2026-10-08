@@ -25,6 +25,7 @@ if (getRversion() >= "2.15.1") {
     "OBS_VALUE",
     "INDICATOR",
     "n_records",
+    "n_values",
     "ref_date",
     "birth_date",
     "na.omit",

@@ -2,18 +2,32 @@
 % Please edit documentation in R/coverage.R
 \name{compute_global_coverage}
 \alias{compute_global_coverage}
-\title{a function to compute the proportion of missing values in a data frame}
+\title{Compute global coverage}
 \usage{
 compute_global_coverage(data, digits = 2)
 }
 \arguments{
-\item{data}{A data frame.}
+\item{data}{Data frame or remote database table (\code{tbl_dbi}).}
 
-\item{digits}{An integer specifying the number of decimal places to round the result to. Default is 2.}
+\item{digits}{Whole number. Decimal places to round to. Default \code{2}.}
 }
 \value{
-A numeric value representing the proportion of missing values in the data frame.
+A number from 0 to 100.
 }
 \description{
-a function to compute the proportion of missing values in a data frame
+Computes the share of non-missing values across every cell of a table, as a
+percentage.
+}
+\details{
+Every column has the same number of records, so the share across all cells
+is the average of each column's coverage from \code{\link[=compute_coverage]{compute_coverage()}}, which
+is computed in the database for \code{tbl_dbi} input.
+}
+\examples{
+hr <- data.frame(gender = c("F", NA, "M"), grade = c(NA, NA, "G1"))
+compute_global_coverage(hr)
+
+}
+\seealso{
+\code{\link[=compute_coverage]{compute_coverage()}}, which gives the coverage of each column.
 }

@@ -2,30 +2,73 @@
 % Please edit documentation in R/coverage.R
 \name{compute_coverage}
 \alias{compute_coverage}
-\title{Compute coverage of non-missing values in a dataset.}
+\alias{compute_coverage.data.frame}
+\alias{compute_coverage.tbl_dbi}
+\title{Compute data coverage}
 \usage{
-compute_coverage(
+compute_coverage(data, ...)
+
+\method{compute_coverage}{data.frame}(
   data,
   group_cols = NULL,
   include_ref_date = FALSE,
   aggregate = FALSE,
-  group = NULL
+  ...
+)
+
+\method{compute_coverage}{tbl_dbi}(
+  data,
+  group_cols = NULL,
+  include_ref_date = FALSE,
+  aggregate = FALSE,
+  ...
 )
 }
 \arguments{
-\item{data}{A data frame.}
+\item{data}{Data frame or remote database table (\code{tbl_dbi}).}
 
-\item{group_cols}{A string specifying the column name to group by. If NULL, coverage is computed for the entire data set.}
+\item{...}{Arguments passed to methods.}
 
-\item{include_ref_date}{A logical value indicating whether to include the \code{ref_date} column in the grouping.}
+\item{group_cols}{Character vector of columns to group by, or \code{NULL}
+(default) for no grouping.}
 
-\item{aggregate}{A logical value indicating whether to aggregate coverage values by the \code{group}.}
+\item{include_ref_date}{Logical. Also group by \code{ref_date}. Default \code{FALSE}.}
 
-\item{group}{Deprecated. Use \code{group_cols} instead.}
+\item{aggregate}{Logical. Average the coverage across columns, giving one
+value per group. Default \code{FALSE}.}
 }
 \value{
-A data frame with coverage values for each column, optionally grouped by the specified \code{group}.
+A table with the grouping columns, \code{variable} (the name of a
+column, unless \code{aggregate} is \code{TRUE}) and \code{coverage} (the share of
+non-missing values, from 0 to 100). A data.table, also for \code{tbl_dbi}
+input.
 }
 \description{
-Compute coverage of non-missing values in a dataset.
+Computes, for each group, the share of non-missing values in every other
+column, as a percentage. Optionally averages the shares across columns,
+giving one coverage value per group.
+}
+\details{
+Every column that is not a grouping column is covered, identifiers
+included. Missing groups are kept as their own group. With
+\code{aggregate = TRUE}, every column weighs equally in the average.
+
+For \code{tbl_dbi} input, the coverage of every column is computed in the
+database, giving one row per group, and only that summary is brought into
+memory to be reshaped.
+}
+\examples{
+hr <- data.frame(
+  ref_date = as.Date(c("2020-01-01", "2020-01-01", "2021-01-01")),
+  gender = c("F", NA, "M"),
+  birth_date = as.Date(c("1980-01-01", NA, NA))
+)
+compute_coverage(hr, include_ref_date = TRUE)
+
+}
+\seealso{
+\code{\link[=compute_global_coverage]{compute_global_coverage()}}, which gives a single coverage
+value for the whole table. \code{\link[=plot_coverage_trend]{plot_coverage_trend()}},
+\code{\link[=plot_coverage_bar]{plot_coverage_bar()}} and \code{\link[=plot_coverage_heatmap]{plot_coverage_heatmap()}}, which
+draw coverage.
 }

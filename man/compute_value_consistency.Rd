@@ -2,44 +2,74 @@
 % Please edit documentation in R/consistency.R
 \name{compute_value_consistency}
 \alias{compute_value_consistency}
-\title{Compute the proportion of consistent values in a data frame}
+\alias{compute_value_consistency.data.frame}
+\alias{compute_value_consistency.tbl_dbi}
+\title{Compute value consistency}
 \usage{
-compute_value_consistency(
+compute_value_consistency(data, ...)
+
+\method{compute_value_consistency}{data.frame}(
   data,
   id_col,
   value_col,
   group_cols = NULL,
-  digits = 2
+  digits = 2,
+  ...
+)
+
+\method{compute_value_consistency}{tbl_dbi}(
+  data,
+  id_col,
+  value_col,
+  group_cols = NULL,
+  digits = 2,
+  ...
 )
 }
 \arguments{
-\item{data}{A data frame.}
+\item{data}{Data frame or remote database table (\code{tbl_dbi}) with \code{ref_date}
+and the columns named in \code{id_col} and \code{group_cols}.}
 
-\item{id_col}{A string specifying the name of the column that uniquely identifies records.}
+\item{...}{Arguments passed to methods.}
 
-\item{value_col}{A string specifying the name of the column whose values are to be checked for consistency.}
+\item{id_col}{Character. Column identifying the entity, such as
+\code{"personnel_id"}.}
 
-\item{group_cols}{A character vector specifying the names of the columns to group by. Default is no grouping.}
+\item{value_col}{Character. Column whose values should stay the same for
+each identifier, such as \code{"birth_date"}.}
 
-\item{digits}{An integer specifying the number of decimal places to round the result to. Default is 2.}
+\item{group_cols}{Character vector of columns to group by, such as
+\code{"ref_date"}, or \code{NULL} (default) for the whole table.}
+
+\item{digits}{Whole number. Decimal places to round to. Default \code{2}.}
 }
 \value{
-A data frame with the proportion of consistent values in the data frame, optionally by group.
+A table with the grouping columns and \code{value_consistency}, from 0
+to 100. A data.table for data frame input; a lazy table for \code{tbl_dbi}
+input (use \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
-Compute the proportion of consistent values in a data frame
+Computes, for each group, the share of identifiers that keep a single value
+of \code{value_col}, as a percentage.
 }
 \details{
-Consistency is broadly defined as the proportion of records and values that are consistent
-across the dataset. A value is considered consistent if it does not differ from
-other values for the same record. The function computes the proportion of records with consistent values
-in the data frame, optionally grouped by specified columns.
+Distinct values of \code{value_col} are counted per identifier and group, across
+all dates unless \code{ref_date} is one of \code{group_cols}. An identifier with
+exactly one distinct value is consistent. A missing value counts as a value
+of its own, so an identifier recorded with and without a value is not
+consistent.
 }
 \examples{
-govhr::compute_value_consistency(
- data = govhr::bra_hrmis_personnel,
- id_col = "personnel_id",
- value_col = "birth_date"
+hr <- data.frame(
+  personnel_id = c("a", "a", "b"),
+  ref_date = as.Date(c("2020-01-01", "2021-01-01", "2020-01-01")),
+  birth_date = as.Date(c("1980-01-01", "1981-01-01", "1990-01-01"))
 )
+compute_value_consistency(hr, id_col = "personnel_id", value_col = "birth_date")
 
+}
+\seealso{
+\code{\link[=compute_record_consistency]{compute_record_consistency()}}, which checks that each identifier
+has one record per date. \code{\link[=compute_global_consistency]{compute_global_consistency()}}, which combines
+both.
 }

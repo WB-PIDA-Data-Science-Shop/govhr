@@ -6,32 +6,45 @@
 \usage{
 plot_consistency_trend(
   data,
-  id_col,
-  group_col,
-  value_col,
-  type_plot,
-  toggle_growth = FALSE,
-  group = NULL
+  group_col = "ref_date",
+  type_plot = c("record", "value"),
+  toggle_growth = FALSE
 )
 }
 \arguments{
-\item{data}{A data frame.}
+\item{data}{Data frame or lazy table (\code{tbl_dbi}) with \code{ref_date}, the
+column named in \code{group_col} and \code{record_consistency} or
+\code{value_consistency}, such as the output of \code{\link[=compute_record_consistency]{compute_record_consistency()}}
+or \code{\link[=compute_value_consistency]{compute_value_consistency()}} grouped by \code{group_col} and \code{ref_date}. A
+lazy table is brought into memory first.}
 
-\item{id_col}{A string. The column name of the unique identifier for each record.}
+\item{group_col}{Character. Column to draw one line per group, or
+\code{"ref_date"} (default) for a single line.}
 
-\item{group_col}{A string. The column name of the grouping variable (e.g., "ref_date").}
+\item{type_plot}{Character. \code{"record"} (default) or \code{"value"}, the kind of
+consistency in \code{data}.}
 
-\item{value_col}{A string. The column name of the value to be checked for consistency.}
-
-\item{type_plot}{A string. The type of consistency plot ("record" or "value").}
-
-\item{toggle_growth}{Logical. When \code{TRUE} the y-axis switches to a baseline-index view (first period = 100). Defaults to \code{FALSE}.}
-
-\item{group}{Deprecated. Use \code{group_col} instead.}
+\item{toggle_growth}{Logical. Show consistency as a baseline index, with
+each group's first date at 100. Default \code{FALSE}.}
 }
 \value{
 A ggplot2 object.
 }
 \description{
-Plot consistency over time
+Plots record or value consistency for each reference date, one line per
+group, from consistency already computed.
+}
+\examples{
+hr <- data.frame(
+  personnel_id = c("a", "a", "b", "a"),
+  ref_date = as.Date(c(rep("2020-01-01", 3), "2021-01-01"))
+)
+hr |>
+  compute_record_consistency("personnel_id", group_cols = "ref_date") |>
+  plot_consistency_trend()
+
+}
+\seealso{
+\code{\link[=compute_record_consistency]{compute_record_consistency()}} and
+\code{\link[=compute_value_consistency]{compute_value_consistency()}}, which compute the consistency.
 }
