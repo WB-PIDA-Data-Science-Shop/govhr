@@ -1,10 +1,7 @@
-# Plot coverage by group (coloured bar chart)
+# Plot coverage by variable
 
-Computes per-group coverage using
-[`compute_coverage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_coverage.md)
-(without `ref_date`, not aggregated) and renders a horizontal bar chart
-coloured green-yellow-red according to the same cutpoints used by the
-value boxes:
+Plots one bar per variable with its coverage, coloured by coverage tier,
+from coverage already computed.
 
 ## Usage
 
@@ -16,8 +13,9 @@ plot_coverage_bar(data)
 
 - data:
 
-  A data frame. Typically the contract, personnel, or establishment
-  dataset for the active module.
+  Data frame with `variable` and `coverage`, such as the output of
+  [`compute_coverage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_coverage.md)
+  without grouping.
 
 ## Value
 
@@ -25,8 +23,17 @@ A ggplot2 object.
 
 ## Details
 
-- **High (\>=80%)** — green (`#388e3c`)
+Coverage below 50% is low, from 50% to 79% medium, and from 80% high.
 
-- **Medium (50-79%)** — yellow (`#f9a825`)
+## See also
 
-- **Low (\<50%)** — red (`#d32f2f`)
+[`compute_coverage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_coverage.md),
+which computes the coverage.
+
+## Examples
+
+``` r
+hr <- data.frame(gender = c("F", NA, "M"), grade = c(NA, NA, "G1"))
+plot_coverage_bar(compute_coverage(hr))
+
+```

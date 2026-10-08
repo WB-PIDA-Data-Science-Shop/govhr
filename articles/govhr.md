@@ -106,20 +106,36 @@ compute_coverage(
   personnel_clean,
   group_cols = "employment_status"
 )
-#> # A tibble: 26 × 3
-#>    employment_status variable     coverage
-#>    <chr>             <chr>           <dbl>
-#>  1 active            personnel_id    100  
-#>  2 pensioner         personnel_id    100  
-#>  3 active            ref_date        100  
-#>  4 pensioner         ref_date        100  
-#>  5 active            birth_date      100  
-#>  6 pensioner         birth_date       99.2
-#>  7 active            age             100  
-#>  8 pensioner         age             100  
-#>  9 active            gender          100  
-#> 10 pensioner         gender          100  
-#> # ℹ 16 more rows
+#>     employment_status              variable  coverage
+#>                <char>                <char>     <num>
+#>  1:            active          personnel_id 100.00000
+#>  2:            active              ref_date 100.00000
+#>  3:            active            birth_date 100.00000
+#>  4:            active                   age 100.00000
+#>  5:            active                gender 100.00000
+#>  6:            active               educat7  97.50210
+#>  7:            active          service_type 100.00000
+#>  8:            active                  race   0.00000
+#>  9:            active                 tribe   0.00000
+#> 10:            active first_employment_date 100.00000
+#> 11:            active       retirement_date   0.00000
+#> 12:            active         underage_flag 100.00000
+#> 13:            active  over_retirement_flag 100.00000
+#> 14:         pensioner          personnel_id 100.00000
+#> 15:         pensioner              ref_date 100.00000
+#> 16:         pensioner            birth_date  99.20983
+#> 17:         pensioner                   age 100.00000
+#> 18:         pensioner                gender 100.00000
+#> 19:         pensioner               educat7  99.94147
+#> 20:         pensioner          service_type 100.00000
+#> 21:         pensioner                  race   0.00000
+#> 22:         pensioner                 tribe   0.00000
+#> 23:         pensioner first_employment_date 100.00000
+#> 24:         pensioner       retirement_date 100.00000
+#> 25:         pensioner         underage_flag 100.00000
+#> 26:         pensioner  over_retirement_flag 100.00000
+#>     employment_status              variable  coverage
+#>                <char>                <char>     <num>
 ```
 
 ### Analytics

@@ -1,38 +1,50 @@
-# Plot Coverage Over Time
+# Plot coverage over time
 
-Computes coverage using
-[`compute_coverage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_coverage.md)
-(with `ref_date` always included, aggregated across variables) and
-renders a trend line via
-[`plot_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_trend.md).
+Plots coverage for each reference date, one line per group, from
+coverage already computed.
 
 ## Usage
 
 ``` r
-plot_coverage_trend(data, group_col, toggle_growth = FALSE, group = NULL)
+plot_coverage_trend(data, group_col = "ref_date", toggle_growth = FALSE)
 ```
 
 ## Arguments
 
 - data:
 
-  A data frame. Typically the contract, personnel, or establishment
-  dataset for the active module.
+  Data frame with `ref_date`, `coverage` and the column named in
+  `group_col`, such as the output of
+  `compute_coverage(include_ref_date = TRUE, aggregate = TRUE)`.
 
 - group_col:
 
-  A string. Grouping variable inherited from the `coverage_group` UI
-  input (e.g. `"ref_date"`, `"grade_id"`).
+  Character. Column to draw one line per group, or `"ref_date"`
+  (default) for a single line.
 
 - toggle_growth:
 
-  Logical. When `TRUE` the y-axis switches to a baseline-index view
-  (first period = 100). Defaults to `FALSE`.
-
-- group:
-
-  Deprecated. Use `group_col` instead.
+  Logical. Show coverage as a baseline index, with each group's first
+  date at 100. Default `FALSE`.
 
 ## Value
 
 A ggplot2 object.
+
+## See also
+
+[`compute_coverage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_coverage.md),
+which computes the coverage.
+
+## Examples
+
+``` r
+hr <- data.frame(
+  ref_date = as.Date(c("2020-01-01", "2020-01-01", "2021-01-01")),
+  gender = c("F", NA, "M")
+)
+hr |>
+  compute_coverage(include_ref_date = TRUE, aggregate = TRUE) |>
+  plot_coverage_trend()
+
+```

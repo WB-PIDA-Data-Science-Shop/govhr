@@ -155,20 +155,36 @@ allow you to quickly check this aspect of quality of the data.</p>
 <span>  <span class="va">personnel_clean</span>,</span>
 <span>  group_cols <span class="op">=</span> <span class="st">"employment_status"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 26 × 3</span></span></span>
-<span><span class="co">#&gt;    employment_status variable     coverage</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> active            personnel_id    100  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> pensioner         personnel_id    100  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> active            ref_date        100  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> pensioner         ref_date        100  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> active            birth_date      100  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> pensioner         birth_date       99.2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> active            age             100  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> pensioner         age             100  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> active            gender          100  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> pensioner         gender          100  </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 16 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt;     employment_status              variable  coverage</span></span>
+<span><span class="co">#&gt;                &lt;char&gt;                &lt;char&gt;     &lt;num&gt;</span></span>
+<span><span class="co">#&gt;  1:            active          personnel_id 100.00000</span></span>
+<span><span class="co">#&gt;  2:            active              ref_date 100.00000</span></span>
+<span><span class="co">#&gt;  3:            active            birth_date 100.00000</span></span>
+<span><span class="co">#&gt;  4:            active                   age 100.00000</span></span>
+<span><span class="co">#&gt;  5:            active                gender 100.00000</span></span>
+<span><span class="co">#&gt;  6:            active               educat7  97.50210</span></span>
+<span><span class="co">#&gt;  7:            active          service_type 100.00000</span></span>
+<span><span class="co">#&gt;  8:            active                  race   0.00000</span></span>
+<span><span class="co">#&gt;  9:            active                 tribe   0.00000</span></span>
+<span><span class="co">#&gt; 10:            active first_employment_date 100.00000</span></span>
+<span><span class="co">#&gt; 11:            active       retirement_date   0.00000</span></span>
+<span><span class="co">#&gt; 12:            active         underage_flag 100.00000</span></span>
+<span><span class="co">#&gt; 13:            active  over_retirement_flag 100.00000</span></span>
+<span><span class="co">#&gt; 14:         pensioner          personnel_id 100.00000</span></span>
+<span><span class="co">#&gt; 15:         pensioner              ref_date 100.00000</span></span>
+<span><span class="co">#&gt; 16:         pensioner            birth_date  99.20983</span></span>
+<span><span class="co">#&gt; 17:         pensioner                   age 100.00000</span></span>
+<span><span class="co">#&gt; 18:         pensioner                gender 100.00000</span></span>
+<span><span class="co">#&gt; 19:         pensioner               educat7  99.94147</span></span>
+<span><span class="co">#&gt; 20:         pensioner          service_type 100.00000</span></span>
+<span><span class="co">#&gt; 21:         pensioner                  race   0.00000</span></span>
+<span><span class="co">#&gt; 22:         pensioner                 tribe   0.00000</span></span>
+<span><span class="co">#&gt; 23:         pensioner first_employment_date 100.00000</span></span>
+<span><span class="co">#&gt; 24:         pensioner       retirement_date 100.00000</span></span>
+<span><span class="co">#&gt; 25:         pensioner         underage_flag 100.00000</span></span>
+<span><span class="co">#&gt; 26:         pensioner  over_retirement_flag 100.00000</span></span>
+<span><span class="co">#&gt;     employment_status              variable  coverage</span></span>
+<span><span class="co">#&gt;                &lt;char&gt;                &lt;char&gt;     &lt;num&gt;</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="analytics">Analytics<a class="anchor" aria-label="anchor" href="#analytics"></a>

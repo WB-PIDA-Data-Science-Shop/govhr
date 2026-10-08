@@ -47,6 +47,7 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_percentile.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_quantile.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_record_consistency.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_service_table.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_tenure.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/compute_tenure_panel.html</loc></url>
@@ -73,6 +74,7 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/define_fns.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/deflate_to_real.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_inconsistent_cols.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_movement.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_personnel_event.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/dictionary.html</loc></url>

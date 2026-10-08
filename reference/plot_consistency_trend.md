@@ -1,18 +1,16 @@
 # Plot consistency over time
 
-Plot consistency over time
+Plots record or value consistency for each reference date, one line per
+group, from consistency already computed.
 
 ## Usage
 
 ``` r
 plot_consistency_trend(
   data,
-  id_col,
-  group_col,
-  value_col,
-  type_plot,
-  toggle_growth = FALSE,
-  group = NULL
+  group_col = "ref_date",
+  type_plot = c("record", "value"),
+  toggle_growth = FALSE
 )
 ```
 
@@ -20,33 +18,50 @@ plot_consistency_trend(
 
 - data:
 
-  A data frame.
-
-- id_col:
-
-  A string. The column name of the unique identifier for each record.
+  Data frame or lazy table (`tbl_dbi`) with `ref_date`, the column named
+  in `group_col` and `record_consistency` or `value_consistency`, such
+  as the output of
+  [`compute_record_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_record_consistency.md)
+  or
+  [`compute_value_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_value_consistency.md)
+  grouped by `group_col` and `ref_date`. A lazy table is brought into
+  memory first.
 
 - group_col:
 
-  A string. The column name of the grouping variable (e.g., "ref_date").
-
-- value_col:
-
-  A string. The column name of the value to be checked for consistency.
+  Character. Column to draw one line per group, or `"ref_date"`
+  (default) for a single line.
 
 - type_plot:
 
-  A string. The type of consistency plot ("record" or "value").
+  Character. `"record"` (default) or `"value"`, the kind of consistency
+  in `data`.
 
 - toggle_growth:
 
-  Logical. When `TRUE` the y-axis switches to a baseline-index view
-  (first period = 100). Defaults to `FALSE`.
-
-- group:
-
-  Deprecated. Use `group_col` instead.
+  Logical. Show consistency as a baseline index, with each group's first
+  date at 100. Default `FALSE`.
 
 ## Value
 
 A ggplot2 object.
+
+## See also
+
+[`compute_record_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_record_consistency.md)
+and
+[`compute_value_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_value_consistency.md),
+which compute the consistency.
+
+## Examples
+
+``` r
+hr <- data.frame(
+  personnel_id = c("a", "a", "b", "a"),
+  ref_date = as.Date(c(rep("2020-01-01", 3), "2021-01-01"))
+)
+hr |>
+  compute_record_consistency("personnel_id", group_cols = "ref_date") |>
+  plot_consistency_trend()
+
+```

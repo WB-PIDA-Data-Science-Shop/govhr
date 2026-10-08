@@ -80,7 +80,7 @@ issues arising from its use.
 - [`compute_compression_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_compression_ratio.md)
   : Function to compute the compression ratio
 - [`compute_coverage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_coverage.md)
-  : Compute coverage of non-missing values in a dataset.
+  : Compute data coverage
 - [`compute_cross_section()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_cross_section.md)
   : Compute cross-section summary table
 - [`compute_cross_section_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_cross_section_summary.md)
@@ -95,11 +95,9 @@ issues arising from its use.
 - [`compute_fastsummary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastsummary.md)
   : Compute Fast Summary Statistics by Group
 - [`compute_global_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_global_consistency.md)
-  : Compute the proportion of consistent records and values in a data
-  frame.
+  : Compute global consistency
 - [`compute_global_coverage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_global_coverage.md)
-  : a function to compute the proportion of missing values in a data
-  frame
+  : Compute global coverage
 - [`compute_growth()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_growth.md)
   : Compute growth rate summary table
 - [`compute_growth_decomposition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_growth_decomposition.md)
@@ -121,7 +119,9 @@ issues arising from its use.
   : Function to compute quantiles of a measure column within groups and
   reference dates
 - [`compute_record_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_record_consistency.md)
-  : Compute the proportion of consistent records in a data frame
+  : Compute record consistency
+- [`compute_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement.md)
+  : Compute retirements
 - [`compute_service_table()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_service_table.md)
   : Compute an actuarial service table from a personnel panel
 - [`compute_time_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_time_trend.md)
@@ -131,7 +131,7 @@ issues arising from its use.
 - [`compute_trend_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_trend_summary.md)
   : Compute trend summary
 - [`compute_value_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_value_consistency.md)
-  : Compute the proportion of consistent values in a data frame
+  : Compute value consistency
 - [`compute_wage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wage.md)
   : Compute the average wage
 - [`compute_wage_decomposition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wage_decomposition.md)
@@ -166,10 +166,12 @@ issues arising from its use.
   : Deflate a nominal LCU column to real values
 - [`detect_inconsistent_cols()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_inconsistent_cols.md)
   : Detect inconsistent columns in a data frame
+- [`detect_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_movement.md)
+  : Detect hires and separations
 - [`detect_personnel_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_personnel_event.md)
   : Detect Personnel Events
 - [`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md)
-  : Detect personnel retirement events
+  : Detect retirements
 - [`dictionary`](https://wb-pida-data-science-shop.github.io/govhr/reference/dictionary.md)
   : Harmonization Dictionary for Payroll and HRMIS Data
 - [`enterprise_surveys`](https://wb-pida-data-science-shop.github.io/govhr/reference/enterprise_surveys.md)
@@ -233,15 +235,15 @@ issues arising from its use.
 - [`plot_compression_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_compression_ratio.md)
   : Plot compression ratio
 - [`plot_consistency_heatmap()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_consistency_heatmap.md)
-  : Plot consistency heatmap by group
+  : Plot value consistency by variable and group
 - [`plot_consistency_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_consistency_trend.md)
   : Plot consistency over time
 - [`plot_coverage_bar()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_coverage_bar.md)
-  : Plot coverage by group (coloured bar chart)
+  : Plot coverage by variable
 - [`plot_coverage_heatmap()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_coverage_heatmap.md)
-  : Plot coverage heatmap by group
+  : Plot coverage by variable and group
 - [`plot_coverage_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_coverage_trend.md)
-  : Plot Coverage Over Time
+  : Plot coverage over time
 - [`plot_decile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_decile.md)
   : Plot decile summary
 - [`plot_histogram()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_histogram.md)

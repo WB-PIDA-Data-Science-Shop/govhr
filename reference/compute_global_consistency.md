@@ -1,6 +1,7 @@
-# Compute the proportion of consistent records and values in a data frame.
+# Compute global consistency
 
-Compute the proportion of consistent records and values in a data frame.
+Averages record consistency and the value consistency of the columns in
+`value_cols` into a single percentage for the whole table.
 
 ## Usage
 
@@ -12,45 +13,47 @@ compute_global_consistency(data, id_col, value_cols, digits = 2)
 
 - data:
 
-  A data frame.
+  Data frame or remote database table (`tbl_dbi`) with `ref_date` and
+  the columns named in `id_col` and `group_cols`.
 
 - id_col:
 
-  A string specifying the name of the column that uniquely identifies
-  records.
+  Character. Column identifying the entity, such as `"personnel_id"`.
 
 - value_cols:
 
-  A character vector specifying the name(s) of columns whose values are
-  to be checked for consistency. Value consistency is computed
-  separately for each column and averaged across columns before being
-  combined with record consistency.
+  Character vector of columns whose values should stay the same for each
+  identifier.
 
 - digits:
 
-  An integer specifying the number of decimal places to round the result
-  to. Default is 2.
+  Whole number. Decimal places to round to. Default `2`.
 
 ## Value
 
-A numeric value representing the proportion of consistent records and
-values in the data frame.
+A number from 0 to 100.
 
 ## Details
 
-Consistency is defined as the proportion of records and values that are
-consistent across the dataset. A record is considered consistent if it
-has a unique identifier and all its associated values are consistent. A
-value is considered consistent if it does not contradict other values
-for the same record.
+The value consistencies of `value_cols` are averaged first, and that
+average weighs as much as record consistency. Intermediate results are
+not rounded, so rounding errors do not compound.
+
+## See also
+
+[`compute_record_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_record_consistency.md)
+and
+[`compute_value_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_value_consistency.md),
+which it combines.
 
 ## Examples
 
 ``` r
-govhr::compute_global_consistency(
-  data = govhr::bra_hrmis_personnel,
-  id_col = "personnel_id",
-  value_cols = c("birth_date")
+hr <- data.frame(
+  personnel_id = c("a", "a", "b"),
+  ref_date = as.Date(c("2020-01-01", "2021-01-01", "2020-01-01")),
+  birth_date = as.Date(c("1980-01-01", "1981-01-01", "1990-01-01"))
 )
-#> [1] 100
+compute_global_consistency(hr, "personnel_id", value_cols = "birth_date")
+#> [1] 75
 ```
