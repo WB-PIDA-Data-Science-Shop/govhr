@@ -2,9 +2,14 @@
 % Please edit documentation in R/movement_summarize.R
 \name{estimate_movement_rates}
 \alias{estimate_movement_rates}
+\alias{estimate_movement_rates.data.frame}
+\alias{estimate_movement_rates.tbl_dbi}
+\alias{estimate_movement_rates.default}
 \title{Estimate movement baseline from panel data}
 \usage{
-estimate_movement_rates(
+estimate_movement_rates(contracts, ...)
+
+\method{estimate_movement_rates}{data.frame}(
   contracts,
   group_cols,
   personnel_id_col = "personnel_id",
@@ -12,12 +17,31 @@ estimate_movement_rates(
   start_date_col = "start_date",
   end_date_col = "end_date",
   contract_type_col = "contract_type",
-  salary_col = NULL
+  salary_col = NULL,
+  ...
 )
+
+\method{estimate_movement_rates}{tbl_dbi}(
+  contracts,
+  group_cols,
+  personnel_id_col = "personnel_id",
+  ref_date_col = "ref_date",
+  start_date_col = "start_date",
+  end_date_col = "end_date",
+  contract_type_col = "contract_type",
+  salary_col = NULL,
+  ...
+)
+
+\method{estimate_movement_rates}{default}(contracts, ...)
 }
 \arguments{
-\item{contracts}{Data.table. Contract data in long (panel) format.
-Must contain \code{ref_date_col} for panel snapshot identification.}
+\item{contracts}{A data frame (data.table, data.frame or tibble) or a remote
+database table (\code{tbl_dbi}, e.g. DuckDB) of contract data in long
+(panel) format. Must contain \code{ref_date_col} for panel snapshot
+identification.}
+
+\item{...}{Arguments passed to methods.}
 
 \item{group_cols}{A character vector. One or more columns defining the movement
 states between which transitions are measured
@@ -41,14 +65,16 @@ Default: \code{"end_date"}.}
 Default: \code{"contract_type"}.}
 
 \item{salary_col}{Character or \code{NULL}. Name of a compensation column in
-\code{contract_dt}. When provided, salary summary columns are appended to
+\code{contracts}. When provided, salary summary columns are appended to
 the output (see Value). Default: \code{NULL}.}
 }
 \value{
-A \code{data.table} with one row per
-\code{(from_group, to_group, from_period, to_period)} transition pair,
-keyed on those four columns. Returns an empty \code{data.table} with the
-same schema if no valid transitions are found. Columns:
+A table with one row per
+\code{(from_group, to_group, from_period, to_period)} transition pair --
+a \code{data.table} keyed on those four columns for data frame input, or
+a lazy table sorted by them for \code{tbl_dbi} input (use
+\code{dplyr::collect()} to bring it into memory). Has no rows if no
+valid transitions are found. Columns:
 \describe{
 \item{from_group}{Character. Concatenated \code{group_cols} state at the
 start of the period (T0).}
@@ -77,9 +103,8 @@ across movers.}
 }
 \description{
 Analyzes longitudinal panel data to compute empirical transition probabilities
-for promotions and transfers. Compares consecutive snapshots (T0 -> T1,
-T1 -> T2, etc.) using \code{roll_snapshot_pairs()} and
-\code{.compute_transition_pair()}, and returns one row per
+for promotions and transfers. Compares every pair of consecutive snapshots
+(T0 -> T1, T1 -> T2, etc.) and returns one row per
 \code{(from_group, to_group, from_period, to_period)} pair.
 
 Only actual transitions (\code{from_group != to_group}) are returned; stay
@@ -90,5 +115,38 @@ To obtain a single averaged rate across all periods, aggregate the result:
 \preformatted{
 result[, .(movement_rate = mean(movement_rate)), by = .(from_group, to_group)]
 }
+}
+\details{
+\strong{How it works.} A contract counts on a snapshot date if it has
+started, has not ended (or has no end date) and its type is not
+\code{"inactive"}. Each person's position on a snapshot is their
+\code{group_cols} value(s) on such a contract. Snapshots are numbered, and
+every person's positions at snapshot k are joined to their positions at
+k + 1 in a single pass over the panel, rather than one join per snapshot
+pair (as \code{roll_snapshot_pairs()} + \code{.compute_transition_pair()}
+do; that pair-by-pair version gives the same result and is kept as a
+reference).
+
+\strong{Several contracts at once.} A person holding positions in several
+groups on the same snapshot counts in each: they are at risk in every
+\code{from_group} they hold, and every pairing of a T0 position with a
+T1 position is a transition. Someone in G1 and G2 at T0 and only G2 at T1
+moves G1 -> G2 (and stays in G2).
+
+\strong{Entries, exits and gaps.} Only people present (on an active
+contract) at both T0 and T1 can move. Leavers still count in
+\code{n_pop}; entrants do not. A person missing from a snapshot and back
+later is a leaver and then an entrant, never a move across the gap.
+
+\strong{Salaries.} With \code{salary_col}, a person's salaries within one
+position are summed (missing values ignored), and the statistics are taken
+over the transitions in each \code{(from_group, to_group)} pair. A
+percentage change from a T0 salary of 0 is \code{Inf}, or undefined (and
+left out of the mean) if the T1 salary is also 0.
+
+For a \code{tbl_dbi}, the same steps run inside the database as SQL, and
+the result is returned lazily. Two small queries run straight away: the
+snapshot dates, and the distinct \code{group_cols} values (to build the
+group labels, which SQL cannot paste).
 }
 \keyword{internal}

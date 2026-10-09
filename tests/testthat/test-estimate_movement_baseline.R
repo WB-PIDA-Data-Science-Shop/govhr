@@ -34,11 +34,16 @@ two_snap_mover <- function() {
 # ---------------------------------------------------------------------------
 # estimate_movement_rates — input validation
 # ---------------------------------------------------------------------------
-test_that("non-data.table input raises error", {
-  df <- as.data.frame(two_snap_mover())
+test_that("data.frame and tibble input give the same result as a data.table", {
+  dt_out <- estimate_movement_rates(two_snap_mover(), group_cols = "paygrade")
+  expect_equal(estimate_movement_rates(as.data.frame(two_snap_mover()), group_cols = "paygrade"), dt_out)
+  expect_equal(estimate_movement_rates(tibble::as_tibble(two_snap_mover()), group_cols = "paygrade"), dt_out)
+})
+
+test_that("unsupported input errors naming the argument", {
   expect_error(
-    estimate_movement_rates(df, group_cols = "paygrade"),
-    "data.table"
+    estimate_movement_rates(list(a = 1), group_cols = "paygrade"),
+    "`contracts` must be a data frame or a lazy database table"
   )
 })
 
@@ -62,7 +67,7 @@ test_that("fewer than 2 snapshots raises error", {
   dt <- make_panel("P1", "2015-01-01", "G1")
   expect_error(
     estimate_movement_rates(dt, group_cols = "paygrade"),
-    "2 panel snapshots"
+    "`contracts` must contain at least 2 snapshots"
   )
 })
 
@@ -469,4 +474,175 @@ test_that("salary: person who exits at T1 does not appear in salary calculations
   # Only P2 is a mover; P1 exits before T1 and should not factor into salary
   expect_equal(row$mean_salary_t0, 1000)
   expect_equal(row$n_moves, 1L)
+})
+
+# ---------------------------------------------------------------------------
+# estimate_movement_rates() vs the per-pair implementation, on both backends
+#
+# reference_movement_rates() is the implementation estimate_movement_rates()
+# used up to govhr 0.4.1: roll_snapshot_pairs() + .compute_transition_pair(),
+# one join per consecutive snapshot pair. The vectorised data.frame method and
+# the tbl_dbi (duckdb) method must reproduce it exactly.
+# ---------------------------------------------------------------------------
+reference_movement_rates <- function(contracts, group_cols, salary_col = NULL) {
+  all_periods <- roll_snapshot_pairs(
+    panel_dt = data.table::copy(contracts),
+    date_col = "ref_date",
+    f = .compute_transition_pair,
+    ref_date_col = "ref_date",
+    group_cols = group_cols,
+    personnel_id_col = "personnel_id",
+    start_date_col = "start_date",
+    end_date_col = "end_date",
+    contract_type_col = "contract_type",
+    salary_col = salary_col
+  )
+  data.table::setnames(
+    all_periods,
+    c("t0_date", "t1_date", "period_prob"),
+    c("from_period", "to_period", "movement_rate")
+  )
+  keep <- c("from_group", "to_group", "movement_rate", "from_period",
+            "to_period", "n_pop", "n_moves")
+  if (!is.null(salary_col)) {
+    keep <- c(keep, "mean_salary_t0", "mean_salary_t1", "mean_salary_change",
+              "median_salary_change", "mean_salary_pct_change")
+  }
+  out <- all_periods[, keep, with = FALSE]
+  out <- out[from_group != to_group]
+  out <- out[!is.na(from_group) & !is.na(to_group) & from_group != "NA" & to_group != "NA"]
+  data.table::setkeyv(out, c("from_group", "to_group", "from_period", "to_period"))
+  out[]
+}
+
+# a deliberately messy contracts panel: people missing from some snapshots,
+# ~15% holding a second contract (often in another paygrade), NA paygrades,
+# inactive / expired / not-yet-started contracts, NA contract types, and
+# zero or missing salaries
+messy_contracts <- function(n_people = 120, seed = 11) {
+  set.seed(seed)
+  dates <- as.Date(sprintf("%d-01-01", 2015:2019))
+  panel <- data.table::rbindlist(lapply(dates, function(d) {
+    present <- sample(n_people, round(0.85 * n_people))
+    snap <- data.table::data.table(personnel_id = sprintf("P%03d", present), ref_date = d)
+    rbind(snap, snap[sample(.N, round(0.15 * .N))])
+  }))
+  n <- nrow(panel)
+  panel[, `:=`(
+    paygrade = sample(c("G1", "G2", "G3", NA), n, TRUE, prob = c(0.35, 0.3, 0.3, 0.05)),
+    est_id = sample(c("E1", "E2"), n, TRUE),
+    salary = round(stats::runif(n, 500, 5000)),
+    start_date = ref_date - sample(c(-30L, 1:3000), n, TRUE, prob = c(0.05, rep(0.95 / 3000, 3000))),
+    end_date = ref_date + sample(c(NA, -10L, 400L), n, TRUE, prob = c(0.85, 0.07, 0.08)),
+    contract_type = sample(c("permanent", "fixed-term", "inactive", NA), n, TRUE,
+                           prob = c(0.6, 0.3, 0.07, 0.03))
+  )]
+  panel[sample(n, round(0.05 * n)), salary := 0]
+  panel[sample(n, round(0.05 * n)), salary := NA]
+  panel[]
+}
+
+movement_backends <- c("data.frame", "duckdb")
+
+# run estimate_movement_rates() on `data` or a duckdb copy of it, returning a
+# keyed data.table like the data.frame method's
+run_movement_rates <- function(backend, data, ...) {
+  if (backend == "duckdb") {
+    skip_if_not_installed("duckdb")
+    skip_if_not_installed("dbplyr")
+    con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+    on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+    DBI::dbWriteTable(con, "contracts", as.data.frame(data))
+    data <- dplyr::tbl(con, "contracts")
+  }
+  out <- data.table::as.data.table(dplyr::collect(estimate_movement_rates(data, ...)))
+  data.table::setkeyv(out, c("from_group", "to_group", "from_period", "to_period"))
+  out[]
+}
+
+for (backend in movement_backends) {
+  test_that(paste0("matches the per-pair implementation on a messy panel (", backend, ")"), {
+    panel <- messy_contracts()
+    for (group_cols in list("paygrade", c("est_id", "paygrade"))) {
+      expect_equal(
+        run_movement_rates(backend, panel, group_cols = group_cols),
+        reference_movement_rates(panel, group_cols)
+      )
+    }
+  })
+
+  test_that(paste0("matches the per-pair implementation with salary_col (", backend, ")"), {
+    panel <- messy_contracts()
+    for (group_cols in list("paygrade", c("est_id", "paygrade"))) {
+      expect_equal(
+        run_movement_rates(backend, panel, group_cols = group_cols, salary_col = "salary"),
+        reference_movement_rates(panel, group_cols, salary_col = "salary")
+      )
+    }
+  })
+
+  test_that(paste0("a person holding two positions at T0 counts in both (", backend, ")"), {
+    # P1 holds G1 and G2 in 2015 and only G2 in 2016: G1 -> G2 is a move,
+    # and P1 is at risk in both G1 and G2
+    dt <- data.table::rbindlist(list(
+      make_panel("P1", "2015-01-01", "G1"),
+      make_panel("P1", "2015-01-01", "G2"),
+      make_panel("P2", "2015-01-01", "G1"),
+      make_panel("P1", "2016-01-01", "G2"),
+      make_panel("P2", "2016-01-01", "G1")
+    ))
+    out <- run_movement_rates(backend, dt, group_cols = "paygrade")
+    expect_equal(out$from_group, "G1")
+    expect_equal(out$to_group, "G2")
+    expect_equal(out$n_pop, 2L)
+    expect_equal(out$n_moves, 1L)
+  })
+
+  test_that(paste0("a gap in a person's records is not a move (", backend, ")"), {
+    # P1 is in G1 in 2015, missing in 2016, in G2 in 2017
+    dt <- data.table::rbindlist(list(
+      make_panel("P1", "2015-01-01", "G1"),
+      make_panel("P2", "2015-01-01", "G1"),
+      make_panel("P2", "2016-01-01", "G1"),
+      make_panel("P1", "2017-01-01", "G2"),
+      make_panel("P2", "2017-01-01", "G1")
+    ))
+    expect_equal(nrow(run_movement_rates(backend, dt, group_cols = "paygrade")), 0L)
+  })
+
+  test_that(paste0("zero and missing salaries follow R's rules (", backend, ")"), {
+    # P1 0 -> 0 gives a NaN % change, which mean(na.rm = TRUE) drops; P3
+    # 0 -> 50 gives Inf, which it keeps. P4's T0 salary is missing, so its
+    # sum is 0, as sum(na.rm = TRUE) gives
+    dt <- data.table::rbindlist(list(
+      make_panel_sal("P1", "2015-01-01", "G1", salary = 0),
+      make_panel_sal("P3", "2015-01-01", "G1", salary = 0),
+      make_panel_sal("P4", "2015-01-01", "G3", salary = NA_real_),
+      make_panel_sal("P1", "2016-01-01", "G2", salary = 0),
+      make_panel_sal("P3", "2016-01-01", "G2", salary = 50),
+      make_panel_sal("P4", "2016-01-01", "G2", salary = 100)
+    ))
+    out <- run_movement_rates(backend, dt, group_cols = "paygrade", salary_col = "salary")
+    expect_equal(out[from_group == "G1"]$mean_salary_pct_change, Inf)
+    expect_equal(out[from_group == "G3"]$mean_salary_t0, 0)
+    expect_equal(out, reference_movement_rates(dt, "paygrade", salary_col = "salary"))
+  })
+}
+
+test_that("tbl_dbi input returns a lazy table", {
+  skip_if_not_installed("duckdb")
+  skip_if_not_installed("dbplyr")
+  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  DBI::dbWriteTable(con, "contracts", as.data.frame(two_snap_mover()))
+  out <- estimate_movement_rates(dplyr::tbl(con, "contracts"), group_cols = "paygrade")
+  expect_s3_class(out, "tbl_lazy")
+})
+
+test_that("the caller's data.table is not modified", {
+  panel <- messy_contracts()
+  before <- data.table::copy(panel)
+  estimate_movement_rates(panel, group_cols = "paygrade", salary_col = "salary")
+  expect_equal(panel, before)
+  expect_null(data.table::key(panel))
 })

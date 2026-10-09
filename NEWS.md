@@ -6,6 +6,7 @@
 - `smooth_decrement_rates()` and `compute_service_table()` accept database tables: the heavy step runs in the database and the small pooled result is collected, so both still return a data.table.
 - `compute_service_table()` gains `include_all` (default `TRUE`); set it to `FALSE` to keep only the age, group, `px` and `ex` columns.
 - Adds `data-raw/bench/decrement_rates.R`, benchmarking the old and new implementations (including DuckDB) across panel sizes.
+- `estimate_movement_rates()` pairs every snapshot with the next in one join instead of one join per snapshot pair, with identical results. It is now a generic with `data.frame` and `tbl_dbi` methods (accepting data.frames and tibbles, not only data.tables), and no longer re-keys the caller's data.table.
 
 # govhr 0.4.1
 This release:

@@ -87,8 +87,11 @@ across movers.}
 }
 }
 \description{
-Internal workhorse called by \code{roll_snapshot_pairs()} inside
-\code{estimate_movement_rates()}. Given two consecutive panel snapshots
+Single-pair reference implementation of the counts that
+\code{estimate_movement_rates()} computes for all pairs at once. It can be
+driven by \code{roll_snapshot_pairs()} (as \code{estimate_movement_rates()}
+did up to govhr 0.4.1), and is kept for that and for tests and benchmarks
+(\code{data-raw/bench/movement_rates.R}). Given two consecutive panel snapshots
 (\code{snap_t0} at T0 and \code{snap_t1} at T1), this function:
 
 \enumerate{
