@@ -4,6 +4,7 @@ This release:
 - Increases computational performance by implementing backend duckplyr and data.table APIs.
 - Cleans up the repository, including removing spielplatz folder.
 - Updates and streamlines documentation.
+- Introduces breaking changes to function argument and usage. Please refer to the updated documentation.
 
 # govhr 0.4.0
 This release:

@@ -2,45 +2,86 @@
 % Please edit documentation in R/movement.R
 \name{compute_movement_cost}
 \alias{compute_movement_cost}
-\title{Function to compute the total cost associated with personnel movements}
+\alias{compute_movement_cost.data.frame}
+\alias{compute_movement_cost.tbl_dbi}
+\title{Compute the cost of hires and separations}
 \usage{
-compute_movement_cost(
+compute_movement_cost(data, ...)
+
+\method{compute_movement_cost}{data.frame}(
   data,
-  id_col = "personnel_id",
-  event_type,
-  start_date = NULL,
-  end_date = NULL,
-  status_col = "employment_status",
-  freq = NULL,
+  event_type = c("hire", "separation"),
   measure_col,
   group_cols = NULL,
-  latest_measure = FALSE
+  status_col = "employment_status",
+  ...
+)
+
+\method{compute_movement_cost}{tbl_dbi}(
+  data,
+  event_type = c("hire", "separation"),
+  measure_col,
+  group_cols = NULL,
+  status_col = "employment_status",
+  ...
 )
 }
 \arguments{
-\item{data}{A data frame containing the data to be processed.}
+\item{data}{Data frame or remote database table (\code{tbl_dbi}) with one row
+per person-record. Must contain \code{personnel_id}, \code{ref_date} and the
+columns named in \code{measure_col} and \code{status_col}.}
 
-\item{id_col}{The name of the column representing personnel IDs (default is "personnel_id").}
+\item{...}{Arguments passed to methods.}
 
-\item{event_type}{A character vector indicating which movement event(s) to include (e.g., "hire", "fire", "retirement"). Multiple types can be supplied to compute costs for each type.}
+\item{event_type}{Character vector of the movements to cost: \code{"hire"},
+\code{"separation"} or both. Default both.}
 
-\item{start_date}{The start date for the classification period. Defaults to the minimum reference date found in \code{.data}.}
+\item{measure_col}{Character. Name of the pay column to add up.}
 
-\item{end_date}{The end date for the classification period. Defaults to the maximum reference date found in \code{.data}.}
+\item{group_cols}{Character vector of columns to group by, such as
+\code{"est_id"}, or \code{NULL} (default) for the whole workforce. Must not include
+\code{ref_date}.}
 
-\item{status_col}{The name of the column representing employment status (default is "employment_status").}
-
-\item{freq}{The frequency of the reference dates. Defaults to a guess based on \code{.data}.}
-
-\item{measure_col}{The name of the column containing the cost/measure to sum.}
-
-\item{group_cols}{A character vector of column names to group the data by.}
-
-\item{latest_measure}{A logical value indicating whether to return only the measures for the latest reference date.}
+\item{status_col}{Character. Column holding employment status. Only rows
+equal to \code{"active"} are considered. Default \code{"employment_status"}.}
 }
 \value{
-A data frame containing the movement cost for each requested event type within the specified groups and reference dates.
+A table with one row per \code{ref_date}, group and movement type,
+containing \code{movement_type} (one of \code{event_type}) and \code{movement_cost}, the
+movers' pay. \code{movement_cost} is 0 when nobody moved, and \code{NA} on the date
+with nothing to compare with: the first date for hires, the last for
+separations. A data.table for data frame input; a lazy table for
+\code{tbl_dbi} input (use \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
-Function to compute the total cost associated with personnel movements
+Adds up, for each reference date, the pay of the people who are hired or
+separate at that date.
+}
+\details{
+Hires are costed at their pay on the date they are hired, and separations
+at their pay on their last active date. The pay on all of a mover's active
+records that date is added up, so people with several contracts are costed
+in full; pay recorded alongside, such as a pension, is not. Missing pay
+counts as 0.
+
+With \code{group_cols}, each mover's pay is counted in the group of the record it
+comes from. Every group with active personnel on a date appears for that
+date.
+}
+\examples{
+hr <- data.frame(
+  personnel_id = c(1, 1, 1, 2, 2),
+  ref_date = as.Date(c(
+    "2019-01-01", "2020-01-01", "2021-01-01", "2020-01-01", "2021-01-01"
+  )),
+  employment_status = "active",
+  wage = c(100, 100, 100, 250, 250)
+)
+compute_movement_cost(hr, event_type = "hire", measure_col = "wage")
+
+}
+\seealso{
+\code{\link[=detect_movement]{detect_movement()}}, which flags the movers.
+\code{\link[=compute_movement]{compute_movement()}}, which counts them.
+\code{\link[=compute_retirement_cost]{compute_retirement_cost()}}, which costs the retirements.
 }
