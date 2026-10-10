@@ -7,13 +7,16 @@ test_that("classify_personnel_event('hire') flags a genuine mid-panel hire and e
     employment_status = "active"
   )
 
-  out <- classify_personnel_event(
-    data = df,
-    id_col = "personnel_id",
-    event_type = "hire",
-    start_date = "2019-01-01",
-    end_date = "2021-01-01",
-    status_col = "employment_status"
+  expect_warning(
+    out <- classify_personnel_event(
+      data = df,
+      id_col = "personnel_id",
+      event_type = "hire",
+      start_date = "2019-01-01",
+      end_date = "2021-01-01",
+      status_col = "employment_status"
+    ),
+    "deprecated"
   )
 
   # id 1 is present from the very first ref_date -> never a "hire" (start-date
@@ -37,14 +40,18 @@ test_that("classify_personnel_event('retirement') flags the active->pensioner tr
     employment_status = c("active", "active", "pensioner", rep("active", 3))
   )
 
-  out <- classify_personnel_event(
-    data = df,
-    id_col = "personnel_id",
-    event_type = "retirement",
-    start_date = "2019-01-01",
-    end_date = "2021-01-01",
-    status_col = "employment_status"
-  )[personnel_id == 1]
+  expect_warning(
+    out <- classify_personnel_event(
+      data = df,
+      id_col = "personnel_id",
+      event_type = "retirement",
+      start_date = "2019-01-01",
+      end_date = "2021-01-01",
+      status_col = "employment_status"
+    ),
+    "deprecated"
+  )
+  out <- out[personnel_id == 1]
 
   # retirement is detected on the last *active* record before the pensioner
   # status appears, i.e. 2020-01-01, not 2021-01-01

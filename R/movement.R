@@ -427,6 +427,10 @@ detect_retirement.tbl_dbi <- function(
 #'
 #' This function classifies the personnel module into three types of movements: hires, fires, or retirements.
 #'
+#' This function is deprecated and will be removed in a future release. Use
+#' [detect_movement()] to flag hires and separations, and
+#' [detect_retirement()] to flag retirements.
+#'
 #' @param data A data frame containing personnel data.
 #' @param id_col The name of the column representing personnel IDs.
 #' @param event_type The type of movement to classify (e.g., "hire", "fire", and "retirement").
@@ -450,6 +454,14 @@ classify_personnel_event <- function(
   status_col,
   freq = "year"
 ) {
+  .Deprecated(
+    msg = paste0(
+      "`classify_personnel_event()` is deprecated and will be removed in a ",
+      "future release; use `detect_movement()` or `detect_retirement()` ",
+      "instead."
+    )
+  )
+
   if (event_type %in% c("hire", "fire")) {
     personnel_event <- detect_personnel_event(
       data = data,
