@@ -41,6 +41,13 @@ detect_personnel_event <- function(
   status_col,
   freq = "year"
 ) {
+  .Deprecated(
+    msg = paste0(
+      "`detect_personnel_event()` is deprecated and will be removed in a ",
+      "future release; use `detect_movement()` instead."
+    )
+  )
+
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
