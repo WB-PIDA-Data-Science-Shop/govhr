@@ -2,26 +2,73 @@
 % Please edit documentation in R/distribution.R
 \name{compute_decile}
 \alias{compute_decile}
-\title{Compute Deciles of a Measure}
+\alias{compute_decile.data.frame}
+\alias{compute_decile.tbl_dbi}
+\title{Compute deciles of a measure}
 \usage{
-compute_decile(data, group_cols = NULL, measure_col, latest_measure = FALSE)
+compute_decile(data, ...)
+
+\method{compute_decile}{data.frame}(
+  data,
+  measure_col,
+  group_cols = NULL,
+  latest_measure = FALSE,
+  ...
+)
+
+\method{compute_decile}{tbl_dbi}(
+  data,
+  measure_col,
+  group_cols = NULL,
+  latest_measure = FALSE,
+  ...
+)
 }
 \arguments{
-\item{data}{Data frame containing a \code{ref_date} column and the measure.}
+\item{data}{Data frame or remote database table (\code{tbl_dbi}) containing
+\code{ref_date} and the columns named in \code{measure_col} and \code{group_cols}.}
 
-\item{group_cols}{Character vector of columns to group by, or \code{NULL} for no
-grouping.}
+\item{...}{Arguments passed to methods.}
 
 \item{measure_col}{Character. Numeric column to rank into deciles.}
 
-\item{latest_measure}{Logical. Restrict to the latest reference date and drop
-\code{ref_date} from the grouping. Default \code{FALSE}.}
+\item{group_cols}{Character vector of columns to group by, or \code{NULL}
+(default) for no grouping. Must not include \code{ref_date}.}
+
+\item{latest_measure}{Logical. Restrict to the latest reference date and
+drop \code{ref_date} from the grouping. Default \code{FALSE}.}
 }
 \value{
-A data frame with the grouping columns, \code{decile}, \code{median_value} and
-\code{mean_value}.
+A table with one row per group, reference date and decile,
+containing the grouping columns, \code{ref_date} (unless \code{latest_measure} is
+\code{TRUE}), \code{decile} (1 to 10), \code{median_value} and \code{mean_value}. A
+data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
+\code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
-Assigns rows to deciles of \code{measure_col} within each group and reference
-date, then reports the median and mean of the measure in each decile.
+Splits the records of each group and reference date into ten equally sized
+deciles of \code{measure_col}, and reports the median and mean of the measure in
+each decile.
+}
+\details{
+Records with a missing \code{measure_col} are left out before ranking. Decile
+sizes differ by at most one record, with the larger deciles first, so a
+group with fewer than ten records fills only the first deciles. Records
+with the same value may fall on either side of a decile boundary, which
+leaves the medians and means unchanged.
+
+With \code{latest_measure = TRUE}, the latest date is the latest across all of
+\code{data}, not within each group. Missing groups are kept as their own group.
+}
+\examples{
+hr <- data.frame(
+  ref_date = as.Date("2020-01-01"),
+  wage = 1:20
+)
+compute_decile(hr, measure_col = "wage")
+
+}
+\seealso{
+\code{\link[=compute_percentile]{compute_percentile()}}, which bins the measure at a fixed width
+instead. \code{\link[=plot_decile]{plot_decile()}}, which draws the result.
 }

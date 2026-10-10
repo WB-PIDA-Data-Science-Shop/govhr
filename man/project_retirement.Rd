@@ -2,42 +2,116 @@
 % Please edit documentation in R/retirement.R
 \name{project_retirement}
 \alias{project_retirement}
-\title{Project Retirement Dates}
+\alias{project_retirement.data.frame}
+\alias{project_retirement.tbl_dbi}
+\title{Project retirements of the current workforce}
 \usage{
-project_retirement(
+project_retirement(data, ...)
+
+\method{project_retirement}{data.frame}(
   data,
   threshold_age = 60,
   birth_col = "birth_date",
   group_cols = NULL,
   measure_col = NULL,
+  status_col = "employment_status",
   retirement_coefficient = 0.6,
-  simplify_retirement_date = TRUE,
-  cutoff_date = 10
+  horizon = 10,
+  ...
+)
+
+\method{project_retirement}{tbl_dbi}(
+  data,
+  threshold_age = 60,
+  birth_col = "birth_date",
+  group_cols = NULL,
+  measure_col = NULL,
+  status_col = "employment_status",
+  retirement_coefficient = 0.6,
+  horizon = 10,
+  ...
 )
 }
 \arguments{
-\item{data}{A data frame, either the workforce or wage bill data.}
+\item{data}{Data frame or remote database table (\code{tbl_dbi}) with one row
+per person-record. Must contain \code{personnel_id}, \code{ref_date} and the
+columns named in \code{birth_col} and \code{status_col}, and in \code{measure_col} if
+given.}
 
-\item{threshold_age}{The age at which personnel are considered eligible for retirement (default is 60).}
+\item{...}{Arguments passed to methods.}
 
-\item{birth_col}{The name of the column representing birth dates (default is "birth_date").}
+\item{threshold_age}{Whole number. Age at which people retire. Default
+\code{60}.}
 
-\item{group_cols}{A character vector of column names to group the data by when counting eligible retirees (default is NULL, meaning no grouping).}
+\item{birth_col}{Character. Column holding dates of birth. Default
+\code{"birth_date"}.}
 
-\item{measure_col}{The name of the column representing the measure to be projected (default is NULL, meaning no measure column).}
+\item{group_cols}{Character vector of columns to group by, such as
+\code{"est_id"}, or \code{NULL} (default) for the whole workforce. Must not include
+\code{ref_date}.}
 
-\item{retirement_coefficient}{A numeric value indicating the coefficient to apply to the projected retirement cost (default is 0.6).}
+\item{measure_col}{Character. Pay column used to cost the retirements, or
+\code{NULL} (default) to only count them.}
 
-\item{simplify_retirement_date}{A logical value indicating whether to simplify the retirement date to the end of the year (default is TRUE).}
+\item{status_col}{Character. Column holding employment status, with active
+personnel recorded as \code{"active"}. Default \code{"employment_status"}.}
 
-\item{cutoff_date}{A numeric value indicating the cut-off for future retirement projections in years (default is 10).}
+\item{retirement_coefficient}{Number. Share of their pay that retirees go
+on receiving as a pension, used to cost the retirements. Default \code{0.6}.}
+
+\item{horizon}{Whole number. How many years past the latest reference date
+to project. Default \code{10}.}
 }
 \value{
-A data frame with projected retirement dates and counts of staff eligible for retirement at each reference date.
+A table with one row per projected year and group, containing:
+\describe{
+\item{ref_date}{The last day of the year in which people reach
+\code{threshold_age}.}
+\item{headcount}{Number of people in the current workforce.}
+\item{projected_retirements}{People in the current workforce who reach
+\code{threshold_age} that year.}
+\item{projected_retirement_rate}{\code{projected_retirements} divided by
+\code{headcount}.}
+\item{projected_cost}{Only with \code{measure_col}: the retirees' pay on the
+latest date, times \code{retirement_coefficient}.}
+}
+A data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
+\code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
-Project Retirement Dates
+Projects, for each year ahead, how many people in the current workforce
+reach the retirement age, what share of the current headcount they make up
+and, optionally, what their retirement costs are. The current workforce is
+everyone active on the latest reference date.
 }
 \details{
-The function takes a data frame containing personnel data with birth dates and reference dates. It only considers the last reference date in the data. It then calculates the projected retirement date for each staff member based on the specified threshold age, and counts the number of staff eligible for retirement at each future reference date.
+Only people active on the latest date are projected: people who left
+earlier, or whose record that date is not active, are no longer in the
+workforce. Nor are people who reached \code{threshold_age} by the latest date,
+even if they are still active.
+
+The projected years are those whose last day falls after the latest date
+and at most \code{horizon} years after it. Every group in the current workforce
+appears in every year, with zero retirements when nobody reaches
+\code{threshold_age}.
+
+People are counted once, even if they hold several contracts, and the pay
+on all their contracts is costed. With \code{group_cols}, each person is counted
+in the group they belong to on the latest date. People with a missing
+\code{personnel_id} are not counted, as in \code{\link[=compute_headcount]{compute_headcount()}}.
+}
+\examples{
+hr <- data.frame(
+  personnel_id = c(1, 2, 3, 1, 2, 3),
+  ref_date = as.Date(rep(c("2020-01-01", "2021-01-01"), each = 3)),
+  employment_status = c(rep("active", 5), "pensioner"),
+  birth_date = as.Date(rep(c("1962-05-01", "1990-01-01", "1950-01-01"), 2)),
+  gross_salary_lcu = c(100, 200, 300, 110, 210, 90)
+)
+project_retirement(hr, measure_col = "gross_salary_lcu")
+
+}
+\seealso{
+\code{\link[=compute_retirement]{compute_retirement()}}, which counts the retirements that already
+happened.
 }
