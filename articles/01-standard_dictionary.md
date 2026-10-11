@@ -69,8 +69,10 @@ about individual public sector employees.
 ### Notes
 
 - **Employment Status**: Used together with `ref_date` to detect
-  movement events such as hires, fires, and retirements (see
-  [`classify_personnel_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/classify_personnel_event.md)).
+  movement events such as hires, separations, and retirements (see
+  [`detect_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_movement.md)
+  and
+  [`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md)).
 - **Educational Attainment**: Follows the World Bank’s [Global Labor
   Database](https://worldbank.github.io/gld/Support/A%20-%20Guides%20and%20Documentation/GLD%20Manual%20Files/Education.html)
   (GLD) 7-level classification convention.

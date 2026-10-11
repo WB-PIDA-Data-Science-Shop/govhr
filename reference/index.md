@@ -32,7 +32,7 @@
 - [`compute_baseline_index()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_baseline_index.md)
   : Compute index values relative to base year
 - [`compute_compression_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_compression_ratio.md)
-  : Function to compute the compression ratio
+  : Compute the compression ratio of a measure
 - [`compute_coverage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_coverage.md)
   : Compute data coverage
 - [`compute_cross_section()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_cross_section.md)
@@ -40,7 +40,7 @@
 - [`compute_cross_section_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_cross_section_summary.md)
   : Compute cross-section summary
 - [`compute_decile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_decile.md)
-  : Compute Deciles of a Measure
+  : Compute deciles of a measure
 - [`compute_fastchange()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastchange.md)
   : Calculate year-over-year growth for a numeric column
 - [`compute_fastshare()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastshare.md)
@@ -63,8 +63,7 @@
 - [`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md)
   : Compute movements as hires and separations
 - [`compute_movement_cost()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement_cost.md)
-  : Function to compute the total cost associated with personnel
-  movements
+  : Compute the cost of hires and separations
 - [`compute_pension_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_pension_ratio.md)
   : Compute ratio of last salary to first pension for retired workers
 - [`compute_percentile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_percentile.md)
@@ -76,6 +75,8 @@
   : Compute record consistency
 - [`compute_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement.md)
   : Compute retirements
+- [`compute_retirement_cost()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement_cost.md)
+  : Compute the cost of retirements
 - [`compute_service_table()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_service_table.md)
   : Compute an actuarial service table from a personnel panel
 - [`compute_time_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_time_trend.md)
@@ -215,7 +216,7 @@
 - [`plot_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_trend.md)
   : Plot time trend
 - [`project_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/project_retirement.md)
-  : Project Retirement Dates
+  : Project retirements of the current workforce
 - [`remove_duplicate_contracts()`](https://wb-pida-data-science-shop.github.io/govhr/reference/remove_duplicate_contracts.md)
   : Remove duplicate contract records
 - [`remove_duplicate_personnel()`](https://wb-pida-data-science-shop.github.io/govhr/reference/remove_duplicate_personnel.md)

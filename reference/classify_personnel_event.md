@@ -52,3 +52,11 @@ classify_personnel_event(
 
 A data frame with an additional column indicating the type of movement
 for each personnel record.
+
+## Details
+
+This function is deprecated and will be removed in a future release. Use
+[`detect_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_movement.md)
+to flag hires and separations, and
+[`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md)
+to flag retirements.
