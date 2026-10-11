@@ -2,30 +2,76 @@
 % Please edit documentation in R/summarize.R
 \name{compute_compression_ratio}
 \alias{compute_compression_ratio}
-\title{Function to compute the compression ratio}
+\alias{compute_compression_ratio.data.frame}
+\alias{compute_compression_ratio.tbl_dbi}
+\title{Compute the compression ratio of a measure}
 \usage{
-compute_compression_ratio(
+compute_compression_ratio(data, ...)
+
+\method{compute_compression_ratio}{data.frame}(
   data,
+  measure_col,
   group_cols = NULL,
   percentiles = c(0.9, 0.5, 0.1),
+  latest_measure = FALSE,
+  ...
+)
+
+\method{compute_compression_ratio}{tbl_dbi}(
+  data,
   measure_col,
-  latest_measure = FALSE
+  group_cols = NULL,
+  percentiles = c(0.9, 0.5, 0.1),
+  latest_measure = FALSE,
+  ...
 )
 }
 \arguments{
-\item{data}{A data frame.}
+\item{data}{Data frame or remote database table (\code{tbl_dbi}) containing
+\code{ref_date} and the columns named in \code{measure_col} and \code{group_cols}.}
 
-\item{group_cols}{A character vector of column names to group the data by.}
+\item{...}{Arguments passed to methods.}
 
-\item{percentiles}{A numeric vector of length 3 indicating the upper, middle, and lower percentiles to compute (default is c(0.9, 0.5, 0.1)).}
+\item{measure_col}{Character. Numeric column to compute the percentiles of.}
 
-\item{measure_col}{The name of the column for which the compression ratio will be computed.}
+\item{group_cols}{Character vector of columns to group by, or \code{NULL}
+(default) for no grouping. Must not include \code{ref_date}.}
 
-\item{latest_measure}{A logical value indicating whether to return only the measures for the latest reference date.}
+\item{percentiles}{Numeric vector of length 3 with the upper, middle and
+lower percentiles, as proportions. Default \code{c(0.9, 0.5, 0.1)}.}
+
+\item{latest_measure}{Logical. Restrict to the latest reference date.
+Default \code{FALSE}.}
 }
 \value{
-A data frame containing the 90th, 50th, and 10th percentiles for the specified measure column within the specified groups and reference dates.
+A table with one row per group and reference date, containing the
+grouping columns, \code{ref_date}, \code{percentile_upper}, \code{percentile_50} (the
+middle percentile, whichever \code{percentiles[2]} is) and \code{percentile_lower}.
+A data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
+\code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
-Function to compute the compression ratio
+Computes, for each group and reference date, an upper, middle and lower
+percentile of \code{measure_col}, by default the 90th, 50th and 10th. The spread
+between the upper and lower percentiles shows how compressed pay is.
+}
+\details{
+Percentiles are interpolated between neighbouring values, as in
+\code{stats::quantile(type = 7)}. Records with a missing \code{measure_col} are left
+out. Missing groups are kept as their own group.
+
+With \code{latest_measure = TRUE}, the latest date is the latest with a
+non-missing \code{measure_col} across all of \code{data}, not within each group.
+}
+\examples{
+hr <- data.frame(
+  ref_date = as.Date("2020-01-01"),
+  wage = 1:11
+)
+compute_compression_ratio(hr, measure_col = "wage")
+
+}
+\seealso{
+\code{\link[=compute_decile]{compute_decile()}}, which summarises the whole distribution by
+decile. \code{\link[=plot_compression_ratio]{plot_compression_ratio()}}, which draws the result.
 }

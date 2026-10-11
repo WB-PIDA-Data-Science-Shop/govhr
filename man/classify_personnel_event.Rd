@@ -35,3 +35,8 @@ A data frame with an additional column indicating the type of movement for each 
 \description{
 This function classifies the personnel module into three types of movements: hires, fires, or retirements.
 }
+\details{
+This function is deprecated and will be removed in a future release. Use
+\code{\link[=detect_movement]{detect_movement()}} to flag hires and separations, and
+\code{\link[=detect_retirement]{detect_retirement()}} to flag retirements.
+}

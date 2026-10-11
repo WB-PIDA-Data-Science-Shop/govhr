@@ -314,6 +314,12 @@ if (getRversion() >= "2.15.1") {
     "retirement",
     "retirements",
     "retirement_rate",
+    # compute_movement_cost, project_retirement
+    "movement_type",
+    "movement_cost",
+    "retirement_year",
+    "projected_retirements",
+    "projected_retirement_rate",
     # compute_wage
     "wage_growth"
   ))

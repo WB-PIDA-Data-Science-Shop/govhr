@@ -41,6 +41,13 @@ detect_personnel_event <- function(
   status_col,
   freq = "year"
 ) {
+  .Deprecated(
+    msg = paste0(
+      "`detect_personnel_event()` is deprecated and will be removed in a ",
+      "future release; use `detect_movement()` instead."
+    )
+  )
+
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
@@ -427,6 +434,10 @@ detect_retirement.tbl_dbi <- function(
 #'
 #' This function classifies the personnel module into three types of movements: hires, fires, or retirements.
 #'
+#' This function is deprecated and will be removed in a future release. Use
+#' [detect_movement()] to flag hires and separations, and
+#' [detect_retirement()] to flag retirements.
+#'
 #' @param data A data frame containing personnel data.
 #' @param id_col The name of the column representing personnel IDs.
 #' @param event_type The type of movement to classify (e.g., "hire", "fire", and "retirement").
@@ -450,6 +461,14 @@ classify_personnel_event <- function(
   status_col,
   freq = "year"
 ) {
+  .Deprecated(
+    msg = paste0(
+      "`classify_personnel_event()` is deprecated and will be removed in a ",
+      "future release; use `detect_movement()` or `detect_retirement()` ",
+      "instead."
+    )
+  )
+
   if (event_type %in% c("hire", "fire")) {
     personnel_event <- detect_personnel_event(
       data = data,
@@ -495,84 +514,315 @@ classify_personnel_event <- function(
   data[]
 }
 
-#' Function to compute the total cost associated with personnel movements
+#' Compute the cost of hires and separations
 #'
-#' @param data A data frame containing the data to be processed.
-#' @param id_col The name of the column representing personnel IDs (default is "personnel_id").
-#' @param event_type A character vector indicating which movement event(s) to include (e.g., "hire", "fire", "retirement"). Multiple types can be supplied to compute costs for each type.
-#' @param start_date The start date for the classification period. Defaults to the minimum reference date found in `.data`.
-#' @param end_date The end date for the classification period. Defaults to the maximum reference date found in `.data`.
-#' @param status_col The name of the column representing employment status (default is "employment_status").
-#' @param freq The frequency of the reference dates. Defaults to a guess based on `.data`.
-#' @param measure_col The name of the column containing the cost/measure to sum.
-#' @param group_cols A character vector of column names to group the data by.
-#' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
+#' Adds up, for each reference date, the pay of the people who are hired or
+#' separate at that date.
 #'
-#' @importFrom data.table as.data.table setorderv rbindlist
+#' @param data Data frame or remote database table (`tbl_dbi`) with one row
+#'   per person-record. Must contain `personnel_id`, `ref_date` and the
+#'   columns named in `measure_col` and `status_col`.
+#' @param event_type Character vector of the movements to cost: `"hire"`,
+#'   `"separation"` or both. Default both.
+#' @param measure_col Character. Name of the pay column to add up.
+#' @param group_cols Character vector of columns to group by, such as
+#'   `"est_id"`, or `NULL` (default) for the whole workforce. Must not include
+#'   `ref_date`.
+#' @param status_col Character. Column holding employment status. Only rows
+#'   equal to `"active"` are considered. Default `"employment_status"`.
+#' @param ... Arguments passed to methods.
+#'
+#' @returns A table with one row per `ref_date`, group and movement type,
+#'   containing `movement_type` (one of `event_type`) and `movement_cost`, the
+#'   movers' pay. `movement_cost` is 0 when nobody moved, and `NA` on the date
+#'   with nothing to compare with: the first date for hires, the last for
+#'   separations. A data.table for data frame input; a lazy table for
+#'   `tbl_dbi` input (use [dplyr::collect()] to bring it into memory).
+#'
+#' @details
+#' Hires are costed at their pay on the date they are hired, and separations
+#' at their pay on their last active date. The pay on all of a mover's active
+#' records that date is added up, so people with several contracts are costed
+#' in full; pay recorded alongside, such as a pension, is not. Missing pay
+#' counts as 0.
+#'
+#' With `group_cols`, each mover's pay is counted in the group of the record it
+#' comes from. Every group with active personnel on a date appears for that
+#' date.
+#'
+#' @seealso [detect_movement()], which flags the movers.
+#'   [compute_movement()], which counts them.
+#'   [compute_retirement_cost()], which costs the retirements.
+#'
+#' @examples
+#' hr <- data.frame(
+#'   personnel_id = c(1, 1, 1, 2, 2),
+#'   ref_date = as.Date(c(
+#'     "2019-01-01", "2020-01-01", "2021-01-01", "2020-01-01", "2021-01-01"
+#'   )),
+#'   employment_status = "active",
+#'   wage = c(100, 100, 100, 250, 250)
+#' )
+#' compute_movement_cost(hr, event_type = "hire", measure_col = "wage")
 #'
 #' @export
-#' @returns A data frame containing the movement cost for each requested event type within the specified groups and reference dates.
-compute_movement_cost <- function(
+compute_movement_cost <- function(data, ...) {
+  UseMethod("compute_movement_cost")
+}
+
+#' @rdname compute_movement_cost
+#' @importFrom data.table as.data.table fcoalesce fifelse rbindlist setorderv
+#' @importFrom rlang arg_match check_dots_empty
+#' @export
+compute_movement_cost.data.frame <- function(
   data,
-  id_col = "personnel_id",
-  event_type,
-  start_date = NULL,
-  end_date = NULL,
-  status_col = "employment_status",
-  freq = NULL,
+  event_type = c("hire", "separation"),
   measure_col,
   group_cols = NULL,
-  latest_measure = FALSE
+  status_col = "employment_status",
+  ...
 ) {
+  rlang::check_dots_empty()
+  event_type <- rlang::arg_match(event_type, multiple = TRUE)
+
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
+  }
+
   dt <- data.table::as.data.table(data)
+  keys <- c("personnel_id", "ref_date")
 
-  if (is.null(start_date)) {
-    start_date <- as.character(min(dt[["ref_date"]]))
-  }
-  if (is.null(end_date)) {
-    end_date <- as.character(max(dt[["ref_date"]]))
-  }
-  if (is.null(freq)) {
-    freq <- guess_date_frequency(dt)
+  flags <- detect_movement(dt, status_col = status_col)[
+    , .(personnel_id, ref_date, hire, separation)
+  ]
+
+  # every active record carries its person's flags, so a mover's pay is added
+  # up over all their contracts that date
+  records <- flags[
+    dt[
+      get(status_col) == "active",
+      c(keys, group_cols, measure_col),
+      with = FALSE
+    ],
+    on = keys
+  ]
+
+  by_cols <- c("ref_date", group_cols)
+
+  costs <- lapply(event_type, function(movement) {
+    # flags are NA on a date with nothing to compare with, which carries
+    # through to the cost
+    cost <- records[
+      , .(
+        movement_type = movement,
+        movement_cost = sum(
+          data.table::fifelse(
+            get(movement),
+            data.table::fcoalesce(as.numeric(get(measure_col)), 0),
+            0
+          )
+        )
+      ),
+      by = by_cols
+    ]
+
+    data.table::setorderv(cost, by_cols)
+
+    cost
+  })
+
+  data.table::rbindlist(costs)
+}
+
+#' @rdname compute_movement_cost
+#' @importFrom dplyr all_of coalesce filter if_else inner_join mutate select
+#'   summarise union_all
+#' @importFrom purrr map reduce
+#' @importFrom rlang .data arg_match check_dots_empty
+#' @export
+compute_movement_cost.tbl_dbi <- function(
+  data,
+  event_type = c("hire", "separation"),
+  measure_col,
+  group_cols = NULL,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+  event_type <- rlang::arg_match(event_type, multiple = TRUE)
+
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
   }
 
-  by_cols <- c(group_cols, "ref_date")
+  keys <- c("personnel_id", "ref_date")
 
-  out <- data.table::rbindlist(
-    lapply(event_type, function(type) {
-      # classify personnel events
-      classified <- classify_personnel_event(
-        data = dt,
-        id_col = id_col,
-        event_type = type,
-        start_date = start_date,
-        end_date = end_date,
-        status_col = status_col,
-        freq = freq
+  flags <- detect_movement(data, status_col = status_col) |>
+    select(personnel_id, ref_date, hire, separation)
+
+  # every active record carries its person's flags, so a mover's pay is added
+  # up over all their contracts that date
+  records <- data |>
+    filter(.data[[status_col]] == "active") |>
+    select(all_of(c(keys, group_cols, measure_col))) |>
+    inner_join(flags, by = keys)
+
+  # flags are NULL on a date with nothing to compare with, so the SUM() is
+  # NULL there too
+  event_type |>
+    purrr::map(
+      \(movement) {
+        records |>
+          summarise(
+            movement_cost = sum(
+              if_else(.data[[movement]], coalesce(.data[[measure_col]], 0), 0),
+              na.rm = TRUE
+            ),
+            .by = all_of(c("ref_date", group_cols))
+          ) |>
+          mutate(movement_type = !!movement)
+      }
+    ) |>
+    purrr::reduce(union_all) |>
+    select(ref_date, all_of(group_cols), movement_type, movement_cost)
+}
+
+#' Compute the cost of retirements
+#'
+#' Adds up, for each reference date, the pay of the people who retire at that
+#' date.
+#'
+#' @inheritParams compute_movement_cost
+#' @param status_col Character. Column holding employment status, with active
+#'   personnel recorded as `"active"` and retirees as `"pensioner"`. Default
+#'   `"employment_status"`.
+#'
+#' @returns A table with one row per `ref_date` and group, containing
+#'   `retirement_cost`, the retirees' pay. `retirement_cost` is 0 when nobody
+#'   retired, and `NA` on the last date, which has nothing to compare with. A
+#'   data.table for data frame input; a lazy table for `tbl_dbi` input (use
+#'   [dplyr::collect()] to bring it into memory).
+#'
+#' @details
+#' Retirees are costed at their pay on their last active date. The pay on all
+#' of a retiree's active records that date is added up, so people with several
+#' contracts are costed in full; pay recorded alongside, such as a pension, is
+#' not. Missing pay counts as 0.
+#'
+#' With `group_cols`, each retiree's pay is counted in the group of the record
+#' it comes from. Every group with active personnel on a date appears for that
+#' date.
+#'
+#' @seealso [detect_retirement()], which flags the retirees.
+#'   [compute_retirement()], which counts them. [compute_movement_cost()],
+#'   which costs the hires and separations.
+#'
+#' @examples
+#' hr <- data.frame(
+#'   personnel_id = c(1, 2, 1, 2),
+#'   ref_date = as.Date(rep(c("2020-01-01", "2021-01-01"), each = 2)),
+#'   employment_status = c("active", "active", "pensioner", "active"),
+#'   wage = c(100, 250, 60, 250)
+#' )
+#' compute_retirement_cost(hr, measure_col = "wage")
+#'
+#' @export
+compute_retirement_cost <- function(data, ...) {
+  UseMethod("compute_retirement_cost")
+}
+
+#' @rdname compute_retirement_cost
+#' @importFrom data.table as.data.table fcoalesce fifelse setorderv
+#' @importFrom rlang check_dots_empty
+#' @export
+compute_retirement_cost.data.frame <- function(
+  data,
+  measure_col,
+  group_cols = NULL,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
+  }
+
+  dt <- data.table::as.data.table(data)
+  keys <- c("personnel_id", "ref_date")
+
+  flags <- detect_retirement(dt, status_col = status_col)[
+    , .(personnel_id, ref_date, retirement)
+  ]
+
+  # every active record carries its person's flag, so a retiree's pay is
+  # added up over all their contracts that date
+  records <- flags[
+    dt[
+      get(status_col) == "active",
+      c(keys, group_cols, measure_col),
+      with = FALSE
+    ],
+    on = keys
+  ]
+
+  by_cols <- c("ref_date", group_cols)
+
+  # the flag is NA on the last date, which carries through to the cost
+  cost <- records[
+    , .(
+      retirement_cost = sum(
+        data.table::fifelse(
+          retirement,
+          data.table::fcoalesce(as.numeric(get(measure_col)), 0),
+          0
+        )
       )
+    ),
+    by = by_cols
+  ]
 
-      # compute movement cost
-      classified[
-        type_event == type,
-        .(
-          movement_type = type,
-          measurement = measure_col,
-          movement_cost = sum(get(measure_col), na.rm = TRUE)
-        ),
-        keyby = by_cols
-      ]
-    })
-  )
+  data.table::setorderv(cost, by_cols)
 
-  data.table::setorderv(out, "ref_date")
+  cost[]
+}
 
-  if (latest_measure) {
-    latest_ref_date <- max(out[["ref_date"]])
+#' @rdname compute_retirement_cost
+#' @importFrom dplyr all_of coalesce filter if_else inner_join select summarise
+#' @importFrom rlang .data check_dots_empty
+#' @export
+compute_retirement_cost.tbl_dbi <- function(
+  data,
+  measure_col,
+  group_cols = NULL,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
 
-    out <- out[ref_date == latest_ref_date]
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
   }
 
-  out[]
+  keys <- c("personnel_id", "ref_date")
+
+  flags <- detect_retirement(data, status_col = status_col) |>
+    select(personnel_id, ref_date, retirement)
+
+  # every active record carries its person's flag, so a retiree's pay is
+  # added up over all their contracts that date
+  data |>
+    filter(.data[[status_col]] == "active") |>
+    select(all_of(c(keys, group_cols, measure_col))) |>
+    inner_join(flags, by = keys) |>
+    # the flag is NULL on the last date, so the SUM() is NULL there too
+    summarise(
+      retirement_cost = sum(
+        if_else(retirement, coalesce(.data[[measure_col]], 0), 0),
+        na.rm = TRUE
+      ),
+      .by = all_of(c("ref_date", group_cols))
+    )
 }
 
 #' Compute movements as hires and separations
