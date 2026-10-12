@@ -56,6 +56,7 @@
 #' )
 #' }
 #'
+#' @export
 compute_tenure <- function(
   contracts,
   ref_date,
@@ -201,7 +202,7 @@ compute_tenure <- function(
 #'     tenure days divided by 365.25.}
 #'   }
 #'
-#' @keywords internal
+#' @export
 compute_tenure_panel <- function(
   contracts,
   personnel_id_col = "personnel_id",
@@ -361,6 +362,7 @@ compute_tenure_panel <- function(
 #'
 #' @seealso \code{\link{compute_tenure_panel}}
 #' @keywords internal
+#' @export
 compute_employment_spells <- function(
   contracts,
   personnel_id_col = "personnel_id",

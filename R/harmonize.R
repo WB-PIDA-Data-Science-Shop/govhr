@@ -432,8 +432,22 @@ deflate_to_real <- function(col, ref_date, country_code, base_month = "2021-12-0
   deflated[["deflated_col"]]
 }
 
-# warn about the country-months that deflate_to_real() could not deflate,
-# so a silent NA does not slip into downstream analysis
+#' Warn about values that could not be deflated
+#'
+#' Warns about the country-months that [deflate_to_real()] could not deflate,
+#' so a silent `NA` does not slip into downstream analysis. A row with no CPI
+#' for its own month is reported once; a country with no CPI in `base_month`
+#' is reported with the range of months its CPI data covers.
+#'
+#' @param deflated A data frame with columns `col` (the value to deflate),
+#'   `country_code`, `ref_month`, `cpi_month` and `cpi_base`, as built inside
+#'   [deflate_to_real()].
+#' @param base_month Date. The base month passed to [deflate_to_real()].
+#'
+#' @returns `NULL`, invisibly. Called for its warnings.
+#'
+#' @keywords internal
+#' @export
 warn_missing_cpi <- function(deflated, base_month){
   has_value <- !is.na(deflated$col)
 
@@ -475,6 +489,16 @@ warn_missing_cpi <- function(deflated, base_month){
   }
 }
 
+#' Left-join two tables with `merge()`
+#'
+#' Calls [merge()] with `all.x = TRUE`, so every row of `x` is kept.
+#'
+#' @param ... Arguments passed to [merge()], such as `x`, `y` and `by`.
+#'
+#' @returns The merged table.
+#'
+#' @keywords internal
+#' @export
 merge_wrapper <- function(...) {
   y <- merge(all.x = TRUE, ...)
 
@@ -501,6 +525,7 @@ merge_wrapper <- function(...) {
 #'
 #' @importFrom rlang .data
 #'
+#' @export
 classify_text <- function(
   corpus,
   taxonomy,
@@ -760,6 +785,7 @@ classify_text <- function(
 #'
 #' @importFrom tibble as_tibble
 #'
+#' @export
 convert_data <- function(data, data_original) {
   if ("tbl_df" %in% class(data_original)) {
     data <- tibble::as_tibble(data)

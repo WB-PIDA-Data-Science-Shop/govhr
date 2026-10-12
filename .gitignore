@@ -7,3 +7,4 @@ docs
 spielplatz/
 *.duckdb
 *.duckdb.wal
+data-raw/ideas

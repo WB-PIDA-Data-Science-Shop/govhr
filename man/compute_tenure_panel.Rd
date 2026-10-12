@@ -66,4 +66,3 @@ Tenure is calculated independently within each combination of
 \code{personnel_id}, optional grouping variables supplied through
 \code{group_cols}, and \code{ref_date}.
 }
-\keyword{internal}

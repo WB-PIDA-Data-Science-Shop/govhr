@@ -7,6 +7,9 @@
 - `compute_service_table()` gains `include_all` (default `TRUE`); set it to `FALSE` to keep only the age, group, `px` and `ex` columns.
 - Adds `data-raw/bench/decrement_rates.R`, benchmarking the old and new implementations (including DuckDB) across panel sizes.
 - `estimate_movement_rates()` pairs every snapshot with the next in one join instead of one join per snapshot pair, with identical results. It is now a generic with `data.frame` and `tbl_dbi` methods (accepting data.frames and tibbles, not only data.tables), and no longer re-keys the caller's data.table.
+- New `estimate_progression_rates()` estimates, for each year of service, the share of employees who stay another year and how their real pay grows when they do, pooled over every pair of snapshots.
+- New `compute_career_table()` chains those rates into a career: expected years of service, a projected pay path from a chosen starting pay, and expected career earnings. It builds a whole career from a panel covering only a few years.
+- Every package function whose name does not start with a dot is now exported, including `compute_tenure_panel()`, `compute_tenure()`, `estimate_movement_rates()` and the validation helpers.
 
 # govhr 0.4.1
 This release:

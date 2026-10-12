@@ -243,7 +243,17 @@ compute_percentile.tbl_dbi <- function(
     )
 }
 
-# fractional widths are not exact in floating point, see compute_percentile()
+#' Check that a bin width is a positive whole number
+#'
+#' Fractional widths are not exact in floating point (see
+#' [compute_percentile()]), so only positive whole numbers are accepted.
+#'
+#' @param binwidth The bin width to check.
+#'
+#' @returns `NULL`, invisibly, if `binwidth` is valid. Otherwise an error.
+#'
+#' @keywords internal
+#' @export
 check_binwidth <- function(binwidth) {
   if (
     !is.numeric(binwidth) || length(binwidth) != 1 || is.na(binwidth) ||
@@ -274,6 +284,7 @@ check_binwidth <- function(binwidth) {
 #' @keywords internal
 #' @importFrom dplyr collect filter n summarise
 #' @importFrom stats quantile
+#' @export
 estimate_binwidth <- function(data, measure_col, min_bins = 20, max_bins = 60) {
   pay <- data |>
     filter(!is.na(.data[[measure_col]])) |>

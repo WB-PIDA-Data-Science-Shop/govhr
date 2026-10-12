@@ -181,13 +181,25 @@ compute_wagebill_analytics <- function(
   )
 }
 
-# add each contract's country from the establishment module, matched on
-# est_id only, so a gap in the establishment's dates does not lose its country
+#' Add each contract's country from the establishment module
+#'
+#' Matches on `est_id` only, so a gap in the establishment's dates does not
+#' lose its country. Any `country_code` already in `contracts` is replaced.
+#'
+#' @param contracts Data frame or remote database table (`tbl_dbi`) of
+#'   contracts, with an `est_id` column.
+#' @param establishment Data frame or remote database table of
+#'   establishments, with `est_id` and `country_code` columns.
+#'
+#' @returns `contracts` with a `country_code` column. An error if an `est_id`
+#'   has more than one country; a warning if an `est_id` is missing from
+#'   `establishment` (its `country_code` is `NA`).
+#'
 #' @importFrom dplyr across all_of any_of collect count distinct filter
 #'   left_join select
 #' @importFrom rlang .data
 #' @keywords internal
-#' @noRd
+#' @export
 add_country_code <- function(contracts, establishment){
   countries <- establishment |>
     select(all_of(c("est_id", "country_code"))) |>
@@ -228,15 +240,26 @@ add_country_code <- function(contracts, establishment){
   with_country
 }
 
-# convert pay columns to constant prices of base_month with deflate_to_real().
-# deflate_to_real() runs in R, so it is applied to the distinct countries and
-# dates only (a small table), and the resulting deflators are joined back. This
-# keeps a database table in the database.
+#' Convert pay columns to constant prices
+#'
+#' Converts pay columns to constant prices of `base_month` with
+#' [deflate_to_real()]. `deflate_to_real()` runs in R, so it is applied to the
+#' distinct countries and dates only (a small table), and the resulting
+#' deflators are joined back. This keeps a database table in the database.
+#'
+#' @param data Data frame or remote database table (`tbl_dbi`) with
+#'   `country_code` and `ref_date` columns.
+#' @param pay_cols Character vector of the pay columns to convert.
+#' @param base_month The base month passed to [deflate_to_real()].
+#'
+#' @returns `data` with `pay_cols` in constant prices. Rows with no
+#'   `country_code` get `NA`.
+#'
 #' @importFrom dplyr across all_of collect distinct filter left_join mutate
 #'   select
 #' @importFrom rlang .data
 #' @keywords internal
-#' @noRd
+#' @export
 deflate_pay_cols <- function(data, pay_cols, base_month){
   # rows with no country are left NA; add_country_code() already warned
   deflators <- data |>

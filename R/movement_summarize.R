@@ -106,6 +106,7 @@
 #' group labels, which SQL cannot paste).
 #'
 #' @keywords internal
+#' @export
 estimate_movement_rates <- function(contracts, ...) {
   UseMethod("estimate_movement_rates")
 }
@@ -465,6 +466,7 @@ estimate_movement_rates.default <- function(contracts, ...) {
 #' }
 #'
 #' @keywords internal
+#' @export
 roll_snapshot_pairs <- function(panel_dt, date_col, f, ...) {
   if (!data.table::is.data.table(panel_dt)) {
     stop("panel_dt must be a data.table.", call. = FALSE)

@@ -321,7 +321,20 @@ if (getRversion() >= "2.15.1") {
     "hire_rate",
     "separation_rate",
     # compute_wage
-    "wage_growth"
+    "wage_growth",
+    # estimate_progression_rates / compute_career_table
+    ".entry_pay",
+    ".next_pay",
+    ".next_pid",
+    ".pay",
+    ".tenure",
+    "expected_earnings",
+    "median_pay",
+    "n_pay",
+    "pay_growth",
+    "pay_index",
+    "projected_pay",
+    "start_tenure"
   ))
 }
 

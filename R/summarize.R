@@ -921,6 +921,17 @@ cp_ratio <- function(x, upper = 0.9, lower = 0.1, na.rm = TRUE) {
 }
 
 
+#' Share of each value in a vector
+#'
+#' For each element of `x`, returns the share of all elements of `x` that
+#' have the same value. `NA` counts as a value of its own.
+#'
+#' @param x A vector.
+#'
+#' @returns A numeric vector the same length as `x`.
+#'
+#' @keywords internal
+#' @export
 prop <- function(x) {
   # Count nonmissing values of x within each group
   tbl <- data.table::data.table(val = x)[, .N, by = val]

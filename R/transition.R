@@ -297,7 +297,19 @@ compute_transition.tbl_dbi <- function(
   transitions
 }
 
-# shared by both compute_transition() methods, so they warn identically
+#' Warn about records not unique by id and reference date
+#'
+#' Shared by both [compute_transition()] methods, so they warn identically.
+#'
+#' @param n_duplicates Number of duplicated records.
+#' @param n_rows Number of records dropped.
+#' @param n_ids Number of affected ids.
+#' @param id_col Name of the id column.
+#'
+#' @returns `NULL`, invisibly. Called for its warning.
+#'
+#' @keywords internal
+#' @export
 warn_duplicate_records <- function(n_duplicates, n_rows, n_ids, id_col) {
   warning(
     sprintf(
@@ -327,6 +339,7 @@ warn_duplicate_records <- function(n_duplicates, n_rows, n_ids, id_col) {
 #' @importFrom plotly layout plot_ly
 #' @importFrom stats median
 #' @keywords internal
+#' @export
 plot_transfer_heatmap <- function(data) {
   transfer <- data[["transfer"]]
 

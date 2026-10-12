@@ -192,6 +192,7 @@ compute_growth_summary <- function(data, group_col, measure_col = NULL) {
 #' @importFrom ggplot2 scale_color_manual
 #' @importFrom grDevices colorRampPalette
 #' @keywords internal
+#' @export
 group_color_scale <- function(values) {
   n_groups <- dplyr::n_distinct(values, na.rm = TRUE)
 

@@ -11,6 +11,7 @@
 #' @importFrom rlang syms expr !!!
 #' @importFrom dplyr filter
 #' @keywords internal
+#' @export
 drop_missing <- function(data, cols){
   conditions <- lapply(
     rlang::syms(cols),
@@ -35,6 +36,7 @@ drop_missing <- function(data, cols){
 #'
 #' @importFrom dplyr distinct mutate lag lead
 #' @keywords internal
+#' @export
 build_calendar <- function(data) {
   calendar <- data |>
     distinct(ref_date) |>
@@ -59,6 +61,7 @@ build_calendar <- function(data) {
 #' @return A factor the same length as `age`, with levels given by `labels`.
 #'
 #' @keywords internal
+#' @export
 cut_age <- function(
   age,
   breaks = c(-Inf, 20, 30, 40, 50, 60, Inf),
@@ -83,6 +86,7 @@ cut_age <- function(
 #'   if there are any.
 #'
 #' @keywords internal
+#' @export
 check_required_cols <- function(data, required_cols, arg = "data"){
   # colnames() rather than names(), which does not list a tbl_dbi's columns
   missing_cols <- setdiff(required_cols, colnames(data))
@@ -147,6 +151,7 @@ check_required_cols <- function(data, required_cols, arg = "data"){
 #' @return Does not return; always stops with an error.
 #'
 #' @keywords internal
+#' @export
 stop_unsupported_data <- function(x, arg = "data") {
   stop(
     "`", arg, "` must be a data frame or a lazy database table (tbl_dbi), ",
@@ -174,6 +179,7 @@ stop_unsupported_data <- function(x, arg = "data") {
 #' @importFrom dplyr across all_of any_of distinct filter inner_join select
 #' @importFrom rlang .data
 #' @keywords internal
+#' @export
 keep_active_contracts <- function(contracts, personnel){
   # one row per person and date, so the join does not duplicate contracts
   active_personnel <- personnel |>
@@ -194,6 +200,7 @@ keep_active_contracts <- function(contracts, personnel){
 #'
 #' @returns Invisible TRUE if valid, stops with error otherwise
 #' @keywords internal
+#' @export
 validate_column_exists <- function(dt, colname, varname) {
   if (!colname %in% names(dt)) {
     stop(
@@ -216,6 +223,7 @@ validate_column_exists <- function(dt, colname, varname) {
 #'
 #' @returns Invisible TRUE if valid, stops with error otherwise
 #' @keywords internal
+#' @export
 validate_columns_exist <- function(dt, colnames, varname) {
   missing_cols <- setdiff(colnames, names(dt))
 
@@ -239,6 +247,7 @@ validate_columns_exist <- function(dt, colnames, varname) {
 #'
 #' @returns Invisible TRUE if valid, stops with error otherwise
 #' @keywords internal
+#' @export
 validate_date_format <- function(date, varname) {
   # Accept both Date objects and character strings
   if (is.character(date)) {
@@ -277,12 +286,22 @@ validate_date_format <- function(date, varname) {
   return(date)
 }
 
-# Support a renamed argument for one deprecation cycle.
-#
-# Returns the value for the new argument, warning if the caller supplied the
-# old name instead. `old` defaults to NULL in the wrapping function, so a
-# non-NULL value means the caller explicitly passed the deprecated argument.
-#' @noRd
+#' Support a renamed argument for one deprecation cycle
+#'
+#' Returns the value for the new argument, warning if the caller supplied the
+#' old name instead. `old` defaults to `NULL` in the wrapping function, so a
+#' non-`NULL` value means the caller explicitly passed the deprecated argument.
+#'
+#' @param new The value of the new argument.
+#' @param old The value of the deprecated argument.
+#' @param old_name,new_name The names of the deprecated and new arguments,
+#'   used in the messages.
+#'
+#' @returns `new` if `old` is `NULL`; otherwise `old`, with a deprecation
+#'   warning. An error if both were supplied.
+#'
+#' @keywords internal
+#' @export
 resolve_renamed_arg <- function(new, old, old_name, new_name) {
   if (is.null(old)) {
     return(new)
