@@ -2,33 +2,55 @@
 % Please edit documentation in R/consistency.R
 \name{compute_record_consistency}
 \alias{compute_record_consistency}
-\title{Compute the proportion of consistent records in a data frame}
+\alias{compute_record_consistency.data.frame}
+\alias{compute_record_consistency.tbl_dbi}
+\title{Compute record consistency}
 \usage{
-compute_record_consistency(data, id_col, group_cols = NULL, digits = 2)
+compute_record_consistency(data, ...)
+
+\method{compute_record_consistency}{data.frame}(data, id_col, group_cols = NULL, digits = 2, ...)
+
+\method{compute_record_consistency}{tbl_dbi}(data, id_col, group_cols = NULL, digits = 2, ...)
 }
 \arguments{
-\item{data}{A data frame.}
+\item{data}{Data frame or remote database table (\code{tbl_dbi}) with \code{ref_date}
+and the columns named in \code{id_col} and \code{group_cols}.}
 
-\item{id_col}{A string specifying the name of the column that uniquely identifies records (e.g., "personnel_id" or "contract_id").}
+\item{...}{Arguments passed to methods.}
 
-\item{group_cols}{A character vector specifying the names of the columns to group by. Default is NULL, which means no grouping.}
+\item{id_col}{Character. Column identifying the entity, such as
+\code{"personnel_id"}.}
 
-\item{digits}{An integer specifying the number of decimal places to round the result to. Default is 2.}
+\item{group_cols}{Character vector of columns to group by, such as
+\code{"ref_date"}, or \code{NULL} (default) for the whole table.}
+
+\item{digits}{Whole number. Decimal places to round to. Default \code{2}.}
 }
 \value{
-A data frame with the proportion of consistent records in the data frame, optionally by group.
+A table with the grouping columns and \code{record_consistency}, from 0
+to 100. A data.table for data frame input; a lazy table for \code{tbl_dbi}
+input (use \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
-Compute the proportion of consistent records in a data frame
+Computes, for each group, the share of identifiers that appear in exactly
+one record per reference date, as a percentage.
 }
 \details{
-A record is considered consistent if it has a unique identifier and all its associated values are consistent.
-The function computes the proportion of consistent records in the data frame, optionally grouped by specified columns.
+Records are counted per identifier, \code{ref_date} and group. A combination
+with exactly one record is consistent, and \code{record_consistency} is the
+share of consistent combinations in each group. Missing identifiers and
+groups are kept as their own value.
 }
 \examples{
-govhr::compute_record_consistency(
- data = govhr::bra_hrmis_personnel,
- id_col = "personnel_id",
+hr <- data.frame(
+  personnel_id = c("a", "a", "b"),
+  ref_date = as.Date("2020-01-01")
 )
+compute_record_consistency(hr, id_col = "personnel_id")
 
+}
+\seealso{
+\code{\link[=compute_value_consistency]{compute_value_consistency()}}, which checks that each identifier
+keeps the same value. \code{\link[=compute_global_consistency]{compute_global_consistency()}}, which combines
+both.
 }

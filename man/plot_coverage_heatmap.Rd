@@ -2,20 +2,32 @@
 % Please edit documentation in R/qcheck_plots.R
 \name{plot_coverage_heatmap}
 \alias{plot_coverage_heatmap}
-\title{Plot coverage heatmap by group}
+\title{Plot coverage by variable and group}
 \usage{
-plot_coverage_heatmap(data, group_col = NULL, group = NULL)
+plot_coverage_heatmap(data, group_col = "ref_date")
 }
 \arguments{
-\item{data}{A data frame.}
+\item{data}{Data frame with \code{variable}, \code{coverage} and the column named in
+\code{group_col}, such as the output of \code{compute_coverage(group_cols = group_col)}.}
 
-\item{group_col}{A string. Grouping variable.}
-
-\item{group}{Deprecated. Use \code{group_col} instead.}
+\item{group_col}{Character. Column whose values run across the heatmap.
+Default \code{"ref_date"}.}
 }
 \value{
-A plotly object representing a heatmap of coverage values by group and variable.
+A plotly object.
 }
 \description{
-Plot coverage heatmap by group
+Plots a heatmap of coverage, with groups across and variables down, from
+coverage already computed.
+}
+\examples{
+hr <- data.frame(
+  ref_date = as.Date(c("2020-01-01", "2020-01-01", "2021-01-01")),
+  gender = c("F", NA, "M")
+)
+plot_coverage_heatmap(compute_coverage(hr, group_cols = "ref_date"))
+
+}
+\seealso{
+\code{\link[=compute_coverage]{compute_coverage()}}, which computes the coverage.
 }

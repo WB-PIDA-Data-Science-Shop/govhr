@@ -2,38 +2,44 @@
 % Please edit documentation in R/consistency.R
 \name{compute_global_consistency}
 \alias{compute_global_consistency}
-\title{Compute the proportion of consistent records and values in a data frame.}
+\title{Compute global consistency}
 \usage{
 compute_global_consistency(data, id_col, value_cols, digits = 2)
 }
 \arguments{
-\item{data}{A data frame.}
+\item{data}{Data frame or remote database table (\code{tbl_dbi}) with \code{ref_date}
+and the columns named in \code{id_col} and \code{group_cols}.}
 
-\item{id_col}{A string specifying the name of the column that uniquely identifies records.}
+\item{id_col}{Character. Column identifying the entity, such as
+\code{"personnel_id"}.}
 
-\item{value_cols}{A character vector specifying the name(s) of columns whose values
-are to be checked for consistency. Value consistency is computed separately for
-each column and averaged across columns before being combined with record consistency.}
+\item{value_cols}{Character vector of columns whose values should stay the
+same for each identifier.}
 
-\item{digits}{An integer specifying the number of decimal places to round the result to. Default is 2.}
+\item{digits}{Whole number. Decimal places to round to. Default \code{2}.}
 }
 \value{
-A numeric value representing the proportion of consistent records and values in the data frame.
+A number from 0 to 100.
 }
 \description{
-Compute the proportion of consistent records and values in a data frame.
+Averages record consistency and the value consistency of the columns in
+\code{value_cols} into a single percentage for the whole table.
 }
 \details{
-Consistency is defined as the proportion of records and values that are consistent
-across the dataset. A record is considered consistent if it has a unique identifier and all
-its associated values are consistent. A value is considered consistent if it does not
-contradict other values for the same record.
+The value consistencies of \code{value_cols} are averaged first, and that
+average weighs as much as record consistency. Intermediate results are not
+rounded, so rounding errors do not compound.
 }
 \examples{
-govhr::compute_global_consistency(
-  data = govhr::bra_hrmis_personnel,
-  id_col = "personnel_id",
-  value_cols = c("birth_date")
+hr <- data.frame(
+  personnel_id = c("a", "a", "b"),
+  ref_date = as.Date(c("2020-01-01", "2021-01-01", "2020-01-01")),
+  birth_date = as.Date(c("1980-01-01", "1981-01-01", "1990-01-01"))
 )
+compute_global_consistency(hr, "personnel_id", value_cols = "birth_date")
 
+}
+\seealso{
+\code{\link[=compute_record_consistency]{compute_record_consistency()}} and
+\code{\link[=compute_value_consistency]{compute_value_consistency()}}, which it combines.
 }

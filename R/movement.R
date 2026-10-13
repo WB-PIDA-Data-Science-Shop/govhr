@@ -41,6 +41,13 @@ detect_personnel_event <- function(
   status_col,
   freq = "year"
 ) {
+  .Deprecated(
+    msg = paste0(
+      "`detect_personnel_event()` is deprecated and will be removed in a ",
+      "future release; use `detect_movement()` instead."
+    )
+  )
+
   # Convert to data.table
   dt <- data.table::as.data.table(data)
 
@@ -115,52 +122,321 @@ detect_personnel_event <- function(
   return(data_out)
 }
 
-#' Detect personnel retirement events
+#' Detect hires and separations
 #'
-#' Identifies personnel who retired, i.e., whose status changed from "active" to "inactive".
+#' Flags, for each active person and reference date, whether they were hired
+#' since the previous date and whether they are gone by the next date.
 #'
-#' @param data A data.frame or data.table with columns `personnel_id`, `ref_date`, and `status`.
+#' @param data Data frame or remote database table (`tbl_dbi`) with one row
+#'   per person-record. Must contain `personnel_id`, `ref_date` and the column
+#'   named in `status_col`.
+#' @param status_col Character. Column holding employment status. Only rows
+#'   equal to `"active"` are considered. Default `"employment_status"`.
+#' @param ... Arguments passed to methods.
 #'
-#' @returns A data.table with `personnel_id`, `ref_date`, and `type_event = "retire"`.
+#' @returns A table with one row per active person and `ref_date`, containing:
+#' \describe{
+#'   \item{personnel_id, ref_date}{The person and date.}
+#'   \item{prev_date, next_date}{The neighbouring dates found in the data,
+#'     which the person's status is compared with. `NA` on the first and last
+#'     date.}
+#'   \item{hire}{`TRUE` if the person was not active on `prev_date`. `NA` on
+#'     the first date, which has nothing to compare with.}
+#'   \item{separation}{`TRUE` if the person is not active on `next_date`. `NA`
+#'     on the last date.}
+#' }
+#' A data.table for data frame input; a lazy table for `tbl_dbi` input (use
+#' [dplyr::collect()] to bring it into memory).
 #'
-#' @importFrom data.table as.data.table shift
+#' @details
+#' The previous and next dates are the neighbouring dates found in the data,
+#' so the dates do not need to be evenly spaced. People with several contracts
+#' on a date appear once. A separation is any exit from active status,
+#' including retirement.
+#'
+#' @seealso [compute_movement()], which counts these hires and separations.
+#'   [detect_retirement()], which flags the retirements among the separations.
 #'
 #' @examples
-#' \dontrun{
-#' retire_events <- detect_retirement(personnel_df)
-#' }
+#' hr <- data.frame(
+#'   personnel_id = c(1, 2, 1, 3, 1, 3),
+#'   ref_date = as.Date(rep(c("2020-01-01", "2021-01-01", "2022-01-01"), each = 2)),
+#'   employment_status = "active"
+#' )
+#' detect_movement(hr)
+#'
 #' @export
-detect_retirement <- function(data) {
-  # Convert to data.table
+detect_movement <- function(data, ...) {
+  UseMethod("detect_movement")
+}
+
+#' @rdname detect_movement
+#' @importFrom data.table := as.data.table data.table fifelse setorderv shift
+#' @importFrom rlang check_dots_empty
+#' @export
+detect_movement.data.frame <- function(
+  data,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
   dt <- data.table::as.data.table(data)
 
-  # Ensure ordering by personnel and date
-  data.table::setorderv(dt, cols = c("personnel_id", "ref_date"))
+  # one row per person and date, so people with several contracts count once
+  person_dates <- unique(
+    dt[get(status_col) == "active", .(personnel_id, ref_date)]
+  )
 
-  # Create lag_status within each personnel
-  dt[,
-    lead_status := data.table::shift(employment_status, type = "lead"),
-    by = personnel_id
+  # previous and next date for each date in the data
+  dates <- sort(unique(person_dates[["ref_date"]]))
+  calendar <- data.table::data.table(
+    ref_date = dates,
+    prev_date = data.table::shift(dates),
+    next_date = data.table::shift(dates, type = "lead")
+  )
+
+  movement <- calendar[person_dates, on = "ref_date"]
+
+  # hired: no active record on the previous date. NA when there is no
+  # previous date to compare with
+  movement[, hire := data.table::fifelse(is.na(prev_date), NA, TRUE)]
+  movement[
+    person_dates,
+    on = .(personnel_id, prev_date = ref_date),
+    hire := FALSE
   ]
 
-  # Filter for retire events
-  retire_dt <- dt[
-    lead_status == "pensioner" & employment_status == "active",
-    .(personnel_id, ref_date)
+  # separated: no active record on the next date
+  movement[, separation := data.table::fifelse(is.na(next_date), NA, TRUE)]
+  movement[
+    person_dates,
+    on = .(personnel_id, next_date = ref_date),
+    separation := FALSE
   ]
 
-  # Add event type
-  retire_dt[, type_event := "retire"]
+  data.table::setorderv(movement, c("ref_date", "personnel_id"))
 
-  retire_dt <- retire_dt |>
-    convert_data(data)
+  movement[, .(personnel_id, ref_date, prev_date, next_date, hire, separation)]
+}
 
-  return(retire_dt)
+#' @rdname detect_movement
+#' @importFrom dplyr all_of anti_join distinct filter if_else inner_join
+#'   join_by left_join mutate select
+#' @importFrom rlang .data check_dots_empty
+#' @export
+detect_movement.tbl_dbi <- function(
+  data,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
+  # one row per person and date, so people with several contracts count once
+  person_dates <- data |>
+    filter(.data[[status_col]] == "active") |>
+    select(all_of(c("personnel_id", "ref_date"))) |>
+    distinct()
+
+  movement <- person_dates |>
+    inner_join(build_calendar(person_dates), by = "ref_date")
+
+  # hired: no active record on the previous date
+  hires <- movement |>
+    filter(!is.na(prev_date)) |>
+    anti_join(person_dates, by = join_by(personnel_id, prev_date == ref_date)) |>
+    select(all_of(c("personnel_id", "ref_date"))) |>
+    mutate(hired = 1)
+
+  # separated: no active record on the next date
+  separations <- movement |>
+    filter(!is.na(next_date)) |>
+    anti_join(person_dates, by = join_by(personnel_id, next_date == ref_date)) |>
+    select(all_of(c("personnel_id", "ref_date"))) |>
+    mutate(separated = 1)
+
+  movement |>
+    left_join(hires, by = c("personnel_id", "ref_date")) |>
+    left_join(separations, by = c("personnel_id", "ref_date")) |>
+    # NA when there is no previous (next) date to compare with
+    mutate(
+      hire = if_else(is.na(prev_date), NA, !is.na(hired)),
+      separation = if_else(is.na(next_date), NA, !is.na(separated))
+    ) |>
+    select(personnel_id, ref_date, prev_date, next_date, hire, separation)
+}
+
+#' Detect retirements
+#'
+#' Flags, for each active person and reference date, whether they leave active
+#' status by the next date into a pension, i.e. whether their next status
+#' after leaving is pensioner.
+#'
+#' @inheritParams detect_movement
+#' @param status_col Character. Column holding employment status, with active
+#'   personnel recorded as `"active"` and retirees as `"pensioner"`. Default
+#'   `"employment_status"`.
+#'
+#' @returns A table with one row per active person and `ref_date`, containing
+#'   `personnel_id`, `ref_date`, `next_date` (the next date found in the data)
+#'   and `retirement`: `TRUE` if the person retires by `next_date`, and `NA` on
+#'   the last date, which has nothing to compare with. A data.table for data
+#'   frame input; a lazy table for `tbl_dbi` input (use [dplyr::collect()] to
+#'   bring it into memory).
+#'
+#' @details
+#' A retirement is a separation whose next status is pensioner. A pension
+#' drawn alongside an active contract is therefore not a retirement.
+#'
+#' Pension registration can lag the exit, so the pensioner record may appear
+#' at any later date, not only the next one. A retirement is dated by the exit,
+#' not by the registration. A person who returns to active work before any
+#' pensioner record is not retired at the earlier exit. There is no limit on
+#' the lag, so an exit followed years later by a deferred pension also counts
+#' as a retirement.
+#'
+#' As in [detect_movement()], only dates with active personnel are compared,
+#' so pensioner records dated before the next such date are not seen, and an
+#' exit on the last such date is `NA`.
+#'
+#' @seealso [compute_retirement()], which counts these retirements.
+#'   [detect_movement()], which flags the separations they are drawn from.
+#'
+#' @examples
+#' hr <- data.frame(
+#'   personnel_id = c(1, 2, 1, 2, 2),
+#'   ref_date = as.Date(c(
+#'     "2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01", "2022-01-01"
+#'   )),
+#'   employment_status = c("active", "active", "pensioner", "active", "active")
+#' )
+#' detect_retirement(hr)
+#'
+#' @export
+detect_retirement <- function(data, ...) {
+  UseMethod("detect_retirement")
+}
+
+#' @rdname detect_retirement
+#' @importFrom data.table := as.data.table fifelse
+#' @importFrom rlang check_dots_empty
+#' @export
+detect_retirement.data.frame <- function(
+  data,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
+  dt <- data.table::as.data.table(data)
+  movement <- detect_movement(dt, status_col = status_col)
+
+  person_dates <- movement[, .(personnel_id, ref_date)]
+  pensioner_dates <- unique(
+    dt[get(status_col) == "pensioner", .(personnel_id, ref_date)]
+  )
+
+  # pension registration can lag the exit, so roll forward to the first
+  # pensioner and active records from the next date onwards rather than
+  # looking at the next date only
+  next_pension <- pensioner_dates[
+    movement,
+    on = .(personnel_id, ref_date = next_date),
+    roll = -Inf,
+    x.ref_date
+  ]
+  next_return <- person_dates[
+    movement,
+    on = .(personnel_id, ref_date = next_date),
+    roll = -Inf,
+    x.ref_date
+  ]
+
+  # NA when there is no next date to compare with. a pension that starts by
+  # the time the person returns, e.g. a retiree rehired on contract, still
+  # marks the exit as a retirement
+  movement[
+    , retirement := data.table::fifelse(
+      is.na(next_date),
+      NA,
+      separation &
+        !is.na(next_pension) &
+        (is.na(next_return) | next_pension <= next_return)
+    )
+  ]
+
+  movement[, .(personnel_id, ref_date, next_date, retirement)]
+}
+
+#' @rdname detect_retirement
+#' @importFrom dplyr all_of distinct filter if_else inner_join join_by
+#'   left_join mutate rename select summarise
+#' @importFrom rlang .data check_dots_empty
+#' @export
+detect_retirement.tbl_dbi <- function(
+  data,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
+  movement <- detect_movement(data, status_col = status_col)
+
+  person_dates <- movement |>
+    select(all_of(c("personnel_id", "ref_date")))
+
+  pensioner_dates <- data |>
+    filter(.data[[status_col]] == "pensioner") |>
+    select(all_of(c("personnel_id", "ref_date"))) |>
+    distinct()
+
+  separations <- movement |>
+    filter(separation)
+
+  # pension registration can lag the exit, so take the first pensioner and
+  # active records from the next date onwards. SQL has no rolling join, hence
+  # the inequality join and min()
+  first_record_after_exit <- function(records, name) {
+    separations |>
+      inner_join(
+        records |> rename(record_date = "ref_date"),
+        by = join_by(personnel_id, next_date <= record_date)
+      ) |>
+      summarise(
+        !!name := min(record_date, na.rm = TRUE),
+        .by = all_of(c("personnel_id", "ref_date"))
+      )
+  }
+
+  retired <- separations |>
+    inner_join(
+      first_record_after_exit(pensioner_dates, "next_pension"),
+      by = c("personnel_id", "ref_date")
+    ) |>
+    left_join(
+      first_record_after_exit(person_dates, "next_return"),
+      by = c("personnel_id", "ref_date")
+    ) |>
+    # a pension that starts by the time the person returns, e.g. a retiree
+    # rehired on contract, still marks the exit as a retirement
+    filter(is.na(next_return) | next_pension <= next_return) |>
+    select(all_of(c("personnel_id", "ref_date"))) |>
+    mutate(retired = 1)
+
+  movement |>
+    left_join(retired, by = c("personnel_id", "ref_date")) |>
+    # NA when there is no next date to compare with
+    mutate(retirement = if_else(is.na(next_date), NA, !is.na(retired))) |>
+    select(personnel_id, ref_date, next_date, retirement)
 }
 
 #' Classify personnel movement events
 #'
 #' This function classifies the personnel module into three types of movements: hires, fires, or retirements.
+#'
+#' This function is deprecated and will be removed in a future release. Use
+#' [detect_movement()] to flag hires and separations, and
+#' [detect_retirement()] to flag retirements.
 #'
 #' @param data A data frame containing personnel data.
 #' @param id_col The name of the column representing personnel IDs.
@@ -185,6 +461,14 @@ classify_personnel_event <- function(
   status_col,
   freq = "year"
 ) {
+  .Deprecated(
+    msg = paste0(
+      "`classify_personnel_event()` is deprecated and will be removed in a ",
+      "future release; use `detect_movement()` or `detect_retirement()` ",
+      "instead."
+    )
+  )
+
   if (event_type %in% c("hire", "fire")) {
     personnel_event <- detect_personnel_event(
       data = data,
@@ -196,7 +480,10 @@ classify_personnel_event <- function(
       freq = freq
     )
   } else if (event_type == "retirement") {
-    personnel_event <- detect_retirement(data)
+    personnel_event <- detect_retirement(data, status_col = status_col)[
+      retirement %in% TRUE,
+      .(personnel_id, ref_date, type_event = "retire")
+    ]
   }
 
   data <- data.table::copy(setDT(data))
@@ -227,84 +514,315 @@ classify_personnel_event <- function(
   data[]
 }
 
-#' Function to compute the total cost associated with personnel movements
+#' Compute the cost of hires and separations
 #'
-#' @param data A data frame containing the data to be processed.
-#' @param id_col The name of the column representing personnel IDs (default is "personnel_id").
-#' @param event_type A character vector indicating which movement event(s) to include (e.g., "hire", "fire", "retirement"). Multiple types can be supplied to compute costs for each type.
-#' @param start_date The start date for the classification period. Defaults to the minimum reference date found in `.data`.
-#' @param end_date The end date for the classification period. Defaults to the maximum reference date found in `.data`.
-#' @param status_col The name of the column representing employment status (default is "employment_status").
-#' @param freq The frequency of the reference dates. Defaults to a guess based on `.data`.
-#' @param measure_col The name of the column containing the cost/measure to sum.
-#' @param group_cols A character vector of column names to group the data by.
-#' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
+#' Adds up, for each reference date, the pay of the people who are hired or
+#' separate at that date.
 #'
-#' @importFrom data.table as.data.table setorderv rbindlist
+#' @param data Data frame or remote database table (`tbl_dbi`) with one row
+#'   per person-record. Must contain `personnel_id`, `ref_date` and the
+#'   columns named in `measure_col` and `status_col`.
+#' @param event_type Character vector of the movements to cost: `"hire"`,
+#'   `"separation"` or both. Default both.
+#' @param measure_col Character. Name of the pay column to add up.
+#' @param group_cols Character vector of columns to group by, such as
+#'   `"est_id"`, or `NULL` (default) for the whole workforce. Must not include
+#'   `ref_date`.
+#' @param status_col Character. Column holding employment status. Only rows
+#'   equal to `"active"` are considered. Default `"employment_status"`.
+#' @param ... Arguments passed to methods.
+#'
+#' @returns A table with one row per `ref_date`, group and movement type,
+#'   containing `movement_type` (one of `event_type`) and `movement_cost`, the
+#'   movers' pay. `movement_cost` is 0 when nobody moved, and `NA` on the date
+#'   with nothing to compare with: the first date for hires, the last for
+#'   separations. A data.table for data frame input; a lazy table for
+#'   `tbl_dbi` input (use [dplyr::collect()] to bring it into memory).
+#'
+#' @details
+#' Hires are costed at their pay on the date they are hired, and separations
+#' at their pay on their last active date. The pay on all of a mover's active
+#' records that date is added up, so people with several contracts are costed
+#' in full; pay recorded alongside, such as a pension, is not. Missing pay
+#' counts as 0.
+#'
+#' With `group_cols`, each mover's pay is counted in the group of the record it
+#' comes from. Every group with active personnel on a date appears for that
+#' date.
+#'
+#' @seealso [detect_movement()], which flags the movers.
+#'   [compute_movement()], which counts them.
+#'   [compute_retirement_cost()], which costs the retirements.
+#'
+#' @examples
+#' hr <- data.frame(
+#'   personnel_id = c(1, 1, 1, 2, 2),
+#'   ref_date = as.Date(c(
+#'     "2019-01-01", "2020-01-01", "2021-01-01", "2020-01-01", "2021-01-01"
+#'   )),
+#'   employment_status = "active",
+#'   wage = c(100, 100, 100, 250, 250)
+#' )
+#' compute_movement_cost(hr, event_type = "hire", measure_col = "wage")
 #'
 #' @export
-#' @returns A data frame containing the movement cost for each requested event type within the specified groups and reference dates.
-compute_movement_cost <- function(
+compute_movement_cost <- function(data, ...) {
+  UseMethod("compute_movement_cost")
+}
+
+#' @rdname compute_movement_cost
+#' @importFrom data.table as.data.table fcoalesce fifelse rbindlist setorderv
+#' @importFrom rlang arg_match check_dots_empty
+#' @export
+compute_movement_cost.data.frame <- function(
   data,
-  id_col = "personnel_id",
-  event_type,
-  start_date = NULL,
-  end_date = NULL,
-  status_col = "employment_status",
-  freq = NULL,
+  event_type = c("hire", "separation"),
   measure_col,
   group_cols = NULL,
-  latest_measure = FALSE
+  status_col = "employment_status",
+  ...
 ) {
+  rlang::check_dots_empty()
+  event_type <- rlang::arg_match(event_type, multiple = TRUE)
+
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
+  }
+
   dt <- data.table::as.data.table(data)
+  keys <- c("personnel_id", "ref_date")
 
-  if (is.null(start_date)) {
-    start_date <- as.character(min(dt[["ref_date"]]))
-  }
-  if (is.null(end_date)) {
-    end_date <- as.character(max(dt[["ref_date"]]))
-  }
-  if (is.null(freq)) {
-    freq <- guess_date_frequency(dt)
+  flags <- detect_movement(dt, status_col = status_col)[
+    , .(personnel_id, ref_date, hire, separation)
+  ]
+
+  # every active record carries its person's flags, so a mover's pay is added
+  # up over all their contracts that date
+  records <- flags[
+    dt[
+      get(status_col) == "active",
+      c(keys, group_cols, measure_col),
+      with = FALSE
+    ],
+    on = keys
+  ]
+
+  by_cols <- c("ref_date", group_cols)
+
+  costs <- lapply(event_type, function(movement) {
+    # flags are NA on a date with nothing to compare with, which carries
+    # through to the cost
+    cost <- records[
+      , .(
+        movement_type = movement,
+        movement_cost = sum(
+          data.table::fifelse(
+            get(movement),
+            data.table::fcoalesce(as.numeric(get(measure_col)), 0),
+            0
+          )
+        )
+      ),
+      by = by_cols
+    ]
+
+    data.table::setorderv(cost, by_cols)
+
+    cost
+  })
+
+  data.table::rbindlist(costs)
+}
+
+#' @rdname compute_movement_cost
+#' @importFrom dplyr all_of coalesce filter if_else inner_join mutate select
+#'   summarise union_all
+#' @importFrom purrr map reduce
+#' @importFrom rlang .data arg_match check_dots_empty
+#' @export
+compute_movement_cost.tbl_dbi <- function(
+  data,
+  event_type = c("hire", "separation"),
+  measure_col,
+  group_cols = NULL,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+  event_type <- rlang::arg_match(event_type, multiple = TRUE)
+
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
   }
 
-  by_cols <- c(group_cols, "ref_date")
+  keys <- c("personnel_id", "ref_date")
 
-  out <- data.table::rbindlist(
-    lapply(event_type, function(type) {
-      # classify personnel events
-      classified <- classify_personnel_event(
-        data = dt,
-        id_col = id_col,
-        event_type = type,
-        start_date = start_date,
-        end_date = end_date,
-        status_col = status_col,
-        freq = freq
+  flags <- detect_movement(data, status_col = status_col) |>
+    select(personnel_id, ref_date, hire, separation)
+
+  # every active record carries its person's flags, so a mover's pay is added
+  # up over all their contracts that date
+  records <- data |>
+    filter(.data[[status_col]] == "active") |>
+    select(all_of(c(keys, group_cols, measure_col))) |>
+    inner_join(flags, by = keys)
+
+  # flags are NULL on a date with nothing to compare with, so the SUM() is
+  # NULL there too
+  event_type |>
+    purrr::map(
+      \(movement) {
+        records |>
+          summarise(
+            movement_cost = sum(
+              if_else(.data[[movement]], coalesce(.data[[measure_col]], 0), 0),
+              na.rm = TRUE
+            ),
+            .by = all_of(c("ref_date", group_cols))
+          ) |>
+          mutate(movement_type = !!movement)
+      }
+    ) |>
+    purrr::reduce(union_all) |>
+    select(ref_date, all_of(group_cols), movement_type, movement_cost)
+}
+
+#' Compute the cost of retirements
+#'
+#' Adds up, for each reference date, the pay of the people who retire at that
+#' date.
+#'
+#' @inheritParams compute_movement_cost
+#' @param status_col Character. Column holding employment status, with active
+#'   personnel recorded as `"active"` and retirees as `"pensioner"`. Default
+#'   `"employment_status"`.
+#'
+#' @returns A table with one row per `ref_date` and group, containing
+#'   `retirement_cost`, the retirees' pay. `retirement_cost` is 0 when nobody
+#'   retired, and `NA` on the last date, which has nothing to compare with. A
+#'   data.table for data frame input; a lazy table for `tbl_dbi` input (use
+#'   [dplyr::collect()] to bring it into memory).
+#'
+#' @details
+#' Retirees are costed at their pay on their last active date. The pay on all
+#' of a retiree's active records that date is added up, so people with several
+#' contracts are costed in full; pay recorded alongside, such as a pension, is
+#' not. Missing pay counts as 0.
+#'
+#' With `group_cols`, each retiree's pay is counted in the group of the record
+#' it comes from. Every group with active personnel on a date appears for that
+#' date.
+#'
+#' @seealso [detect_retirement()], which flags the retirees.
+#'   [compute_retirement()], which counts them. [compute_movement_cost()],
+#'   which costs the hires and separations.
+#'
+#' @examples
+#' hr <- data.frame(
+#'   personnel_id = c(1, 2, 1, 2),
+#'   ref_date = as.Date(rep(c("2020-01-01", "2021-01-01"), each = 2)),
+#'   employment_status = c("active", "active", "pensioner", "active"),
+#'   wage = c(100, 250, 60, 250)
+#' )
+#' compute_retirement_cost(hr, measure_col = "wage")
+#'
+#' @export
+compute_retirement_cost <- function(data, ...) {
+  UseMethod("compute_retirement_cost")
+}
+
+#' @rdname compute_retirement_cost
+#' @importFrom data.table as.data.table fcoalesce fifelse setorderv
+#' @importFrom rlang check_dots_empty
+#' @export
+compute_retirement_cost.data.frame <- function(
+  data,
+  measure_col,
+  group_cols = NULL,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
+  }
+
+  dt <- data.table::as.data.table(data)
+  keys <- c("personnel_id", "ref_date")
+
+  flags <- detect_retirement(dt, status_col = status_col)[
+    , .(personnel_id, ref_date, retirement)
+  ]
+
+  # every active record carries its person's flag, so a retiree's pay is
+  # added up over all their contracts that date
+  records <- flags[
+    dt[
+      get(status_col) == "active",
+      c(keys, group_cols, measure_col),
+      with = FALSE
+    ],
+    on = keys
+  ]
+
+  by_cols <- c("ref_date", group_cols)
+
+  # the flag is NA on the last date, which carries through to the cost
+  cost <- records[
+    , .(
+      retirement_cost = sum(
+        data.table::fifelse(
+          retirement,
+          data.table::fcoalesce(as.numeric(get(measure_col)), 0),
+          0
+        )
       )
+    ),
+    by = by_cols
+  ]
 
-      # compute movement cost
-      classified[
-        type_event == type,
-        .(
-          movement_type = type,
-          measurement = measure_col,
-          movement_cost = sum(get(measure_col), na.rm = TRUE)
-        ),
-        keyby = by_cols
-      ]
-    })
-  )
+  data.table::setorderv(cost, by_cols)
 
-  data.table::setorderv(out, "ref_date")
+  cost[]
+}
 
-  if (latest_measure) {
-    latest_ref_date <- max(out[["ref_date"]])
+#' @rdname compute_retirement_cost
+#' @importFrom dplyr all_of coalesce filter if_else inner_join select summarise
+#' @importFrom rlang .data check_dots_empty
+#' @export
+compute_retirement_cost.tbl_dbi <- function(
+  data,
+  measure_col,
+  group_cols = NULL,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
 
-    out <- out[ref_date == latest_ref_date]
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
   }
 
-  out[]
+  keys <- c("personnel_id", "ref_date")
+
+  flags <- detect_retirement(data, status_col = status_col) |>
+    select(personnel_id, ref_date, retirement)
+
+  # every active record carries its person's flag, so a retiree's pay is
+  # added up over all their contracts that date
+  data |>
+    filter(.data[[status_col]] == "active") |>
+    select(all_of(c(keys, group_cols, measure_col))) |>
+    inner_join(flags, by = keys) |>
+    # the flag is NULL on the last date, so the SUM() is NULL there too
+    summarise(
+      retirement_cost = sum(
+        if_else(retirement, coalesce(.data[[measure_col]], 0), 0),
+        na.rm = TRUE
+      ),
+      .by = all_of(c("ref_date", group_cols))
+    )
 }
 
 #' Compute movements as hires and separations
@@ -361,7 +879,7 @@ compute_movement <- function(data, ...) {
 }
 
 #' @rdname compute_movement
-#' @importFrom data.table := .N as.data.table data.table fifelse setorderv shift
+#' @importFrom data.table := .N as.data.table setorderv
 #' @importFrom rlang check_dots_empty
 #' @export
 compute_movement.data.frame <- function(
@@ -377,38 +895,21 @@ compute_movement.data.frame <- function(
   }
 
   dt <- data.table::as.data.table(data)
-  active <- dt[get(status_col) == "active"]
 
-  # one row per person and date, so people with several contracts count once
-  person_dates <- unique(active[, .(personnel_id, ref_date)])
+  # one row per person, date and group, so people with several contracts
+  # count once
   person_groups <- unique(
-    active[, c("personnel_id", "ref_date", group_cols), with = FALSE]
+    dt[
+      get(status_col) == "active",
+      c("personnel_id", "ref_date", group_cols),
+      with = FALSE
+    ]
   )
 
-  # previous and next date for each date in the data
-  dates <- sort(unique(person_dates$ref_date))
-  calendar <- data.table::data.table(
-    ref_date = dates,
-    prev_date = data.table::shift(dates),
-    next_date = data.table::shift(dates, type = "lead")
-  )
-
-  events <- calendar[person_dates, on = "ref_date"]
-
-  # hired: no active record on the previous date. NA when there is no
-  # previous date to compare with
-  events[, hire := data.table::fifelse(is.na(prev_date), NA, TRUE)]
-  events[person_dates, on = .(personnel_id, prev_date = ref_date), hire := FALSE]
-
-  # separated: no active record on the next date
-  events[, separation := data.table::fifelse(is.na(next_date), NA, TRUE)]
-  events[
-    person_dates,
-    on = .(personnel_id, next_date = ref_date),
-    separation := FALSE
-  ]
-
-  movement <- events[person_groups, on = c("personnel_id", "ref_date")][
+  movement <- detect_movement(dt, status_col = status_col)[
+    person_groups,
+    on = c("personnel_id", "ref_date")
+  ][
     , .(
       headcount = .N,
       hires = sum(hire),
@@ -429,8 +930,8 @@ compute_movement.data.frame <- function(
 }
 
 #' @rdname compute_movement
-#' @importFrom dplyr all_of anti_join coalesce distinct filter if_else inner_join
-#'   join_by left_join mutate n select summarise
+#' @importFrom dplyr all_of distinct filter if_else inner_join mutate n select
+#'   summarise
 #' @importFrom rlang .data check_dots_empty
 #' @export
 compute_movement.tbl_dbi <- function(
@@ -445,55 +946,28 @@ compute_movement.tbl_dbi <- function(
     stop("`ref_date` should not be included in `group_cols`")
   }
 
-  active <- data |>
-    filter(.data[[status_col]] == "active")
-
-  # one row per person and date, so people with several contracts count once
-  person_dates <- active |>
-    select(all_of(c("personnel_id", "ref_date"))) |>
-    distinct()
-
-  person_groups <- active |>
+  # one row per person, date and group, so people with several contracts
+  # count once
+  person_groups <- data |>
+    filter(.data[[status_col]] == "active") |>
     select(all_of(c("personnel_id", "ref_date", group_cols))) |>
     distinct()
 
-  # previous and next date for each date in the data
-  calendar <- build_calendar(person_dates)
-
-  events <- person_dates |>
-    inner_join(calendar, by = "ref_date")
-
-  # hired: no active record on the previous date
-  hires <- events |>
-    filter(!is.na(prev_date)) |>
-    anti_join(person_dates, by = join_by(personnel_id, prev_date == ref_date)) |>
-    select(all_of(c("personnel_id", "ref_date"))) |>
-    mutate(hire = 1)
-
-  # separated: no active record on the next date
-  separations <- events |>
-    filter(!is.na(next_date)) |>
-    anti_join(person_dates, by = join_by(personnel_id, next_date == ref_date)) |>
-    select(all_of(c("personnel_id", "ref_date"))) |>
-    mutate(separation = 1)
-
   person_groups |>
-    inner_join(calendar, by = "ref_date") |>
-    left_join(hires, by = c("personnel_id", "ref_date")) |>
-    left_join(separations, by = c("personnel_id", "ref_date")) |>
-    # SQL's SUM() returns NULL, not 0, when nobody was hired (separated), so
-    # people without an event are counted as 0 first
+    inner_join(
+      detect_movement(data, status_col = status_col),
+      by = c("personnel_id", "ref_date")
+    ) |>
+    # hire (separation) is NULL on the first (last) date, so its SUM() stays
+    # NULL there. counted as doubles, since some backends, such as SQLite,
+    # divide integers without the fraction in the rates
     summarise(
       headcount = n(),
-      hires = sum(coalesce(hire, 0), na.rm = TRUE),
-      separations = sum(coalesce(separation, 0), na.rm = TRUE),
-      .by = all_of(c("ref_date", "prev_date", "next_date", group_cols))
+      hires = sum(if_else(hire, 1, 0), na.rm = TRUE),
+      separations = sum(if_else(separation, 1, 0), na.rm = TRUE),
+      .by = all_of(c("ref_date", group_cols))
     ) |>
-    # no previous (next) date to compare with, so hires (separations) are
-    # unknown
     mutate(
-      hires = if_else(is.na(prev_date), NA_real_, hires),
-      separations = if_else(is.na(next_date), NA_real_, separations),
       hire_rate = hires / headcount,
       separation_rate = separations / headcount,
       replacement_rate = hires / separations
@@ -501,6 +975,157 @@ compute_movement.tbl_dbi <- function(
     select(
       all_of(c("ref_date", group_cols)),
       headcount, hires, separations, hire_rate, separation_rate, replacement_rate
+    )
+}
+
+#' Compute retirements
+#'
+#' Counts, for each reference date, how many people are active and how many of
+#' them leave active status by the next date into a pension, i.e. whose next
+#' status after leaving is pensioner.
+#'
+#' @param data Data frame or remote database table (`tbl_dbi`) with one row
+#'   per person-record. Must contain `personnel_id`, `ref_date` and the column
+#'   named in `status_col`.
+#' @param group_cols Character vector of columns to group by, such as
+#'   `"est_id"`, or `NULL` (default) for the whole workforce. Must not include
+#'   `ref_date`.
+#' @param status_col Character. Column holding employment status, with active
+#'   personnel recorded as `"active"` and retirees as `"pensioner"`. Default
+#'   `"employment_status"`.
+#' @param ... Arguments passed to methods.
+#'
+#' @returns A table with one row per `ref_date` and group, containing:
+#' \describe{
+#'   \item{headcount}{Number of active people.}
+#'   \item{retirements}{Active people who are no longer active on the next
+#'     date and are next recorded as pensioners. `NA` on the last date, which
+#'     has nothing to compare with.}
+#'   \item{retirement_rate}{`retirements` divided by `headcount`.}
+#' }
+#' A data.table for data frame input; a lazy table for `tbl_dbi` input (use
+#' [dplyr::collect()] to bring it into memory).
+#'
+#' @details
+#' The next date is the neighbouring date found in the data, so the dates do
+#' not need to be evenly spaced. People are counted once per date, even if they
+#' hold several contracts. With `group_cols`, each person is counted in the
+#' group they belong to on that date.
+#'
+#' Pension registration can lag the exit, so the pensioner record may appear
+#' at any later date, not only the next one. A retirement is dated by the exit,
+#' not by the registration. A person who returns to active work before any
+#' pensioner record counts as a separation, not a retirement, at the earlier
+#' exit. There is no limit on the lag, so an exit followed years later by a
+#' deferred pension also counts as a retirement.
+#'
+#' @seealso [compute_movement()], whose separations include these retirements
+#'   and whose rates share their denominator. [detect_retirement()], which
+#'   flags the retirements of each person.
+#'
+#' @examples
+#' hr <- data.frame(
+#'   personnel_id = c(1, 2, 1, 2, 2),
+#'   ref_date = as.Date(c(
+#'     "2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01", "2022-01-01"
+#'   )),
+#'   employment_status = c("active", "active", "pensioner", "active", "active")
+#' )
+#' compute_retirement(hr)
+#'
+#' @export
+compute_retirement <- function(data, ...) {
+  UseMethod("compute_retirement")
+}
+
+#' @rdname compute_retirement
+#' @importFrom data.table := .N as.data.table setorderv
+#' @importFrom rlang check_dots_empty
+#' @export
+compute_retirement.data.frame <- function(
+  data,
+  group_cols = NULL,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
+  }
+
+  dt <- data.table::as.data.table(data)
+
+  # one row per person, date and group, so people with several contracts
+  # count once
+  person_groups <- unique(
+    dt[
+      get(status_col) == "active",
+      c("personnel_id", "ref_date", group_cols),
+      with = FALSE
+    ]
+  )
+
+  retirement <- detect_retirement(dt, status_col = status_col)[
+    person_groups,
+    on = c("personnel_id", "ref_date")
+  ][
+    , .(
+      headcount = .N,
+      retirements = sum(retirement)
+    ),
+    by = c("ref_date", group_cols)
+  ][
+    , retirement_rate := retirements / headcount
+  ]
+
+  data.table::setorderv(retirement, c("ref_date", group_cols))
+
+  retirement[]
+}
+
+#' @rdname compute_retirement
+#' @importFrom dplyr all_of distinct filter if_else inner_join mutate n select
+#'   summarise
+#' @importFrom rlang .data check_dots_empty
+#' @export
+compute_retirement.tbl_dbi <- function(
+  data,
+  group_cols = NULL,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
+  }
+
+  # one row per person, date and group, so people with several contracts
+  # count once
+  person_groups <- data |>
+    filter(.data[[status_col]] == "active") |>
+    select(all_of(c("personnel_id", "ref_date", group_cols))) |>
+    distinct()
+
+  person_groups |>
+    inner_join(
+      detect_retirement(data, status_col = status_col),
+      by = c("personnel_id", "ref_date")
+    ) |>
+    # retirement is NULL on the last date, so its SUM() stays NULL there.
+    # counted as doubles, since some backends, such as SQLite, divide integers
+    # without the fraction in retirement_rate
+    summarise(
+      headcount = n(),
+      retirements = sum(if_else(retirement, 1, 0), na.rm = TRUE),
+      .by = all_of(c("ref_date", group_cols))
+    ) |>
+    mutate(retirement_rate = retirements / headcount) |>
+    select(
+      all_of(
+        c("ref_date", group_cols, "headcount", "retirements", "retirement_rate")
+      )
     )
 }
 

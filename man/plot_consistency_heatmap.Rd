@@ -2,22 +2,38 @@
 % Please edit documentation in R/qcheck_plots.R
 \name{plot_consistency_heatmap}
 \alias{plot_consistency_heatmap}
-\title{Plot consistency heatmap by group}
+\title{Plot value consistency by variable and group}
 \usage{
-plot_consistency_heatmap(data, id_col, group_cols, group = NULL)
+plot_consistency_heatmap(data, group_col = "ref_date")
 }
 \arguments{
-\item{data}{A data frame.}
+\item{data}{Data frame with \code{variable}, \code{value_consistency} and the column
+named in \code{group_col}: one row per group and variable, such as
+\code{\link[=compute_value_consistency]{compute_value_consistency()}} results for several value columns stacked
+with a \code{variable} column naming each.}
 
-\item{id_col}{A string. The column name of the unique identifier for each record.}
-
-\item{group_cols}{A string. The column name of the grouping variable (e.g., "ref_date").}
-
-\item{group}{Deprecated. Use \code{group_cols} instead.}
+\item{group_col}{Character. Column whose values run across the heatmap.
+Default \code{"ref_date"}.}
 }
 \value{
-A plotly heatmap object representing consistency values by group and variable.
+A plotly object.
 }
 \description{
-Plot consistency heatmap by group
+Plots a heatmap of value consistency, with groups across and variables
+down, from consistency already computed.
+}
+\examples{
+hr <- data.frame(
+  personnel_id = c("a", "a", "b"),
+  ref_date = as.Date(c("2020-01-01", "2021-01-01", "2020-01-01")),
+  birth_date = as.Date(c("1980-01-01", "1981-01-01", "1990-01-01"))
+)
+hr |>
+  compute_value_consistency("personnel_id", "birth_date", group_cols = "ref_date") |>
+  transform(variable = "birth_date") |>
+  plot_consistency_heatmap()
+
+}
+\seealso{
+\code{\link[=compute_value_consistency]{compute_value_consistency()}}, which computes the consistency.
 }

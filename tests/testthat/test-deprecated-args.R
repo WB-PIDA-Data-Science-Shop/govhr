@@ -35,9 +35,9 @@ expect_deprecated <- function(res, arg) {
 test_that("`group` still works and matches `group_cols`", {
   data <- make_panel()
 
-  res <- with_warnings(compute_coverage(data, group = "gender"))
+  res <- with_warnings(compute_cross_section(data, group = "gender"))
   expect_deprecated(res, "group")
-  expect_equal(res$value, compute_coverage(data, group_cols = "gender"))
+  expect_equal(res$value, compute_cross_section(data, group_cols = "gender"))
 })
 
 test_that("`group` still works and matches `group_col`", {
@@ -100,7 +100,12 @@ test_that("supplying both the old and the new name is an error", {
 
   expect_error(
     suppressWarnings(
-      compute_coverage(data, group_cols = "gender", group = "gender")
+      compute_growth(
+        data,
+        group_col = "gender",
+        group = "gender",
+        measure_col = "wage"
+      )
     ),
     "not both"
   )

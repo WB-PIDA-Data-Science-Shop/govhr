@@ -590,61 +590,154 @@ compute_quantile <- function(
   out[]
 }
 
-#' Function to compute the compression ratio
+#' Compute the compression ratio of a measure
 #'
-#' @param data A data frame.
-#' @param group_cols A character vector of column names to group the data by.
-#' @param percentiles A numeric vector of length 3 indicating the upper, middle, and lower percentiles to compute (default is c(0.9, 0.5, 0.1)).
-#' @param measure_col The name of the column for which the compression ratio will be computed.
-#' @param latest_measure A logical value indicating whether to return only the measures for the latest reference date.
+#' Computes, for each group and reference date, an upper, middle and lower
+#' percentile of `measure_col`, by default the 90th, 50th and 10th. The spread
+#' between the upper and lower percentiles shows how compressed pay is.
 #'
-#' @returns A data frame containing the 90th, 50th, and 10th percentiles for the specified measure column within the specified groups and reference dates.
+#' @param data Data frame or remote database table (`tbl_dbi`) containing
+#'   `ref_date` and the columns named in `measure_col` and `group_cols`.
+#' @param measure_col Character. Numeric column to compute the percentiles of.
+#' @param group_cols Character vector of columns to group by, or `NULL`
+#'   (default) for no grouping. Must not include `ref_date`.
+#' @param percentiles Numeric vector of length 3 with the upper, middle and
+#'   lower percentiles, as proportions. Default `c(0.9, 0.5, 0.1)`.
+#' @param latest_measure Logical. Restrict to the latest reference date.
+#'   Default `FALSE`.
+#' @param ... Arguments passed to methods.
 #'
-#' @importFrom data.table as.data.table setorderv
-#' @importFrom collapse fquantile
+#' @returns A table with one row per group and reference date, containing the
+#'   grouping columns, `ref_date`, `percentile_upper`, `percentile_50` (the
+#'   middle percentile, whichever `percentiles[2]` is) and `percentile_lower`.
+#'   A data.table for data frame input; a lazy table for `tbl_dbi` input (use
+#'   [dplyr::collect()] to bring it into memory).
+#'
+#' @details
+#' Percentiles are interpolated between neighbouring values, as in
+#' `stats::quantile(type = 7)`. Records with a missing `measure_col` are left
+#' out. Missing groups are kept as their own group.
+#'
+#' With `latest_measure = TRUE`, the latest date is the latest with a
+#' non-missing `measure_col` across all of `data`, not within each group.
+#'
+#' @seealso [compute_decile()], which summarises the whole distribution by
+#'   decile. [plot_compression_ratio()], which draws the result.
+#'
+#' @examples
+#' hr <- data.frame(
+#'   ref_date = as.Date("2020-01-01"),
+#'   wage = 1:11
+#' )
+#' compute_compression_ratio(hr, measure_col = "wage")
 #'
 #' @export
-compute_compression_ratio <- function(
+compute_compression_ratio <- function(data, ...) {
+  UseMethod("compute_compression_ratio")
+}
+
+#' @rdname compute_compression_ratio
+#' @importFrom collapse fquantile
+#' @importFrom data.table as.data.table setorderv
+#' @importFrom rlang check_dots_empty
+#' @export
+compute_compression_ratio.data.frame <- function(
   data,
+  measure_col,
   group_cols = NULL,
   percentiles = c(0.9, 0.5, 0.1),
-  measure_col,
-  latest_measure = FALSE
+  latest_measure = FALSE,
+  ...
 ) {
-  # consider generalizing this function to compute any percentile, not just 90th, 50th, and 10th
+  rlang::check_dots_empty()
+
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
+  }
+
   dt <- data.table::as.data.table(data)
+  measured <- dt[!is.na(get(measure_col))]
+
+  if (latest_measure) {
+    measured <- measured[ref_date == max(ref_date, na.rm = TRUE)]
+  }
 
   by_cols <- c(group_cols, "ref_date")
 
-  out <- dt[
-    !is.na(get(measure_col)),
-    .(
+  ratio <- measured[
+    , .(
       percentile_upper = collapse::fquantile(
         get(measure_col),
         probs = percentiles[1],
-        na.rm = TRUE
+        names = FALSE
       ),
       percentile_50 = collapse::fquantile(
         get(measure_col),
         probs = percentiles[2],
-        na.rm = TRUE
+        names = FALSE
       ),
       percentile_lower = collapse::fquantile(
         get(measure_col),
         probs = percentiles[3],
-        na.rm = TRUE
+        names = FALSE
       )
     ),
-    keyby = by_cols
+    by = by_cols
   ]
 
-  if (latest_measure && group_cols != "ref_date") {
-    out <- out[ref_date == max(ref_date)]
+  data.table::setorderv(ratio, by_cols)
+
+  ratio[]
+}
+
+#' @rdname compute_compression_ratio
+#' @importFrom dplyr all_of filter summarise
+#' @importFrom rlang .data check_dots_empty
+#' @importFrom stats quantile
+#' @export
+compute_compression_ratio.tbl_dbi <- function(
+  data,
+  measure_col,
+  group_cols = NULL,
+  percentiles = c(0.9, 0.5, 0.1),
+  latest_measure = FALSE,
+  ...
+) {
+  rlang::check_dots_empty()
+
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
   }
 
-  data.table::setorderv(out, by_cols)
+  measured <- data |>
+    dplyr::filter(!is.na(.data[[measure_col]]))
 
-  out[]
+  if (latest_measure) {
+    measured <- measured |>
+      dplyr::filter(ref_date == max(ref_date, na.rm = TRUE))
+  }
+
+  # quantile() translates to an interpolated percentile, such as duckdb's
+  # quantile_cont(), matching the data frame method
+  measured |>
+    dplyr::summarise(
+      percentile_upper = quantile(
+        .data[[measure_col]],
+        !!percentiles[1],
+        na.rm = TRUE
+      ),
+      percentile_50 = quantile(
+        .data[[measure_col]],
+        !!percentiles[2],
+        na.rm = TRUE
+      ),
+      percentile_lower = quantile(
+        .data[[measure_col]],
+        !!percentiles[3],
+        na.rm = TRUE
+      ),
+      .by = dplyr::all_of(c(group_cols, "ref_date"))
+    )
 }
 
 #' Compute time trend

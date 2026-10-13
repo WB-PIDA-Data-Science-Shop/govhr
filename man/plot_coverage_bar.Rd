@@ -2,26 +2,29 @@
 % Please edit documentation in R/qcheck_plots.R
 \name{plot_coverage_bar}
 \alias{plot_coverage_bar}
-\title{Plot coverage by group (coloured bar chart)}
+\title{Plot coverage by variable}
 \usage{
 plot_coverage_bar(data)
 }
 \arguments{
-\item{data}{A data frame. Typically the contract, personnel, or
-establishment dataset for the active module.}
+\item{data}{Data frame with \code{variable} and \code{coverage}, such as the output
+of \code{\link[=compute_coverage]{compute_coverage()}} without grouping.}
 }
 \value{
 A ggplot2 object.
 }
 \description{
-Computes per-group coverage using \code{\link[=compute_coverage]{compute_coverage()}} (without
-\code{ref_date}, not aggregated) and renders a horizontal bar chart coloured
-green-yellow-red according to the same cutpoints used by the value boxes:
+Plots one bar per variable with its coverage, coloured by coverage tier,
+from coverage already computed.
 }
 \details{
-\itemize{
-\item \strong{High (>=80\%)} — green (\verb{#388e3c})
-\item \strong{Medium (50-79\%)} — yellow (\verb{#f9a825})
-\item \strong{Low (<50\%)} — red (\verb{#d32f2f})
+Coverage below 50\% is low, from 50\% to 79\% medium, and from 80\% high.
 }
+\examples{
+hr <- data.frame(gender = c("F", NA, "M"), grade = c(NA, NA, "G1"))
+plot_coverage_bar(compute_coverage(hr))
+
+}
+\seealso{
+\code{\link[=compute_coverage]{compute_coverage()}}, which computes the coverage.
 }

@@ -2,27 +2,38 @@
 % Please edit documentation in R/qcheck_plots.R
 \name{plot_coverage_trend}
 \alias{plot_coverage_trend}
-\title{Plot Coverage Over Time}
+\title{Plot coverage over time}
 \usage{
-plot_coverage_trend(data, group_col, toggle_growth = FALSE, group = NULL)
+plot_coverage_trend(data, group_col = "ref_date", toggle_growth = FALSE)
 }
 \arguments{
-\item{data}{A data frame. Typically the contract, personnel, or
-establishment dataset for the active module.}
+\item{data}{Data frame with \code{ref_date}, \code{coverage} and the column named in
+\code{group_col}, such as the output of
+\code{compute_coverage(include_ref_date = TRUE, aggregate = TRUE)}.}
 
-\item{group_col}{A string. Grouping variable inherited from the
-\code{coverage_group} UI input (e.g. \code{"ref_date"}, \code{"grade_id"}).}
+\item{group_col}{Character. Column to draw one line per group, or
+\code{"ref_date"} (default) for a single line.}
 
-\item{toggle_growth}{Logical. When \code{TRUE} the y-axis switches to a
-baseline-index view (first period = 100). Defaults to \code{FALSE}.}
-
-\item{group}{Deprecated. Use \code{group_col} instead.}
+\item{toggle_growth}{Logical. Show coverage as a baseline index, with each
+group's first date at 100. Default \code{FALSE}.}
 }
 \value{
 A ggplot2 object.
 }
 \description{
-Computes coverage using \code{\link[=compute_coverage]{compute_coverage()}} (with \code{ref_date} always
-included, aggregated across variables) and renders a trend line via
-\code{\link[=plot_trend]{plot_trend()}}.
+Plots coverage for each reference date, one line per group, from coverage
+already computed.
+}
+\examples{
+hr <- data.frame(
+  ref_date = as.Date(c("2020-01-01", "2020-01-01", "2021-01-01")),
+  gender = c("F", NA, "M")
+)
+hr |>
+  compute_coverage(include_ref_date = TRUE, aggregate = TRUE) |>
+  plot_coverage_trend()
+
+}
+\seealso{
+\code{\link[=compute_coverage]{compute_coverage()}}, which computes the coverage.
 }

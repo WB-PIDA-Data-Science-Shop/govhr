@@ -1,86 +1,87 @@
-library(testthat)
-library(data.table)
-library(lubridate)
+# retirement_panel is in helper-retirement_panel.R
 
-# Example dataset
-set.seed(123)
-years <- 2015:2025
-n_personnel <- 1000
+# detect_movement() and detect_retirement() flag the active person-dates of
+# retirement_panel:
+# hires: p7 in 2022, returning after the 2021 gap
+# separations: p2, p5, p6 and p7 in 2020, p1 in 2021 and p7 in 2022
+# retirements: p5 and p6 in 2020, p1 in 2021 and p7 in 2022
 
-dt <- data.table(
-  personnel_id = rep(1:n_personnel, each = length(years)),
-  ref_date = rep(ymd(paste0(years, "-01-01")), times = n_personnel),
-  employment_status = sample(c("active", "pensioner"), n_personnel * length(years), replace = TRUE, prob = c(0.7,0.3))
-)
+flagged <- function(events, flag) {
+  events[events[[flag]] %in% TRUE, c("personnel_id", "ref_date")] |>
+    as.data.frame()
+}
 
-# Mock convert_data if not available
-convert_data <- function(dt_expanded, original_data) dt_expanded
+test_that("detect_movement flags hires and separations", {
+  result <- detect_movement(retirement_panel)
 
+  # one row per active person and date, so p3's two 2020 contracts count once
+  expect_equal(nrow(result), 15L)
 
-test_that("detect_retirement detects retirement events correctly", {
-  # Create a simple test case
-  dt2 <- data.table(
-    personnel_id = c(1,1,1,2,2),
-    ref_date = ymd(c("2020-01-01","2021-01-01","2022-01-01","2020-01-01","2021-01-01")),
-    employment_status = c("active","active","pensioner","active","pensioner")
+  # the first date has no previous date, and the last no next date
+  expect_true(all(is.na(result$hire[result$ref_date == as.Date("2020-01-01")])))
+  expect_true(all(is.na(result$separation[result$ref_date == as.Date("2023-01-01")])))
+
+  expect_equal(
+    flagged(result, "hire"),
+    data.frame(personnel_id = "p7", ref_date = as.Date("2022-01-01"))
   )
-
-  res <- detect_retirement(dt2)
-
-  # Check output columns
-  expect_true(all(c("personnel_id", "ref_date", "type_event") %in% names(res)))
-
-  # Should detect retirement for both personnel
-  expect_equal(res$personnel_id, c(1,2))
-  expect_equal(res$type_event, c("retire","retire"))
-
-  # Dates should be the last active before inactive
-  expect_equal(res$ref_date, ymd(c("2021-01-01","2020-01-01")))
-})
-
-test_that("detect_retirement ignores non-retire transitions", {
-  dt3 <- data.table(
-    personnel_id = 1:3,
-    ref_date = ymd(c("2020-01-01","2021-01-01","2022-01-01")),
-    employment_status = c("active","active","active")
+  expect_equal(
+    flagged(result, "separation"),
+    data.frame(
+      personnel_id = c("p2", "p5", "p6", "p7", "p1", "p7"),
+      ref_date = as.Date(c(rep("2020-01-01", 4), "2021-01-01", "2022-01-01"))
+    )
   )
-
-  res <- detect_retirement(dt3)
-  expect_equal(nrow(res), 0)
 })
 
-test_that("detect_retirement works with multiple personnel and years", {
-  dt_large <- copy(dt)
-  # Randomly set the last year of each personnel to inactive
-  dt_large[, employment_status := ifelse(ref_date == max(ref_date), "pensioner", "active"), by = personnel_id]
+test_that("detect_movement adds up to compute_movement()", {
+  counts <- detect_movement(retirement_panel) |>
+    dplyr::summarise(
+      hires = sum(.data[["hire"]]),
+      separations = sum(.data[["separation"]]),
+      .by = "ref_date"
+    )
 
-  res <- detect_retirement(dt_large)
+  expected <- compute_movement(retirement_panel)
 
-  # Should return one retirement per personnel
-  expect_equal(nrow(res), n_personnel)
-
-  # All type_event should be "retire"
-  expect_true(all(res$type_event == "retire"))
-
-  # All personnel_id should be valid
-  expect_true(all(res$personnel_id %in% 1:n_personnel))
+  expect_equal(counts$ref_date, expected$ref_date)
+  expect_equal(counts$hires, expected$hires)
+  expect_equal(counts$separations, expected$separations)
 })
 
-test_that("detect_retirement output is ordered correctly", {
-  res <- detect_retirement(dt)
+test_that("detect_retirement flags the separations into a pension", {
+  result <- detect_retirement(retirement_panel)
 
-  expect_s3_class(res, "data.table")
-  expect_true(all(c("personnel_id", "ref_date", "type_event") %in% names(res)))
-})
+  expect_true(all(is.na(result$retirement[result$ref_date == as.Date("2023-01-01")])))
 
-test_that("detect_retirement handles edge cases with single-year personnel", {
-  dt_edge <- data.table(
-    personnel_id = c(1,2),
-    ref_date = ymd(c("2020-01-01","2020-01-01")),
-    employment_status = c("active","pensioner")
+  # p7's 2020 exit is followed by a return to work, not a pension
+  expect_equal(
+    flagged(result, "retirement"),
+    data.frame(
+      personnel_id = c("p5", "p6", "p1", "p7"),
+      ref_date = as.Date(c("2020-01-01", "2020-01-01", "2021-01-01", "2022-01-01"))
+    )
   )
+})
 
-  res <- detect_retirement(dt_edge)
-  # No retire events possible because no lead status
-  expect_equal(nrow(res), 0)
+test_that("detect_movement and detect_retirement agree on a database table", {
+  skip_if_not_installed("dbplyr")
+  skip_if_not_installed("duckdb")
+
+  con <- DBI::dbConnect(duckdb::duckdb())
+  remote <- dplyr::copy_to(con, retirement_panel, "retirement_panel")
+
+  for (detect in list(detect_movement, detect_retirement)) {
+    expected <- detect(retirement_panel) |>
+      as.data.frame()
+
+    result <- detect(remote) |>
+      dplyr::collect() |>
+      dplyr::arrange(.data[["ref_date"]], .data[["personnel_id"]]) |>
+      as.data.frame()
+
+    expect_equal(result, expected, ignore_attr = TRUE)
+  }
+
+  DBI::dbDisconnect(con, shutdown = TRUE)
 })
