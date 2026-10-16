@@ -1,3 +1,5 @@
+# govhr 0.4.2
+
 # govhr 0.4.1
 This release:
 - Standardizes an architecture for workforce and wage bill analytics.
