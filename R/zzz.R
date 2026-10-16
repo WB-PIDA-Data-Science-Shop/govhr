@@ -303,6 +303,9 @@ if (getRversion() >= "2.15.1") {
     "next_date",
     "hire_rate",
     "separation_rate",
+    "prev_headcount",
+    "active_records",
+    "pay",
     # detect_movement, detect_retirement, compute_retirement
     "hired",
     "separated",

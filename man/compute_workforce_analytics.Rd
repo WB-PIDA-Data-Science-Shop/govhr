@@ -23,8 +23,8 @@ A named list of tables:
 \item{headcount_by_est}{Headcount and share of the total for each
 establishment and \code{ref_date}, from \code{\link[=compute_headcount]{compute_headcount()}}.}
 \item{movement}{Headcount, hires, separations and their rates for each
-\code{ref_date}, from \code{\link[=compute_movement]{compute_movement()}}. Hires are \code{NA} on the first date
-and separations on the last, since there is nothing to compare with.}
+\code{ref_date}, from \code{\link[=compute_movement]{compute_movement()}}. Hires and separations are \code{NA}
+on the first date, since there is nothing to compare with.}
 \item{transitions}{One row per move between establishments, with
 \code{personnel_id}, origin (\code{from}), destination (\code{to}), when the person
 joined the origin (\code{from_date}) and when they arrived at the destination

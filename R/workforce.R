@@ -20,8 +20,8 @@
 #'   \item{headcount_by_est}{Headcount and share of the total for each
 #'     establishment and `ref_date`, from [compute_headcount()].}
 #'   \item{movement}{Headcount, hires, separations and their rates for each
-#'     `ref_date`, from [compute_movement()]. Hires are `NA` on the first date
-#'     and separations on the last, since there is nothing to compare with.}
+#'     `ref_date`, from [compute_movement()]. Hires and separations are `NA`
+#'     on the first date, since there is nothing to compare with.}
 #'   \item{transitions}{One row per move between establishments, with
 #'     `personnel_id`, origin (`from`), destination (`to`), when the person
 #'     joined the origin (`from_date`) and when they arrived at the destination

@@ -48,25 +48,27 @@ equal to \code{"active"} are considered. Default \code{"employment_status"}.}
 \value{
 A table with one row per \code{ref_date}, group and movement type,
 containing \code{movement_type} (one of \code{event_type}) and \code{movement_cost}, the
-movers' pay. \code{movement_cost} is 0 when nobody moved, and \code{NA} on the date
-with nothing to compare with: the first date for hires, the last for
-separations. A data.table for data frame input; a lazy table for
-\code{tbl_dbi} input (use \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
+movers' pay. \code{movement_cost} is 0 when nobody moved, and \code{NA} on the
+first date, which has nothing to compare with, and for the separations of
+a group with nobody active on the previous date. A data.table for data frame
+input; a lazy table for \code{tbl_dbi} input (use \code{\link[dplyr:collect]{dplyr::collect()}} to bring
+it into memory).
 }
 \description{
-Adds up, for each reference date, the pay of the people who are hired or
-separate at that date.
+Adds up, for each reference date, the pay of the people who were hired or
+separated since the previous date.
 }
 \details{
-Hires are costed at their pay on the date they are hired, and separations
-at their pay on their last active date. The pay on all of a mover's active
-records that date is added up, so people with several contracts are costed
-in full; pay recorded alongside, such as a pension, is not. Missing pay
-counts as 0.
+As in \code{\link[=compute_movement]{compute_movement()}}, hires are counted on the date they are hired,
+and separations on the first date the person is absent. Hires are costed at
+their pay on the date they are hired, and separations at their pay on their
+last active date. The pay on all of a mover's active records that date is
+added up, so people with several contracts are costed in full; pay recorded
+alongside, such as a pension, is not. Missing pay counts as 0.
 
 With \code{group_cols}, each mover's pay is counted in the group of the record it
 comes from. Every group with active personnel on a date appears for that
-date.
+date, and a group that everyone left still appears on the next date.
 }
 \examples{
 hr <- data.frame(

@@ -154,6 +154,10 @@ detect_personnel_event <- function(
 #' on a date appear once. A separation is any exit from active status,
 #' including retirement.
 #'
+#' A separation is flagged on the person's last active date, which holds their
+#' pay and group, but happens by `next_date`, the first date they are absent.
+#' [compute_movement()] counts it on `next_date`.
+#'
 #' @seealso [compute_movement()], which counts these hires and separations.
 #'   [detect_retirement()], which flags the retirements among the separations.
 #'
@@ -286,7 +290,9 @@ detect_movement.tbl_dbi <- function(
 #'
 #' @details
 #' A retirement is a separation whose next status is pensioner. A pension
-#' drawn alongside an active contract is therefore not a retirement.
+#' drawn alongside an active contract is therefore not a retirement. As with
+#' separations, it is flagged on the person's last active date and counted by
+#' [compute_retirement()] on `next_date`, the first date they are absent.
 #'
 #' Pension registration can lag the exit, so the pensioner record may appear
 #' at any later date, not only the next one. A retirement is dated by the exit,
@@ -516,8 +522,8 @@ classify_personnel_event <- function(
 
 #' Compute the cost of hires and separations
 #'
-#' Adds up, for each reference date, the pay of the people who are hired or
-#' separate at that date.
+#' Adds up, for each reference date, the pay of the people who were hired or
+#' separated since the previous date.
 #'
 #' @param data Data frame or remote database table (`tbl_dbi`) with one row
 #'   per person-record. Must contain `personnel_id`, `ref_date` and the
@@ -534,21 +540,23 @@ classify_personnel_event <- function(
 #'
 #' @returns A table with one row per `ref_date`, group and movement type,
 #'   containing `movement_type` (one of `event_type`) and `movement_cost`, the
-#'   movers' pay. `movement_cost` is 0 when nobody moved, and `NA` on the date
-#'   with nothing to compare with: the first date for hires, the last for
-#'   separations. A data.table for data frame input; a lazy table for
-#'   `tbl_dbi` input (use [dplyr::collect()] to bring it into memory).
+#'   movers' pay. `movement_cost` is 0 when nobody moved, and `NA` on the
+#'   first date, which has nothing to compare with, and for the separations of
+#'   a group with nobody active on the previous date. A data.table for data frame
+#'   input; a lazy table for `tbl_dbi` input (use [dplyr::collect()] to bring
+#'   it into memory).
 #'
 #' @details
-#' Hires are costed at their pay on the date they are hired, and separations
-#' at their pay on their last active date. The pay on all of a mover's active
-#' records that date is added up, so people with several contracts are costed
-#' in full; pay recorded alongside, such as a pension, is not. Missing pay
-#' counts as 0.
+#' As in [compute_movement()], hires are counted on the date they are hired,
+#' and separations on the first date the person is absent. Hires are costed at
+#' their pay on the date they are hired, and separations at their pay on their
+#' last active date. The pay on all of a mover's active records that date is
+#' added up, so people with several contracts are costed in full; pay recorded
+#' alongside, such as a pension, is not. Missing pay counts as 0.
 #'
 #' With `group_cols`, each mover's pay is counted in the group of the record it
 #' comes from. Every group with active personnel on a date appears for that
-#' date.
+#' date, and a group that everyone left still appears on the next date.
 #'
 #' @seealso [detect_movement()], which flags the movers.
 #'   [compute_movement()], which counts them.
@@ -571,7 +579,7 @@ compute_movement_cost <- function(data, ...) {
 }
 
 #' @rdname compute_movement_cost
-#' @importFrom data.table as.data.table fcoalesce fifelse rbindlist setorderv
+#' @importFrom data.table := as.data.table fcoalesce fifelse melt
 #' @importFrom rlang arg_match check_dots_empty
 #' @export
 compute_movement_cost.data.frame <- function(
@@ -591,9 +599,10 @@ compute_movement_cost.data.frame <- function(
 
   dt <- data.table::as.data.table(data)
   keys <- c("personnel_id", "ref_date")
+  by_cols <- c("ref_date", group_cols)
 
   flags <- detect_movement(dt, status_col = status_col)[
-    , .(personnel_id, ref_date, hire, separation)
+    , .(personnel_id, ref_date, next_date, hire, separation)
   ]
 
   # every active record carries its person's flags, so a mover's pay is added
@@ -606,37 +615,51 @@ compute_movement_cost.data.frame <- function(
     ],
     on = keys
   ]
+  records[, pay := data.table::fcoalesce(as.numeric(get(measure_col)), 0)]
 
-  by_cols <- c("ref_date", group_cols)
+  # hire is NA on the first date, which carries through to its cost.
+  # next_date is the same for everyone on a date, so grouping by it only
+  # carries it along
+  costs <- records[
+    , .(
+      active_records = .N,
+      hire = sum(data.table::fifelse(hire, pay, 0)),
+      separation = sum(data.table::fifelse(separation, pay, 0))
+    ),
+    by = c(by_cols, "next_date")
+  ]
 
-  costs <- lapply(event_type, function(movement) {
-    # flags are NA on a date with nothing to compare with, which carries
-    # through to the cost
-    cost <- records[
-      , .(
-        movement_type = movement,
-        movement_cost = sum(
-          data.table::fifelse(
-            get(movement),
-            data.table::fcoalesce(as.numeric(get(measure_col)), 0),
-            0
-          )
-        )
-      ),
-      by = by_cols
-    ]
+  # as in compute_movement(), a separation moves down to the next date
+  previous <- costs[
+    !is.na(next_date),
+    c(group_cols, "next_date", "separation"),
+    with = FALSE
+  ]
+  data.table::setnames(previous, "next_date", "ref_date")
 
-    data.table::setorderv(cost, by_cols)
+  # a full join keeps a group that everyone left, which has no active records,
+  # and so no hires, on the date its separations move to
+  costs <- merge(
+    costs[, c(by_cols, "active_records", "hire"), with = FALSE],
+    previous,
+    by = by_cols,
+    all = TRUE
+  )
+  costs[is.na(active_records), hire := 0]
 
-    cost
-  })
-
-  data.table::rbindlist(costs)
+  data.table::melt(
+    costs,
+    id.vars = by_cols,
+    measure.vars = event_type,
+    variable.name = "movement_type",
+    value.name = "movement_cost",
+    variable.factor = FALSE
+  )
 }
 
 #' @rdname compute_movement_cost
-#' @importFrom dplyr all_of coalesce filter if_else inner_join mutate select
-#'   summarise union_all
+#' @importFrom dplyr all_of coalesce filter full_join if_else inner_join mutate
+#'   n select summarise union_all
 #' @importFrom purrr map reduce
 #' @importFrom rlang .data arg_match check_dots_empty
 #' @export
@@ -656,31 +679,50 @@ compute_movement_cost.tbl_dbi <- function(
   }
 
   keys <- c("personnel_id", "ref_date")
+  by_cols <- c("ref_date", group_cols)
 
   flags <- detect_movement(data, status_col = status_col) |>
-    select(personnel_id, ref_date, hire, separation)
+    select(personnel_id, ref_date, next_date, hire, separation)
 
   # every active record carries its person's flags, so a mover's pay is added
   # up over all their contracts that date
   records <- data |>
     filter(.data[[status_col]] == "active") |>
     select(all_of(c(keys, group_cols, measure_col))) |>
-    inner_join(flags, by = keys)
+    inner_join(flags, by = keys) |>
+    mutate(pay = coalesce(.data[[measure_col]], 0))
 
-  # flags are NULL on a date with nothing to compare with, so the SUM() is
-  # NULL there too
+  # hire is NULL on the first date, so the SUM() is NULL there too. next_date
+  # is the same for everyone on a date, so grouping by it only carries it
+  # along
+  costs <- records |>
+    summarise(
+      active_records = n(),
+      hire = sum(if_else(hire, pay, 0), na.rm = TRUE),
+      separation = sum(if_else(separation, pay, 0), na.rm = TRUE),
+      .by = all_of(c(by_cols, "next_date"))
+    )
+
+  # as in compute_movement(), a separation moves down to the next date
+  previous <- costs |>
+    filter(!is.na(next_date)) |>
+    select(all_of(group_cols), ref_date = next_date, separation)
+
+  # a full join keeps a group that everyone left, which has no active records,
+  # and so no hires, on the date its separations move to
+  costs <- costs |>
+    select(all_of(by_cols), active_records, hire) |>
+    full_join(previous, by = by_cols, na_matches = "na") |>
+    mutate(hire = if_else(is.na(active_records), 0, hire))
+
   event_type |>
     purrr::map(
       \(movement) {
-        records |>
-          summarise(
-            movement_cost = sum(
-              if_else(.data[[movement]], coalesce(.data[[measure_col]], 0), 0),
-              na.rm = TRUE
-            ),
-            .by = all_of(c("ref_date", group_cols))
-          ) |>
-          mutate(movement_type = !!movement)
+        costs |>
+          mutate(
+            movement_type = !!movement,
+            movement_cost = .data[[movement]]
+          )
       }
     ) |>
     purrr::reduce(union_all) |>
@@ -689,8 +731,8 @@ compute_movement_cost.tbl_dbi <- function(
 
 #' Compute the cost of retirements
 #'
-#' Adds up, for each reference date, the pay of the people who retire at that
-#' date.
+#' Adds up, for each reference date, the pay of the people who retired since
+#' the previous date.
 #'
 #' @inheritParams compute_movement_cost
 #' @param status_col Character. Column holding employment status, with active
@@ -699,19 +741,21 @@ compute_movement_cost.tbl_dbi <- function(
 #'
 #' @returns A table with one row per `ref_date` and group, containing
 #'   `retirement_cost`, the retirees' pay. `retirement_cost` is 0 when nobody
-#'   retired, and `NA` on the last date, which has nothing to compare with. A
+#'   retired, and `NA` on the first date, which has nothing to compare with,
+#'   and for a group with nobody active on the previous date. A
 #'   data.table for data frame input; a lazy table for `tbl_dbi` input (use
 #'   [dplyr::collect()] to bring it into memory).
 #'
 #' @details
-#' Retirees are costed at their pay on their last active date. The pay on all
-#' of a retiree's active records that date is added up, so people with several
-#' contracts are costed in full; pay recorded alongside, such as a pension, is
-#' not. Missing pay counts as 0.
+#' As in [compute_retirement()], retirements are counted on the first date the
+#' person is absent. Retirees are costed at their pay on their last active
+#' date. The pay on all of a retiree's active records that date is added up, so
+#' people with several contracts are costed in full; pay recorded alongside,
+#' such as a pension, is not. Missing pay counts as 0.
 #'
 #' With `group_cols`, each retiree's pay is counted in the group of the record
-#' it comes from. Every group with active personnel on a date appears for that
-#' date.
+#' it comes from. Every group with active personnel on a date appears for
+#' that date, and a group that everyone left still appears on the next date.
 #'
 #' @seealso [detect_retirement()], which flags the retirees.
 #'   [compute_retirement()], which counts them. [compute_movement_cost()],
@@ -732,7 +776,7 @@ compute_retirement_cost <- function(data, ...) {
 }
 
 #' @rdname compute_retirement_cost
-#' @importFrom data.table as.data.table fcoalesce fifelse setorderv
+#' @importFrom data.table := as.data.table fcoalesce fifelse setkey setnames
 #' @importFrom rlang check_dots_empty
 #' @export
 compute_retirement_cost.data.frame <- function(
@@ -752,7 +796,7 @@ compute_retirement_cost.data.frame <- function(
   keys <- c("personnel_id", "ref_date")
 
   flags <- detect_retirement(dt, status_col = status_col)[
-    , .(personnel_id, ref_date, retirement)
+    , .(personnel_id, ref_date, next_date, retirement)
   ]
 
   # every active record carries its person's flag, so a retiree's pay is
@@ -765,30 +809,41 @@ compute_retirement_cost.data.frame <- function(
     ],
     on = keys
   ]
+  records[, pay := data.table::fcoalesce(as.numeric(get(measure_col)), 0)]
 
   by_cols <- c("ref_date", group_cols)
 
-  # the flag is NA on the last date, which carries through to the cost
-  cost <- records[
-    , .(
-      retirement_cost = sum(
-        data.table::fifelse(
-          retirement,
-          data.table::fcoalesce(as.numeric(get(measure_col)), 0),
-          0
-        )
-      )
-    ),
-    by = by_cols
+  # next_date is the same for everyone on a date, so grouping by it only
+  # carries it along
+  costs <- records[
+    , .(retirement_cost = sum(data.table::fifelse(retirement, pay, 0))),
+    by = c(by_cols, "next_date")
   ]
 
-  data.table::setorderv(cost, by_cols)
+  # as in compute_retirement(), a retirement moves down to the next date
+  previous <- costs[
+    !is.na(next_date),
+    c(group_cols, "next_date", "retirement_cost"),
+    with = FALSE
+  ]
+  data.table::setnames(previous, "next_date", "ref_date")
 
-  cost[]
+  # a full join keeps a group that everyone left, which has no row on the date
+  # its retirements move to
+  costs <- merge(
+    costs[, by_cols, with = FALSE],
+    previous,
+    by = by_cols,
+    all = TRUE
+  )
+  data.table::setkey(costs, NULL)
+
+  costs[]
 }
 
 #' @rdname compute_retirement_cost
-#' @importFrom dplyr all_of coalesce filter if_else inner_join select summarise
+#' @importFrom dplyr all_of coalesce filter full_join if_else inner_join select
+#'   summarise
 #' @importFrom rlang .data check_dots_empty
 #' @export
 compute_retirement_cost.tbl_dbi <- function(
@@ -805,31 +860,45 @@ compute_retirement_cost.tbl_dbi <- function(
   }
 
   keys <- c("personnel_id", "ref_date")
+  by_cols <- c("ref_date", group_cols)
 
   flags <- detect_retirement(data, status_col = status_col) |>
-    select(personnel_id, ref_date, retirement)
+    select(personnel_id, ref_date, next_date, retirement)
 
   # every active record carries its person's flag, so a retiree's pay is
-  # added up over all their contracts that date
-  data |>
+  # added up over all their contracts that date. next_date is the same for
+  # everyone on a date, so grouping by it only carries it along
+  costs <- data |>
     filter(.data[[status_col]] == "active") |>
     select(all_of(c(keys, group_cols, measure_col))) |>
     inner_join(flags, by = keys) |>
-    # the flag is NULL on the last date, so the SUM() is NULL there too
     summarise(
       retirement_cost = sum(
         if_else(retirement, coalesce(.data[[measure_col]], 0), 0),
         na.rm = TRUE
       ),
-      .by = all_of(c("ref_date", group_cols))
+      .by = all_of(c(by_cols, "next_date"))
     )
+
+  # as in compute_retirement(), a retirement moves down to the next date
+  previous <- costs |>
+    filter(!is.na(next_date)) |>
+    select(all_of(group_cols), ref_date = next_date, retirement_cost)
+
+  # a full join keeps a group that everyone left, which has no row on the date
+  # its retirements move to. missing groups match each other, as they do in
+  # data.table joins
+  costs |>
+    select(all_of(by_cols)) |>
+    full_join(previous, by = by_cols, na_matches = "na")
 }
 
 #' Compute movements as hires and separations
 #'
 #' Counts, for each reference date, how many people are active, how many
-#' joined since the previous date (hires) and how many are gone by the next
-#' date (separations). Hire, separation, and replacement rates are also returned.
+#' joined since the previous date (hires) and how many left since the previous
+#' date (separations). Hire, separation, and replacement rates are also
+#' returned.
 #'
 #' @param data Data frame or remote database table (`tbl_dbi`) with one row
 #'   per person-record. Must contain `personnel_id`, `ref_date` and the column
@@ -844,26 +913,36 @@ compute_retirement_cost.tbl_dbi <- function(
 #' @returns A table with one row per `ref_date` and group, containing:
 #' \describe{
 #'   \item{headcount}{Number of active people.}
-#'   \item{hires}{People active on this date but not on the previous one. `NA`
-#'     on the first date, which has nothing to compare with.}
-#'   \item{separations}{People active on this date but not on the next one. `NA`
-#'     on the last date.}
+#'   \item{hires}{People active on this date but not on the previous one.}
+#'   \item{separations}{People active on the previous date but not on this
+#'     one.}
 #'   \item{hire_rate, separation_rate}{`hires` and `separations` divided by
-#'     `headcount`.}
+#'     the headcount on the previous date.}
+#'   \item{replacement_rate}{`hires` divided by `separations`.}
 #' }
-#' A data.table for data frame input; a lazy table for `tbl_dbi` input (use
-#' [dplyr::collect()] to bring it into memory).
+#' Hires, separations and rates are `NA` on the first date, which has nothing
+#' to compare with. A data.table for data frame input; a lazy table for
+#' `tbl_dbi` input (use [dplyr::collect()] to bring it into memory).
 #'
 #' @details
-#' The previous and next dates are the neighbouring dates found in the data,
-#' so the dates do not need to be evenly spaced.
+#' The previous date is the neighbouring date found in the data, so the dates
+#' do not need to be evenly spaced.
+#'
+#' Hires and separations both cover the time since the previous date, so on
+#' every date after the first, `headcount` equals the previous date's
+#' `headcount` plus `hires` minus `separations`.
 #'
 #' People are counted once per date, even if they hold several contracts. A
 #' separation is any exit from active status, including retirement.
 #'
 #' With `group_cols`, each person is counted in the group they belong to on
-#' that date. Moving from one group to another is neither a hire nor a
-#' separation; use [compute_transition()] to count those moves.
+#' that date, and each separation in the group the person left. A group that
+#' everyone left still appears on the next date, with a `headcount` of 0. A
+#' group with nobody active on the previous date has no headcount to compare
+#' with, so its separations and rates are `NA`.
+#' Moving from one group to another is neither a hire nor a separation, so the
+#' headcount of a group adds up only once those moves are counted too; use
+#' [compute_transition()] to count them.
 #'
 #' @examples
 #' hr <- data.frame(
@@ -895,6 +974,7 @@ compute_movement.data.frame <- function(
   }
 
   dt <- data.table::as.data.table(data)
+  by_cols <- c("ref_date", group_cols)
 
   # one row per person, date and group, so people with several contracts
   # count once
@@ -906,32 +986,62 @@ compute_movement.data.frame <- function(
     ]
   )
 
-  movement <- detect_movement(dt, status_col = status_col)[
+  people <- detect_movement(dt, status_col = status_col)[
     person_groups,
     on = c("personnel_id", "ref_date")
-  ][
+  ]
+
+  # next_date is the same for everyone on a date, so grouping by it only
+  # carries it along
+  movement <- people[
     , .(
       headcount = .N,
       hires = sum(hire),
       separations = sum(separation)
     ),
-    by = c("ref_date", group_cols)
-  ][
+    by = c(by_cols, "next_date")
+  ]
+
+  # a separation is flagged on the last active date, so it moves down to the
+  # next date, with the headcount it left, to cover the same period as that
+  # date's hires
+  previous <- movement[
+    !is.na(next_date),
+    c(group_cols, "next_date", "headcount", "separations"),
+    with = FALSE
+  ]
+  data.table::setnames(
+    previous,
+    c("next_date", "headcount"),
+    c("ref_date", "prev_headcount")
+  )
+
+  # a full join keeps a group that everyone left, which has no active
+  # personnel, and so no row, on the date its separations move to
+  movement <- merge(
+    movement[, c(by_cols, "headcount", "hires"), with = FALSE],
+    previous,
+    by = by_cols,
+    all = TRUE
+  )
+  movement[is.na(headcount), c("headcount", "hires") := 0L]
+
+  movement[
     , `:=`(
-      hire_rate = hires / headcount,
-      separation_rate = separations / headcount,
+      hire_rate = hires / prev_headcount,
+      separation_rate = separations / prev_headcount,
       replacement_rate = hires / separations
     )
   ]
-
-  data.table::setorderv(movement, c("ref_date", group_cols))
+  movement[, prev_headcount := NULL]
+  data.table::setkey(movement, NULL)
 
   movement[]
 }
 
 #' @rdname compute_movement
-#' @importFrom dplyr all_of distinct filter if_else inner_join mutate n select
-#'   summarise
+#' @importFrom dplyr all_of coalesce distinct filter full_join if_else
+#'   inner_join mutate n select summarise
 #' @importFrom rlang .data check_dots_empty
 #' @export
 compute_movement.tbl_dbi <- function(
@@ -946,6 +1056,8 @@ compute_movement.tbl_dbi <- function(
     stop("`ref_date` should not be included in `group_cols`")
   }
 
+  by_cols <- c("ref_date", group_cols)
+
   # one row per person, date and group, so people with several contracts
   # count once
   person_groups <- data |>
@@ -953,23 +1065,47 @@ compute_movement.tbl_dbi <- function(
     select(all_of(c("personnel_id", "ref_date", group_cols))) |>
     distinct()
 
-  person_groups |>
+  people <- person_groups |>
     inner_join(
       detect_movement(data, status_col = status_col),
       by = c("personnel_id", "ref_date")
-    ) |>
-    # hire (separation) is NULL on the first (last) date, so its SUM() stays
-    # NULL there. counted as doubles, since some backends, such as SQLite,
-    # divide integers without the fraction in the rates
+    )
+
+  # hire is NULL on the first date, so its SUM() stays NULL there. counted as
+  # doubles, since some backends, such as SQLite, divide integers without the
+  # fraction in the rates. next_date is the same for everyone on a date, so
+  # grouping by it only carries it along
+  movement <- people |>
     summarise(
       headcount = n(),
       hires = sum(if_else(hire, 1, 0), na.rm = TRUE),
       separations = sum(if_else(separation, 1, 0), na.rm = TRUE),
-      .by = all_of(c("ref_date", group_cols))
-    ) |>
+      .by = all_of(c(by_cols, "next_date"))
+    )
+
+  # a separation is flagged on the last active date, so it moves down to the
+  # next date, with the headcount it left, to cover the same period as that
+  # date's hires
+  previous <- movement |>
+    filter(!is.na(next_date)) |>
+    select(
+      all_of(group_cols),
+      ref_date = next_date,
+      prev_headcount = headcount,
+      separations
+    )
+
+  # a full join keeps a group that everyone left, which has no active
+  # personnel, and so no row, on the date its separations move to. missing
+  # groups match each other, as they do in data.table joins
+  movement |>
+    select(all_of(by_cols), headcount, hires) |>
+    full_join(previous, by = by_cols, na_matches = "na") |>
     mutate(
-      hire_rate = hires / headcount,
-      separation_rate = separations / headcount,
+      hires = if_else(is.na(headcount), 0, hires),
+      headcount = coalesce(headcount, 0),
+      hire_rate = hires / prev_headcount,
+      separation_rate = separations / prev_headcount,
       replacement_rate = hires / separations
     ) |>
     select(
@@ -980,8 +1116,8 @@ compute_movement.tbl_dbi <- function(
 
 #' Compute retirements
 #'
-#' Counts, for each reference date, how many people are active and how many of
-#' them leave active status by the next date into a pension, i.e. whose next
+#' Counts, for each reference date, how many people are active and how many
+#' left active status since the previous date into a pension, i.e. whose next
 #' status after leaving is pensioner.
 #'
 #' @param data Data frame or remote database table (`tbl_dbi`) with one row
@@ -998,23 +1134,28 @@ compute_movement.tbl_dbi <- function(
 #' @returns A table with one row per `ref_date` and group, containing:
 #' \describe{
 #'   \item{headcount}{Number of active people.}
-#'   \item{retirements}{Active people who are no longer active on the next
-#'     date and are next recorded as pensioners. `NA` on the last date, which
-#'     has nothing to compare with.}
-#'   \item{retirement_rate}{`retirements` divided by `headcount`.}
+#'   \item{retirements}{People active on the previous date who are no longer
+#'     active on this one and are next recorded as pensioners. `NA` on the
+#'     first date, which has nothing to compare with.}
+#'   \item{retirement_rate}{`retirements` divided by the headcount on the
+#'     previous date, as `separation_rate` in [compute_movement()].}
 #' }
 #' A data.table for data frame input; a lazy table for `tbl_dbi` input (use
 #' [dplyr::collect()] to bring it into memory).
 #'
 #' @details
-#' The next date is the neighbouring date found in the data, so the dates do
-#' not need to be evenly spaced. People are counted once per date, even if they
-#' hold several contracts. With `group_cols`, each person is counted in the
-#' group they belong to on that date.
+#' The previous date is the neighbouring date found in the data, so the dates
+#' do not need to be evenly spaced. People are counted once per date, even if
+#' they hold several contracts. With `group_cols`, each person is counted in
+#' the group they belong to on that date, and each retirement in the group the
+#' person left. A group that everyone left still appears on the next date,
+#' with a `headcount` of 0. A group with nobody active on the previous date has
+#' no headcount to compare with, so its retirements and rate are `NA`.
 #'
 #' Pension registration can lag the exit, so the pensioner record may appear
 #' at any later date, not only the next one. A retirement is dated by the exit,
-#' not by the registration. A person who returns to active work before any
+#' the first date the person is absent, not by the registration. A person who
+#' returns to active work before any
 #' pensioner record counts as a separation, not a retirement, at the earlier
 #' exit. There is no limit on the lag, so an exit followed years later by a
 #' deferred pension also counts as a retirement.
@@ -1066,27 +1207,56 @@ compute_retirement.data.frame <- function(
     ]
   )
 
-  retirement <- detect_retirement(dt, status_col = status_col)[
+  by_cols <- c("ref_date", group_cols)
+
+  people <- detect_retirement(dt, status_col = status_col)[
     person_groups,
     on = c("personnel_id", "ref_date")
-  ][
+  ]
+
+  # next_date is the same for everyone on a date, so grouping by it only
+  # carries it along
+  retirement <- people[
     , .(
       headcount = .N,
       retirements = sum(retirement)
     ),
-    by = c("ref_date", group_cols)
-  ][
-    , retirement_rate := retirements / headcount
+    by = c(by_cols, "next_date")
   ]
 
-  data.table::setorderv(retirement, c("ref_date", group_cols))
+  # as separations in compute_movement(), a retirement moves down to the next
+  # date, with the headcount it left
+  previous <- retirement[
+    !is.na(next_date),
+    c(group_cols, "next_date", "headcount", "retirements"),
+    with = FALSE
+  ]
+  data.table::setnames(
+    previous,
+    c("next_date", "headcount"),
+    c("ref_date", "prev_headcount")
+  )
+
+  # a full join keeps a group that everyone left, which has no row on the date
+  # its retirements move to
+  retirement <- merge(
+    retirement[, c(by_cols, "headcount"), with = FALSE],
+    previous,
+    by = by_cols,
+    all = TRUE
+  )
+  retirement[is.na(headcount), headcount := 0L]
+
+  retirement[, retirement_rate := retirements / prev_headcount]
+  retirement[, prev_headcount := NULL]
+  data.table::setkey(retirement, NULL)
 
   retirement[]
 }
 
 #' @rdname compute_retirement
-#' @importFrom dplyr all_of distinct filter if_else inner_join mutate n select
-#'   summarise
+#' @importFrom dplyr all_of coalesce distinct filter full_join if_else
+#'   inner_join mutate n select summarise
 #' @importFrom rlang .data check_dots_empty
 #' @export
 compute_retirement.tbl_dbi <- function(
@@ -1108,20 +1278,45 @@ compute_retirement.tbl_dbi <- function(
     select(all_of(c("personnel_id", "ref_date", group_cols))) |>
     distinct()
 
-  person_groups |>
+  by_cols <- c("ref_date", group_cols)
+
+  people <- person_groups |>
     inner_join(
       detect_retirement(data, status_col = status_col),
       by = c("personnel_id", "ref_date")
-    ) |>
-    # retirement is NULL on the last date, so its SUM() stays NULL there.
-    # counted as doubles, since some backends, such as SQLite, divide integers
-    # without the fraction in retirement_rate
+    )
+
+  # counted as doubles, since some backends, such as SQLite, divide integers
+  # without the fraction in retirement_rate. next_date is the same for
+  # everyone on a date, so grouping by it only carries it along
+  retirement <- people |>
     summarise(
       headcount = n(),
       retirements = sum(if_else(retirement, 1, 0), na.rm = TRUE),
-      .by = all_of(c("ref_date", group_cols))
+      .by = all_of(c(by_cols, "next_date"))
+    )
+
+  # as separations in compute_movement(), a retirement moves down to the next
+  # date, with the headcount it left
+  previous <- retirement |>
+    filter(!is.na(next_date)) |>
+    select(
+      all_of(group_cols),
+      ref_date = next_date,
+      prev_headcount = headcount,
+      retirements
+    )
+
+  # a full join keeps a group that everyone left, which has no row on the date
+  # its retirements move to. missing groups match each other, as they do in
+  # data.table joins
+  retirement |>
+    select(all_of(by_cols), headcount) |>
+    full_join(previous, by = by_cols, na_matches = "na") |>
+    mutate(
+      headcount = coalesce(headcount, 0),
+      retirement_rate = retirements / prev_headcount
     ) |>
-    mutate(retirement_rate = retirements / headcount) |>
     select(
       all_of(
         c("ref_date", group_cols, "headcount", "retirements", "retirement_rate")

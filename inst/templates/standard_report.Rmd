@@ -66,8 +66,9 @@ workforce$headcount_by_est |>
 ## Hires and separations
 
 Hires are people active on a date but not on the previous one; separations
-are people active on a date but not on the next one, including retirements.
-Both are shown as a share of headcount.
+are people active on the previous date but not on this one, including
+retirements. Hires are shown as a share of headcount, and separations as a
+share of the previous date's headcount.
 
 ```{r hires}
 plot_movement(

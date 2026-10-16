@@ -56,11 +56,47 @@ for (backend in backends) {
     )
     expect_equal(result$headcount, c(2, 2, 2))
     expect_equal(result$hires, c(NA, 1, 0))
-    expect_equal(result$separations, c(1, 0, NA))
+    # person 2 leaves after 2020, so is counted in 2021, the first date absent
+    expect_equal(result$separations, c(NA, 1, 0))
     expect_equal(result$hire_rate, c(NA, 0.5, 0))
-    expect_equal(result$separation_rate, c(0.5, 0, NA))
-    # one hire and no separations in 2021, so nobody is being replaced
-    expect_equal(result$replacement_rate, c(NA, Inf, NA))
+    expect_equal(result$separation_rate, c(NA, 0.5, 0))
+    # person 3 replaces person 2 in 2021; nobody moves in 2022
+    expect_equal(result$replacement_rate, c(NA, 1, NaN))
+  })
+
+  test_that(paste0("adds hires and removes separations from headcount (", backend, ")"), {
+    # people join, leave and return at different dates
+    churn <- data.frame(
+      personnel_id = c(1, 2, 3, 1, 3, 4, 2, 4, 5, 2, 5),
+      ref_date = as.Date(rep(
+        c("2020-01-01", "2021-01-01", "2022-01-01", "2023-01-01"),
+        times = c(3, 3, 3, 2)
+      )),
+      employment_status = "active"
+    )
+
+    result <- run_movement(backend, churn)
+    previous <- result$headcount[-nrow(result)]
+
+    expect_equal(
+      result$headcount[-1],
+      previous + result$hires[-1] - result$separations[-1]
+    )
+  })
+
+  test_that(paste0("rates divide by the previous headcount (", backend, ")"), {
+    # four people in 2020, two of whom leave; one more joins in 2021
+    shrinking <- data.frame(
+      personnel_id = c(1, 2, 3, 4, 1, 2, 5),
+      ref_date = as.Date(rep(c("2020-01-01", "2021-01-01"), times = c(4, 3))),
+      employment_status = "active"
+    )
+
+    result <- run_movement(backend, shrinking)
+
+    expect_equal(result$separations, c(NA, 2))
+    expect_equal(result$separation_rate, c(NA, 2 / 4))
+    expect_equal(result$hire_rate, c(NA, 1 / 4))
   })
 
   test_that(paste0("counts people with several contracts once (", backend, ")"), {
@@ -75,11 +111,32 @@ for (backend in backends) {
   test_that(paste0("moving between groups is not a hire (", backend, ")"), {
     result <- run_movement(backend, hr, group_cols = "est_id")
 
-    # person 1 moves from A to B in 2022 without being hired or separated
-    expect_equal(result$est_id, c("A", "A", "B", "B"))
-    expect_equal(result$headcount, c(2, 1, 1, 2))
-    expect_equal(result$hires, c(NA, 0, 1, 0))
-    expect_equal(result$separations, c(1, 0, 0, NA))
+    # person 1 moves from A to B in 2022 without being hired or separated,
+    # leaving A empty, which still appears in 2022. B has nobody in 2020, so
+    # has no headcount to compare its 2021 separations with
+    expect_equal(result$est_id, c("A", "A", "B", "A", "B"))
+    expect_equal(result$headcount, c(2, 1, 1, 0, 2))
+    expect_equal(result$hires, c(NA, 0, 1, 0, 0))
+    expect_equal(result$separations, c(NA, 1, NA, 0, 0))
+  })
+
+  test_that(paste0("counts a separation in the group left (", backend, ")"), {
+    # everyone in A leaves after 2020
+    closing <- data.frame(
+      personnel_id = c(1, 2, 3, 3),
+      ref_date = as.Date(c(
+        "2020-01-01", "2020-01-01", "2020-01-01", "2021-01-01"
+      )),
+      est_id = c("A", "A", "B", "B"),
+      employment_status = "active"
+    )
+
+    result <- run_movement(backend, closing, group_cols = "est_id")
+
+    expect_equal(result$est_id, c("A", "B", "A", "B"))
+    expect_equal(result$headcount, c(2, 1, 0, 1))
+    expect_equal(result$separations, c(NA, NA, 2, 0))
+    expect_equal(result$separation_rate, c(NA, NA, 1, 0))
   })
 
   test_that(paste0("uses a custom status column (", backend, ")"), {

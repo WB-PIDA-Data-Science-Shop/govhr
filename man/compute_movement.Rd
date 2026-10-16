@@ -40,31 +40,42 @@ equal to \code{"active"} are counted. Default \code{"employment_status"}.}
 A table with one row per \code{ref_date} and group, containing:
 \describe{
 \item{headcount}{Number of active people.}
-\item{hires}{People active on this date but not on the previous one. \code{NA}
-on the first date, which has nothing to compare with.}
-\item{separations}{People active on this date but not on the next one. \code{NA}
-on the last date.}
+\item{hires}{People active on this date but not on the previous one.}
+\item{separations}{People active on the previous date but not on this
+one.}
 \item{hire_rate, separation_rate}{\code{hires} and \code{separations} divided by
-\code{headcount}.}
+the headcount on the previous date.}
+\item{replacement_rate}{\code{hires} divided by \code{separations}.}
 }
-A data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
-\code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
+Hires, separations and rates are \code{NA} on the first date, which has nothing
+to compare with. A data.table for data frame input; a lazy table for
+\code{tbl_dbi} input (use \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
 Counts, for each reference date, how many people are active, how many
-joined since the previous date (hires) and how many are gone by the next
-date (separations). Hire, separation, and replacement rates are also returned.
+joined since the previous date (hires) and how many left since the previous
+date (separations). Hire, separation, and replacement rates are also
+returned.
 }
 \details{
-The previous and next dates are the neighbouring dates found in the data,
-so the dates do not need to be evenly spaced.
+The previous date is the neighbouring date found in the data, so the dates
+do not need to be evenly spaced.
+
+Hires and separations both cover the time since the previous date, so on
+every date after the first, \code{headcount} equals the previous date's
+\code{headcount} plus \code{hires} minus \code{separations}.
 
 People are counted once per date, even if they hold several contracts. A
 separation is any exit from active status, including retirement.
 
 With \code{group_cols}, each person is counted in the group they belong to on
-that date. Moving from one group to another is neither a hire nor a
-separation; use \code{\link[=compute_transition]{compute_transition()}} to count those moves.
+that date, and each separation in the group the person left. A group that
+everyone left still appears on the next date, with a \code{headcount} of 0. A
+group with nobody active on the previous date has no headcount to compare
+with, so its separations and rates are \code{NA}.
+Moving from one group to another is neither a hire nor a separation, so the
+headcount of a group adds up only once those moves are counted too; use
+\code{\link[=compute_transition]{compute_transition()}} to count them.
 }
 \examples{
 hr <- data.frame(
