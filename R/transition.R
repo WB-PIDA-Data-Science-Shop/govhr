@@ -89,7 +89,7 @@
 #'
 #' # c leaves after 2020 and returns to a different paygrade in 2022
 #' returns <- data.frame(
-#'   contract_id = "c",
+#'   personnel_id = "c",
 #'   ref_date = as.Date(c("2020-01-01", "2022-01-01")),
 #'   paygrade = c("G1", "G2")
 #' )

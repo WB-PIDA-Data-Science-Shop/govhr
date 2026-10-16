@@ -111,7 +111,7 @@ Rows with a missing identifier or group are dropped.
 }
 \examples{
 careers <- data.frame(
-  contract_id = c("a", "a", "a", "b", "b", "b", "b"),
+  personnel_id = c("a", "a", "a", "b", "b", "b", "b"),
   ref_date = as.Date(c(
     "2020-01-01", "2021-01-01", "2022-01-01",
     "2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01"
@@ -126,7 +126,7 @@ compute_transition(careers, group_cols = "paygrade", drop_duplicates = TRUE)
 
 # c leaves after 2020 and returns to a different paygrade in 2022
 returns <- data.frame(
-  contract_id = "c",
+  personnel_id = "c",
   ref_date = as.Date(c("2020-01-01", "2022-01-01")),
   paygrade = c("G1", "G2")
 )
