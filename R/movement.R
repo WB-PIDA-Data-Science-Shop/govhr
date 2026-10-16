@@ -247,21 +247,42 @@ detect_movement.tbl_dbi <- function(
 
   # hired: no active record on the previous date
   hires <- movement |>
-    filter(!is.na(prev_date)) |>
-    anti_join(person_dates, by = join_by(personnel_id, prev_date == ref_date)) |>
-    select(all_of(c("personnel_id", "ref_date"))) |>
+    filter(
+      !is.na(prev_date)
+    ) |>
+    anti_join(
+      person_dates,
+      by = join_by(personnel_id, prev_date == ref_date)
+    ) |>
+    select(
+      all_of(
+        c("personnel_id", "ref_date")
+      )
+    ) |>
     mutate(hired = 1)
 
   # separated: no active record on the next date
   separations <- movement |>
-    filter(!is.na(next_date)) |>
-    anti_join(person_dates, by = join_by(personnel_id, next_date == ref_date)) |>
-    select(all_of(c("personnel_id", "ref_date"))) |>
+    filter(
+      !is.na(next_date)
+    ) |>
+    anti_join(
+      person_dates, by = join_by(personnel_id, next_date == ref_date)
+    ) |>
+    select(
+      all_of(c("personnel_id", "ref_date"))
+    ) |>
     mutate(separated = 1)
 
   movement |>
-    left_join(hires, by = c("personnel_id", "ref_date")) |>
-    left_join(separations, by = c("personnel_id", "ref_date")) |>
+    left_join(
+      hires, 
+      by = c("personnel_id", "ref_date")
+    ) |>
+    left_join(
+      separations,
+      by = c("personnel_id", "ref_date")
+    ) |>
     # NA when there is no previous (next) date to compare with
     mutate(
       hire = if_else(is.na(prev_date), NA, !is.na(hired)),
@@ -1010,6 +1031,7 @@ compute_movement.data.frame <- function(
     c(group_cols, "next_date", "headcount", "separations"),
     with = FALSE
   ]
+
   data.table::setnames(
     previous,
     c("next_date", "headcount"),
@@ -1024,6 +1046,7 @@ compute_movement.data.frame <- function(
     by = by_cols,
     all = TRUE
   )
+
   movement[is.na(headcount), c("headcount", "hires") := 0L]
 
   movement[
@@ -1070,10 +1093,8 @@ compute_movement.tbl_dbi <- function(
       detect_movement(data, status_col = status_col),
       by = c("personnel_id", "ref_date")
     )
-
-  # hire is NULL on the first date, so its SUM() stays NULL there. counted as
-  # doubles, since some backends, such as SQLite, divide integers without the
-  # fraction in the rates. next_date is the same for everyone on a date, so
+  
+    # next_date is the same for everyone on a date, so
   # grouping by it only carries it along
   movement <- people |>
     summarise(
