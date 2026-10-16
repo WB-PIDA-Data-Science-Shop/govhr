@@ -51,9 +51,9 @@ the data, so a database table is processed in the database.
 Hires and separations are counted per person, so someone holding several
 contracts on the same date is counted once.
 
-A person recorded in more than one establishment on the same date has no
-single position that period, so \code{\link[=compute_transition]{compute_transition()}} leaves them out of
-\code{transitions} and warns about it.
+A person recorded in more than one establishment on the same date moves
+from each of them to every establishment they join next, as described in
+\code{\link[=compute_transition]{compute_transition()}}.
 }
 \examples{
 contracts <- data.frame(

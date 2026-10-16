@@ -614,7 +614,7 @@ classify_text <- function(
     tokens <- strsplit(cleanse(texts), " ")
     names(tokens) <- ids
     tokens <- lapply(tokens, function(tk) tk[tk != "" & !tk %in% sw])
-    rbindlist(lapply(tokens, data.table), idcol = "id") |>
+    data.table::rbindlist(lapply(tokens, data.table), idcol = "id") |>
       setnames(c("id", "term"))
   }
 

@@ -10,19 +10,23 @@ compute_transition(data, ...)
 
 \method{compute_transition}{data.frame}(
   data,
-  id_col = "contract_id",
+  id_col = "personnel_id",
   group_cols,
   return_all = FALSE,
   summarize = FALSE,
+  drop_duplicates = FALSE,
+  across_separations = FALSE,
   ...
 )
 
 \method{compute_transition}{tbl_dbi}(
   data,
-  id_col = "contract_id",
+  id_col = "personnel_id",
   group_cols,
   return_all = FALSE,
   summarize = FALSE,
+  drop_duplicates = FALSE,
+  across_separations = FALSE,
   ...
 )
 }
@@ -33,56 +37,105 @@ compute_transition(data, ...)
 \item{...}{Arguments passed to methods.}
 
 \item{id_col}{Character. Column identifying whose career is tracked, such as
-a person or a contract. Default \code{"contract_id"}.}
+a person or a contract. Default \code{"personnel_id"}.}
 
 \item{group_cols}{Character vector of columns defining a career position
 (e.g. paygrade, department). Several columns are combined into one label,
 such as \code{"G1 | Finance"}.}
 
-\item{return_all}{Logical. Also keep each entity's last spell, which has no
-next group, so its \code{to} and \code{ref_date} are \code{NA}. This includes entities
-that never move. Default \code{FALSE}.}
+\item{return_all}{Logical. Also keep the groups held in the last period of
+each career, which have no next group, so their \code{to} and \code{ref_date} are
+\code{NA}. This includes entities that never move. Default \code{FALSE}.}
 
 \item{summarize}{Logical. Count moves by origin, destination and date
 instead of returning one row per move. Default \code{FALSE}.}
+
+\item{drop_duplicates}{Logical. Drop every entity with more than one record
+on the same \code{ref_date}, with a warning, so that each entity holds a single
+group per period. Default \code{FALSE}, which keeps entities holding several
+groups at once. See Details.}
+
+\item{across_separations}{Logical. Count moves made across a separation,
+i.e. between the groups an entity held before leaving the data and those
+it holds on its return. Default \code{FALSE}, which treats the return as the
+start of a new career. See Details.}
 }
 \value{
-With \code{summarize = FALSE}, one row per move with the identifier, \code{from} (the
-group left), \code{to} (the group joined), \code{from_date} (when the spell in \code{from}
-began) and \code{ref_date} (when the entity was first seen in \code{to}).
+With \code{summarize = FALSE}, one row per move with the identifier, \code{from} (a
+group held in the period before the move), \code{to} (a group joined),
+\code{from_date} (when the entity began holding \code{from} without a break) and
+\code{ref_date} (when the entity was first seen in \code{to}).
 
 With \code{summarize = TRUE}, one row per \code{from}, \code{to} and \code{ref_date}, with
-\code{transitions}, the number of moves.
+\code{transitions}, the number of moves, and \code{transition_rate}, those moves
+divided by the headcount in \code{from} on the previous date in the data, as in
+\code{\link[=compute_movement]{compute_movement()}}.
 
 A data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
 \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
 Tracks how people (or contracts) move between groups, such as paygrades or
-departments, over time. Each entity's history is collapsed into spells: runs
-of consecutive periods in the same group. Each spell is then paired with the
-one that follows it, giving one row per move.
+departments, over time. A move happens when an entity joins a group it did
+not hold in its previous period, and pairs each group it held then with
+each group it joins, giving one row per move.
 }
 \details{
 Each move is dated when it happens: \code{ref_date} is the first period the
-entity is seen in its new group. Dating it by when the previous spell began
-would instead push every first move back to the start of the data.
+entity is seen in its new group. Dating it by when the entity entered its
+previous group would instead push every first move back to the start of the
+data.
 
-Rows with a missing identifier or group are dropped. Each entity must have
-at most one record per \code{ref_date}, otherwise its position in that period is
-unclear. Entities that break this rule are dropped entirely, with a warning
-saying how many records were removed.
+An entity may hold several groups on the same date, such as two
+occupations. Each group it held in its previous period is paired with each
+group it joins, so holding \code{A} and \code{B} and then \code{A} and \code{C} gives two moves,
+\code{A -> C} and \code{B -> C}. Leaving a group without joining another, such as
+holding \code{A} and \code{B} and then only \code{A}, is not a move. Several records in the
+same group, such as two contracts in the same paygrade, hold it once.
+
+With \code{drop_duplicates = TRUE}, an entity with more than one record on a
+date, even in the same group, is dropped entirely, with a warning saying
+how many records were removed.
+
+An entity missing on the next date in the data has separated, for instance
+from the public sector, and may later return. By default its return starts
+a new career: the groups it held before leaving are the last of the old
+career, and the groups it returns to are not moves. Pass only the records in
+which entities are active, such as active contracts, so that inactive
+periods count as separations. With \code{across_separations = TRUE}, separations
+are ignored, so a move can span dates on which the entity is missing.
+\code{transition_rate} still divides by the headcount on the previous date in
+the data, which such an entity is not part of.
+
+Rows with a missing identifier or group are dropped.
 }
 \examples{
 careers <- data.frame(
-  contract_id = c("a", "a", "a", "b", "b"),
+  contract_id = c("a", "a", "a", "b", "b", "b", "b"),
   ref_date = as.Date(c(
-    "2020-01-01", "2021-01-01", "2022-01-01", "2020-01-01", "2021-01-01"
+    "2020-01-01", "2021-01-01", "2022-01-01",
+    "2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01"
   )),
-  paygrade = c("G1", "G1", "G2", "G5", "G5")
+  paygrade = c("G1", "G1", "G2", "A", "B", "A", "C")
 )
 compute_transition(careers, group_cols = "paygrade")
 compute_transition(careers, group_cols = "paygrade", summarize = TRUE)
+
+# b holds two paygrades at once, so is dropped
+compute_transition(careers, group_cols = "paygrade", drop_duplicates = TRUE)
+
+# c leaves after 2020 and returns to a different paygrade in 2022
+returns <- data.frame(
+  contract_id = "c",
+  ref_date = as.Date(c("2020-01-01", "2022-01-01")),
+  paygrade = c("G1", "G2")
+)
+compute_transition(rbind(careers, returns), group_cols = "paygrade")
+compute_transition(
+  rbind(careers, returns),
+  group_cols = "paygrade",
+  across_separations = TRUE
+)
 
 }
 \seealso{
