@@ -41,8 +41,8 @@ paygrade within department, combine them into one column beforehand
 (e.g., \code{paste(paygrade, department, sep = "|")}).}
 
 \item{drop_duplicates}{Logical. Drop every entity with more than one record
-on the same \code{ref_date}, with a warning, so that each entity holds a single
-group per period. Default \code{FALSE}, which keeps entities holding several
+on the same \code{ref_date}, with a warning, so that each entity belongs to a single
+group per period. Default \code{FALSE}, which keeps entities belonging to several
 groups at once. See Details.}
 
 \item{across_separations}{Logical. Count moves made across a separation,
@@ -70,7 +70,7 @@ entity is seen in its new group. Dating it by when the entity entered its
 previous group would instead push every first move back to the start of the
 data.
 
-An entity may hold several groups on the same date, such as two
+An entity may belong to several groups on the same date, such as two
 occupations. Each group it held in its previous period is paired with each
 group it joins, so holding \code{A} and \code{B} and then \code{A} and \code{C} gives two moves,
 \code{A -> C} and \code{B -> C}. Leaving a group without joining another, such as
@@ -81,15 +81,14 @@ With \code{drop_duplicates = TRUE}, an entity with more than one record on a
 date, even in the same group, is dropped entirely, with a warning saying
 how many records were removed.
 
-An entity missing on the next date in the data has separated, for instance
-from the public sector, and may later return. By default its return starts
-a new career: the groups it held before leaving are the last of the old
-career, and the groups it returns to are not moves. Pass only the records in
-which entities are active, such as active contracts, so that inactive
-periods count as separations. With \code{across_separations = TRUE}, separations
-are ignored, so a move can span dates on which the entity is missing.
+An entity may separate itself from the public sector and return later in time.
+By default its return starts a new career: the groups it held before leaving
+are the last of the old career, and the groups it returns to are not moves.
+Pass only the records in which entities are active, such as active contracts,
+so that inactive periods count as separations. With \code{across_separations = TRUE},
+separations are ignored, so a move can span dates on which the entity is missing.
 
-Rows with a missing identifier or group are dropped.
+Rows with a missing identifier or group are silently dropped.
 }
 \examples{
 careers <- data.frame(

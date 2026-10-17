@@ -21,11 +21,11 @@ The following examples illustrate how to leverage `govhr` to generate analytics.
 
 When analyzing the workforce, a first order concern is understanding time trends in headcount. One way to do this is to compute the total headcount by reference date, allowing the user to visualize the trajectory of the public sector workforce over time.
 
-The function `compute_time_trend` and its companion plotting function `plot_trend` allow users to quickly generate this type of analysis.
+The function `compute_trend_summary` and its companion plotting function `plot_trend` allow users to quickly generate this type of analysis.
 
 ```{r}
 # total headcount by reference date
-headcount_trend <- compute_time_trend(
+headcount_trend <- compute_trend_summary(
   govhr::bra_hrmis_personnel,
   group_col = "ref_date"
 )
@@ -37,7 +37,7 @@ You might also be curious about how time trends for headcount varies across grou
 
 ```{r}
 # total headcount by reference date and gender
-headcount_trend_gender <- compute_time_trend(
+headcount_trend_gender <- compute_trend_summary(
   govhr::bra_hrmis_personnel,
   group_col = c("gender")
 )
@@ -72,11 +72,11 @@ plot_movement(
 
 ## Wagebill analytics
 
-Most of the analysis presented in the workforce analytics section can be replicated for the wagebill. For example, the `compute_time_trend` function can be used to compute the total wagebill by reference date, while the `plot_trend` function can visualize that trend.
+Most of the analysis presented in the workforce analytics section can be replicated for the wagebill. For example, the `compute_trend_summary` function can be used to compute the total wagebill by reference date, while the `plot_trend` function can visualize that trend.
 
 ```{r}
 # total wagebill by reference date
-wagebill_trend <- compute_time_trend(
+wagebill_trend <- compute_trend_summary(
   govhr::bra_hrmis_contract,
   group_col = "ref_date",
   measure_col = "gross_salary_lcu"
@@ -91,7 +91,7 @@ A similar differentiation by group is possible, using the same grammar for the `
 # total wagebill by reference date
 wagebill_paygrade_trend <- govhr::bra_hrmis_contract |>
     filter(!is.na(paygrade)) |>
-    compute_time_trend(
+    compute_trend_summary(
         group_col = "paygrade",
         measure_col = "gross_salary_lcu"
     )

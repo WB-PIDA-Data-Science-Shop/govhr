@@ -41,8 +41,8 @@ paygrade within department, combine them into one column beforehand
 (e.g., \code{paste(paygrade, department, sep = "|")}).}
 
 \item{drop_duplicates}{Logical. Drop every entity with more than one record
-on the same \code{ref_date}, with a warning, so that each entity holds a single
-group per period. Default \code{FALSE}, which keeps entities holding several
+on the same \code{ref_date}, with a warning, so that each entity belongs to a single
+group per period. Default \code{FALSE}, which keeps entities belonging to several
 groups at once. See Details.}
 
 \item{across_separations}{Logical. Count moves made across a separation,

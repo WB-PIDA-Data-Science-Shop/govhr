@@ -167,59 +167,6 @@ compute_cross_section_summary <- function(data, group_col, measure_col = NULL) {
   }
 }
 
-#' Compute growth rate summary
-#'
-#' Keeps each group's first and last reference date and computes the percentage
-#' change between them. Counts rows when `measure_col` is `NULL` (headcount) and
-#' sums the column otherwise (wage bill).
-#'
-#' @param data Data frame containing `ref_date` and the grouping column.
-#' @param group_col Character. Column to group by.
-#' @param measure_col Character. Numeric column to sum, or `NULL` to count rows.
-#'
-#' @returns A data frame with the grouping column and a `growth_rate` column, in
-#'   percentage points (e.g. `12.5` for +12.5%).
-#'
-#' @importFrom dplyr all_of arrange filter first last n summarise
-#' @export
-compute_growth_summary <- function(data, group_col, measure_col = NULL) {
-  labelled <- dplyr::filter(data, !is.na(.data[[group_col]]))
-
-  # aggregate every period once; picking endpoints out of the (small) aggregate
-  # is cheaper than scanning the raw rows for each group's first and last date
-  by_period <- if (is.null(measure_col)) {
-    dplyr::summarise(
-      labelled,
-      value = dplyr::n(),
-      .by = dplyr::all_of(c("ref_date", group_col))
-    )
-  } else {
-    govhr::compute_fastsummary(
-      labelled,
-      cols = measure_col,
-      fns = "sum",
-      group_cols = c("ref_date", group_col)
-    )
-  }
-
-  by_period |>
-    dplyr::filter(
-      .data[["ref_date"]] %in% range(.data[["ref_date"]]),
-      .by = dplyr::all_of(group_col)
-    ) |>
-    dplyr::arrange(.data[["ref_date"]]) |>
-    dplyr::summarise(
-      growth_rate = round(
-        dplyr::last(.data[["value"]]) / dplyr::first(.data[["value"]]) - 1,
-        3
-      ) *
-        100,
-      .by = dplyr::all_of(group_col)
-    ) |>
-    dplyr::filter(!is.na(.data[["growth_rate"]]))
-}
-
-
 #' Orange gradient colour scale for grouped series
 #'
 #' Builds the package's standard sequential orange scale, sized to the number
@@ -350,7 +297,7 @@ plot_bar_total <- function(data, group_col, x_col = "value", x_label = "Value") 
 #' dashed reference line at zero separating growth from decline.
 #'
 #' @param data Data frame with the grouping column and a `growth_rate` column,
-#'   as returned by [compute_growth_summary()].
+#'   as returned by [compute_growth()].
 #' @param group_col Character. Column to group by.
 #'
 #' @returns A ggplot2 object.
