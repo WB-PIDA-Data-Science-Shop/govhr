@@ -1094,7 +1094,7 @@ compute_movement.tbl_dbi <- function(
       by = c("personnel_id", "ref_date")
     )
   
-    # next_date is the same for everyone on a date, so
+  # next_date is the same for everyone on a date, so
   # grouping by it only carries it along
   movement <- people |>
     summarise(

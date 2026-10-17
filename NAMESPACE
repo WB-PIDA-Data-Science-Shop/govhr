@@ -196,7 +196,6 @@ importFrom(dplyr,
   ntile,
   pull,
   rename,
-  row_number,
   select,
   semi_join,
   slice_head,
@@ -211,17 +210,9 @@ importFrom(dplyr,
 importFrom(dtplyr,lazy_dt)
 importFrom(fixest,fixef)
 importFrom(forcats,fct_reorder)
-importFrom(ggiraph,
-  geom_point_interactive,
-  girafe,
-  opts_hover,
-  opts_sizing
-)
 importFrom(ggplot2,
   aes,
-  coord_cartesian,
   element_text,
-  expansion,
   facet_wrap,
   geom_col,
   geom_hline,
@@ -235,26 +226,15 @@ importFrom(ggplot2,
   guide_axis,
   label_wrap_gen,
   labs,
-  margin,
   scale_color_manual,
   scale_fill_manual,
-  scale_size_identity,
   scale_x_continuous,
   scale_y_continuous,
   scale_y_discrete,
   theme,
   theme_minimal,
-  theme_void,
   xlab,
   ylab
-)
-importFrom(ggraph,
-  geom_edge_arc,
-  geom_node_point,
-  geom_node_text,
-  ggraph,
-  scale_edge_alpha_identity,
-  scale_edge_width_continuous
 )
 importFrom(ggrepel,geom_text_repel)
 importFrom(ggstats,ggcoef_model)
@@ -267,7 +247,6 @@ importFrom(httr,
   modify_url,
   stop_for_status
 )
-importFrom(igraph,gorder)
 importFrom(janitor,clean_names)
 importFrom(jsonlite,fromJSON)
 importFrom(lubridate,
@@ -313,7 +292,6 @@ importFrom(scales,
 )
 importFrom(stats,
   as.formula,
-  complete.cases,
   median,
   quantile,
   reorder,
@@ -328,6 +306,5 @@ importFrom(tibble,
   is_tibble,
   tibble
 )
-importFrom(tidygraph,as_tbl_graph)
 importFrom(tidyr,pivot_wider)
 importFrom(tidyselect,eval_select)

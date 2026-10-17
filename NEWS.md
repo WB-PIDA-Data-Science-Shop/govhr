@@ -1,4 +1,7 @@
 # govhr 0.4.2
+This release:
+- Fixes inconsistencies in how separations and hires were measured. Now they correspond to the same time period and the rates are consistent.
+- Makes compute transitions more flexible, where transitions are considered as general changes in group membership of a given entity. The user may still disregard entities that belong
 
 # govhr 0.4.1
 This release:

@@ -12,9 +12,6 @@
 #' @param group_cols Character vector of columns defining a career position
 #'   (e.g. paygrade, department). Several columns are combined into one label,
 #'   such as `"G1 | Finance"`.
-#' @param return_all Logical. Also keep the groups held in the last period of
-#'   each career, which have no next group, so their `to` and `ref_date` are
-#'   `NA`. This includes entities that never move. Default `FALSE`.
 #' @param summarize Logical. Count moves by origin, destination and date
 #'   instead of returning one row per move. Default `FALSE`.
 #' @param drop_duplicates Logical. Drop every entity with more than one record
@@ -22,7 +19,7 @@
 #'   group per period. Default `FALSE`, which keeps entities holding several
 #'   groups at once. See Details.
 #' @param across_separations Logical. Count moves made across a separation,
-#'   i.e. between the groups an entity held before leaving the data and those
+#'   i.e. between the groups an entity held before leaving the public sector and those
 #'   it holds on its return. Default `FALSE`, which treats the return as the
 #'   start of a new career. See Details.
 #' @param ... Arguments passed to methods.
@@ -106,16 +103,11 @@ compute_transition <- function(data, ...) {
 }
 
 #' @rdname compute_transition
-#' @importFrom data.table .N .SD := as.data.table fifelse setkey setnames
-#'   setorderv shift
-#' @importFrom rlang check_dots_empty
-#' @importFrom stats complete.cases
 #' @export
 compute_transition.data.frame <- function(
   data,
   id_col = "personnel_id",
   group_cols,
-  return_all = FALSE,
   summarize = FALSE,
   drop_duplicates = FALSE,
   across_separations = FALSE,
@@ -125,7 +117,7 @@ compute_transition.data.frame <- function(
 
   key_cols <- c(id_col, "ref_date")
 
-  dt <- data.table::as.data.table(data)[, c(key_cols, group_cols), with = FALSE]
+  dt <-data.table::as.data.table(data)[, c(key_cols, group_cols), with = FALSE]
 
   dt <- dt[
     stats::complete.cases(dt[, c(id_col, group_cols), with = FALSE])
@@ -163,9 +155,7 @@ compute_transition.data.frame <- function(
   periods <- unique(positions[, key_cols, with = FALSE])
   data.table::setorderv(periods, key_cols)
   periods[, prev_date := data.table::shift(ref_date)]
-  periods[, next_date := data.table::shift(ref_date, type = "lead")]
   periods[!same_as_neighbour(periods, id_col), prev_date := NA]
-  periods[!same_as_neighbour(periods, id_col, type = "lead"), next_date := NA]
 
   dates <- sort(unique(periods[["ref_date"]]))
 
@@ -178,23 +168,17 @@ compute_transition.data.frame <- function(
       prev_date != data.table::shift(dates)[date_index],
       prev_date := NA
     ]
-    periods[
-      next_date != data.table::shift(dates, type = "lead")[date_index],
-      next_date := NA
-    ]
   }
 
-  positions[
-    periods,
-    on = key_cols,
-    c("prev_date", "next_date") := .(i.prev_date, i.next_date)
-  ]
+  positions[periods, on = key_cols, prev_date := i.prev_date]
 
   # a group was held in the entity's previous period if its record before, in
   # the same group, is exactly that period
   data.table::setorderv(positions, c(id_col, "from", "ref_date"))
+
   held_before <- same_as_neighbour(positions, c(id_col, "from")) &
     data.table::shift(positions[["ref_date"]]) == positions[["prev_date"]]
+
   held_before <- !is.na(held_before) & held_before
 
   # each record is dated by the latest record of its group not held before,
@@ -216,35 +200,25 @@ compute_transition.data.frame <- function(
   data.table::setnames(destinations, c("prev_date", "from"), c("origin_date", "to"))
 
   origins <- positions[
-    , c(id_col, "ref_date", "next_date", "from", "from_date"),
+    , c(id_col, "ref_date", "from", "from_date"),
     with = FALSE
   ]
   data.table::setnames(origins, "ref_date", "origin_date")
 
-  # every group held before a move is paired with every group joined in it
+  # every group held before a move is paired with every group joined in it. a
+  # period followed only by leaving a group finds no destination, so is no move
   transitions <- merge(
     origins,
     destinations,
     by = c(id_col, "origin_date"),
-    all.x = return_all,
     allow.cartesian = TRUE
   )
-
-  # a period followed only by leaving a group is no move, and is kept only if
-  # it is the last of its career
-  if (return_all) {
-    transitions <- transitions[!is.na(to) | is.na(next_date)]
-  }
 
   transitions <- transitions[
     , c(id_col, "from", "to", "from_date", "ref_date"), with = FALSE
   ]
   data.table::setkey(transitions, NULL)
-  data.table::setorderv(
-    transitions,
-    c(id_col, "ref_date", "from", "to"),
-    na.last = TRUE
-  )
+  data.table::setorderv(transitions, c(id_col, "ref_date", "from", "to"))
 
   if (summarize) {
     transitions <- transitions[
@@ -260,18 +234,12 @@ compute_transition.data.frame <- function(
     ]
     group_headcount[, ref_date := dates[match(ref_date, dates) + 1L]]
 
-    # the last date has no next date, and its NA would match the undated rows
-    # of return_all
     transitions[
-      group_headcount[!is.na(ref_date)],
+      group_headcount,
       on = c("from", "ref_date"),
       transition_rate := transitions / i.prev_headcount
     ]
-    data.table::setorderv(
-      transitions,
-      c("ref_date", "from", "to"),
-      na.last = TRUE
-    )
+    data.table::setorderv(transitions, c("ref_date", "from", "to"))
   }
 
   transitions[]
@@ -291,16 +259,11 @@ same_as_neighbour <- function(dt, cols, type = "lag") {
 }
 
 #' @rdname compute_transition
-#' @importFrom dplyr across all_of anti_join collect distinct filter if_else
-#'   inner_join lag lead left_join mutate n n_distinct rename row_number select
-#'   semi_join summarise
-#' @importFrom rlang .data check_dots_empty
 #' @export
 compute_transition.tbl_dbi <- function(
   data,
   id_col = "personnel_id",
   group_cols,
-  return_all = FALSE,
   summarize = FALSE,
   drop_duplicates = FALSE,
   across_separations = FALSE,
@@ -314,8 +277,8 @@ compute_transition.tbl_dbi <- function(
     drop_missing(
       c(id_col, group_cols)
     ) |>
-    select(
-      all_of(c(key_cols, group_cols))
+    dplyr::select(
+      dplyr::all_of(c(key_cols, group_cols))
     )
 
   # drop entities holding several records in the same period, even if those
@@ -323,29 +286,29 @@ compute_transition.tbl_dbi <- function(
   # dropped records are not counted as violations
   if (drop_duplicates) {
     key_counts <- entity_group |>
-      summarise(
-        n_records = n(),
-        .by = all_of(key_cols)
+      dplyr::summarise(
+        n_records = dplyr::n(),
+        .by = dplyr::all_of(key_cols)
       )
 
     violating_ids <- key_counts |>
-      filter(
+      dplyr::filter(
         n_records > 1
       ) |>
-      select(all_of(id_col)) |>
-      distinct()
+      dplyr::select(dplyr::all_of(id_col)) |>
+      dplyr::distinct()
 
     violations <- key_counts |>
-      semi_join(
+      dplyr::semi_join(
         violating_ids,
         by = id_col
       ) |>
-      summarise(
+      dplyr::summarise(
         n_duplicates = sum(n_records - 1, na.rm = TRUE),
         n_rows = sum(n_records, na.rm = TRUE),
-        n_ids = n_distinct(.data[[id_col]])
+        n_ids = dplyr::n_distinct(.data[[id_col]])
       ) |>
-      collect()
+      dplyr::collect()
 
     if (violations[["n_ids"]] > 0) {
       warn_duplicate_records(
@@ -356,7 +319,7 @@ compute_transition.tbl_dbi <- function(
       )
 
       entity_group <- entity_group |>
-        anti_join(
+        dplyr::anti_join(
           violating_ids,
           by = id_col
         )
@@ -368,9 +331,9 @@ compute_transition.tbl_dbi <- function(
   # and joined back
   if (length(group_cols) > 1) {
     group_labels <- entity_group |>
-      select(all_of(group_cols)) |>
-      distinct() |>
-      collect()
+      dplyr::select(dplyr::all_of(group_cols)) |>
+      dplyr::distinct() |>
+      dplyr::collect()
 
     group_labels[["from"]] <- do.call(
       paste,
@@ -378,152 +341,141 @@ compute_transition.tbl_dbi <- function(
     )
 
     entity_group <- entity_group |>
-      left_join(
+      dplyr::left_join(
         group_labels,
         by = group_cols,
         copy = TRUE
       )
   } else {
     entity_group <- entity_group |>
-      mutate(
+      dplyr::mutate(
         from = .data[[group_cols]]
       )
   }
 
   positions <- entity_group |>
-    select(
-      all_of(key_cols), from
+    dplyr::select(
+      dplyr::all_of(key_cols), from
     ) |>
-    distinct()
+    dplyr::distinct()
 
+  # periods refer to the entity's own sequence of reference dates,
+  # so that each entity's career is tracked independently.
   periods <- positions |>
-    distinct(
-      across(all_of(key_cols))
+    dplyr::distinct(
+      dplyr::across(dplyr::all_of(key_cols))
     ) |>
-    mutate(
-      prev_date = lag(ref_date, order_by = ref_date),
-      next_date = lead(ref_date, order_by = ref_date),
-      period = row_number(ref_date),
-      .by = all_of(id_col)
+    dplyr::mutate(
+      prev_date = dplyr::lag(ref_date, order_by = ref_date),
+      period = dplyr::row_number(ref_date),
+      .by = dplyr::all_of(id_col)
     )
 
-  # an entity missing on the next date in the data has separated, so the
-  # periods on either side of the gap are not neighbours. numbering periods by
-  # their place in the calendar, not among the entity's own dates, also breaks
-  # each run of a group at the gap
+  # an entity missing on the next date in the data has separated from the public sector.
+  # numbering periods by their place with reference to the calendar
+  # induces a break in their run.
   if (!across_separations) {
     calendar <- build_calendar(periods) |>
-      mutate(
-        calendar_period = row_number(ref_date)
+      dplyr::mutate(
+        calendar_period = dplyr::row_number(ref_date)
       ) |>
-      rename(
-        calendar_prev = prev_date,
-        calendar_next = next_date
+      dplyr::select(
+        ref_date, calendar_prev = prev_date, calendar_period
       )
 
     periods <- periods |>
-      left_join(
+      dplyr::left_join(
         calendar,
         by = "ref_date"
       ) |>
-      mutate(
-        prev_date = if_else(prev_date == calendar_prev, prev_date, NA),
-        next_date = if_else(next_date == calendar_next, next_date, NA),
+      dplyr::mutate(
+        prev_date = dplyr::if_else(prev_date == calendar_prev, prev_date, NA),
         period = calendar_period
       ) |>
-      select(
-        all_of(key_cols), prev_date, next_date, period
+      dplyr::select(
+        dplyr::all_of(key_cols), prev_date, period
       )
   }
 
   # records held in consecutive periods of the entity keep the same gap between
-  # the entity's period number and the group's record number, which marks each
-  # unbroken run in a group. SQL has no ordered running maximum without
-  # dbplyr::window_order(), hence this rather than the data.table approach
+  # the entity's period number and the group's record number by entity, 
+  # defining the entity's contiguous run within a group.
   runs <- positions |>
-    inner_join(
+    dplyr::inner_join(
       periods,
       by = key_cols
     ) |>
-    mutate(
-      run = period - row_number(ref_date),
-      .by = all_of(c(id_col, "from"))
+    dplyr::mutate(
+      run = period - dplyr::row_number(ref_date),
+      .by = dplyr::all_of(c(id_col, "from"))
     ) |>
-    mutate(
+    dplyr::mutate(
       from_date = min(ref_date, na.rm = TRUE),
-      .by = all_of(c(id_col, "from", "run"))
+      .by = dplyr::all_of(c(id_col, "from", "run"))
     )
 
   # a run that starts after the entity's first period is a group joined then
   destinations <- runs |>
-    filter(
+    dplyr::filter(
       !is.na(prev_date),
       ref_date == from_date
     ) |>
-    select(
-      all_of(id_col), origin_date = prev_date, ref_date, to = from
+    dplyr::select(
+      dplyr::all_of(id_col),
+      origin_date = prev_date,
+      ref_date,
+      to = from
     )
 
   origins <- runs |>
-    select(
-      all_of(id_col), origin_date = ref_date, next_date, from, from_date
+    dplyr::select(
+      dplyr::all_of(id_col),
+      origin_date = ref_date,
+      from,
+      from_date
     )
 
   # every group held before a move is paired with every group joined in it. a
-  # period followed only by leaving a group is no move, and is kept only if it
-  # is the last of its career
-  if (return_all) {
-    transitions <- origins |>
-      left_join(
-        destinations,
-        by = c(id_col, "origin_date")
-      ) |>
-      filter(
-        !is.na(to) | is.na(next_date)
-      )
-  } else {
-    transitions <- origins |>
-      inner_join(
-        destinations,
-        by = c(id_col, "origin_date")
-      )
-  }
-
-  transitions <- transitions |>
-    select(
-      all_of(id_col), from, to, from_date, ref_date
+  # period followed only by leaving a group finds no destination, so is no move
+  transitions <- origins |>
+    dplyr::inner_join(
+      destinations,
+      by = c(id_col, "origin_date")
+    ) |>
+    dplyr::select(
+      dplyr::all_of(id_col), from, to, from_date, ref_date
     )
 
   if (summarize) {
     # each group's headcount moves forward to the next date, whose moves it is
     # the origin for
     group_headcount <- positions |>
-      summarise(
-        prev_headcount = n(),
+      dplyr::summarise(
+        prev_headcount = dplyr::n(),
         .by = c("ref_date", "from")
       ) |>
-      inner_join(
+      dplyr::inner_join(
         build_calendar(positions),
         by = "ref_date"
       ) |>
-      select(
+      dplyr::select(
         from, ref_date = next_date, prev_headcount
       )
 
     transitions <- transitions |>
-      summarise(
-        transitions = n(),
-        .by = all_of(c("from", "to", "ref_date"))
+      dplyr::summarise(
+        transitions = dplyr::n(),
+        .by = dplyr::all_of(c("from", "to", "ref_date"))
       ) |>
-      left_join(
+      dplyr::left_join(
         group_headcount,
         by = c("from", "ref_date")
       ) |>
       # some databases divide integers with integer division
-      mutate(
+      dplyr::mutate(
         transition_rate = as.numeric(transitions) / prev_headcount
       ) |>
-      select(
+      dplyr::select(
         from, to, ref_date, transitions, transition_rate
       )
   }
@@ -558,8 +510,6 @@ warn_duplicate_records <- function(n_duplicates, n_rows, n_ids, id_col) {
 #'
 #' @returns A plotly object.
 #'
-#' @importFrom plotly layout plot_ly
-#' @importFrom stats median
 #' @keywords internal
 plot_transfer_heatmap <- function(data) {
   transfer <- data[["transfer"]]
@@ -609,15 +559,6 @@ plot_transfer_heatmap <- function(data) {
 #' @returns A ggiraph girafe object, or a ggplot object when
 #'   `interactive = FALSE`.
 #'
-#' @importFrom dplyr across mutate pull row_number
-#' @importFrom ggplot2 aes coord_cartesian expansion margin scale_color_manual
-#'   scale_size_identity scale_x_continuous scale_y_continuous theme theme_void
-#' @importFrom grDevices colorRampPalette
-#' @importFrom tidygraph as_tbl_graph
-#' @importFrom igraph gorder
-#' @importFrom ggraph ggraph geom_edge_arc geom_node_point geom_node_text scale_edge_alpha_identity
-#'   scale_edge_width_continuous
-#' @importFrom ggiraph geom_point_interactive girafe opts_hover opts_sizing
 #' 
 #' @keywords internal
 #' @export

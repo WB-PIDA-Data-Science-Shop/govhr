@@ -12,7 +12,6 @@ compute_transition(data, ...)
   data,
   id_col = "personnel_id",
   group_cols,
-  return_all = FALSE,
   summarize = FALSE,
   drop_duplicates = FALSE,
   across_separations = FALSE,
@@ -23,7 +22,6 @@ compute_transition(data, ...)
   data,
   id_col = "personnel_id",
   group_cols,
-  return_all = FALSE,
   summarize = FALSE,
   drop_duplicates = FALSE,
   across_separations = FALSE,
@@ -43,10 +41,6 @@ a person or a contract. Default \code{"personnel_id"}.}
 (e.g. paygrade, department). Several columns are combined into one label,
 such as \code{"G1 | Finance"}.}
 
-\item{return_all}{Logical. Also keep the groups held in the last period of
-each career, which have no next group, so their \code{to} and \code{ref_date} are
-\code{NA}. This includes entities that never move. Default \code{FALSE}.}
-
 \item{summarize}{Logical. Count moves by origin, destination and date
 instead of returning one row per move. Default \code{FALSE}.}
 
@@ -56,7 +50,7 @@ group per period. Default \code{FALSE}, which keeps entities holding several
 groups at once. See Details.}
 
 \item{across_separations}{Logical. Count moves made across a separation,
-i.e. between the groups an entity held before leaving the data and those
+i.e. between the groups an entity held before leaving the public sector and those
 it holds on its return. Default \code{FALSE}, which treats the return as the
 start of a new career. See Details.}
 }

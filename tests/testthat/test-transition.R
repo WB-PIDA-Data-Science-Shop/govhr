@@ -126,28 +126,6 @@ for (backend in backends) {
     )
   })
 
-  test_that(paste(backend, "- return_all keeps the groups of the last period"), {
-    everyone <- run_transition(
-      backend,
-      several,
-      group_cols = "paygrade",
-      return_all = TRUE
-    )
-
-    terminal <- everyone[is.na(everyone[["to"]]), ]
-
-    expect_equal(sum(!is.na(everyone[["to"]])), 6L)
-    expect_equal(terminal[["personnel_id"]], c("a", "b", "b", "c", "d"))
-    expect_equal(terminal[["from"]], c("A", "A", "B", "C", "A"))
-    expect_equal(
-      terminal[["from_date"]],
-      as.Date(c(
-        "2020-01-01", "2020-01-01", "2021-01-01", "2022-01-01", "2020-01-01"
-      ))
-    )
-    expect_true(all(is.na(terminal[["ref_date"]])))
-  })
-
   test_that(paste(backend, "- summarize divides moves by the previous headcount"), {
     # c holds G1 through two records in 2020, but is one of three people in G1
     rates <- data.frame(
@@ -161,7 +139,6 @@ for (backend in backends) {
       backend,
       rates,
       group_cols = "paygrade",
-      return_all = TRUE,
       summarize = TRUE
     )
 
@@ -169,11 +146,10 @@ for (backend in backends) {
       result,
       c("from", "to", "ref_date", "transitions", "transition_rate")
     )
-    expect_equal(result[["from"]], c("G1", "G2", "G1", "G3"))
-    expect_equal(result[["to"]], c("G3", "G3", NA, NA))
-    expect_equal(as.integer(result[["transitions"]]), c(2L, 1L, 1L, 3L))
-    # the undated rows of return_all have no previous headcount
-    expect_equal(result[["transition_rate"]], c(2 / 3, 1, NA, NA))
+    expect_equal(result[["from"]], c("G1", "G2"))
+    expect_equal(result[["to"]], c("G3", "G3"))
+    expect_equal(as.integer(result[["transitions"]]), c(2L, 1L))
+    expect_equal(result[["transition_rate"]], c(2 / 3, 1))
   })
 
   test_that(paste(backend, "- a return after a separation starts a new career"), {
@@ -188,19 +164,6 @@ for (backend in backends) {
       result[["from_date"]],
       as.Date(c("2022-01-01", "2022-01-01"))
     )
-
-    everyone <- run_transition(
-      backend,
-      returns,
-      group_cols = "paygrade",
-      return_all = TRUE
-    )
-
-    # the groups held before leaving end a career, as do the last ones
-    terminal <- everyone[is.na(everyone[["to"]]), ]
-
-    expect_equal(terminal[["personnel_id"]], c("a", "a", "b", "b", "c"))
-    expect_equal(terminal[["from"]], c("G1", "G3", "G1", "G2", "G5"))
   })
 
   test_that(paste(backend, "- across_separations counts moves across a separation"), {
