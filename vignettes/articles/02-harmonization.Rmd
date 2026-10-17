@@ -22,7 +22,7 @@ library(data.table)
 
 Governments collect HR data in their own conventions: column names, classifications, and identifiers rarely match a common standard. Harmonization re-expresses raw HR data extractions using the `govhr` [Standard Data Dictionary](https://wb-pida-data-science-shop.github.io/govhr/articles/01-standard_dictionary.html), organized into three modules: **Establishment**, **Personnel**, and **Contract**. Once harmonized, data becomes comparable across countries and over time, and can feed directly into `govhr`'s analytics functions.
 
-This article walks through harmonizing a synthetic dataset, `bra_hrmis`, built from a contract-level extract from Brazil's HRMIS system in the Alagoas state, using the helper functions in `govhr`. The example focuses primarily on generating one module, Personnel, but a similar logic can be applied to the Establishment and Contract modules.
+This article walks through a harmonization example for a synthetic dataset, `bra_hrmis`, built from a contract-level extract from Brazil's HR data in the Alagoas state, using `govhr`. The example focuses primarily on generating one module, Personnel, but a similar logic can be applied to Establishment and Contract modules.
 
 ```{r}
 bra_hrmis <- as.data.table(govhr::bra_hrmis)
@@ -31,7 +31,7 @@ dim(bra_hrmis)
 
 # Step 1: check column consistency
 
-Before harmonizing, it's useful to check whether raw data sources (e.g. multiple years or offices) share a consistent column naming (i.e., schema). `find_inconsistent_colnames()` flags columns that aren't shared across all sources.
+Before harmonizing, it's useful to check whether raw data sources (e.g. multiple years or offices) share a consistent column naming (i.e., schema). This is the case when a government shares multiple extractions that span across reference dates. `find_inconsistent_colnames()` flags columns that aren't shared across all sources.
 
 ```{r}
 # simulate two extracts with slightly different schemas
@@ -43,13 +43,13 @@ find_inconsistent_colnames(list(extract_2020, extract_2021))
 
 # Step 2: generate module identifiers
 
-Harmonization requires knowing which column identifies a contract and which identifies a person. These are our primary keys, that is, unique identifiers for contracts and personnel, respectively. `find_duplicate_ids()` is a quick way to test whether a candidate column is a valid unique key.
+Harmonization requires knowing which column uniquely identifies a contract and which one identifies a person, for example. These are our primary keys, that is, unique identifiers for contracts and personnel, respectively. `find_duplicate_ids()` is a quick way to test whether a candidate column is a valid unique key.
 
 ```{r}
 bra_hrmis |> find_duplicate_ids(MATRICULA)
 ```
 
-`MATRICULA` uniquely identifies a contract for a given reference date, so it becomes the **contract identifier**, or `contract_id` in our standard data dictionary. `CPF` will serve as the **personnel identifier**, the `personnel_id`.
+`MATRICULA` uniquely identifies a contract for a given reference date, so it can be used as a **contract identifier**, or `contract_id` in our standard data dictionary. `CPF` can serve as the **personnel identifier**, the `personnel_id`.
 
 # Step 3: map raw columns to standardized names
 
@@ -75,7 +75,7 @@ bra_hrmis <- harmonize_columns(bra_hrmis, column_dictionary) |>
 
 # Building reference dates
 
-Dates are often stored as serial numbers or split across year/month columns. Once a `ref_date` column is built, `guess_date_frequency()` confirms the reporting interval — useful for choosing the right window when computing growth or turnover indicators later.
+Dates are often stored as serial numbers or split across year/month columns. Once you define a `ref_date`, `guess_date_frequency()` confirms the reporting interval — useful for choosing the right window when computing growth or turnover indicators later.
 
 ```{r}
 bra_hrmis[, ref_date := as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-"))]
@@ -85,9 +85,9 @@ bra_hrmis |>
   guess_date_frequency()
 ```
 
-# Deduping values
+# Deduplicating values
 
-Attributes like education and gender should be constant for a given personnel-period, but raw data sometimes disagrees across rows for the same `personnel_id`/`ref_date` (e.g. due to concurrent contracts). `dedup_values()` resolves this using a chosen strategy — here, the modal value.
+Attributes like education and gender should be the same for a given personnel-reference date, but raw data is sometimes inconsistent. `dedup_values()` resolves this using a chosen strategy — here, the modal value.
 
 ```{r}
 bra_hrmis <- dedup_values(
@@ -107,7 +107,7 @@ bra_hrmis <- dedup_values(
 
 # Deflating wages
 
-Nominal wages in local currency aren't comparable across time or countries. `convert_constant_ppp()` uses the bundled `macro_indicators` dataset (with CPI and PPP conversion factors) to convert local currency units into international dollars.
+Nominal wages in local currency aren't comparable across time or countries. `convert_constant_ppp()` uses the bundled `macro_indicators` dataset (with CPI and PPP conversion factors) to convert local currency units into international constant dollars.
 
 ```{r}
 setnames(
@@ -159,7 +159,7 @@ bra_hrmis_personnel |> head()
 
 # Validating the harmonized data
 
-Once harmonized, `validate_data()` checks the harmonized dataset against a set of validation rules. It then reports both a pass-rate summary and the specific records that violate each rule. This helps you identify negative salaries, missing keys, or out-of-range dates before analytics are run.
+Once harmonized, `validate_data()` checks the harmonized dataset against a pre-determined set of validation rules. It then reports both a pass-rate summary and the specific records that violate each rule. This helps you identify negative salaries, missing keys, or out-of-range dates before analytics are run.
 
 ```{r}
 result <- validate_data(
@@ -176,4 +176,4 @@ You can inspect the specific records that violate a given rule, for example, the
 result$violations[["salary_non_negative"]]
 ```
 
-Informed by this validation, you might want to revisit your harmonization process and address lingering data quality issues.
+Informed by this data validation, you might want to revisit your harmonization process and address lingering data quality issues.
