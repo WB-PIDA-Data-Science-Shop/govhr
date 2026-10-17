@@ -25,7 +25,7 @@
 #'   \item{transitions}{One row per move between establishments, with
 #'     `personnel_id`, origin (`from`), destination (`to`), when the person
 #'     joined the origin (`from_date`) and when they arrived at the destination
-#'     (`ref_date`), from [compute_transition()].}
+#'     (`ref_date`), from [detect_transition()].}
 #' }
 #' Each table has the class its function returns for `contracts`: data.tables
 #' for data frame input, lazy tables for `tbl_dbi` input (use
@@ -43,7 +43,7 @@
 #'
 #' A person recorded in more than one establishment on the same date moves
 #' from each of them to every establishment they join next, as described in
-#' [compute_transition()].
+#' [detect_transition()].
 #'
 #' @examples
 #' contracts <- data.frame(
@@ -87,11 +87,10 @@ compute_workforce_analytics <- function(contracts, personnel){
   movement <- compute_movement(data)
 
   # 2.2. transitions: by establishment
-  transitions <- compute_transition(
+  transitions <- detect_transition(
     data,
     id_col = "personnel_id",
-    group_cols = "est_id",
-    summarize = FALSE
+    group_col = "est_id"
   )
 
   list(

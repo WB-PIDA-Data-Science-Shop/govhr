@@ -165,7 +165,7 @@ if (getRversion() >= "2.15.1") {
     ".contrib",
     "tenure_days",
     "tenure_years",
-    # compute_transition
+    # detect_transition, compute_transition
     "to",
     "from_date",
     "origin_date",
@@ -173,11 +173,9 @@ if (getRversion() >= "2.15.1") {
     "run",
     "calendar_period",
     "calendar_prev",
-    "calendar_next",
     "transitions",
     "transition_rate",
     "i.prev_date",
-    "i.next_date",
     "i.prev_headcount",
     "n_duplicates",
     "n_rows",

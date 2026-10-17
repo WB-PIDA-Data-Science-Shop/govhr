@@ -1,22 +1,21 @@
-#' Compute career transitions
+#' Detect transitions
 #'
-#' Tracks how people (or contracts) move between groups, such as paygrades or
+#' Tracks how entities move between groups, such as paygrades or
 #' departments, over time. A move happens when an entity joins a group it did
 #' not hold in its previous period, and pairs each group it held then with
-#' each group it joins, giving one row per move.
+#' each group it joins, returning one record per transition
 #'
 #' @param data Data frame or remote database table (`tbl_dbi`) with a
-#'   `ref_date` column, the identifier column and the grouping columns.
+#'   `ref_date` column, the identifier column and the grouping column.
 #' @param id_col Character. Column identifying whose career is tracked, such as
 #'   a person or a contract. Default `"personnel_id"`.
-#' @param group_cols Character vector of columns defining a career position
-#'   (e.g. paygrade, department). Several columns are combined into one label,
-#'   such as `"G1 | Finance"`.
-#' @param summarize Logical. Count moves by origin, destination and date
-#'   instead of returning one row per move. Default `FALSE`.
+#' @param group_col Character. Column defining a group, such as a
+#'   paygrade or a department. To track a combination of groups, such as
+#'   paygrade within department, combine them into one column beforehand 
+#'   (e.g., `paste(paygrade, department, sep = "|")`).
 #' @param drop_duplicates Logical. Drop every entity with more than one record
-#'   on the same `ref_date`, with a warning, so that each entity holds a single
-#'   group per period. Default `FALSE`, which keeps entities holding several
+#'   on the same `ref_date`, with a warning, so that each entity belongs to a single
+#'   group per period. Default `FALSE`, which keeps entities belonging to several
 #'   groups at once. See Details.
 #' @param across_separations Logical. Count moves made across a separation,
 #'   i.e. between the groups an entity held before leaving the public sector and those
@@ -24,19 +23,12 @@
 #'   start of a new career. See Details.
 #' @param ... Arguments passed to methods.
 #'
-#' @returns
-#' With `summarize = FALSE`, one row per move with the identifier, `from` (a
-#' group held in the period before the move), `to` (a group joined),
-#' `from_date` (when the entity began holding `from` without a break) and
-#' `ref_date` (when the entity was first seen in `to`).
-#'
-#' With `summarize = TRUE`, one row per `from`, `to` and `ref_date`, with
-#' `transitions`, the number of moves, and `transition_rate`, those moves
-#' divided by the headcount in `from` on the previous date in the data, as in
-#' [compute_movement()].
-#'
-#' A data.table for data frame input; a lazy table for `tbl_dbi` input (use
-#' [dplyr::collect()] to bring it into memory).
+#' @returns One row per move with the identifier, `from` (a group held in the
+#'   period before the move), `to` (a group joined), `from_date` (when the
+#'   entity began holding `from` without a break) and `ref_date` (when the
+#'   entity was first seen in `to`). A data.table for data frame input; a lazy
+#'   table for `tbl_dbi` input (use [dplyr::collect()] to bring it into
+#'   memory).
 #'
 #' @details
 #' Each move is dated when it happens: `ref_date` is the first period the
@@ -44,7 +36,7 @@
 #' previous group would instead push every first move back to the start of the
 #' data.
 #'
-#' An entity may hold several groups on the same date, such as two
+#' An entity may belong to several groups on the same date, such as two
 #' occupations. Each group it held in its previous period is paired with each
 #' group it joins, so holding `A` and `B` and then `A` and `C` gives two moves,
 #' `A -> C` and `B -> C`. Leaving a group without joining another, such as
@@ -55,19 +47,17 @@
 #' date, even in the same group, is dropped entirely, with a warning saying
 #' how many records were removed.
 #'
-#' An entity missing on the next date in the data has separated, for instance
-#' from the public sector, and may later return. By default its return starts
-#' a new career: the groups it held before leaving are the last of the old
-#' career, and the groups it returns to are not moves. Pass only the records in
-#' which entities are active, such as active contracts, so that inactive
-#' periods count as separations. With `across_separations = TRUE`, separations
-#' are ignored, so a move can span dates on which the entity is missing.
-#' `transition_rate` still divides by the headcount on the previous date in
-#' the data, which such an entity is not part of.
+#' An entity may separate itself from the public sector and return later in time.
+#' By default its return starts a new career: the groups it held before leaving 
+#' are the last of the old career, and the groups it returns to are not moves. 
+#' Pass only the records in which entities are active, such as active contracts, 
+#' so that inactive periods count as separations. With `across_separations = TRUE`, 
+#' separations are ignored, so a move can span dates on which the entity is missing.
 #'
-#' Rows with a missing identifier or group are dropped.
+#' Rows with a missing identifier or group are silently dropped.
 #'
-#' @seealso [plot_transition_network()] to draw the moves as a network.
+#' @seealso [compute_transition()], which counts these moves.
+#'   [plot_transition_network()] to draw them as a network.
 #'
 #' @examples
 #' careers <- data.frame(
@@ -78,11 +68,10 @@
 #'   )),
 #'   paygrade = c("G1", "G1", "G2", "A", "B", "A", "C")
 #' )
-#' compute_transition(careers, group_cols = "paygrade")
-#' compute_transition(careers, group_cols = "paygrade", summarize = TRUE)
+#' detect_transition(careers, group_col = "paygrade")
 #'
 #' # b holds two paygrades at once, so is dropped
-#' compute_transition(careers, group_cols = "paygrade", drop_duplicates = TRUE)
+#' detect_transition(careers, group_col = "paygrade", drop_duplicates = TRUE)
 #'
 #' # c leaves after 2020 and returns to a different paygrade in 2022
 #' returns <- data.frame(
@@ -90,79 +79,62 @@
 #'   ref_date = as.Date(c("2020-01-01", "2022-01-01")),
 #'   paygrade = c("G1", "G2")
 #' )
-#' compute_transition(rbind(careers, returns), group_cols = "paygrade")
-#' compute_transition(
+#' detect_transition(rbind(careers, returns), group_col = "paygrade")
+#' detect_transition(
 #'   rbind(careers, returns),
-#'   group_cols = "paygrade",
+#'   group_col = "paygrade",
 #'   across_separations = TRUE
 #' )
 #'
 #' @export
-compute_transition <- function(data, ...) {
-  UseMethod("compute_transition")
+detect_transition <- function(data, ...) {
+  UseMethod("detect_transition")
 }
 
-#' @rdname compute_transition
+#' @rdname detect_transition
 #' @export
-compute_transition.data.frame <- function(
+detect_transition.data.frame <- function(
   data,
   id_col = "personnel_id",
-  group_cols,
-  summarize = FALSE,
+  group_col,
   drop_duplicates = FALSE,
   across_separations = FALSE,
   ...
 ) {
   rlang::check_dots_empty()
 
+  if (length(group_col) != 1) {
+    stop("`group_col` must be a single column name.", call. = FALSE)
+  }
+
   key_cols <- c(id_col, "ref_date")
 
-  dt <-data.table::as.data.table(data)[, c(key_cols, group_cols), with = FALSE]
+  dt <- data.table::as.data.table(data)[, c(key_cols, group_col), with = FALSE]
 
   dt <- dt[
-    stats::complete.cases(dt[, c(id_col, group_cols), with = FALSE])
+    stats::complete.cases(dt[, c(id_col, group_col), with = FALSE])
   ]
 
-  # checked after the complete.cases filter, so records already dropped for
+  # checked after the missingness filter, so records already dropped for
   # missingness are not counted as violations
   if (drop_duplicates) {
-    duplicate_keys <- duplicated(dt[, key_cols, with = FALSE])
-
-    if (any(duplicate_keys)) {
-      violating_ids <- unique(dt[[id_col]][duplicate_keys])
-      violating_rows <- dt[[id_col]] %in% violating_ids
-
-      warn_duplicate_records(
-        n_duplicates = sum(duplicate_keys),
-        n_rows = sum(violating_rows),
-        n_ids = length(violating_ids),
-        id_col = id_col
-      )
-
-      dt <- dt[!violating_rows]
-    }
+    dt <- drop_duplicate(dt, id_col = id_col)
   }
 
-  # if necessary, combine group cols into a single column
-  if (length(group_cols) > 1) {
-    dt[, "from" := do.call(paste, c(.SD, sep = " | ")), .SDcols = group_cols]
-  } else {
-    data.table::setnames(dt, group_cols, "from")
-  }
+  data.table::setnames(dt, group_col, "from")
 
-  positions <- unique(dt[, c(key_cols, "from"), with = FALSE])
+  positions <- unique(dt)
 
   periods <- unique(positions[, key_cols, with = FALSE])
   data.table::setorderv(periods, key_cols)
   periods[, prev_date := data.table::shift(ref_date)]
   periods[!same_as_neighbour(periods, id_col), prev_date := NA]
 
-  dates <- sort(unique(periods[["ref_date"]]))
-
   # an entity missing on the next date in the data has separated, so the
   # periods on either side of the gap are not neighbours: the earlier one ends
   # a career and the later one starts the next, with no move between them
   if (!across_separations) {
+    dates <- sort(unique(periods[["ref_date"]]))
     date_index <- match(periods[["ref_date"]], dates)
     periods[
       prev_date != data.table::shift(dates)[date_index],
@@ -220,143 +192,43 @@ compute_transition.data.frame <- function(
   data.table::setkey(transitions, NULL)
   data.table::setorderv(transitions, c(id_col, "ref_date", "from", "to"))
 
-  if (summarize) {
-    transitions <- transitions[
-      , .(transitions = .N),
-      by = c("from", "to", "ref_date")
-    ]
-
-    # each group's headcount moves forward to the next date, whose moves it is
-    # the origin for
-    group_headcount <- positions[
-      , .(prev_headcount = .N),
-      by = c("ref_date", "from")
-    ]
-    group_headcount[, ref_date := dates[match(ref_date, dates) + 1L]]
-
-    transitions[
-      group_headcount,
-      on = c("from", "ref_date"),
-      transition_rate := transitions / i.prev_headcount
-    ]
-    data.table::setorderv(transitions, c("ref_date", "from", "to"))
-  }
-
   transitions[]
 }
 
-# shifting within `by` groups runs once per group, which is far slower than one
-# vectorised comparison when there are millions of entities. `dt` must already
-# be sorted by `cols`
-same_as_neighbour <- function(dt, cols, type = "lag") {
-  matches <- lapply(
-    cols,
-    function(col) dt[[col]] == data.table::shift(dt[[col]], type = type)
-  )
-  same <- Reduce(`&`, matches)
-
-  !is.na(same) & same
-}
-
-#' @rdname compute_transition
+#' @rdname detect_transition
 #' @export
-compute_transition.tbl_dbi <- function(
+detect_transition.tbl_dbi <- function(
   data,
   id_col = "personnel_id",
-  group_cols,
-  summarize = FALSE,
+  group_col,
   drop_duplicates = FALSE,
   across_separations = FALSE,
   ...
 ) {
   rlang::check_dots_empty()
 
+  if (length(group_col) != 1) {
+    stop("`group_col` must be a single column name.", call. = FALSE)
+  }
+
   key_cols <- c(id_col, "ref_date")
 
-  entity_group <- data |>
+  positions <- data |>
     drop_missing(
-      c(id_col, group_cols)
+      c(id_col, group_col)
     ) |>
     dplyr::select(
-      dplyr::all_of(c(key_cols, group_cols))
+      dplyr::all_of(key_cols),
+      from = dplyr::all_of(group_col)
     )
 
-  # drop entities holding several records in the same period, even if those
-  # records share the same group. checked after the missingness filter, so
-  # dropped records are not counted as violations
+  # checked after the missingness filter, so records already dropped for
+  # missingness are not counted as violations
   if (drop_duplicates) {
-    key_counts <- entity_group |>
-      dplyr::summarise(
-        n_records = dplyr::n(),
-        .by = dplyr::all_of(key_cols)
-      )
-
-    violating_ids <- key_counts |>
-      dplyr::filter(
-        n_records > 1
-      ) |>
-      dplyr::select(dplyr::all_of(id_col)) |>
-      dplyr::distinct()
-
-    violations <- key_counts |>
-      dplyr::semi_join(
-        violating_ids,
-        by = id_col
-      ) |>
-      dplyr::summarise(
-        n_duplicates = sum(n_records - 1, na.rm = TRUE),
-        n_rows = sum(n_records, na.rm = TRUE),
-        n_ids = dplyr::n_distinct(.data[[id_col]])
-      ) |>
-      dplyr::collect()
-
-    if (violations[["n_ids"]] > 0) {
-      warn_duplicate_records(
-        n_duplicates = violations[["n_duplicates"]],
-        n_rows = violations[["n_rows"]],
-        n_ids = violations[["n_ids"]],
-        id_col = id_col
-      )
-
-      entity_group <- entity_group |>
-        dplyr::anti_join(
-          violating_ids,
-          by = id_col
-        )
-    }
+    positions <- drop_duplicate(positions, id_col = id_col)
   }
 
-  # if necessary, combine group cols into a single label. paste() cannot be
-  # translated, so labels are built in base R for the distinct group values
-  # and joined back
-  if (length(group_cols) > 1) {
-    group_labels <- entity_group |>
-      dplyr::select(dplyr::all_of(group_cols)) |>
-      dplyr::distinct() |>
-      dplyr::collect()
-
-    group_labels[["from"]] <- do.call(
-      paste,
-      c(group_labels[group_cols], sep = " | ")
-    )
-
-    entity_group <- entity_group |>
-      dplyr::left_join(
-        group_labels,
-        by = group_cols,
-        copy = TRUE
-      )
-  } else {
-    entity_group <- entity_group |>
-      dplyr::mutate(
-        from = .data[[group_cols]]
-      )
-  }
-
-  positions <- entity_group |>
-    dplyr::select(
-      dplyr::all_of(key_cols), from
-    ) |>
+  positions <- positions |>
     dplyr::distinct()
 
   # periods refer to the entity's own sequence of reference dates,
@@ -398,7 +270,7 @@ compute_transition.tbl_dbi <- function(
   }
 
   # records held in consecutive periods of the entity keep the same gap between
-  # the entity's period number and the group's record number by entity, 
+  # the entity's period number and the group's record number by entity,
   # defining the entity's contiguous run within a group.
   runs <- positions |>
     dplyr::inner_join(
@@ -437,7 +309,7 @@ compute_transition.tbl_dbi <- function(
 
   # every group held before a move is paired with every group joined in it. a
   # period followed only by leaving a group finds no destination, so is no move
-  transitions <- origins |>
+  origins |>
     dplyr::inner_join(
       destinations,
       by = c(id_col, "origin_date")
@@ -445,60 +317,230 @@ compute_transition.tbl_dbi <- function(
     dplyr::select(
       dplyr::all_of(id_col), from, to, from_date, ref_date
     )
+}
 
-  if (summarize) {
-    # each group's headcount moves forward to the next date, whose moves it is
-    # the origin for
-    group_headcount <- positions |>
-      dplyr::summarise(
-        prev_headcount = dplyr::n(),
-        .by = c("ref_date", "from")
-      ) |>
-      dplyr::inner_join(
-        build_calendar(positions),
-        by = "ref_date"
-      ) |>
-      dplyr::select(
-        from, ref_date = next_date, prev_headcount
-      )
+#' Compute career transitions
+#'
+#' Counts, for each reference date, how many entities moved from one group to
+#' another since the previous date, and what share of the origin group they
+#' make up.
+#'
+#' @inheritParams detect_transition
+#'
+#' @returns A table with one row per `from`, `to` and `ref_date`, containing:
+#' \describe{
+#'   \item{transitions}{Number of moves from `from` to `to` dated `ref_date`,
+#'     as detected by [detect_transition()].}
+#'   \item{transition_rate}{`transitions` divided by the headcount in `from`
+#'     on the previous date in the data, as in [compute_movement()].}
+#' }
+#' A data.table for data frame input; a lazy table for `tbl_dbi` input (use
+#' [dplyr::collect()] to bring it into memory).
+#'
+#' @details
+#' Moves are found and dated as in [detect_transition()], so an entity holding
+#' several groups moves from each group it held to each group it joins.
+#'
+#' The headcount is the number of distinct entities in each group on each
+#' date, from [count_entity()], so each entity counts once in every group it
+#' holds. It is counted on the same records as the moves: rows with a missing
+#' identifier or group, and with `drop_duplicates = TRUE` the entities dropped
+#' as duplicates, are left out of both.
+#'
+#' With `across_separations = TRUE`, a move can span dates on which the entity
+#' is missing, but `transition_rate` still divides by the headcount on the
+#' previous date in the data, which such an entity is not part of.
+#'
+#' @seealso [detect_transition()], which finds each move.
+#'   [compute_movement()], which counts hires and separations.
+#'
+#' @examples
+#' careers <- data.frame(
+#'   personnel_id = c("a", "a", "a", "b", "b", "b", "b"),
+#'   ref_date = as.Date(c(
+#'     "2020-01-01", "2021-01-01", "2022-01-01",
+#'     "2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01"
+#'   )),
+#'   paygrade = c("G1", "G1", "G2", "A", "B", "A", "C")
+#' )
+#' compute_transition(careers, group_col = "paygrade")
+#'
+#' @export
+compute_transition <- function(data, ...) {
+  UseMethod("compute_transition")
+}
 
-    transitions <- transitions |>
-      dplyr::summarise(
-        transitions = dplyr::n(),
-        .by = dplyr::all_of(c("from", "to", "ref_date"))
-      ) |>
-      dplyr::left_join(
-        group_headcount,
-        by = c("from", "ref_date")
-      ) |>
-      # some databases divide integers with integer division
-      dplyr::mutate(
-        transition_rate = as.numeric(transitions) / prev_headcount
-      ) |>
-      dplyr::select(
-        from, to, ref_date, transitions, transition_rate
-      )
+#' @rdname compute_transition
+#' @export
+compute_transition.data.frame <- function(
+  data,
+  id_col = "personnel_id",
+  group_col,
+  drop_duplicates = FALSE,
+  across_separations = FALSE,
+  ...
+) {
+  rlang::check_dots_empty()
+
+  key_cols <- c(id_col, "ref_date")
+
+  # drop missing group_col and id_col
+  records <- data.table::as.data.table(data)[, c(key_cols, group_col), with = FALSE]
+
+  records <- records[
+    stats::complete.cases(records[, c(id_col, group_col), with = FALSE])
+  ]
+
+  if (drop_duplicates) {
+    records <- drop_duplicate(records, id_col = id_col)
   }
+
+  # duplicates are already dropped, so detect_transition() has none left
+  transitions <- detect_transition(
+    records,
+    id_col = id_col,
+    group_col = group_col,
+    drop_duplicates = FALSE,
+    across_separations = across_separations
+  )
+
+  transitions <- transitions[
+    , .(transitions = .N),
+    by = c("from", "to", "ref_date")
+  ]
+
+  group_headcount <- count_entity(
+    records,
+    id_col = id_col,
+    group_cols = c("ref_date", group_col)
+  )
+
+  data.table::setnames(
+    group_headcount,
+    c(group_col, "count"),
+    c("from", "prev_headcount")
+  )
+
+  # each group's headcount moves forward to the next date, whose moves it is
+  # the origin for
+  dates <- sort(unique(group_headcount[["ref_date"]]))
+  group_headcount[, ref_date := dates[match(ref_date, dates) + 1L]]
+
+  transitions[
+    group_headcount,
+    on = c("from", "ref_date"),
+    transition_rate := transitions / i.prev_headcount
+  ]
+
+  data.table::setorderv(transitions, c("ref_date", "from", "to"))
+
+  transitions[]
+}
+
+#' @rdname compute_transition
+#' @export
+compute_transition.tbl_dbi <- function(
+  data,
+  id_col = "personnel_id",
+  group_col,
+  drop_duplicates = FALSE,
+  across_separations = FALSE,
+  ...
+) {
+  rlang::check_dots_empty()
+
+  key_cols <- c(id_col, "ref_date")
+
+  records <- data |>
+    drop_missing(
+      c(id_col, group_col)
+    ) |>
+    dplyr::select(
+      dplyr::all_of(c(key_cols, group_col))
+    )
+
+  if (drop_duplicates) {
+    records <- drop_duplicate(records, id_col = id_col)
+  }
+
+  group_headcount <- records |>
+    count_entity(
+      id_col = id_col,
+      group_cols = c("ref_date", group_col)
+    ) |>
+    dplyr::rename(
+      from = dplyr::all_of(group_col),
+      prev_headcount = count
+    )
+
+  # each group's headcount moves forward to the next date, whose moves it is
+  # the origin for
+  group_headcount <- group_headcount |>
+    dplyr::inner_join(
+      build_calendar(group_headcount),
+      by = "ref_date"
+    ) |>
+    dplyr::select(
+      from, ref_date = next_date, prev_headcount
+    )
+
+  # duplicates are already dropped, so detect_transition() has none left
+  transitions <- records |>
+    detect_transition(
+      id_col = id_col,
+      group_col = group_col,
+      drop_duplicates = FALSE,
+      across_separations = across_separations
+    )
+    
+  transitions <- transitions |>
+    dplyr::summarise(
+      transitions = dplyr::n(),
+      .by = dplyr::all_of(c("from", "to", "ref_date"))
+    ) |>
+    dplyr::left_join(
+      group_headcount,
+      by = c("from", "ref_date")
+    ) |>
+    # some databases divide integers with integer division
+    dplyr::mutate(
+      transition_rate = as.numeric(transitions) / prev_headcount
+    ) |>
+    dplyr::select(
+      from, to, ref_date, transitions, transition_rate
+    )
 
   transitions
 }
 
-# shared by both compute_transition() methods, so they warn identically
-warn_duplicate_records <- function(n_duplicates, n_rows, n_ids, id_col) {
-  warning(
-    sprintf(
-      paste(
-        "%d record(s) are not uniquely identified by `%s` and `ref_date`;",
-        "dropping all %d record(s) for the %d affected `%s` value(s)."
-      ),
-      as.integer(n_duplicates),
-      id_col,
-      as.integer(n_rows),
-      as.integer(n_ids),
-      id_col
-    ),
-    call. = FALSE
+#' Compare each row with its neighbour
+#'
+#' Flags the rows whose values in `cols` all equal those of the row before (or
+#' after) it. Used to find runs of rows belonging to the same entity and group
+#' in [detect_transition()].
+#'
+#' @param dt A data.table already sorted by `cols`.
+#' @param cols Character vector of the columns to compare.
+#' @param type Character. `"lag"` (default) compares each row with the row
+#'   before it, `"lead"` with the row after it.
+#'
+#' @return A logical vector with one element per row of `dt`: `TRUE` if the row
+#'   matches its neighbour in every column of `cols`, and `FALSE` otherwise,
+#'   including the first (or last) row, which has no neighbour.
+#'
+#' @details
+#' Shifting within `by` groups runs once per group, which is far slower than
+#' one vectorised comparison when there are millions of entities.
+#'
+#' @keywords internal
+same_as_neighbour <- function(dt, cols, type = "lag") {
+  matches <- lapply(
+    cols,
+    function(col) dt[[col]] == data.table::shift(dt[[col]], type = type)
   )
+  same <- Reduce(`&`, matches)
+
+  !is.na(same) & same
 }
 
 #' Plot transfer heatmap
@@ -550,7 +592,7 @@ plot_transfer_heatmap <- function(data) {
 #' or more nodes are labelled by index rather than by name.
 #'
 #' @param data Data frame with one row per move and `from` and `to` columns,
-#'   as returned by [compute_transition()] with `summarize = FALSE`.
+#'   as returned by [detect_transition()].
 #' @param interactive Logical. If `TRUE` (default), return an interactive
 #'   chart that shows each establishment's name on hover. If `FALSE`, return a
 #'   static ggplot, for outputs such as Word that cannot show interactive

@@ -1,16 +1,43 @@
 
 #' Count unique entities by group
-#' 
-#' @param data Data frame containing the data.
+#'
+#' Counts how many distinct entities, such as people or contracts, are in each
+#' group. Rows with a missing identifier are not counted.
+#'
+#' @param data Data frame or remote database table (`tbl_dbi`) containing
+#'   `id_col` and `group_cols`.
 #' @param id_col Character. Column name of the unique identifier for the entity.
 #' @param group_cols Character vector of column names to group by, or `NULL` for no grouping.
-#' 
-#' @returns A data frame with the grouping columns and a `count` column representing the number of unique entities in each group.
-#' 
-#' @importFrom data.table as.data.table uniqueN setorderv
+#' @param ... Arguments passed to methods.
+#'
+#' @returns A table with the grouping columns and a `count` column representing
+#'   the number of unique entities in each group. A data.table sorted by the
+#'   grouping columns for data frame input; a lazy table for `tbl_dbi` input
+#'   (use [dplyr::collect()] to bring it into memory).
+#'
+#' @examples
+#' hr <- data.frame(
+#'   personnel_id = c(1, 1, 2, NA),
+#'   est_id = c("A", "A", "B", "B")
+#' )
+#' count_entity(hr, id_col = "personnel_id", group_cols = "est_id")
+#'
 #' @export
-count_entity <- function(data, id_col, group_cols = NULL){
-  dt <- data.table::as.data.table(data)
+count_entity <- function(data, ...) {
+  UseMethod("count_entity")
+}
+
+#' @rdname count_entity
+#' @export
+count_entity.data.frame <- function(data, id_col, group_cols = NULL, ...) {
+  rlang::check_dots_empty()
+
+  # as.data.table() copies, which is wasted on a data.table input
+  dt <- if (data.table::is.data.table(data)) {
+    data
+  } else {
+    data.table::as.data.table(data)
+  }
 
   out <- dt[
     !is.na(get(id_col)),
@@ -23,6 +50,21 @@ count_entity <- function(data, id_col, group_cols = NULL){
   data.table::setorderv(out, c(group_cols, "count"))
 
   out[]
+}
+
+#' @rdname count_entity
+#' @export
+count_entity.tbl_dbi <- function(data, id_col, group_cols = NULL, ...) {
+  rlang::check_dots_empty()
+
+  data |>
+    dplyr::filter(
+      !is.na(.data[[id_col]])
+    ) |>
+    dplyr::summarise(
+      count = dplyr::n_distinct(.data[[id_col]]),
+      .by = dplyr::all_of(group_cols)
+    )
 }
 
 

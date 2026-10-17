@@ -28,7 +28,7 @@ on the first date, since there is nothing to compare with.}
 \item{transitions}{One row per move between establishments, with
 \code{personnel_id}, origin (\code{from}), destination (\code{to}), when the person
 joined the origin (\code{from_date}) and when they arrived at the destination
-(\code{ref_date}), from \code{\link[=compute_transition]{compute_transition()}}.}
+(\code{ref_date}), from \code{\link[=detect_transition]{detect_transition()}}.}
 }
 Each table has the class its function returns for \code{contracts}: data.tables
 for data frame input, lazy tables for \code{tbl_dbi} input (use
@@ -53,7 +53,7 @@ contracts on the same date is counted once.
 
 A person recorded in more than one establishment on the same date moves
 from each of them to every establishment they join next, as described in
-\code{\link[=compute_transition]{compute_transition()}}.
+\code{\link[=detect_transition]{detect_transition()}}.
 }
 \examples{
 contracts <- data.frame(

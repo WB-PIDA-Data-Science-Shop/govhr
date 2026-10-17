@@ -149,3 +149,43 @@ test_that("compute_growth_summary drops unlabelled groups", {
   expect_false(anyNA(result$paygrade))
   expect_equal(result$paygrade, "G1")
 })
+
+# ---- count_entity ------------------------------------------------------------
+
+entities <- data.frame(
+  personnel_id = c(1, 1, 2, NA, 3),
+  est_id = c("A", "A", "B", "B", "B"),
+  stringsAsFactors = FALSE
+)
+
+test_that("count_entity counts distinct non-missing ids per group", {
+  result <- count_entity(entities, id_col = "personnel_id", group_cols = "est_id")
+
+  expect_true(data.table::is.data.table(result))
+  expect_equal(result[["est_id"]], c("A", "B"))
+  expect_equal(result[["count"]], c(1L, 2L))
+})
+
+test_that("count_entity gives the same counts on a duckdb table", {
+  skip_if_not_installed("duckdb")
+  skip_if_not_installed("dbplyr")
+
+  # silence duckdb's notice about where it stores extensions
+  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  DBI::dbWriteTable(con, "entities", entities)
+
+  result <- count_entity(
+    dplyr::tbl(con, "entities"),
+    id_col = "personnel_id",
+    group_cols = "est_id"
+  )
+
+  expect_s3_class(result, "tbl_dbi")
+
+  result <- dplyr::collect(result)
+  result <- result[order(result[["est_id"]]), ]
+
+  expect_equal(result[["est_id"]], c("A", "B"))
+  expect_equal(as.integer(result[["count"]]), c(1L, 2L))
+})
