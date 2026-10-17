@@ -46,6 +46,10 @@ The previous and next dates are the neighbouring dates found in the data,
 so the dates do not need to be evenly spaced. People with several contracts
 on a date appear once. A separation is any exit from active status,
 including retirement.
+
+A separation is flagged on the person's last active date, which holds their
+pay and group, but happens by \code{next_date}, the first date they are absent.
+\code{\link[=compute_movement]{compute_movement()}} counts it on \code{next_date}.
 }
 \examples{
 hr <- data.frame(

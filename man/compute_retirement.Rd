@@ -41,28 +41,33 @@ personnel recorded as \code{"active"} and retirees as \code{"pensioner"}. Defaul
 A table with one row per \code{ref_date} and group, containing:
 \describe{
 \item{headcount}{Number of active people.}
-\item{retirements}{Active people who are no longer active on the next
-date and are next recorded as pensioners. \code{NA} on the last date, which
-has nothing to compare with.}
-\item{retirement_rate}{\code{retirements} divided by \code{headcount}.}
+\item{retirements}{People active on the previous date who are no longer
+active on this one and are next recorded as pensioners. \code{NA} on the
+first date, which has nothing to compare with.}
+\item{retirement_rate}{\code{retirements} divided by the headcount on the
+previous date, as \code{separation_rate} in \code{\link[=compute_movement]{compute_movement()}}.}
 }
 A data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
 \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
-Counts, for each reference date, how many people are active and how many of
-them leave active status by the next date into a pension, i.e. whose next
+Counts, for each reference date, how many people are active and how many
+left active status since the previous date into a pension, i.e. whose next
 status after leaving is pensioner.
 }
 \details{
-The next date is the neighbouring date found in the data, so the dates do
-not need to be evenly spaced. People are counted once per date, even if they
-hold several contracts. With \code{group_cols}, each person is counted in the
-group they belong to on that date.
+The previous date is the neighbouring date found in the data, so the dates
+do not need to be evenly spaced. People are counted once per date, even if
+they hold several contracts. With \code{group_cols}, each person is counted in
+the group they belong to on that date, and each retirement in the group the
+person left. A group that everyone left still appears on the next date,
+with a \code{headcount} of 0. A group with nobody active on the previous date has
+no headcount to compare with, so its retirements and rate are \code{NA}.
 
 Pension registration can lag the exit, so the pensioner record may appear
 at any later date, not only the next one. A retirement is dated by the exit,
-not by the registration. A person who returns to active work before any
+the first date the person is absent, not by the registration. A person who
+returns to active work before any
 pensioner record counts as a separation, not a retirement, at the earlier
 exit. There is no limit on the lag, so an exit followed years later by a
 deferred pension also counts as a retirement.

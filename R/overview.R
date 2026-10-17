@@ -1,16 +1,43 @@
 
 #' Count unique entities by group
-#' 
-#' @param data Data frame containing the data.
+#'
+#' Counts how many distinct entities, such as people or contracts, are in each
+#' group. Rows with a missing identifier are not counted.
+#'
+#' @param data Data frame or remote database table (`tbl_dbi`) containing
+#'   `id_col` and `group_cols`.
 #' @param id_col Character. Column name of the unique identifier for the entity.
 #' @param group_cols Character vector of column names to group by, or `NULL` for no grouping.
-#' 
-#' @returns A data frame with the grouping columns and a `count` column representing the number of unique entities in each group.
-#' 
-#' @importFrom data.table as.data.table uniqueN setorderv
+#' @param ... Arguments passed to methods.
+#'
+#' @returns A table with the grouping columns and a `count` column representing
+#'   the number of unique entities in each group. A data.table sorted by the
+#'   grouping columns for data frame input; a lazy table for `tbl_dbi` input
+#'   (use [dplyr::collect()] to bring it into memory).
+#'
+#' @examples
+#' hr <- data.frame(
+#'   personnel_id = c(1, 1, 2, NA),
+#'   est_id = c("A", "A", "B", "B")
+#' )
+#' count_entity(hr, id_col = "personnel_id", group_cols = "est_id")
+#'
 #' @export
-count_entity <- function(data, id_col, group_cols = NULL){
-  dt <- data.table::as.data.table(data)
+count_entity <- function(data, ...) {
+  UseMethod("count_entity")
+}
+
+#' @rdname count_entity
+#' @export
+count_entity.data.frame <- function(data, id_col, group_cols = NULL, ...) {
+  rlang::check_dots_empty()
+
+  # as.data.table() copies, which is wasted on a data.table input
+  dt <- if (data.table::is.data.table(data)) {
+    data
+  } else {
+    data.table::as.data.table(data)
+  }
 
   out <- dt[
     !is.na(get(id_col)),
@@ -23,6 +50,21 @@ count_entity <- function(data, id_col, group_cols = NULL){
   data.table::setorderv(out, c(group_cols, "count"))
 
   out[]
+}
+
+#' @rdname count_entity
+#' @export
+count_entity.tbl_dbi <- function(data, id_col, group_cols = NULL, ...) {
+  rlang::check_dots_empty()
+
+  data |>
+    dplyr::filter(
+      !is.na(.data[[id_col]])
+    ) |>
+    dplyr::summarise(
+      count = dplyr::n_distinct(.data[[id_col]]),
+      .by = dplyr::all_of(group_cols)
+    )
 }
 
 
@@ -124,59 +166,6 @@ compute_cross_section_summary <- function(data, group_col, measure_col = NULL) {
     )
   }
 }
-
-#' Compute growth rate summary
-#'
-#' Keeps each group's first and last reference date and computes the percentage
-#' change between them. Counts rows when `measure_col` is `NULL` (headcount) and
-#' sums the column otherwise (wage bill).
-#'
-#' @param data Data frame containing `ref_date` and the grouping column.
-#' @param group_col Character. Column to group by.
-#' @param measure_col Character. Numeric column to sum, or `NULL` to count rows.
-#'
-#' @returns A data frame with the grouping column and a `growth_rate` column, in
-#'   percentage points (e.g. `12.5` for +12.5%).
-#'
-#' @importFrom dplyr all_of arrange filter first last n summarise
-#' @export
-compute_growth_summary <- function(data, group_col, measure_col = NULL) {
-  labelled <- dplyr::filter(data, !is.na(.data[[group_col]]))
-
-  # aggregate every period once; picking endpoints out of the (small) aggregate
-  # is cheaper than scanning the raw rows for each group's first and last date
-  by_period <- if (is.null(measure_col)) {
-    dplyr::summarise(
-      labelled,
-      value = dplyr::n(),
-      .by = dplyr::all_of(c("ref_date", group_col))
-    )
-  } else {
-    govhr::compute_fastsummary(
-      labelled,
-      cols = measure_col,
-      fns = "sum",
-      group_cols = c("ref_date", group_col)
-    )
-  }
-
-  by_period |>
-    dplyr::filter(
-      .data[["ref_date"]] %in% range(.data[["ref_date"]]),
-      .by = dplyr::all_of(group_col)
-    ) |>
-    dplyr::arrange(.data[["ref_date"]]) |>
-    dplyr::summarise(
-      growth_rate = round(
-        dplyr::last(.data[["value"]]) / dplyr::first(.data[["value"]]) - 1,
-        3
-      ) *
-        100,
-      .by = dplyr::all_of(group_col)
-    ) |>
-    dplyr::filter(!is.na(.data[["growth_rate"]]))
-}
-
 
 #' Orange gradient colour scale for grouped series
 #'
@@ -308,7 +297,7 @@ plot_bar_total <- function(data, group_col, x_col = "value", x_label = "Value") 
 #' dashed reference line at zero separating growth from decline.
 #'
 #' @param data Data frame with the grouping column and a `growth_rate` column,
-#'   as returned by [compute_growth_summary()].
+#'   as returned by [compute_growth()].
 #' @param group_col Character. Column to group by.
 #'
 #' @returns A ggplot2 object.

@@ -10,81 +10,89 @@ compute_transition(data, ...)
 
 \method{compute_transition}{data.frame}(
   data,
-  id_col = "contract_id",
-  group_cols,
-  return_all = FALSE,
-  summarize = FALSE,
+  id_col = "personnel_id",
+  group_col,
+  drop_duplicates = FALSE,
+  across_separations = FALSE,
   ...
 )
 
 \method{compute_transition}{tbl_dbi}(
   data,
-  id_col = "contract_id",
-  group_cols,
-  return_all = FALSE,
-  summarize = FALSE,
+  id_col = "personnel_id",
+  group_col,
+  drop_duplicates = FALSE,
+  across_separations = FALSE,
   ...
 )
 }
 \arguments{
 \item{data}{Data frame or remote database table (\code{tbl_dbi}) with a
-\code{ref_date} column, the identifier column and the grouping columns.}
+\code{ref_date} column, the identifier column and the grouping column.}
 
 \item{...}{Arguments passed to methods.}
 
 \item{id_col}{Character. Column identifying whose career is tracked, such as
-a person or a contract. Default \code{"contract_id"}.}
+a person or a contract. Default \code{"personnel_id"}.}
 
-\item{group_cols}{Character vector of columns defining a career position
-(e.g. paygrade, department). Several columns are combined into one label,
-such as \code{"G1 | Finance"}.}
+\item{group_col}{Character. Column defining a group, such as a
+paygrade or a department. To track a combination of groups, such as
+paygrade within department, combine them into one column beforehand
+(e.g., \code{paste(paygrade, department, sep = "|")}).}
 
-\item{return_all}{Logical. Also keep each entity's last spell, which has no
-next group, so its \code{to} and \code{ref_date} are \code{NA}. This includes entities
-that never move. Default \code{FALSE}.}
+\item{drop_duplicates}{Logical. Drop every entity with more than one record
+on the same \code{ref_date}, with a warning, so that each entity belongs to a single
+group per period. Default \code{FALSE}, which keeps entities belonging to several
+groups at once. See Details.}
 
-\item{summarize}{Logical. Count moves by origin, destination and date
-instead of returning one row per move. Default \code{FALSE}.}
+\item{across_separations}{Logical. Count moves made across a separation,
+i.e. between the groups an entity held before leaving the public sector and those
+it holds on its return. Default \code{FALSE}, which treats the return as the
+start of a new career. See Details.}
 }
 \value{
-With \code{summarize = FALSE}, one row per move with the identifier, \code{from} (the
-group left), \code{to} (the group joined), \code{from_date} (when the spell in \code{from}
-began) and \code{ref_date} (when the entity was first seen in \code{to}).
-
-With \code{summarize = TRUE}, one row per \code{from}, \code{to} and \code{ref_date}, with
-\code{transitions}, the number of moves.
-
+A table with one row per \code{from}, \code{to} and \code{ref_date}, containing:
+\describe{
+\item{transitions}{Number of moves from \code{from} to \code{to} dated \code{ref_date},
+as detected by \code{\link[=detect_transition]{detect_transition()}}.}
+\item{transition_rate}{\code{transitions} divided by the headcount in \code{from}
+on the previous date in the data, as in \code{\link[=compute_movement]{compute_movement()}}.}
+}
 A data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
 \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
-Tracks how people (or contracts) move between groups, such as paygrades or
-departments, over time. Each entity's history is collapsed into spells: runs
-of consecutive periods in the same group. Each spell is then paired with the
-one that follows it, giving one row per move.
+Counts, for each reference date, how many entities moved from one group to
+another since the previous date, and what share of the origin group they
+make up.
 }
 \details{
-Each move is dated when it happens: \code{ref_date} is the first period the
-entity is seen in its new group. Dating it by when the previous spell began
-would instead push every first move back to the start of the data.
+Moves are found and dated as in \code{\link[=detect_transition]{detect_transition()}}, so an entity holding
+several groups moves from each group it held to each group it joins.
 
-Rows with a missing identifier or group are dropped. Each entity must have
-at most one record per \code{ref_date}, otherwise its position in that period is
-unclear. Entities that break this rule are dropped entirely, with a warning
-saying how many records were removed.
+The headcount is the number of distinct entities in each group on each
+date, from \code{\link[=count_entity]{count_entity()}}, so each entity counts once in every group it
+holds. It is counted on the same records as the moves: rows with a missing
+identifier or group, and with \code{drop_duplicates = TRUE} the entities dropped
+as duplicates, are left out of both.
+
+With \code{across_separations = TRUE}, a move can span dates on which the entity
+is missing, but \code{transition_rate} still divides by the headcount on the
+previous date in the data, which such an entity is not part of.
 }
 \examples{
 careers <- data.frame(
-  contract_id = c("a", "a", "a", "b", "b"),
+  personnel_id = c("a", "a", "a", "b", "b", "b", "b"),
   ref_date = as.Date(c(
-    "2020-01-01", "2021-01-01", "2022-01-01", "2020-01-01", "2021-01-01"
+    "2020-01-01", "2021-01-01", "2022-01-01",
+    "2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01"
   )),
-  paygrade = c("G1", "G1", "G2", "G5", "G5")
+  paygrade = c("G1", "G1", "G2", "A", "B", "A", "C")
 )
-compute_transition(careers, group_cols = "paygrade")
-compute_transition(careers, group_cols = "paygrade", summarize = TRUE)
+compute_transition(careers, group_col = "paygrade")
 
 }
 \seealso{
-\code{\link[=plot_transition_network]{plot_transition_network()}} to draw the moves as a network.
+\code{\link[=detect_transition]{detect_transition()}}, which finds each move.
+\code{\link[=compute_movement]{compute_movement()}}, which counts hires and separations.
 }

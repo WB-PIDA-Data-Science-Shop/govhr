@@ -41,7 +41,7 @@ test_that("returns the four indicators", {
   )
   expect_true(all(vapply(result, data.table::is.data.table, logical(1))))
   expect_equal(result$movement$hires, c(NA, 1L, 0L))
-  expect_equal(result$movement$separations, c(0L, 1L, NA))
+  expect_equal(result$movement$separations, c(NA, 0L, 1L))
 })
 
 test_that("counts only active personnel", {

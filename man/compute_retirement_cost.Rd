@@ -44,23 +44,25 @@ personnel recorded as \code{"active"} and retirees as \code{"pensioner"}. Defaul
 \value{
 A table with one row per \code{ref_date} and group, containing
 \code{retirement_cost}, the retirees' pay. \code{retirement_cost} is 0 when nobody
-retired, and \code{NA} on the last date, which has nothing to compare with. A
+retired, and \code{NA} on the first date, which has nothing to compare with,
+and for a group with nobody active on the previous date. A
 data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
 \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
-Adds up, for each reference date, the pay of the people who retire at that
-date.
+Adds up, for each reference date, the pay of the people who retired since
+the previous date.
 }
 \details{
-Retirees are costed at their pay on their last active date. The pay on all
-of a retiree's active records that date is added up, so people with several
-contracts are costed in full; pay recorded alongside, such as a pension, is
-not. Missing pay counts as 0.
+As in \code{\link[=compute_retirement]{compute_retirement()}}, retirements are counted on the first date the
+person is absent. Retirees are costed at their pay on their last active
+date. The pay on all of a retiree's active records that date is added up, so
+people with several contracts are costed in full; pay recorded alongside,
+such as a pension, is not. Missing pay counts as 0.
 
 With \code{group_cols}, each retiree's pay is counted in the group of the record
-it comes from. Every group with active personnel on a date appears for that
-date.
+it comes from. Every group with active personnel on a date appears for
+that date, and a group that everyone left still appears on the next date.
 }
 \examples{
 hr <- data.frame(

@@ -21,6 +21,139 @@ drop_missing <- function(data, cols){
     filter(!!!conditions)
 }
 
+#' Drop entities with duplicated records
+#'
+#' Drops every record of each entity holding more than one record on the same
+#' `ref_date`, even if those records are otherwise identical, and warns how
+#' many records were removed. Used to keep a single record per entity and
+#' period, e.g. a single group per period in [detect_transition()].
+#'
+#' @param data A data frame or lazy database table (`tbl_dbi`) with `ref_date`
+#'   and the column named in `id_col`.
+#' @param id_col Character. Column identifying the entity, such as a person or
+#'   a contract.
+#' @param ... Arguments passed to methods.
+#'
+#' @return `data` without the records of the entities holding several records
+#'   on a date. A data.table for data frame input; a lazy table for `tbl_dbi`
+#'   input.
+#'
+#' @keywords internal
+drop_duplicate <- function(data, ...) {
+  UseMethod("drop_duplicate")
+}
+
+#' @rdname drop_duplicate
+#' @export
+drop_duplicate.data.frame <- function(data, id_col, ...) {
+  rlang::check_dots_empty()
+
+  # as.data.table() copies, which is wasted on a data.table input
+  dt <- if (data.table::is.data.table(data)) {
+    data
+  } else {
+    data.table::as.data.table(data)
+  }
+
+  duplicate_keys <- duplicated(dt, by = c(id_col, "ref_date"))
+
+  if (!any(duplicate_keys)) {
+    return(dt)
+  }
+
+  violating_ids <- unique(dt[[id_col]][duplicate_keys])
+  violating_rows <- dt[[id_col]] %in% violating_ids
+
+  warn_duplicate_records(
+    n_duplicates = sum(duplicate_keys),
+    n_rows = sum(violating_rows),
+    n_ids = length(violating_ids),
+    id_col = id_col
+  )
+
+  dt[!violating_rows]
+}
+
+#' @rdname drop_duplicate
+#' @export
+drop_duplicate.tbl_dbi <- function(data, id_col, ...) {
+  rlang::check_dots_empty()
+
+  key_counts <- data |>
+    dplyr::summarise(
+      n_records = dplyr::n(),
+      .by = dplyr::all_of(c(id_col, "ref_date"))
+    )
+
+  violating_ids <- key_counts |>
+    dplyr::filter(
+      n_records > 1
+    ) |>
+    dplyr::select(dplyr::all_of(id_col)) |>
+    dplyr::distinct()
+
+  violations <- key_counts |>
+    dplyr::semi_join(
+      violating_ids,
+      by = id_col
+    ) |>
+    dplyr::summarise(
+      n_duplicates = sum(n_records - 1, na.rm = TRUE),
+      n_rows = sum(n_records, na.rm = TRUE),
+      n_ids = dplyr::n_distinct(.data[[id_col]])
+    ) |>
+    dplyr::collect()
+
+  if (violations[["n_ids"]] == 0) {
+    return(data)
+  }
+
+  warn_duplicate_records(
+    n_duplicates = violations[["n_duplicates"]],
+    n_rows = violations[["n_rows"]],
+    n_ids = violations[["n_ids"]],
+    id_col = id_col
+  )
+
+  data |>
+    dplyr::anti_join(
+      violating_ids,
+      by = id_col
+    )
+}
+
+#' Warn about records dropped as duplicates
+#'
+#' Raises the warning of [drop_duplicate()], shared by its methods so that
+#' both backends word it identically.
+#'
+#' @param n_duplicates Number of surplus records, i.e. records beyond the
+#'   first for each entity and `ref_date`.
+#' @param n_rows Number of records dropped, all records of the affected
+#'   entities.
+#' @param n_ids Number of entities dropped.
+#' @param id_col Character. Column identifying the entity.
+#'
+#' @return `NULL`, invisibly. Called for its warning.
+#'
+#' @keywords internal
+warn_duplicate_records <- function(n_duplicates, n_rows, n_ids, id_col) {
+  warning(
+    sprintf(
+      paste(
+        "%d record(s) are not uniquely identified by `%s` and `ref_date`;",
+        "dropping all %d record(s) for the %d affected `%s` value(s)."
+      ),
+      as.integer(n_duplicates),
+      id_col,
+      as.integer(n_rows),
+      as.integer(n_ids),
+      id_col
+    ),
+    call. = FALSE
+  )
+}
+
 #' Build a calendar of reference dates
 #'
 #' Lists each distinct `ref_date` in the data alongside the reference date
