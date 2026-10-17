@@ -305,7 +305,7 @@ test_that("the service chain matches compute_service_table() with tenure as the 
     radix = 100
   )
   service <- compute_service_table(
-    personnel, age_col = "tenure", status_col = "employment_status",
+    personnel, duration_col = "tenure", status_col = "employment_status",
     personnel_id_col = "personnel_id", ref_date_col = "ref_date",
     group_cols = "gender", radix = 100
   )

@@ -95,7 +95,7 @@ test_that("basic exposure/exit counts and rates are correct", {
   snaps <- decrement_pair_snaps()
   out <- .compute_decrement_pair(
     snaps$snap_t0, snaps$snap_t1,
-    age_col = "age", status_col = "employment_status",
+    duration_col = "age", status_col = "employment_status",
     personnel_id_col = "personnel_id", ref_date_col = "ref_date",
     group_cols = "gender"
   )
@@ -112,7 +112,7 @@ test_that("someone already a pensioner at t0 is excluded from exposure entirely 
   snaps <- decrement_pair_snaps()
   out <- .compute_decrement_pair(
     snaps$snap_t0, snaps$snap_t1,
-    age_col = "age", status_col = "employment_status",
+    duration_col = "age", status_col = "employment_status",
     personnel_id_col = "personnel_id", ref_date_col = "ref_date",
     group_cols = "gender"
   )
@@ -126,7 +126,7 @@ test_that("a non-retirement-exit is attributed to the person's own t0 age, not s
   snaps <- decrement_pair_snaps()
   out <- .compute_decrement_pair(
     snaps$snap_t0, snaps$snap_t1,
-    age_col = "age", status_col = "employment_status",
+    duration_col = "age", status_col = "employment_status",
     personnel_id_col = "personnel_id", ref_date_col = "ref_date",
     group_cols = "gender"
   )
@@ -142,7 +142,7 @@ test_that("outcome vocabulary is derived from the data, not hardcoded", {
   snaps <- decrement_pair_snaps()
   out <- .compute_decrement_pair(
     snaps$snap_t0, snaps$snap_t1,
-    age_col = "age", status_col = "employment_status",
+    duration_col = "age", status_col = "employment_status",
     personnel_id_col = "personnel_id", ref_date_col = "ref_date",
     group_cols = "gender"
   )
@@ -155,7 +155,7 @@ test_that("every exposed age/group reports all outcome types with explicit zeros
   snaps <- decrement_pair_snaps()
   out <- .compute_decrement_pair(
     snaps$snap_t0, snaps$snap_t1,
-    age_col = "age", status_col = "employment_status",
+    duration_col = "age", status_col = "employment_status",
     personnel_id_col = "personnel_id", ref_date_col = "ref_date",
     group_cols = "gender"
   )
@@ -171,7 +171,7 @@ test_that("outcome rates sum to exactly 1 for every age/group", {
   snaps <- decrement_pair_snaps()
   out <- .compute_decrement_pair(
     snaps$snap_t0, snaps$snap_t1,
-    age_col = "age", status_col = "employment_status",
+    duration_col = "age", status_col = "employment_status",
     personnel_id_col = "personnel_id", ref_date_col = "ref_date",
     group_cols = "gender"
   )
@@ -183,7 +183,7 @@ test_that("t0_date and t1_date are attached correctly", {
   snaps <- decrement_pair_snaps()
   out <- .compute_decrement_pair(
     snaps$snap_t0, snaps$snap_t1,
-    age_col = "age", status_col = "employment_status",
+    duration_col = "age", status_col = "employment_status",
     personnel_id_col = "personnel_id", ref_date_col = "ref_date",
     group_cols = "gender"
   )
@@ -353,7 +353,7 @@ for (backend in backends) {
     }
     expect_warning(
       out <- estimate_decrement_rates(
-        personnel_dt = data, age_col = "age", status_col = "employment_status",
+        personnel_dt = data, duration_col = "age", status_col = "employment_status",
         personnel_id_col = "personnel_id", ref_date_col = "ref_date", group_cols = NULL
       ),
       "deprecated"
@@ -403,7 +403,7 @@ test_that("pooled output over one pair matches .compute_decrement_pair()", {
   snaps <- decrement_pair_snaps()
   pair <- .compute_decrement_pair(
     snaps$snap_t0, snaps$snap_t1,
-    age_col = "age", status_col = "employment_status",
+    duration_col = "age", status_col = "employment_status",
     personnel_id_col = "personnel_id", ref_date_col = "ref_date",
     group_cols = "gender"
   )

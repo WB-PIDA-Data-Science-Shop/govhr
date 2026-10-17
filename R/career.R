@@ -187,38 +187,12 @@ estimate_progression_rates.data.frame <- function(personnel,
   contract_group_cols <- intersect(group_cols, colnames(contracts))
   person_year <- c(personnel_id_col, ref_date_col)
 
-  ### one pay per person and snapshot: their total pay across contracts,
-  ### ignoring a contract with missing pay (NA only if all are missing)
-  contract_dt <- as.data.table(contracts)[,
-    c(person_year, contract_id_col, salary_col, contract_group_cols),
-    with = FALSE
-  ]
-  pay_dt <- contract_dt[,
-    .(.pay = if (all(is.na(get(salary_col)))) {
-      NA_real_
-    } else {
-      sum(get(salary_col), na.rm = TRUE)
-    }),
-    by = person_year
-  ]
-
-  ### contract-level groups come from one contract per person and snapshot:
-  ### the highest (or lowest) paid, ties going to the lowest contract id
-  if (length(contract_group_cols) > 0L) {
-    pay_order <- if (select_contract == "highest_paid") -1L else 1L
-    setorderv(
-      contract_dt,
-      c(person_year, salary_col, contract_id_col),
-      order = c(1L, 1L, pay_order, 1L),
-      na.last = TRUE
-    )
-    chosen_dt <- contract_dt[
-      !duplicated(contract_dt, by = person_year),
-      c(person_year, contract_group_cols),
-      with = FALSE
-    ]
-    pay_dt <- merge(pay_dt, chosen_dt, by = person_year)
-  }
+  ### one row per person and snapshot: total pay across their contracts,
+  ### and the contract-level groups of one of them
+  pay_dt <- .pay_by_person_snapshot(
+    contracts, person_year, contract_id_col, salary_col,
+    contract_group_cols, select_contract
+  )
 
   ### the person-year panel: each personnel record with that year's pay
   panel <- merge(
@@ -236,7 +210,7 @@ estimate_progression_rates.data.frame <- function(personnel,
   ### clock
   stay_dt <- estimate_decrement_rates(
     panel,
-    age_col = tenure_col,
+    duration_col = tenure_col,
     status_col = status_col,
     personnel_id_col = personnel_id_col,
     ref_date_col = ref_date_col,
@@ -363,28 +337,120 @@ estimate_progression_rates.data.frame <- function(personnel,
     "contracts"
   )
 
-  ### every group column must come from exactly one of the two tables
-  in_personnel <- group_cols %in% colnames(personnel)
-  in_contracts <- group_cols %in% colnames(contracts)
+  .check_column_sources(group_cols, personnel, contracts, "group column")
+
+  invisible(NULL)
+}
+
+#' Check that each column comes from exactly one of personnel and contracts
+#'
+#' Shared by Level 1's group columns and the career panel's covariates.
+#' Stops with an error if a column is in both tables (ambiguous) or in
+#' neither.
+#'
+#' @param cols Character vector of column names, or `NULL`.
+#' @param personnel,contracts The two tables.
+#' @param noun What the columns are called in the error, e.g.
+#'   `"group column"`.
+#'
+#' @returns `NULL`, invisibly.
+#' @noRd
+.check_column_sources <- function(cols, personnel, contracts, noun) {
+  in_personnel <- cols %in% colnames(personnel)
+  in_contracts <- cols %in% colnames(contracts)
 
   if (any(in_personnel & in_contracts)) {
     stop(
-      paste0("`", group_cols[in_personnel & in_contracts], "`", collapse = ", "),
+      paste0("`", cols[in_personnel & in_contracts], "`", collapse = ", "),
       " is in both `personnel` and `contracts`; rename one copy so each ",
-      "group column comes from one table.",
+      noun, " comes from one table.",
       call. = FALSE
     )
   }
 
   if (any(!in_personnel & !in_contracts)) {
     stop(
-      paste0("`", group_cols[!in_personnel & !in_contracts], "`", collapse = ", "),
+      paste0("`", cols[!in_personnel & !in_contracts], "`", collapse = ", "),
       " is in neither `personnel` nor `contracts`.",
       call. = FALSE
     )
   }
 
   invisible(NULL)
+}
+
+#' Total pay per person and snapshot, with contract columns from one contract
+#'
+#' Shared by `estimate_progression_rates()` and `build_career_panel()`, so
+#' both levels turn contracts into one row per person and snapshot the same
+#' way:
+#' * `.pay` is the total across the person's contracts, leaving out a
+#'   contract with missing pay (`NA` only if all of them are missing);
+#' * `contract_cols` (e.g. occupation) come from the one contract that
+#'   `.choose_contract()` picks.
+#'
+#' @param contracts The contract table (any data frame).
+#' @param person_year The person and snapshot columns.
+#' @param contract_id_col,salary_col The contract id and pay columns.
+#' @param contract_cols Columns to take from the chosen contract, or empty.
+#' @param select_contract `"highest_paid"` or `"lowest_paid"`.
+#'
+#' @returns A data.table with one row per person and snapshot: `person_year`,
+#'   `contract_cols` and `.pay`.
+#' @noRd
+.pay_by_person_snapshot <- function(contracts, person_year, contract_id_col,
+                                    salary_col, contract_cols,
+                                    select_contract) {
+  contract_dt <- as.data.table(contracts)[,
+    c(person_year, contract_id_col, salary_col, contract_cols),
+    with = FALSE
+  ]
+
+  pay_dt <- contract_dt[,
+    .(.pay = if (all(is.na(get(salary_col)))) {
+      NA_real_
+    } else {
+      sum(get(salary_col), na.rm = TRUE)
+    }),
+    by = person_year
+  ]
+
+  if (length(contract_cols) > 0L) {
+    chosen_dt <- .choose_contract(
+      contract_dt, person_year, salary_col, contract_id_col, select_contract
+    )[, c(person_year, contract_cols), with = FALSE]
+    pay_dt <- chosen_dt[pay_dt, on = person_year]
+  }
+
+  pay_dt
+}
+
+#' Pick one contract per person and snapshot
+#'
+#' The highest-paid (or lowest-paid) contract, ties going to the lowest
+#' contract id, and a contract with missing pay only if all of them are
+#' missing. One sort and a pass keeping each group's first row, both in C,
+#' which is several times faster than a grouped `max()` filter on large
+#' panels (and needs no separate tie-break).
+#'
+#' @param contract_dt A data.table of contracts. **Sorted by reference.**
+#' @param person_year The person and snapshot columns.
+#' @param salary_col,contract_id_col The pay and contract id columns.
+#' @param select_contract `"highest_paid"` or `"lowest_paid"`.
+#'
+#' @returns The chosen rows of `contract_dt`, one per person and snapshot.
+#' @noRd
+.choose_contract <- function(contract_dt, person_year, salary_col,
+                             contract_id_col, select_contract) {
+  pay_order <- if (select_contract == "highest_paid") -1L else 1L
+  setorderv(
+    contract_dt,
+    c(person_year, salary_col, contract_id_col),
+    order = c(1L, 1L, pay_order, 1L),
+    na.last = TRUE
+  )
+
+  contract_dt[!duplicated(contract_dt, by = person_year)]
 }
 
 #' Compute a career table of service and pay by years of service

@@ -6,7 +6,7 @@
 \usage{
 smooth_decrement_rates(
   decrements,
-  age_col,
+  duration_col,
   status_col,
   group_cols,
   active_value = "active",
@@ -21,7 +21,7 @@ age / \code{group_cols} / \code{status_col}, with a \code{pop}
 (exposure) and \code{decrement_rate} column. A lazy table is collected
 into memory first; it is small, and the smoothing runs in R.}
 
-\item{age_col}{A single string naming the age column.}
+\item{duration_col}{A single string naming the duration column (e.g. age).}
 
 \item{status_col}{A single string naming the outcome-type column.}
 
@@ -41,7 +41,7 @@ A data.table (also for \code{tbl_dbi} input) with one row per
 age / \code{group_cols} / \code{status_col}, spanning the full observed
 age range within each group with no gaps:
 \describe{
-\item{age_col, group_cols}{As supplied.}
+\item{duration_col, group_cols}{As supplied.}
 \item{status_col}{The outcome type, including \code{active_value}.}
 \item{decrement_rate}{The graduated rate, clipped to \code{[0, 1]}.
 Sums to 1 across outcome types for a given age/group (up to the

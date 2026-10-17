@@ -6,7 +6,7 @@
 \usage{
 compute_service_table(
   personnel,
-  age_col,
+  duration_col,
   status_col,
   personnel_id_col,
   ref_date_col,
@@ -25,8 +25,8 @@ panel: one row per person and reference date. It is passed to
 \code{estimate_decrement_rates()}, so for a database table the heavy step runs
 in the database; only the small table of rates by age is brought into R.}
 
-\item{age_col}{A single string naming the age column. Ages are rounded
-down to whole years.}
+\item{duration_col}{A single string naming the duration column the table
+runs on, usually age. Values are rounded down to whole years.}
 
 \item{status_col}{A single string naming the employment status column. The
 value \code{"active"} means "still in service"; every other value is a way of
@@ -58,7 +58,7 @@ when the rates are smoothed. Default \code{0.75}.}
 \item{personnel_dt}{Deprecated. Use \code{personnel} instead.}
 
 \item{include_all}{Logical. If \code{TRUE} (the default), return the full table;
-if \code{FALSE}, keep only \code{age_col}, \code{group_cols}, \code{px} and \code{ex}.}
+if \code{FALSE}, keep only \code{duration_col}, \code{group_cols}, \code{px} and \code{ex}.}
 }
 \value{
 A data.table (also for \code{tbl_dbi} input) with one row per age and
@@ -66,9 +66,9 @@ A data.table (also for \code{tbl_dbi} input) with one row per age and
 data with no gaps. Column names follow actuarial notation: \code{x} is the
 age, \code{p} a probability, \code{l} a number of people, \code{L} and \code{T} person-years,
 and \code{e} an expected number of years. With \code{include_all = FALSE}, only
-\code{age_col}, \code{group_cols}, \code{px} and \code{ex} are kept.
+\code{duration_col}, \code{group_cols}, \code{px} and \code{ex} are kept.
 \describe{
-\item{age_col, group_cols}{As supplied.}
+\item{duration_col, group_cols}{As supplied.}
 \item{px}{Share of employees active at age x who are still active at
 age x + 1.}
 \item{lx}{Number of the imaginary group still in service at age x,
@@ -128,7 +128,7 @@ service" must be \code{"active"}.
 # one service table for the whole bundled Brazilian personnel panel
 st <- compute_service_table(
   bra_hrmis_personnel,
-  age_col = "age",
+  duration_col = "age",
   status_col = "employment_status",
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",

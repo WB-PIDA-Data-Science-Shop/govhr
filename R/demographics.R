@@ -12,7 +12,7 @@
 #' \enumerate{
 #'   \item Defines the exposure cohort as every person with
 #'         \code{status_col == "active"} at T0, and tabulates exposure by
-#'         \code{age_col}/\code{group_cols} using each person's T0 age and
+#'         \code{duration_col}/\code{group_cols} using each person's T0 age and
 #'         group -- ages are never shifted, since individuals are tracked by
 #'         identity rather than aggregated independently per snapshot.
 #'   \item Looks up each cohort member's \code{status_col} value at T1 via a
@@ -26,7 +26,7 @@
 #'         \code{"non-retirement-exit"}, which is always included since it is
 #'         synthesized rather than drawn from the data. No status values are
 #'         hardcoded.
-#'   \item Counts, per \code{age_col}/\code{group_cols}/\code{status_col}
+#'   \item Counts, per \code{duration_col}/\code{group_cols}/\code{status_col}
 #'         combination, how many cohort members ended up with each outcome at
 #'         T1 -- including \code{"active"} (i.e. stayed), so the resulting
 #'         rates for a given age/group sum to 1 across all outcome types.
@@ -38,14 +38,14 @@
 #'
 #' @param snap_t0 Data.table. Subset of the full personnel panel at snapshot
 #'   T0, already filtered to a single reference date. Must contain
-#'   \code{age_col}, \code{status_col}, \code{personnel_id_col},
+#'   \code{duration_col}, \code{status_col}, \code{personnel_id_col},
 #'   \code{ref_date_col}, and \code{group_cols}.
 #' @param snap_t1 Data.table. Subset of the full personnel panel at snapshot
 #'   T1 (the period immediately following T0). Same column requirements as
 #'   \code{snap_t0}.
-#' @param age_col Character. Name of the (integer or coercible-to-integer)
-#'   age column. Exposure and outcome counts are keyed by each person's T0
-#'   age.
+#' @param duration_col Character. Name of the (integer or coercible-to-integer)
+#'   duration column, e.g. age or years of service. Exposure and outcome
+#'   counts are keyed by each person's T0 duration.
 #' @param status_col Character. Name of the employment status column (e.g.
 #'   \code{"employment_status"}). The literal value \code{"active"} defines
 #'   the T0 exposure cohort; every other value observed at T1, plus the
@@ -56,13 +56,13 @@
 #'   extract the T0 and T1 dates attached to the output.
 #' @param group_cols A character vector. Additional columns (e.g. gender,
 #'   service type) to stratify exposure and outcome counts by, alongside
-#'   \code{age_col}.
+#'   \code{duration_col}.
 #'
 #' @returns A \code{data.table} with one row per
-#'   \code{(age_col, group_cols, status_col)} combination observed in the T0
+#'   \code{(duration_col, group_cols, status_col)} combination observed in the T0
 #'   exposure cohort. Columns:
 #'   \describe{
-#'     \item{age_col}{Integer. T0 age (column name taken from \code{age_col}).}
+#'     \item{duration_col}{Integer. T0 duration, e.g. age (column name taken from \code{duration_col}).}
 #'     \item{group_cols}{The stratifying columns, taken directly from T0.}
 #'     \item{status_col}{Character. The T1 outcome type (column name taken
 #'       from \code{status_col}), e.g. \code{"active"}, \code{"pensioner"},
@@ -82,7 +82,7 @@
 #' @keywords internal
 .compute_decrement_pair <- function(snap_t0,
                                     snap_t1,
-                                    age_col,
+                                    duration_col,
                                     status_col,
                                     personnel_id_col,
                                     ref_date_col,
@@ -97,7 +97,7 @@
   t1_date <- snap_t1[[ref_date_col]][1L]
 
   ### ensure we are using integer ages for classes
-  snap_t0[, (age_col) := as.integer(get(age_col))]
+  snap_t0[, (duration_col) := as.integer(get(duration_col))]
 
   ### the cohort of interest: everyone active at t0. exposure/age/group are
   ### always taken at t0, so there is no need to shift ages when we later
@@ -106,7 +106,7 @@
   cohort_t0 <- snap_t0[get(status_col) == "active"]
 
   ### exposure counts by age/group
-  pop_dt <- cohort_t0[, .(pop = .N), by = c(age_col, group_cols)]
+  pop_dt <- cohort_t0[, .(pop = .N), by = c(duration_col, group_cols)]
 
   ### each cohort member's status at t1; anyone absent from the t1 snapshot
   ### altogether has left the organization outside of retirement.
@@ -130,7 +130,7 @@
 
   data.table::setnames(t1_status, status_col, ".status_t1")
 
-  cohort_ids <- cohort_t0[, c(personnel_id_col, age_col, group_cols), with = FALSE]
+  cohort_ids <- cohort_t0[, c(personnel_id_col, duration_col, group_cols), with = FALSE]
   cohort_dt <- t1_status[cohort_ids, on = personnel_id_col]
   cohort_dt[is.na(.status_t1), .status_t1 := "non-retirement-exit"]
 
@@ -141,7 +141,7 @@
   exits_dt <- cohort_dt[
     .status_t1 %in% outcome_types,
     .(exits = .N),
-    by = c(age_col, group_cols, ".status_t1")
+    by = c(duration_col, group_cols, ".status_t1")
   ]
   data.table::setnames(exits_dt, ".status_t1", status_col)
 
@@ -152,11 +152,11 @@
   ### per-outcome-type qx downstream and pooling across period-pairs later
   grid_dt <- pop_dt[,
     c(list(pop = pop), stats::setNames(list(outcome_types), status_col)),
-    by = c(age_col, group_cols)
+    by = c(duration_col, group_cols)
   ]
 
   ### bring exits onto the full grid (native join, all grid_dt rows/cols kept)
-  all_dt <- exits_dt[grid_dt, on = c(age_col, group_cols, status_col)]
+  all_dt <- exits_dt[grid_dt, on = c(duration_col, group_cols, status_col)]
   all_dt[is.na(exits), exits := 0]
   all_dt[, decrement_rate := exits / pop]
 
@@ -166,11 +166,11 @@
   all_dt[, t1_date := t1_date]
 
   ### lets sort the data.table by age and group columns
-  all_dt <- all_dt[, c(age_col, group_cols, status_col, 
+  all_dt <- all_dt[, c(duration_col, group_cols, status_col, 
                        "pop", "exits", "decrement_rate", 
                        "t0_date", "t1_date"), 
                        with = FALSE]
-  setorderv(all_dt, c(age_col, group_cols))
+  setorderv(all_dt, c(duration_col, group_cols))
 
   
 
@@ -199,8 +199,10 @@
 #'   personnel panel: multiple snapshots of the same population over time,
 #'   identified by \code{ref_date_col}. Must contain at least two distinct,
 #'   non-missing reference dates.
-#' @param age_col A single string naming the (integer, or coercible to
-#'   integer) age column.
+#' @param duration_col A single string naming the duration column the rates
+#'   are indexed by, in whole years (integer, or coercible to integer):
+#'   usually age (the default, `"age"`), or years of service for rates by
+#'   tenure.
 #' @param status_col A single string naming the employment status column,
 #'   e.g. \code{"employment_status"}. The value \code{"active"} identifies
 #'   who is exposed to risk in each snapshot; every other value your data
@@ -222,7 +224,7 @@
 #'   for \code{tbl_dbi} input (use \code{dplyr::collect()} to bring it into
 #'   memory):
 #'   \describe{
-#'     \item{age_col, group_cols}{The age and grouping columns, as supplied.}
+#'     \item{duration_col, group_cols}{The duration (e.g. age) and grouping columns, as supplied.}
 #'     \item{status_col}{The outcome type this row's rate applies to --
 #'       \code{"active"} (stayed), an observed exit status (e.g.
 #'       \code{"pensioner"}), or the synthetic \code{"non-retirement-exit"}
@@ -329,7 +331,7 @@
 #'
 #' estimate_decrement_rates(
 #'   personnel_dt = personnel_dt,
-#'   age_col = "age",
+#'   duration_col = "age",
 #'   status_col = "employment_status",
 #'   personnel_id_col = "personnel_id",
 #'   ref_date_col = "ref_date",
@@ -355,7 +357,7 @@ estimate_decrement_rates <- function(personnel, ..., personnel_dt = NULL) {
 #' @importFrom rlang check_dots_empty
 #' @export
 estimate_decrement_rates.data.frame <- function(personnel,
-                                                age_col = "age",
+                                                duration_col = "age",
                                                 status_col = "employment_status",
                                                 personnel_id_col = "personnel_id",
                                                 ref_date_col = "ref_date",
@@ -363,7 +365,7 @@ estimate_decrement_rates.data.frame <- function(personnel,
                                                 ...) {
   rlang::check_dots_empty()
 
-  by_cols <- c(age_col, group_cols)
+  by_cols <- c(duration_col, group_cols)
 
   ### work on a subset copy holding only the columns we need, so the
   ### caller's table is never re-keyed or re-ordered by the sort below
@@ -429,7 +431,7 @@ estimate_decrement_rates.data.frame <- function(personnel,
     c(".snap", by_cols, ".outcome"),
     with = FALSE
   ]
-  cohort[, (age_col) := as.integer(get(age_col))]
+  cohort[, (duration_col) := as.integer(get(duration_col))]
 
   outcome_types <- .decrement_outcome_types(panel[.snap > 1L, .status])
 
@@ -469,7 +471,7 @@ estimate_decrement_rates.data.frame <- function(personnel,
 #' @importFrom rlang .data !!! check_dots_empty
 #' @export
 estimate_decrement_rates.tbl_dbi <- function(personnel,
-                                             age_col = "age",
+                                             duration_col = "age",
                                              status_col = "employment_status",
                                              personnel_id_col = "personnel_id",
                                              ref_date_col = "ref_date",
@@ -477,7 +479,7 @@ estimate_decrement_rates.tbl_dbi <- function(personnel,
                                              ...) {
   rlang::check_dots_empty()
 
-  by_cols <- c(age_col, group_cols)
+  by_cols <- c(duration_col, group_cols)
 
   ### the same steps as the data.frame method, written as dplyr verbs that
   ### dbplyr turns into SQL -- the panel itself never leaves the database
@@ -537,7 +539,7 @@ estimate_decrement_rates.tbl_dbi <- function(personnel,
     ungroup() |>
     filter(.status == "active", .snap < !!n_snaps) |>
     mutate(
-      !!age_col := as.integer(floor(.data[[age_col]])),
+      !!duration_col := as.integer(floor(.data[[duration_col]])),
       .outcome = case_when(
         .next_snap == .snap + 1L & !is.na(.next_status) ~ .next_status,
         TRUE ~ "non-retirement-exit"
@@ -695,7 +697,7 @@ estimate_decrement_rates.default <- function(personnel, ...) {
 #'   age / \code{group_cols} / \code{status_col}, with a \code{pop}
 #'   (exposure) and \code{decrement_rate} column. A lazy table is collected
 #'   into memory first; it is small, and the smoothing runs in R.
-#' @param age_col A single string naming the age column.
+#' @param duration_col A single string naming the duration column (e.g. age).
 #' @param status_col A single string naming the outcome-type column.
 #' @param group_cols A character vector of stratifying columns (e.g. gender),
 #'   or \code{NULL} for no stratification.
@@ -709,7 +711,7 @@ estimate_decrement_rates.default <- function(personnel, ...) {
 #'   age / \code{group_cols} / \code{status_col}, spanning the full observed
 #'   age range within each group with no gaps:
 #'   \describe{
-#'     \item{age_col, group_cols}{As supplied.}
+#'     \item{duration_col, group_cols}{As supplied.}
 #'     \item{status_col}{The outcome type, including \code{active_value}.}
 #'     \item{decrement_rate}{The graduated rate, clipped to \code{[0, 1]}.
 #'       Sums to 1 across outcome types for a given age/group (up to the
@@ -736,7 +738,7 @@ estimate_decrement_rates.default <- function(personnel, ...) {
 #'   \code{\link{compute_service_table}}
 #' @export
 smooth_decrement_rates <- function(decrements,
-                                   age_col,
+                                   duration_col,
                                    status_col,
                                    group_cols,
                                    active_value = "active",
@@ -753,7 +755,7 @@ smooth_decrement_rates <- function(decrements,
   ### each group, computed once across all outcome types (not per-status)
   ### so every exit cause ends up on exactly the same age sequence
   age_range_dt <- decrements[,
-    .(min_age = min(get(age_col)), max_age = max(get(age_col))),
+    .(min_age = min(get(duration_col)), max_age = max(get(duration_col))),
     by = group_cols
   ]
 
@@ -772,7 +774,7 @@ smooth_decrement_rates <- function(decrements,
     {
       full_ages <- seq.int(min_age[1L], max_age[1L])
       smoothed_rate <- .smooth_rate_curve(
-        age = get(age_col),
+        age = get(duration_col),
         rate = decrement_rate,
         weight = pop,
         full_ages = full_ages,
@@ -781,7 +783,7 @@ smooth_decrement_rates <- function(decrements,
       ### clip to a valid probability range -- loess/linear interpolation
       ### can overshoot slightly, especially near sparse edges
       smoothed_rate <- pmin(pmax(smoothed_rate, 0), 1)
-      stats::setNames(list(full_ages, smoothed_rate), c(age_col, "decrement_rate"))
+      stats::setNames(list(full_ages, smoothed_rate), c(duration_col, "decrement_rate"))
     },
     by = c(group_cols, status_col)
   ]
@@ -792,12 +794,12 @@ smooth_decrement_rates <- function(decrements,
   ### every outcome type, "active" included, would not preserve that)
   active_dt <- smoothed_dt[,
     .(decrement_rate = pmax(1 - sum(decrement_rate), 0)),
-    by = c(age_col, group_cols)
+    by = c(duration_col, group_cols)
   ]
   active_dt[, (status_col) := active_value]
 
   out_dt <- data.table::rbindlist(list(smoothed_dt, active_dt), use.names = TRUE)
-  setorderv(out_dt, c(group_cols, age_col, status_col))
+  setorderv(out_dt, c(group_cols, duration_col, status_col))
 
   return(out_dt[])
 }
@@ -825,8 +827,8 @@ smooth_decrement_rates <- function(decrements,
 #'   panel: one row per person and reference date. It is passed to
 #'   `estimate_decrement_rates()`, so for a database table the heavy step runs
 #'   in the database; only the small table of rates by age is brought into R.
-#' @param age_col A single string naming the age column. Ages are rounded
-#'   down to whole years.
+#' @param duration_col A single string naming the duration column the table
+#'   runs on, usually age. Values are rounded down to whole years.
 #' @param status_col A single string naming the employment status column. The
 #'   value `"active"` means "still in service"; every other value is a way of
 #'   leaving.
@@ -849,16 +851,16 @@ smooth_decrement_rates <- function(decrements,
 #'   when the rates are smoothed. Default `0.75`.
 #' @param personnel_dt Deprecated. Use `personnel` instead.
 #' @param include_all Logical. If `TRUE` (the default), return the full table;
-#'   if `FALSE`, keep only `age_col`, `group_cols`, `px` and `ex`.
+#'   if `FALSE`, keep only `duration_col`, `group_cols`, `px` and `ex`.
 #'
 #' @returns A data.table (also for `tbl_dbi` input) with one row per age and
 #'   `group_cols` combination, from the youngest to the oldest age in the
 #'   data with no gaps. Column names follow actuarial notation: `x` is the
 #'   age, `p` a probability, `l` a number of people, `L` and `T` person-years,
 #'   and `e` an expected number of years. With `include_all = FALSE`, only
-#'   `age_col`, `group_cols`, `px` and `ex` are kept.
+#'   `duration_col`, `group_cols`, `px` and `ex` are kept.
 #'   \describe{
-#'     \item{age_col, group_cols}{As supplied.}
+#'     \item{duration_col, group_cols}{As supplied.}
 #'     \item{px}{Share of employees active at age x who are still active at
 #'       age x + 1.}
 #'     \item{lx}{Number of the imaginary group still in service at age x,
@@ -903,7 +905,7 @@ smooth_decrement_rates <- function(decrements,
 #' # one service table for the whole bundled Brazilian personnel panel
 #' st <- compute_service_table(
 #'   bra_hrmis_personnel,
-#'   age_col = "age",
+#'   duration_col = "age",
 #'   status_col = "employment_status",
 #'   personnel_id_col = "personnel_id",
 #'   ref_date_col = "ref_date",
@@ -919,7 +921,7 @@ smooth_decrement_rates <- function(decrements,
 #'   smoothed.
 #' @export
 compute_service_table <- function(personnel,
-                                  age_col,
+                                  duration_col,
                                   status_col,
                                   personnel_id_col,
                                   ref_date_col,
@@ -937,7 +939,7 @@ compute_service_table <- function(personnel,
   ## collect() it (a no-op for data frames) for the data.table chain below
   decrement_dt <-
     estimate_decrement_rates(personnel = personnel,
-                             age_col = age_col,
+                             duration_col = duration_col,
                              status_col = status_col,
                              personnel_id_col = personnel_id_col,
                              ref_date_col = ref_date_col,
@@ -952,7 +954,7 @@ compute_service_table <- function(personnel,
   if (isTRUE(smooth)) {
     decrement_dt <- smooth_decrement_rates(
       decrements = decrement_dt,
-      age_col = age_col,
+      duration_col = duration_col,
       status_col = status_col,
       group_cols = group_cols,
       span = span
@@ -969,11 +971,11 @@ compute_service_table <- function(personnel,
   .extract_survival <- function(dt) {
     out <- dt[
       get(status_col) == "active",
-      c(age_col, group_cols, "decrement_rate"),
+      c(duration_col, group_cols, "decrement_rate"),
       with = FALSE
     ]
     data.table::setnames(out, "decrement_rate", "px")
-    setorderv(out, c(group_cols, age_col))
+    setorderv(out, c(group_cols, duration_col))
     out
   }
   survival_dt <- .extract_survival(decrement_dt)
@@ -983,7 +985,7 @@ compute_service_table <- function(personnel,
   ### survival_dt from the now gap-filled decrement_dt. skipping that
   ### re-extraction was the bug: the chain below would otherwise keep
   ### running on the stale, still-gappy survival_dt built above
-  gap_dt <- survival_dt[, .(has_gap = any(diff(get(age_col)) != 1L)), by = group_cols]
+  gap_dt <- survival_dt[, .(has_gap = any(diff(get(duration_col)) != 1L)), by = group_cols]
   if (any(gap_dt$has_gap) && !isTRUE(smooth)) {
 
     warning(
@@ -996,7 +998,7 @@ compute_service_table <- function(personnel,
 
     decrement_dt <- smooth_decrement_rates(
       decrements = decrement_dt,
-      age_col = age_col,
+      duration_col = duration_col,
       status_col = status_col,
       group_cols = group_cols,
       span = span
@@ -1029,7 +1031,7 @@ compute_service_table <- function(personnel,
   ### keep only the headline columns if asked; group_cols = NULL simply
   ### drops out of c()
   if (!isTRUE(include_all)) {
-    survival_dt <- survival_dt[, c(age_col, group_cols, "px", "ex"), with = FALSE]
+    survival_dt <- survival_dt[, c(duration_col, group_cols, "px", "ex"), with = FALSE]
   }
 
   return(survival_dt[])

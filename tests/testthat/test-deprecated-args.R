@@ -76,7 +76,7 @@ test_that("`personnel_dt` still works and matches `personnel`", {
     employment_status = "active"
   )
   args <- list(
-    age_col = "age",
+    duration_col = "age",
     status_col = "employment_status",
     personnel_id_col = "personnel_id",
     ref_date_col = "ref_date",

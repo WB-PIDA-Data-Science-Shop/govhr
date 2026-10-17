@@ -7,7 +7,7 @@
 .compute_decrement_pair(
   snap_t0,
   snap_t1,
-  age_col,
+  duration_col,
   status_col,
   personnel_id_col,
   ref_date_col,
@@ -17,16 +17,16 @@
 \arguments{
 \item{snap_t0}{Data.table. Subset of the full personnel panel at snapshot
 T0, already filtered to a single reference date. Must contain
-\code{age_col}, \code{status_col}, \code{personnel_id_col},
+\code{duration_col}, \code{status_col}, \code{personnel_id_col},
 \code{ref_date_col}, and \code{group_cols}.}
 
 \item{snap_t1}{Data.table. Subset of the full personnel panel at snapshot
 T1 (the period immediately following T0). Same column requirements as
 \code{snap_t0}.}
 
-\item{age_col}{Character. Name of the (integer or coercible-to-integer)
-age column. Exposure and outcome counts are keyed by each person's T0
-age.}
+\item{duration_col}{Character. Name of the (integer or coercible-to-integer)
+duration column, e.g. age or years of service. Exposure and outcome
+counts are keyed by each person's T0 duration.}
 
 \item{status_col}{Character. Name of the employment status column (e.g.
 \code{"employment_status"}). The literal value \code{"active"} defines
@@ -41,14 +41,14 @@ extract the T0 and T1 dates attached to the output.}
 
 \item{group_cols}{A character vector. Additional columns (e.g. gender,
 service type) to stratify exposure and outcome counts by, alongside
-\code{age_col}.}
+\code{duration_col}.}
 }
 \value{
 A \code{data.table} with one row per
-\code{(age_col, group_cols, status_col)} combination observed in the T0
+\code{(duration_col, group_cols, status_col)} combination observed in the T0
 exposure cohort. Columns:
 \describe{
-\item{age_col}{Integer. T0 age (column name taken from \code{age_col}).}
+\item{duration_col}{Integer. T0 duration, e.g. age (column name taken from \code{duration_col}).}
 \item{group_cols}{The stratifying columns, taken directly from T0.}
 \item{status_col}{Character. The T1 outcome type (column name taken
 from \code{status_col}), e.g. \code{"active"}, \code{"pensioner"},
@@ -76,7 +76,7 @@ T1), this function:
 \enumerate{
 \item Defines the exposure cohort as every person with
 \code{status_col == "active"} at T0, and tabulates exposure by
-\code{age_col}/\code{group_cols} using each person's T0 age and
+\code{duration_col}/\code{group_cols} using each person's T0 age and
 group -- ages are never shifted, since individuals are tracked by
 identity rather than aggregated independently per snapshot.
 \item Looks up each cohort member's \code{status_col} value at T1 via a
@@ -90,7 +90,7 @@ values actually appear in \code{snap_t1} (e.g. \code{"active"},
 \code{"non-retirement-exit"}, which is always included since it is
 synthesized rather than drawn from the data. No status values are
 hardcoded.
-\item Counts, per \code{age_col}/\code{group_cols}/\code{status_col}
+\item Counts, per \code{duration_col}/\code{group_cols}/\code{status_col}
 combination, how many cohort members ended up with each outcome at
 T1 -- including \code{"active"} (i.e. stayed), so the resulting
 rates for a given age/group sum to 1 across all outcome types.

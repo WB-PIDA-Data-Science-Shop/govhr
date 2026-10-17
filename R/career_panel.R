@@ -30,14 +30,16 @@
 #' @param personnel A data frame (data.table, data.frame or tibble) or a
 #'   remote database table (`tbl_dbi`, e.g. DuckDB) of the personnel panel:
 #'   one row per person and snapshot, with `personnel_id_col`,
-#'   `ref_date_col`, `status_col` and `clock_col`.
+#'   `ref_date_col`, `status_col` and `duration_col`.
 #' @param contracts The contract panel for the same people and snapshots,
 #'   with `personnel_id_col`, `ref_date_col`, `contract_id_col` and
 #'   `salary_col`: a data frame, or, when `personnel` is a database table, a
 #'   table on the same connection. A person may hold several contracts in a
 #'   snapshot.
-#' @param clock_col A single string: the column of `personnel` that careers
-#'   are timed on, in years. There is no default. Usually one of:
+#' @param duration_col A single string: the column of `personnel` that careers
+#'   are timed on: the time since an origin (hire, for tenure; birth, for
+#'   age) at each snapshot, in years. Not the length of an interval, which is
+#'   `exposure`. There is no default. Usually one of:
 #'   * years of service, for careers by tenure. Build it with
 #'     [compute_tenure_panel()] from contract history, or as the years
 #'     since `first_employment_date`.
@@ -82,7 +84,8 @@
 #'       interval ends (whether or not the person has a record there).}
 #'     \item{spell}{Integer. The person's spell of service: 1, then one
 #'       more each time they come back after leaving.}
-#'     \item{clock_col}{The clock at the start of the interval, as given.}
+#'     \item{duration_col}{The duration at the start of the interval, as
+#'       given.}
 #'     \item{covariate_cols}{The covariates at the start of the interval.}
 #'     \item{pay}{Numeric. Total pay across the person's contracts at
 #'       `ref_date`, in the units of `salary_col`. `NA` if they have no
@@ -129,7 +132,7 @@
 #' interval: someone who changes occupation has rows in one occupation,
 #' then the other.
 #'
-#' **Missing clock or date.** An active row with no `clock_col` is left out,
+#' **Missing duration or date.** An active row with no `duration_col` is left out,
 #' with a warning, but still counts as the person's next record for their
 #' row before (and its exit still starts a new spell). A personnel row with
 #' no `ref_date_col` is dropped. A contract with no matching personnel row is
@@ -148,10 +151,10 @@
 #' database as SQL, giving the same panel, and the result is returned
 #' lazily. A few small queries run straight away: the snapshot dates (whose
 #' calendar is worked out in R and sent back inline, so no write access is
-#' needed), and counts for the warnings about duplicates and missing clock
+#' needed), and counts for the warnings about duplicates and missing duration
 #' values.
 #'
-#' Errors if `clock_col` is not in `personnel`; if a required column is
+#' Errors if `duration_col` is not in `personnel`; if a required column is
 #' missing from either table; if a covariate is in both tables or in
 #' neither; if `personnel` has fewer than 2 snapshots; if `personnel` is a
 #' database table and `contracts` is not a table on the same connection; or
@@ -172,7 +175,7 @@
 #' # warns that a few person-years have no contract history, so no tenure
 #' panel <- build_career_panel(
 #'   personnel, contracts,
-#'   clock_col = "tenure_years", salary_col = "gross_salary_real",
+#'   duration_col = "tenure_years", salary_col = "gross_salary_real",
 #'   covariate_cols = c("gender", "occupation_english")
 #' )
 #'
@@ -195,7 +198,7 @@
 #'
 #' panel_db <- build_career_panel(
 #'   dplyr::tbl(con, "personnel"), dplyr::tbl(con, "contracts"),
-#'   clock_col = "tenure_years", salary_col = "gross_salary_real",
+#'   duration_col = "tenure_years", salary_col = "gross_salary_real",
 #'   covariate_cols = c("gender", "occupation_english")
 #' )
 #'
@@ -206,18 +209,18 @@
 #'
 #' @seealso [estimate_progression_rates()] and [compute_career_table()] for
 #'   the annual career table by group, [compute_tenure_panel()] and
-#'   [deflate_to_real()] to prepare the clock and pay columns.
+#'   [deflate_to_real()] to prepare the duration and pay columns.
 #' @export
 build_career_panel <- function(personnel, ...) {
   UseMethod("build_career_panel")
 }
 
 #' @rdname build_career_panel
-#' @importFrom data.table := as.data.table setnames setorderv shift
+#' @importFrom data.table := %chin% as.data.table setnames setorderv shift
 #' @export
 build_career_panel.data.frame <- function(personnel,
                                           contracts,
-                                          clock_col,
+                                          duration_col,
                                           salary_col,
                                           covariate_cols = NULL,
                                           select_contract = c(
@@ -231,7 +234,7 @@ build_career_panel.data.frame <- function(personnel,
   rlang::check_dots_empty()
   select_contract <- match.arg(select_contract)
   .check_career_panel_args(
-    personnel, contracts, clock_col, salary_col, covariate_cols,
+    personnel, contracts, duration_col, salary_col, covariate_cols,
     status_col, personnel_id_col, ref_date_col, contract_id_col
   )
 
@@ -252,11 +255,15 @@ build_career_panel.data.frame <- function(personnel,
   ### pay and covariates (NA for a record with no contract)
   panel <- pay_dt[
     as.data.table(personnel)[,
-      c(person_year, status_col, clock_col, person_covariate_cols),
+      c(person_year, status_col, duration_col, person_covariate_cols),
       with = FALSE
     ],
     on = person_year
   ]
+
+  ### a record with no snapshot date belongs to no snapshot: drop it first,
+  ### so it is never counted as a duplicate
+  panel <- panel[!is.na(get(ref_date_col))]
 
   ### personnel should have one row per person and snapshot (enforced by QC
   ### upstream); keep the last of any duplicates, as Level 1 does
@@ -274,7 +281,6 @@ build_career_panel.data.frame <- function(personnel,
 
   ### the snapshot calendar: each snapshot's number, its next snapshot and
   ### its snapshot a year later, and the years to each
-  panel <- panel[!is.na(.date)]
   all_dates <- sort(unique(panel$.date))
   .check_panel_snapshots(
     length(all_dates), arg = "personnel", ref_date_col = ref_date_col
@@ -317,14 +323,11 @@ build_career_panel.data.frame <- function(personnel,
 
   ### how the interval ended: still active, retired, or gone (no record, or
   ### any other status)
-  panel[, exit_type := data.table::fifelse(
-    !is.na(.next_status) & .next_status == "active",
-    "none",
-    data.table::fifelse(
-      !is.na(.next_status) & .next_status == "pensioner",
-      "retirement",
-      "other"
-    )
+  ### (%chin% is FALSE, never NA, for a missing status)
+  panel[, exit_type := data.table::fcase(
+    .next_status %chin% "active", "none",
+    .next_status %chin% "pensioner", "retirement",
+    default = "other"
   )]
 
   ### years at risk: the whole interval for someone who stays, half of it
@@ -348,43 +351,41 @@ build_career_panel.data.frame <- function(personnel,
     by = .pid
   ]
 
-  ### a row with no clock value belongs nowhere on the clock, so it is left
+  ### a row with no duration value belongs nowhere on the time scale, so it is left
   ### out (with a warning) -- only now, so that it still counted as "next"
   ### for the person's row before, and its exit still started a new spell
-  n_no_clock <- panel[, sum(is.na(get(clock_col)))]
-  if (n_no_clock > 0L) {
-    .warn_panel_no_clock(n_no_clock, clock_col)
-    panel <- panel[!is.na(get(clock_col))]
+  n_no_duration <- panel[, sum(is.na(get(duration_col)))]
+  if (n_no_duration > 0L) {
+    .warn_panel_no_duration(n_no_duration, duration_col)
+    panel <- panel[!is.na(get(duration_col))]
   }
 
   setnames(
     panel, c(".pid", ".date", ".pay"), c(personnel_id_col, ref_date_col, "pay")
   )
-  panel[, c(
-    person_year, "next_ref_date", "spell", clock_col, covariate_cols, "pay",
-    "exposure", "exit_type", "pay_growth"
-  ), with = FALSE]
+  out_cols <- .career_panel_cols(person_year, duration_col, covariate_cols)
+  panel[, out_cols, with = FALSE]
 }
 
 #' Check the inputs of build_career_panel()
 #'
 #' Stops with an error if:
-#' * `clock_col` is not in `personnel` (pointing to the ways to build one),
+#' * `duration_col` is not in `personnel` (pointing to the ways to build one),
 #' * a required column is missing from `personnel` or `contracts`,
 #' * a covariate is in both tables (ambiguous) or in neither.
 #'
 #' @returns `NULL`, invisibly.
 #' @noRd
-.check_career_panel_args <- function(personnel, contracts, clock_col,
+.check_career_panel_args <- function(personnel, contracts, duration_col,
                                      salary_col, covariate_cols, status_col,
                                      personnel_id_col, ref_date_col,
                                      contract_id_col) {
-  if (!clock_col %in% colnames(personnel)) {
+  if (!duration_col %in% colnames(personnel)) {
     stop(
-      "`personnel` has no clock column `", clock_col, "`. Add the clock the ",
-      "careers run on first: years of service, from contract history with ",
-      "compute_tenure_panel() or as the years since `first_employment_date`; ",
-      "or age.",
+      "`personnel` has no duration column `", duration_col, "`. Add the ",
+      "duration the careers run on first: years of service, from contract ",
+      "history with compute_tenure_panel() or as the years since ",
+      "`first_employment_date`; or age.",
       call. = FALSE
     )
   }
@@ -418,13 +419,13 @@ build_career_panel.data.frame <- function(personnel,
 }
 
 #' @rdname build_career_panel
-#' @importFrom dplyr across all_of case_when collect count desc filter
+#' @importFrom dplyr across all_of case_when collect count desc filter if_else
 #'   group_by inner_join lag lead left_join mutate pull rename row_number
 #'   select summarise ungroup
 #' @export
 build_career_panel.tbl_dbi <- function(personnel,
                                        contracts,
-                                       clock_col,
+                                       duration_col,
                                        salary_col,
                                        covariate_cols = NULL,
                                        select_contract = c(
@@ -449,7 +450,7 @@ build_career_panel.tbl_dbi <- function(personnel,
     )
   }
   .check_career_panel_args(
-    personnel, contracts, clock_col, salary_col, covariate_cols,
+    personnel, contracts, duration_col, salary_col, covariate_cols,
     status_col, personnel_id_col, ref_date_col, contract_id_col
   )
 
@@ -491,7 +492,7 @@ build_career_panel.tbl_dbi <- function(personnel,
   ### the person-snapshot panel: each personnel record with that snapshot's
   ### pay and covariates (NULL for a record with no contract)
   panel <- personnel |>
-    select(all_of(c(person_year, status_col, clock_col, person_covariate_cols))) |>
+    select(all_of(c(person_year, status_col, duration_col, person_covariate_cols))) |>
     left_join(pay_tbl, by = person_year) |>
     rename(all_of(c(.pid = personnel_id_col, .date = ref_date_col, .status = status_col))) |>
     filter(!is.na(.date))
@@ -553,7 +554,7 @@ build_career_panel.tbl_dbi <- function(personnel,
         TRUE ~ "other"
       ),
       ### years at risk, half the interval for someone who leaves
-      exposure = .interval_years * case_when(exit_type == "none" ~ 1, TRUE ~ 0.5),
+      exposure = .interval_years * if_else(exit_type == "none", 1, 0.5),
       ### yearly growth in pay of those active a year later
       pay_growth = case_when(
         .ahead_status == "active" & .pay > 0 & .ahead_pay > 0 ~
@@ -565,21 +566,21 @@ build_career_panel.tbl_dbi <- function(personnel,
     ### in another)
     group_by(.pid) |>
     dbplyr::window_order(.snap) |>
-    mutate(.left_before = lag(case_when(exit_type == "none" ~ 0L, TRUE ~ 1L), default = 0L)) |>
+    mutate(.left_before = lag(if_else(exit_type == "none", 0L, 1L), default = 0L)) |>
     mutate(spell = as.integer(1L + cumsum(.left_before))) |>
     ungroup()
 
-  ### a row with no clock value is left out, with a warning -- only now, so
+  ### a row with no duration value is left out, with a warning -- only now, so
   ### that it still counted as "next" for the row before, and its exit
   ### still started a new spell
-  clock <- rlang::sym(clock_col)
-  n_no_clock <- panel |>
-    filter(is.na(!!clock)) |>
+  duration <- rlang::sym(duration_col)
+  n_no_duration <- panel |>
+    filter(is.na(!!duration)) |>
     count(name = ".n") |>
     pull(.n)
-  if (isTRUE(n_no_clock > 0)) {
-    .warn_panel_no_clock(n_no_clock, clock_col)
-    panel <- filter(panel, !is.na(!!clock))
+  if (isTRUE(n_no_duration > 0)) {
+    .warn_panel_no_duration(n_no_duration, duration_col)
+    panel <- filter(panel, !is.na(!!duration))
   }
 
   new_names <- stats::setNames(
@@ -589,10 +590,7 @@ build_career_panel.tbl_dbi <- function(personnel,
   ### would be dropped (with a warning) by any summary built on the panel
   panel |>
     rename(all_of(new_names)) |>
-    select(all_of(c(
-      person_year, "next_ref_date", "spell", clock_col, covariate_cols, "pay",
-      "exposure", "exit_type", "pay_growth"
-    )))
+    select(all_of(.career_panel_cols(person_year, duration_col, covariate_cols)))
 }
 
 #' @rdname build_career_panel
@@ -644,6 +642,22 @@ build_career_panel.default <- function(personnel, ...) {
   )
 }
 
+#' The columns of a career panel, in order
+#'
+#' Shared by both methods of `build_career_panel()`: the documented output,
+#' stated once.
+#'
+#' @param person_year The person and snapshot columns.
+#' @param duration_col,covariate_cols As in `build_career_panel()`.
+#' @returns A character vector of column names.
+#' @noRd
+.career_panel_cols <- function(person_year, duration_col, covariate_cols) {
+  c(
+    person_year, "next_ref_date", "spell", duration_col, covariate_cols, "pay",
+    "exposure", "exit_type", "pay_growth"
+  )
+}
+
 ### warnings shared by both methods, so they say the same thing
 
 #' @noRd
@@ -657,9 +671,9 @@ build_career_panel.default <- function(personnel, ...) {
 }
 
 #' @noRd
-.warn_panel_no_clock <- function(n_no_clock, clock_col) {
+.warn_panel_no_duration <- function(n_no_duration, duration_col) {
   warning(
-    n_no_clock, " active person-snapshot(s) have no `", clock_col, "` and ",
+    n_no_duration, " active person-snapshot(s) have no `", duration_col, "` and ",
     "are left out of the panel.",
     call. = FALSE
   )

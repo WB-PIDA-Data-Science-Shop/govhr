@@ -90,7 +90,7 @@ panel_contracts <- function() {
 for (backend in backends) test_that(paste0("each active person-year gets its interval, exposure, exit type and pay growth", " [", backend, "]"), {
   out <- run_panel(backend, 
     panel_personnel(), panel_contracts(),
-    clock_col = "tenure", salary_col = "pay"
+    duration_col = "tenure", salary_col = "pay"
   )
 
   expect_equal(out$personnel_id, c("P1", "P1", "P2", "P3", "P4"))
@@ -136,7 +136,7 @@ for (backend in backends) test_that(paste0("a contract covariate comes from the 
   # goes to the lower contract_id, C3, a clerk
   out <- run_panel(backend, 
     panel_personnel(), panel_occupation_contracts(),
-    clock_col = "tenure", salary_col = "pay", covariate_cols = "occupation"
+    duration_col = "tenure", salary_col = "pay", covariate_cols = "occupation"
   )
 
   expect_equal(out$occupation, c("clerk", "clerk", "nurse", "clerk", "clerk"))
@@ -147,7 +147,7 @@ for (backend in backends) test_that(paste0("select_contract = \"lowest_paid\" ta
   # P1/2020 is now a nurse (40 < 60); P3/2020's tie still goes to C3
   out <- run_panel(backend, 
     panel_personnel(), panel_occupation_contracts(),
-    clock_col = "tenure", salary_col = "pay", covariate_cols = "occupation",
+    duration_col = "tenure", salary_col = "pay", covariate_cols = "occupation",
     select_contract = "lowest_paid"
   )
 
@@ -161,7 +161,7 @@ for (backend in backends) test_that(paste0("covariates from personnel and from c
 
   out <- run_panel(backend, 
     personnel, panel_occupation_contracts(),
-    clock_col = "tenure", salary_col = "pay",
+    duration_col = "tenure", salary_col = "pay",
     covariate_cols = c("gender", "occupation")
   )
 
@@ -182,7 +182,7 @@ for (backend in backends) test_that(paste0("only a pensioner counts as retiring;
   ]
 
   out <- run_panel(backend, 
-    personnel, panel_contracts(), clock_col = "tenure", salary_col = "pay"
+    personnel, panel_contracts(), duration_col = "tenure", salary_col = "pay"
   )
 
   expect_equal(out$exit_type, c("none", "none", "other", "other", "none"))
@@ -208,7 +208,7 @@ for (backend in backends) test_that(paste0("someone who leaves and comes back st
   )
 
   out <- run_panel(backend, 
-    personnel, contracts, clock_col = "tenure", salary_col = "pay"
+    personnel, contracts, duration_col = "tenure", salary_col = "pay"
   )
 
   expect_equal(out$personnel_id, c("R", "R", "S", "S", "S"))
@@ -217,7 +217,7 @@ for (backend in backends) test_that(paste0("someone who leaves and comes back st
   expect_equal(out$spell, c(1L, 2L, 1L, 1L, 1L))
 })
 
-for (backend in backends) test_that(paste0("a person-year with no clock value is left out, with a warning, but still counts as the year before's next", " [", backend, "]"), {
+for (backend in backends) test_that(paste0("a person-year with no duration value is left out, with a warning, but still counts as the year before's next", " [", backend, "]"), {
   # P1/2021 has no tenure: its own row goes, but P1/2020 still sees P1
   # active in 2021, so stays, with growth log(110 / 100)
   personnel <- panel_personnel()
@@ -227,7 +227,7 @@ for (backend in backends) test_that(paste0("a person-year with no clock value is
 
   expect_warning(
     out <- run_panel(backend, 
-      personnel, panel_contracts(), clock_col = "tenure", salary_col = "pay"
+      personnel, panel_contracts(), duration_col = "tenure", salary_col = "pay"
     ),
     "1 active person-snapshot.*no `tenure`"
   )
@@ -242,7 +242,7 @@ for (backend in backends) test_that(paste0("a duplicated personnel row warns and
 
   expect_warning(
     out <- run_panel(backend, 
-      personnel, panel_contracts(), clock_col = "tenure", salary_col = "pay"
+      personnel, panel_contracts(), duration_col = "tenure", salary_col = "pay"
     ),
     "duplicate"
   )
@@ -250,11 +250,11 @@ for (backend in backends) test_that(paste0("a duplicated personnel row warns and
   expect_equal(out$exit_type, c("none", "none", "other", "retirement", "none"))
 })
 
-for (backend in backends) test_that(paste0("a missing clock column errors and says how to build one", " [", backend, "]"), {
+for (backend in backends) test_that(paste0("a missing duration column errors and says how to build one", " [", backend, "]"), {
   expect_error(
     run_panel(backend, 
       panel_personnel(), panel_contracts(),
-      clock_col = "years_of_service", salary_col = "pay"
+      duration_col = "years_of_service", salary_col = "pay"
     ),
     "years_of_service.*compute_tenure_panel[(][)].*age"
   )
@@ -264,7 +264,7 @@ for (backend in backends) test_that(paste0("a missing pay column errors naming i
   expect_error(
     run_panel(backend, 
       panel_personnel(), panel_contracts(),
-      clock_col = "tenure", salary_col = "gross_salary_real"
+      duration_col = "tenure", salary_col = "gross_salary_real"
     ),
     "`contracts` is missing required columns: gross_salary_real"
   )
@@ -277,7 +277,7 @@ for (backend in backends) test_that(paste0("a covariate found in both tables err
   expect_error(
     run_panel(backend, 
       personnel, panel_occupation_contracts(),
-      clock_col = "tenure", salary_col = "pay", covariate_cols = "occupation"
+      duration_col = "tenure", salary_col = "pay", covariate_cols = "occupation"
     ),
     "`occupation` is in both `personnel` and `contracts`"
   )
@@ -287,7 +287,7 @@ for (backend in backends) test_that(paste0("a covariate found in neither table e
   expect_error(
     run_panel(backend, 
       panel_personnel(), panel_contracts(),
-      clock_col = "tenure", salary_col = "pay", covariate_cols = "region"
+      duration_col = "tenure", salary_col = "pay", covariate_cols = "region"
     ),
     "`region` is in neither `personnel` nor `contracts`"
   )
@@ -298,7 +298,7 @@ for (backend in backends) test_that(paste0("fewer than 2 snapshots errors", " ["
 
   expect_error(
     run_panel(backend, 
-      personnel, panel_contracts(), clock_col = "tenure", salary_col = "pay"
+      personnel, panel_contracts(), duration_col = "tenure", salary_col = "pay"
     ),
     "`personnel` must contain at least 2 snapshots"
   )
@@ -317,7 +317,7 @@ for (backend in backends) test_that(paste0("missing or zero pay leaves a row at 
   ))
 
   out <- run_panel(backend, 
-    panel_personnel(), contracts, clock_col = "tenure", salary_col = "pay"
+    panel_personnel(), contracts, duration_col = "tenure", salary_col = "pay"
   )
 
   expect_equal(out$pay, c(100, 0, NA, 100, 100))
@@ -334,7 +334,7 @@ test_that("the caller's tables are not changed", {
 
   build_career_panel(
     personnel, contracts,
-    clock_col = "tenure", salary_col = "pay", covariate_cols = "occupation"
+    duration_col = "tenure", salary_col = "pay", covariate_cols = "occupation"
   )
 
   expect_identical(personnel, personnel_before)
@@ -354,7 +354,7 @@ test_that("on annual data, the panel summed by whole years of tenure gives Level
     personnel, contracts, tenure_col = "tenure_years", salary_col = "gross_salary_lcu"
   ))
   panel <- suppressWarnings(build_career_panel(
-    personnel, contracts, clock_col = "tenure_years", salary_col = "gross_salary_lcu"
+    personnel, contracts, duration_col = "tenure_years", salary_col = "gross_salary_lcu"
   ))
 
   summed <- panel[,
@@ -407,7 +407,7 @@ for (backend in backends) test_that(paste0("monthly snapshots give monthly expos
   ))
 
   out <- run_panel(backend, 
-    personnel, contracts, clock_col = "tenure", salary_col = "pay"
+    personnel, contracts, duration_col = "tenure", salary_col = "pay"
   )
   m_out <- out[personnel_id == "M"]
   l_out <- out[personnel_id == "L"]
@@ -443,7 +443,7 @@ for (backend in backends) test_that(paste0("a snapshot missing from the whole pa
   )
 
   out <- run_panel(backend, 
-    personnel, contracts, clock_col = "tenure", salary_col = "pay"
+    personnel, contracts, duration_col = "tenure", salary_col = "pay"
   )
 
   expect_equal(out$personnel_id, c("A", "A", "A", "B"))
@@ -469,7 +469,7 @@ for (backend in backends) test_that(paste0("a seasonal worker gets pay growth to
   ))
 
   out <- run_panel(backend, 
-    personnel, contracts, clock_col = "tenure", salary_col = "pay"
+    personnel, contracts, duration_col = "tenure", salary_col = "pay"
   )[personnel_id == "W"]
 
   expect_equal(out$ref_date, w_dates)
@@ -486,7 +486,7 @@ for (backend in backends) test_that(paste0("someone paid as a pensioner a year l
   ))
 
   out <- run_panel(backend, 
-    panel_personnel(), contracts, clock_col = "tenure", salary_col = "pay"
+    panel_personnel(), contracts, duration_col = "tenure", salary_col = "pay"
   )
 
   expect_equal(out[personnel_id == "P3", exit_type], "retirement")
@@ -507,14 +507,14 @@ for (backend in backends) test_that(paste0("pay growth is per year when the snap
   )
 
   out <- run_panel(backend, 
-    personnel, contracts, clock_col = "tenure", salary_col = "pay"
+    personnel, contracts, duration_col = "tenure", salary_col = "pay"
   )
 
   expect_equal(out$exposure, c(1, 13 / 12, 11 / 12))
   expect_equal(out$pay_growth, c(0, log(1.3) / (13 / 12), 0))
 })
 
-for (backend in backends) test_that(paste0("an exit on a row with no clock value still starts a new spell", " [", backend, "]"), {
+for (backend in backends) test_that(paste0("an exit on a row with no duration value still starts a new spell", " [", backend, "]"), {
   # P1 has no tenure in 2021 and is gone in 2022, then back in 2023: the
   # 2021 row goes, but its exit still makes the 2023 return spell 2
   personnel <- panel_personnel()
@@ -528,7 +528,7 @@ for (backend in backends) test_that(paste0("an exit on a row with no clock value
   ))
 
   out <- suppressWarnings(run_panel(backend, 
-    personnel, panel_contracts(), clock_col = "tenure", salary_col = "pay"
+    personnel, panel_contracts(), duration_col = "tenure", salary_col = "pay"
   ))
 
   expect_equal(out[personnel_id == "P1", ref_date], as.Date(c("2020-01-01", "2023-01-01")))
@@ -559,7 +559,7 @@ for (backend in backends) test_that(paste0("with uneven snapshot spacing, pay gr
   )
 
   out <- run_panel(backend, 
-    personnel, contracts, clock_col = "tenure", salary_col = "pay"
+    personnel, contracts, duration_col = "tenure", salary_col = "pay"
   )
 
   expect_equal(out[personnel_id == "Q", ref_date], dates[1:6])
@@ -589,7 +589,7 @@ test_that("on a database, the panel is a lazy table, left there until collected"
   db <- local_duckdb_tables(panel_personnel(), panel_contracts())
 
   out <- build_career_panel(
-    db$personnel, db$contracts, clock_col = "tenure", salary_col = "pay"
+    db$personnel, db$contracts, duration_col = "tenure", salary_col = "pay"
   )
 
   expect_s3_class(out, "tbl_dbi")
@@ -613,7 +613,7 @@ test_that("on the bundled data, the database panel equals the data frame panel",
   ]
 
   args <- list(
-    clock_col = "age", salary_col = "gross_salary_lcu",
+    duration_col = "age", salary_col = "gross_salary_lcu",
     covariate_cols = c("gender", "educat7", "occupation_english", "est_id")
   )
   from_df <- do.call(build_career_panel, c(list(personnel, contracts), args))
@@ -627,7 +627,7 @@ test_that("personnel in a database with contracts in memory errors", {
 
   expect_error(
     build_career_panel(
-      db$personnel, panel_contracts(), clock_col = "tenure", salary_col = "pay"
+      db$personnel, panel_contracts(), duration_col = "tenure", salary_col = "pay"
     ),
     "`personnel` and `contracts` must be tables on the same database connection"
   )
@@ -639,7 +639,7 @@ test_that("tables on two different database connections error", {
 
   expect_error(
     build_career_panel(
-      db1$personnel, db2$contracts, clock_col = "tenure", salary_col = "pay"
+      db1$personnel, db2$contracts, duration_col = "tenure", salary_col = "pay"
     ),
     "`personnel` and `contracts` must be tables on the same database connection"
   )
@@ -648,8 +648,25 @@ test_that("tables on two different database connections error", {
 test_that("input that is neither a data frame nor a database table errors naming it", {
   expect_error(
     build_career_panel(
-      list(1), panel_contracts(), clock_col = "tenure", salary_col = "pay"
+      list(1), panel_contracts(), duration_col = "tenure", salary_col = "pay"
     ),
     "`personnel` must be a data frame or a lazy database table"
   )
+})
+
+for (backend in backends) test_that(paste0("rows with no snapshot date are dropped quietly, never counted as duplicates", " [", backend, "]"), {
+  # two dateless rows for P2: they belong to no snapshot, so they are not
+  # duplicates of each other, and the panel is as without them
+  personnel <- rbind(panel_personnel(), data.table::data.table(
+    personnel_id = c("P2", "P2"), ref_date = as.Date(c(NA, NA)),
+    employment_status = "active", tenure = 5
+  ))
+
+  expect_no_warning(
+    out <- run_panel(backend, 
+      personnel, panel_contracts(), duration_col = "tenure", salary_col = "pay"
+    )
+  )
+  expect_equal(out$personnel_id, c("P1", "P1", "P2", "P3", "P4"))
+  expect_equal(out$exit_type, c("none", "none", "other", "retirement", "none"))
 })

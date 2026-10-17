@@ -11,7 +11,7 @@ estimate_decrement_rates(personnel, ..., personnel_dt = NULL)
 
 \method{estimate_decrement_rates}{data.frame}(
   personnel,
-  age_col = "age",
+  duration_col = "age",
   status_col = "employment_status",
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
@@ -21,7 +21,7 @@ estimate_decrement_rates(personnel, ..., personnel_dt = NULL)
 
 \method{estimate_decrement_rates}{tbl_dbi}(
   personnel,
-  age_col = "age",
+  duration_col = "age",
   status_col = "employment_status",
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
@@ -42,8 +42,10 @@ non-missing reference dates.}
 
 \item{personnel_dt}{Deprecated. Use \code{personnel} instead.}
 
-\item{age_col}{A single string naming the (integer, or coercible to
-integer) age column.}
+\item{duration_col}{A single string naming the duration column the rates
+are indexed by, in whole years (integer, or coercible to integer):
+usually age (the default, \code{"age"}), or years of service for rates by
+tenure.}
 
 \item{status_col}{A single string naming the employment status column,
 e.g. \code{"employment_status"}. The value \code{"active"} identifies
@@ -68,7 +70,7 @@ type, pooled across every consecutive snapshot pair in
 for \code{tbl_dbi} input (use \code{dplyr::collect()} to bring it into
 memory):
 \describe{
-\item{age_col, group_cols}{The age and grouping columns, as supplied.}
+\item{duration_col, group_cols}{The duration (e.g. age) and grouping columns, as supplied.}
 \item{status_col}{The outcome type this row's rate applies to --
 \code{"active"} (stayed), an observed exit status (e.g.
 \code{"pensioner"}), or the synthetic \code{"non-retirement-exit"}
@@ -189,7 +191,7 @@ personnel_dt <- data.table(
 
 estimate_decrement_rates(
   personnel_dt = personnel_dt,
-  age_col = "age",
+  duration_col = "age",
   status_col = "employment_status",
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",

@@ -12,7 +12,7 @@ build_career_panel(personnel, ...)
 \method{build_career_panel}{data.frame}(
   personnel,
   contracts,
-  clock_col,
+  duration_col,
   salary_col,
   covariate_cols = NULL,
   select_contract = c("highest_paid", "lowest_paid"),
@@ -26,7 +26,7 @@ build_career_panel(personnel, ...)
 \method{build_career_panel}{tbl_dbi}(
   personnel,
   contracts,
-  clock_col,
+  duration_col,
   salary_col,
   covariate_cols = NULL,
   select_contract = c("highest_paid", "lowest_paid"),
@@ -43,7 +43,7 @@ build_career_panel(personnel, ...)
 \item{personnel}{A data frame (data.table, data.frame or tibble) or a
 remote database table (\code{tbl_dbi}, e.g. DuckDB) of the personnel panel:
 one row per person and snapshot, with \code{personnel_id_col},
-\code{ref_date_col}, \code{status_col} and \code{clock_col}.}
+\code{ref_date_col}, \code{status_col} and \code{duration_col}.}
 
 \item{...}{Not used; must be empty.}
 
@@ -53,8 +53,10 @@ with \code{personnel_id_col}, \code{ref_date_col}, \code{contract_id_col} and
 table on the same connection. A person may hold several contracts in a
 snapshot.}
 
-\item{clock_col}{A single string: the column of \code{personnel} that careers
-are timed on, in years. There is no default. Usually one of:
+\item{duration_col}{A single string: the column of \code{personnel} that careers
+are timed on: the time since an origin (hire, for tenure; birth, for
+age) at each snapshot, in years. Not the length of an interval, which is
+\code{exposure}. There is no default. Usually one of:
 \itemize{
 \item years of service, for careers by tenure. Build it with
 \code{\link[=compute_tenure_panel]{compute_tenure_panel()}} from contract history, or as the years
@@ -108,7 +110,8 @@ interval starts at.}
 interval ends (whether or not the person has a record there).}
 \item{spell}{Integer. The person's spell of service: 1, then one
 more each time they come back after leaving.}
-\item{clock_col}{The clock at the start of the interval, as given.}
+\item{duration_col}{The duration at the start of the interval, as
+given.}
 \item{covariate_cols}{The covariates at the start of the interval.}
 \item{pay}{Numeric. Total pay across the person's contracts at
 \code{ref_date}, in the units of \code{salary_col}. \code{NA} if they have no
@@ -183,7 +186,7 @@ with no pay, or zero pay, is still at risk; only their \code{pay_growth} is
 interval: someone who changes occupation has rows in one occupation,
 then the other.
 
-\strong{Missing clock or date.} An active row with no \code{clock_col} is left out,
+\strong{Missing duration or date.} An active row with no \code{duration_col} is left out,
 with a warning, but still counts as the person's next record for their
 row before (and its exit still starts a new spell). A personnel row with
 no \code{ref_date_col} is dropped. A contract with no matching personnel row is
@@ -202,10 +205,10 @@ tenure gives the exposed, stayers and pay growth of
 database as SQL, giving the same panel, and the result is returned
 lazily. A few small queries run straight away: the snapshot dates (whose
 calendar is worked out in R and sent back inline, so no write access is
-needed), and counts for the warnings about duplicates and missing clock
+needed), and counts for the warnings about duplicates and missing duration
 values.
 
-Errors if \code{clock_col} is not in \code{personnel}; if a required column is
+Errors if \code{duration_col} is not in \code{personnel}; if a required column is
 missing from either table; if a covariate is in both tables or in
 neither; if \code{personnel} has fewer than 2 snapshots; if \code{personnel} is a
 database table and \code{contracts} is not a table on the same connection; or
@@ -226,7 +229,7 @@ personnel <- merge(personnel, tenure, by = c("personnel_id", "ref_date"), all.x 
 # warns that a few person-years have no contract history, so no tenure
 panel <- build_career_panel(
   personnel, contracts,
-  clock_col = "tenure_years", salary_col = "gross_salary_real",
+  duration_col = "tenure_years", salary_col = "gross_salary_real",
   covariate_cols = c("gender", "occupation_english")
 )
 
@@ -249,7 +252,7 @@ DBI::dbWriteTable(con, "contracts", contracts[, .(
 
 panel_db <- build_career_panel(
   dplyr::tbl(con, "personnel"), dplyr::tbl(con, "contracts"),
-  clock_col = "tenure_years", salary_col = "gross_salary_real",
+  duration_col = "tenure_years", salary_col = "gross_salary_real",
   covariate_cols = c("gender", "occupation_english")
 )
 
@@ -262,5 +265,5 @@ DBI::dbDisconnect(con, shutdown = TRUE)
 \seealso{
 \code{\link[=estimate_progression_rates]{estimate_progression_rates()}} and \code{\link[=compute_career_table]{compute_career_table()}} for
 the annual career table by group, \code{\link[=compute_tenure_panel]{compute_tenure_panel()}} and
-\code{\link[=deflate_to_real]{deflate_to_real()}} to prepare the clock and pay columns.
+\code{\link[=deflate_to_real]{deflate_to_real()}} to prepare the duration and pay columns.
 }

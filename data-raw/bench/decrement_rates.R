@@ -106,7 +106,7 @@ make_panel <- function(n_rows, id_type, seed = 1) {
 # ---- the four methods -----------------------------------------------------
 
 cols <- list(
-  age_col = "age", status_col = "employment_status",
+  duration_col = "age", status_col = "employment_status",
   personnel_id_col = "personnel_id", ref_date_col = "ref_date",
   group_cols = "gender"
 )
@@ -126,19 +126,19 @@ method_pairwise <- function(panel) {
     list(panel_dt = panel, date_col = cols$ref_date_col, f = .compute_decrement_pair),
     cols
   ))
-  pool(counts, c(cols$age_col, cols$group_cols), cols$status_col)
+  pool(counts, c(cols$duration_col, cols$group_cols), cols$status_col)
 }
 
 method_self_join <- function(panel) {
   pid <- cols$personnel_id_col; ref <- cols$ref_date_col; st <- cols$status_col
-  by_cols <- c(cols$age_col, cols$group_cols)
+  by_cols <- c(cols$duration_col, cols$group_cols)
 
   dates <- sort(unique(panel[[ref]]))
   calendar <- data.table(.t0 = dates[-length(dates)], .t1 = dates[-1L])
 
   cohort <- panel[get(st) == "active", c(pid, ref, by_cols), with = FALSE]
   setnames(cohort, ref, ".t0")
-  cohort[, (cols$age_col) := as.integer(get(cols$age_col))]
+  cohort[, (cols$duration_col) := as.integer(get(cols$duration_col))]
   cohort <- calendar[cohort, on = ".t0", nomatch = NULL]
 
   t1_status <- panel[, c(pid, ref, st), with = FALSE]
