@@ -32,7 +32,7 @@ collect_indicators <- function(indicators) {
   })
 }
 
-test_that("returns the four indicators", {
+test_that("returns the four indicators, counting only active personnel", {
   result <- compute_workforce_analytics(contracts, personnel)
 
   expect_named(
@@ -42,10 +42,7 @@ test_that("returns the four indicators", {
   expect_true(all(vapply(result, data.table::is.data.table, logical(1))))
   expect_equal(result$movement$hires, c(NA, 1L, 0L))
   expect_equal(result$movement$separations, c(NA, 0L, 1L))
-})
 
-test_that("counts only active personnel", {
-  result <- compute_workforce_analytics(contracts, personnel)
   headcount <- result$headcount[order(result$headcount$ref_date), ]
 
   expect_equal(headcount$headcount, c(2L, 3L, 2L))
