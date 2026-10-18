@@ -12,7 +12,7 @@ compute_wagebill(data, ...)
   data,
   measure_col = "gross_salary_lcu",
   group_cols = NULL,
-  reference_group_col = "ref_date",
+  reference_group_cols = "ref_date",
   ...
 )
 
@@ -20,13 +20,13 @@ compute_wagebill(data, ...)
   data,
   measure_col = "gross_salary_lcu",
   group_cols = NULL,
-  reference_group_col = "ref_date",
+  reference_group_cols = "ref_date",
   ...
 )
 }
 \arguments{
 \item{data}{Data frame or remote database table (\code{tbl_dbi}) with the
-column named in \code{reference_group_col} and the pay column named in
+columns named in \code{reference_group_cols} and the pay column named in
 \code{measure_col}.}
 
 \item{...}{Arguments passed to methods.}
@@ -35,18 +35,18 @@ column named in \code{reference_group_col} and the pay column named in
 \code{"gross_salary_lcu"}.}
 
 \item{group_cols}{Character vector of columns to group by, or \code{NULL} to
-add up everyone together. Must not include \code{reference_group_col}.}
+add up everyone together. Must not overlap with \code{reference_group_cols}.}
 
-\item{reference_group_col}{Character. Name of the column that defines the
-reference groups, usually a date. Shares are computed within each
-reference group, and growth compares each reference group with the one
-before it in sorted order. Default \code{"ref_date"}.}
+\item{reference_group_cols}{Character vector of the columns that together
+define the reference groups, such as a date, or a date and a country.
+Shares are computed within each combination of these columns. Must
+include \code{ref_date}, over which growth is measured. Default \code{"ref_date"}.}
 }
 \value{
-A table with the grouping columns, \code{reference_group_col},
+A table with the grouping columns, \code{reference_group_cols},
 \code{wagebill}, \code{share_wagebill} (the group's share of its reference group's
 total, between 0 and 1; only when \code{group_cols} is given) and
-\code{wagebill_growth} (the change from the previous reference group as a
+\code{wagebill_growth} (the change from the previous reference date as a
 proportion, so \code{0.1} means 10\% growth). A data.table for data frame
 input; a lazy table for \code{tbl_dbi} input (use \code{\link[dplyr:collect]{dplyr::collect()}} to bring
 it into memory).
@@ -55,26 +55,29 @@ it into memory).
 Computes the wagebill (total pay) for each group within each reference
 group, usually a reference date. It also reports each group's share of its
 reference group's total wagebill, and how much the wagebill grew since the
-previous reference group.
+previous reference date.
 }
 \details{
 Missing wage values are skipped when adding up. If every wage value for a
 group in a reference group is missing, its wagebill is \code{NA} rather than 0,
 so missing data is not mistaken for zero pay.
 
-When \code{group_cols} is given, every group appears in every reference group
-in \code{data}. A group with no records in a reference group gets
-\code{wagebill = NA}, so gaps stay visible instead of disappearing. Rows with a
-missing group value are kept as their own group.
+Growth follows each group from one reference date to the next, separately
+for every combination of the other reference columns: with
+\code{reference_group_cols = c("ref_date", "country")}, each country's groups
+form their own series.
 
-\code{wagebill_growth} is \code{NA} in the first reference group, and whenever the
+Every such series appears on every reference date in \code{data}. A series with
+no records on a date gets \code{wagebill = NA}, so gaps stay visible instead of
+disappearing. Rows with a missing group value are kept as their own group.
+
+\code{wagebill_growth} is \code{NA} on the first reference date, and whenever the
 current or previous wagebill is \code{NA}.
 }
 \examples{
 compute_wagebill(
   bra_hrmis_contract,
-  group_cols = "contract_type",
-  reference_group_col = "ref_date"
+  group_cols = "contract_type"
 )
 
 }

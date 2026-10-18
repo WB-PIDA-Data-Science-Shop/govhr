@@ -256,7 +256,6 @@ if (getRversion() >= "2.15.1") {
     "transition_type",
     "..out_cols",
     "..group_cols",
-    "..reference_group_col",
     "delta_wage",
     "key",
     "delta_headcount",
