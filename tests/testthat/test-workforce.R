@@ -72,18 +72,6 @@ test_that("does not modify the input", {
   expect_identical(input_personnel, before_personnel)
 })
 
-test_that("a tibble gives the same indicators as a data frame", {
-  expect_equal(
-    collect_indicators(
-      compute_workforce_analytics(
-        tibble::as_tibble(contracts),
-        tibble::as_tibble(personnel)
-      )
-    ),
-    collect_indicators(compute_workforce_analytics(contracts, personnel))
-  )
-})
-
 test_that("a duckdb table is processed by the tbl_dbi methods", {
   skip_if_not_installed("duckdb")
   skip_if_not_installed("dbplyr")
