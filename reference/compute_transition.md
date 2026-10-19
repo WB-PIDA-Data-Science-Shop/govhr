@@ -1,9 +1,8 @@
 # Compute career transitions
 
-Tracks how people (or contracts) move between groups, such as paygrades
-or departments, over time. Each entity's history is collapsed into
-spells: runs of consecutive periods in the same group. Each spell is
-then paired with the one that follows it, giving one row per move.
+Counts, for each reference date, how many entities moved from one group
+to another since the previous date, and what share of the origin group
+they make up.
 
 ## Usage
 
@@ -13,20 +12,20 @@ compute_transition(data, ...)
 # S3 method for class 'data.frame'
 compute_transition(
   data,
-  id_col = "contract_id",
-  group_cols,
-  return_all = FALSE,
-  summarize = FALSE,
+  id_col = "personnel_id",
+  group_col,
+  drop_duplicates = FALSE,
+  across_separations = FALSE,
   ...
 )
 
 # S3 method for class 'tbl_dbi'
 compute_transition(
   data,
-  id_col = "contract_id",
-  group_cols,
-  return_all = FALSE,
-  summarize = FALSE,
+  id_col = "personnel_id",
+  group_col,
+  drop_duplicates = FALSE,
+  across_separations = FALSE,
   ...
 )
 ```
@@ -36,7 +35,7 @@ compute_transition(
 - data:
 
   Data frame or remote database table (`tbl_dbi`) with a `ref_date`
-  column, the identifier column and the grouping columns.
+  column, the identifier column and the grouping column.
 
 - ...:
 
@@ -45,34 +44,43 @@ compute_transition(
 - id_col:
 
   Character. Column identifying whose career is tracked, such as a
-  person or a contract. Default `"contract_id"`.
+  person or a contract. Default `"personnel_id"`.
 
-- group_cols:
+- group_col:
 
-  Character vector of columns defining a career position (e.g. paygrade,
-  department). Several columns are combined into one label, such as
-  `"G1 | Finance"`.
+  Character. Column defining a group, such as a paygrade or a
+  department. To track a combination of groups, such as paygrade within
+  department, combine them into one column beforehand (e.g.,
+  `paste(paygrade, department, sep = "|")`).
 
-- return_all:
+- drop_duplicates:
 
-  Logical. Also keep each entity's last spell, which has no next group,
-  so its `to` and `ref_date` are `NA`. This includes entities that never
-  move. Default `FALSE`.
+  Logical. Drop every entity with more than one record on the same
+  `ref_date`, with a warning, so that each entity belongs to a single
+  group per period. Default `FALSE`, which keeps entities belonging to
+  several groups at once. See Details.
 
-- summarize:
+- across_separations:
 
-  Logical. Count moves by origin, destination and date instead of
-  returning one row per move. Default `FALSE`.
+  Logical. Count moves made across a separation, i.e. between the groups
+  an entity held before leaving the public sector and those it holds on
+  its return. Default `FALSE`, which treats the return as the start of a
+  new career. See Details.
 
 ## Value
 
-With `summarize = FALSE`, one row per move with the identifier, `from`
-(the group left), `to` (the group joined), `from_date` (when the spell
-in `from` began) and `ref_date` (when the entity was first seen in
-`to`).
+A table with one row per `from`, `to` and `ref_date`, containing:
 
-With `summarize = TRUE`, one row per `from`, `to` and `ref_date`, with
-`transitions`, the number of moves.
+- transitions:
+
+  Number of moves from `from` to `to` dated `ref_date`, as detected by
+  [`detect_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_transition.md).
+
+- transition_rate:
+
+  `transitions` divided by the headcount in `from` on the previous date
+  in the data, as in
+  [`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md).
 
 A data.table for data frame input; a lazy table for `tbl_dbi` input (use
 [`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html)
@@ -80,36 +88,45 @@ to bring it into memory).
 
 ## Details
 
-Each move is dated when it happens: `ref_date` is the first period the
-entity is seen in its new group. Dating it by when the previous spell
-began would instead push every first move back to the start of the data.
+Moves are found and dated as in
+[`detect_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_transition.md),
+so an entity holding several groups moves from each group it held to
+each group it joins.
 
-Rows with a missing identifier or group are dropped. Each entity must
-have at most one record per `ref_date`, otherwise its position in that
-period is unclear. Entities that break this rule are dropped entirely,
-with a warning saying how many records were removed.
+The headcount is the number of distinct entities in each group on each
+date, from
+[`count_entity()`](https://wb-pida-data-science-shop.github.io/govhr/reference/count_entity.md),
+so each entity counts once in every group it holds. It is counted on the
+same records as the moves: rows with a missing identifier or group, and
+with `drop_duplicates = TRUE` the entities dropped as duplicates, are
+left out of both.
+
+With `across_separations = TRUE`, a move can span dates on which the
+entity is missing, but `transition_rate` still divides by the headcount
+on the previous date in the data, which such an entity is not part of.
 
 ## See also
 
-[`plot_transition_network()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_transition_network.md)
-to draw the moves as a network.
+[`detect_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_transition.md),
+which finds each move.
+[`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md),
+which counts hires and separations.
 
 ## Examples
 
 ``` r
 careers <- data.frame(
-  contract_id = c("a", "a", "a", "b", "b"),
+  personnel_id = c("a", "a", "a", "b", "b", "b", "b"),
   ref_date = as.Date(c(
-    "2020-01-01", "2021-01-01", "2022-01-01", "2020-01-01", "2021-01-01"
+    "2020-01-01", "2021-01-01", "2022-01-01",
+    "2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01"
   )),
-  paygrade = c("G1", "G1", "G2", "G5", "G5")
+  paygrade = c("G1", "G1", "G2", "A", "B", "A", "C")
 )
-compute_transition(careers, group_cols = "paygrade")
-#>    contract_id   from     to  from_date   ref_date
-#>         <char> <char> <char>     <Date>     <Date>
-#> 1:           a     G1     G2 2020-01-01 2022-01-01
-compute_transition(careers, group_cols = "paygrade", summarize = TRUE)
-#>      from     to   ref_date transitions
-#>    <char> <char>     <Date>       <int>
-#> 1:     G1     G2 2022-01-01           1
+compute_transition(careers, group_col = "paygrade")
+#>      from     to   ref_date transitions transition_rate
+#>    <char> <char>     <Date>       <int>           <num>
+#> 1:      A      C 2021-01-01           1               1
+#> 2:      B      C 2021-01-01           1               1
+#> 3:     G1     G2 2022-01-01           1               1
 ```

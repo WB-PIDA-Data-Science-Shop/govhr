@@ -47,8 +47,8 @@ A named list of tables:
   Headcount, hires, separations and their rates for each `ref_date`,
   from
   [`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md).
-  Hires are `NA` on the first date and separations on the last, since
-  there is nothing to compare with.
+  Hires and separations are `NA` on the first date, since there is
+  nothing to compare with.
 
 - transitions:
 
@@ -56,7 +56,7 @@ A named list of tables:
   (`from`), destination (`to`), when the person joined the origin
   (`from_date`) and when they arrived at the destination (`ref_date`),
   from
-  [`compute_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_transition.md).
+  [`detect_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_transition.md).
 
 Each table has the class its function returns for `contracts`:
 data.tables for data frame input, lazy tables for `tbl_dbi` input (use
@@ -75,10 +75,9 @@ processed in the database.
 Hires and separations are counted per person, so someone holding several
 contracts on the same date is counted once.
 
-A person recorded in more than one establishment on the same date has no
-single position that period, so
-[`compute_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_transition.md)
-leaves them out of `transitions` and warns about it.
+A person recorded in more than one establishment on the same date moves
+from each of them to every establishment they join next, as described in
+[`detect_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_transition.md).
 
 ## Examples
 
@@ -116,14 +115,14 @@ compute_workforce_analytics(contracts, personnel)
 #> $movement
 #>      ref_date headcount hires separations hire_rate separation_rate
 #>        <Date>     <int> <int>       <int>     <num>           <num>
-#> 1: 2020-01-01         2    NA           0        NA       0.0000000
-#> 2: 2021-01-01         3     1           1 0.3333333       0.3333333
-#> 3: 2022-01-01         2     0          NA 0.0000000              NA
+#> 1: 2020-01-01         2    NA          NA        NA              NA
+#> 2: 2021-01-01         3     1           0       0.5       0.0000000
+#> 3: 2022-01-01         2     0           1       0.0       0.3333333
 #>    replacement_rate
 #>               <num>
 #> 1:               NA
-#> 2:                1
-#> 3:               NA
+#> 2:              Inf
+#> 3:                0
 #> 
 #> $transitions
 #>    personnel_id   from     to  from_date   ref_date

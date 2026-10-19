@@ -20,41 +20,42 @@ library(dplyr)
 ## Analytics
 
 Once data are harmonized, analytics helps governments answer specific
-policy questions: How compressed is the wage structure? Is the workforce
-growing or shrinking? How is headcount distributed across groups?
+policy questions: Is your public sector growing in headcount, wages, or
+both? How much variation is there across ministries, occupations, and
+individual workers?
 
-`govhr` provides functionalities that enable users to generate
-analytics, along with companion plotting functions to visualize them.
-Broadly speaking, we differentiate between analytics on the workforce
-and the wagebill. Workforce analytics focus on the composition, growth,
-and distribution of personnel, while wagebill analytics examine patterns
-and trends in compensation (e.g., base salaries, allowances).
+`govhr` empowers you to generate analytics, as well as giving you
+accessible means to visualize them. Broadly speaking, we differentiate
+between analytics on the workforce and the wagebill. Workforce analytics
+focus on the composition, growth, and distribution of personnel.
+Meanwhile, wagebill analytics examine patterns and trends in
+compensation (e.g., base salaries and allowances).
 
-The following examples illustrate how to leverage `govhr` to generate
+The following examples illustrate how to use `govhr` to generate
 analytics.
 
 ## Workforce analytics
 
-When analyzing the workforce, a first order concern is understanding
-time trends in headcount. One way to do this is to compute the total
-headcount by reference date, allowing the user to visualize the
-trajectory of the public sector workforce over time.
+When analyzing the workforce, a first order concern is understanding how
+the headcount has evolved over time. One way to do this is to compute
+the total headcount by reference date.
 
-The function `compute_time_trend` and its companion plotting function
+The function `compute_headcount` and its companion plotting function
 `plot_trend` allow users to quickly generate this type of analysis.
 
 ``` r
 
 # total headcount by reference date
-headcount_trend <- compute_time_trend(
-  govhr::bra_hrmis_personnel,
-  group_col = "ref_date"
+headcount_trend <- compute_headcount(
+  govhr::bra_hrmis_personnel
 )
 
-plot_trend(headcount_trend, group_col = "ref_date")
+plot_trend(
+  headcount_trend, y_col = "headcount", group_col = "ref_date"
+)
 ```
 
-![](03-analytics_files/figure-html/unnamed-chunk-1-1.png)
+![](03-analytics_files/figure-html/unnamed-chunk-2-1.png)
 
 You might also be curious about how time trends for headcount varies
 across groups, such as gender. Modifying the `group_col` argument makes
@@ -64,24 +65,24 @@ reference date into account.
 ``` r
 
 # total headcount by reference date and gender
-headcount_trend_gender <- compute_time_trend(
+headcount_trend_gender <- compute_headcount(
   govhr::bra_hrmis_personnel,
-  group_col = c("gender")
+  group_cols = c("gender")
 )
 
-plot_trend(headcount_trend_gender, group_col = c("gender"))
+plot_trend(headcount_trend_gender, y_col = "headcount", group_col = c("gender"))
 ```
 
-![](03-analytics_files/figure-html/unnamed-chunk-2-1.png)
+![](03-analytics_files/figure-html/unnamed-chunk-3-1.png)
 
 ## Movement
 
-Beyond the stock of personnel, governments are often interested in the
-flows of personnel into and out of the public sector. The
-`compute_movement` function counts, for each reference date, the number
-of active personnel, new hires and separations, along with hire and
-separation rates. The companion plotting function `plot_movement`
-visualizes these flows.
+Beyond headcount, governments are often interested in the movements of
+personnel into and out of the public sector. The `compute_movement`
+function counts, for each reference date, the number of active
+personnel, new hires and separations, along with hire and separation
+rates. The companion plotting function `plot_movement` visualizes these
+flows.
 
 ``` r
 
@@ -90,7 +91,7 @@ movement <- compute_movement(govhr::bra_hrmis_personnel)
 plot_movement(movement, movement_type = "hire", measurement_type = "count")
 ```
 
-![](03-analytics_files/figure-html/unnamed-chunk-3-1.png) Again, if you
+![](03-analytics_files/figure-html/unnamed-chunk-4-1.png) Again, if you
 are interested in how these flows vary across groups, you can use the
 `group_cols` argument. Here we plot the separation rate by gender.
 
@@ -109,19 +110,24 @@ plot_movement(
 )
 ```
 
-![](03-analytics_files/figure-html/unnamed-chunk-4-1.png)
+![](03-analytics_files/figure-html/unnamed-chunk-5-1.png)
+
+You might also be interested in visualizing how people move within the
+public sector. This is what we call transitions: how personnel move from
+one group to another, or across multiple groups. The
+`compute_transition` function helps you visualize this.
 
 ## Wagebill analytics
 
 Most of the analysis presented in the workforce analytics section can be
-replicated for the wagebill. For example, the `compute_time_trend`
+replicated for the wagebill. For example, the `compute_trend_summary`
 function can be used to compute the total wagebill by reference date,
 while the `plot_trend` function can visualize that trend.
 
 ``` r
 
 # total wagebill by reference date
-wagebill_trend <- compute_time_trend(
+wagebill_trend <- compute_trend_summary(
   govhr::bra_hrmis_contract,
   group_col = "ref_date",
   measure_col = "gross_salary_lcu"
@@ -130,7 +136,7 @@ wagebill_trend <- compute_time_trend(
 plot_trend(wagebill_trend, group_col = "ref_date")
 ```
 
-![](03-analytics_files/figure-html/unnamed-chunk-5-1.png)
+![](03-analytics_files/figure-html/unnamed-chunk-6-1.png)
 
 A similar differentiation by group is possible, using the same grammar
 for the `group_col` argument.
@@ -140,7 +146,7 @@ for the `group_col` argument.
 # total wagebill by reference date
 wagebill_paygrade_trend <- govhr::bra_hrmis_contract |>
     filter(!is.na(paygrade)) |>
-    compute_time_trend(
+    compute_trend_summary(
         group_col = "paygrade",
         measure_col = "gross_salary_lcu"
     )
@@ -148,7 +154,7 @@ wagebill_paygrade_trend <- govhr::bra_hrmis_contract |>
 plot_trend(wagebill_paygrade_trend, group_col = "paygrade")
 ```
 
-![](03-analytics_files/figure-html/unnamed-chunk-6-1.png)
+![](03-analytics_files/figure-html/unnamed-chunk-7-1.png)
 
 ## Equity
 
@@ -175,4 +181,4 @@ compression_ratio <- compute_compression_ratio(
 plot_compression_ratio(compression_ratio)
 ```
 
-![](03-analytics_files/figure-html/unnamed-chunk-7-1.png)
+![](03-analytics_files/figure-html/unnamed-chunk-8-1.png)

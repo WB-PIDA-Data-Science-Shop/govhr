@@ -47,7 +47,11 @@ to bring it into memory).
 ## Details
 
 A retirement is a separation whose next status is pensioner. A pension
-drawn alongside an active contract is therefore not a retirement.
+drawn alongside an active contract is therefore not a retirement. As
+with separations, it is flagged on the person's last active date and
+counted by
+[`compute_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement.md)
+on `next_date`, the first date they are absent.
 
 Pension registration can lag the exit, so the pensioner record may
 appear at any later date, not only the next one. A retirement is dated

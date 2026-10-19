@@ -3,10 +3,10 @@
 ## Overview
 
 This article describes the standard dictionary for `govhr`, organized
-into four main modules: Establishment, Personnel, Contract, and
-Allowance. These modules are designed to organize and standardize
-information about public sector personnel across different countries and
-administrative levels.
+into four modules: Establishment, Personnel, Contract, and Allowance.
+These modules are designed to provide a standard template to guide
+harmonization of public sector human resources data from different
+countries. The modules are structured as follows:
 
 ## Module 1: Establishment
 
@@ -36,18 +36,19 @@ with their sector classification and geographic/administrative location.
 
 ### Notes
 
-- **Sector**: Uses the COFOG (Classification of the Functions of
-  Government) classification to categorize establishments.
+- **Sector**: We recommend you to use the COFOG (Classification of the
+  Functions of Government) classification to map establishments to
+  sectors.
 - **Administration vs. Geography**: Administration levels
-  (`adm1`/`adm2`/`adm3`) refer to institutional/administrative divisions
+  (`adm1`/`adm2`/`adm3`) to institutional/administrative divisions
   (e.g., Ministry, Department, Agency), while geography levels
   (`geo1`/`geo2`) refer to physical location (e.g., state/region,
   municipality/county).
 
 ## Module 2: Personnel
 
-The Personnel module contains demographic and employment information
-about individual public sector employees.
+The Personnel module contains demographic and other employee-specific
+information such as first employment date in the public sector.
 
 ### Fields
 
@@ -85,8 +86,9 @@ about individual public sector employees.
 
 ## Module 3: Contract
 
-The Contract module captures details about employment contracts,
-compensation, and job characteristics.
+The Contract module contains information about the contract,
+compensation, and occupational characteristics. Please note that a same
+worker can hold multiple contracts.
 
 ### Fields
 
@@ -115,26 +117,26 @@ compensation, and job characteristics.
 
 ### Notes
 
-- **Compensation Fields**: Base, gross, and net salary fields (local
-  currency only) allow analysis of gross-to-net ratios and the effect of
-  deductions and allowances. Itemized allowance amounts are tracked
-  separately in the Allowance module.
-- **Contract Type (International)**: Follows the ILO’s ICSE-18
+- **Compensation Fields**: Base, gross, and net salary (local currency
+  units or international dollars) allow analysis of gross-to-net ratios
+  and the effect of deductions and allowances. Itemized allowance
+  amounts are tracked separately in the Allowance module.
+- **Contract Type (International)**: We suggest using the ILO’s ICSE-18
   (International Classification of Status in Employment) standard for
   cross-country comparability, while `contract_type_native` preserves
   local terminology.
-- **Occupation Coding**: Both native and standardized (ISCO-08)
+- **Occupation Coding**: Both local and standardized (ISCO-08)
   classifications enable within-country detail and cross-country
   comparability.
-- **Tenure vs. Seniority**: `contract_tenure` tracks time worked in the
-  current contract, while `seniority` tracks the level within the
-  paygrade.
+- **Tenure and Seniority**: `contract_tenure` tracks time worked in the
+  current contract, while `seniority` tracks a hierarchical position
+  such as a director, if that distinction is made.
 
 ## Module 4: Allowance
 
 The Allowance module captures detailed, itemized allowance payments
-associated with a contract, allowing analysis of allowance composition
-beyond the aggregate `allowance_lcu` figure in the Contract module.
+associated with a contract, enabling a more granular analysis of
+allowance compositione.
 
 ### Fields
 
@@ -149,7 +151,7 @@ beyond the aggregate `allowance_lcu` figure in the Contract module.
 ### Notes
 
 - **Granularity**: Unlike the aggregate `allowance_lcu` field in the
-  Contract module, this module stores one row per allowance type per
+  Contract module, this module records one row per allowance type per
   contract per reference date, enabling detailed breakdowns of allowance
   composition.
 

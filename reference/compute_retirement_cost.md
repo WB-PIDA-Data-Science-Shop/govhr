@@ -1,7 +1,7 @@
 # Compute the cost of retirements
 
-Adds up, for each reference date, the pay of the people who retire at
-that date.
+Adds up, for each reference date, the pay of the people who retired
+since the previous date.
 
 ## Usage
 
@@ -58,21 +58,26 @@ compute_retirement_cost(
 
 A table with one row per `ref_date` and group, containing
 `retirement_cost`, the retirees' pay. `retirement_cost` is 0 when nobody
-retired, and `NA` on the last date, which has nothing to compare with. A
-data.table for data frame input; a lazy table for `tbl_dbi` input (use
+retired, and `NA` on the first date, which has nothing to compare with,
+and for a group with nobody active on the previous date. A data.table
+for data frame input; a lazy table for `tbl_dbi` input (use
 [`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html)
 to bring it into memory).
 
 ## Details
 
-Retirees are costed at their pay on their last active date. The pay on
-all of a retiree's active records that date is added up, so people with
-several contracts are costed in full; pay recorded alongside, such as a
-pension, is not. Missing pay counts as 0.
+As in
+[`compute_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement.md),
+retirements are counted on the first date the person is absent. Retirees
+are costed at their pay on their last active date. The pay on all of a
+retiree's active records that date is added up, so people with several
+contracts are costed in full; pay recorded alongside, such as a pension,
+is not. Missing pay counts as 0.
 
 With `group_cols`, each retiree's pay is counted in the group of the
 record it comes from. Every group with active personnel on a date
-appears for that date.
+appears for that date, and a group that everyone left still appears on
+the next date.
 
 ## See also
 
@@ -95,6 +100,6 @@ hr <- data.frame(
 compute_retirement_cost(hr, measure_col = "wage")
 #>      ref_date retirement_cost
 #>        <Date>           <num>
-#> 1: 2020-01-01             100
-#> 2: 2021-01-01              NA
+#> 1: 2020-01-01              NA
+#> 2: 2021-01-01             100
 ```

@@ -18,11 +18,11 @@ organized into three modules: **Establishment**, **Personnel**, and
 **Contract**. Once harmonized, data becomes comparable across countries
 and over time, and can feed directly into `govhr`’s analytics functions.
 
-This article walks through harmonizing a synthetic dataset, `bra_hrmis`,
-built from a contract-level extract from Brazil’s HRMIS system in the
-Alagoas state, using the helper functions in `govhr`. The example
-focuses primarily on generating one module, Personnel, but a similar
-logic can be applied to the Establishment and Contract modules.
+This article walks through a harmonization example for a synthetic
+dataset, `bra_hrmis`, built from a contract-level extract from Brazil’s
+HR data in the Alagoas state, using `govhr`. The example focuses
+primarily on generating one module, Personnel, but a similar logic can
+be applied to Establishment and Contract modules.
 
 ``` r
 
@@ -35,7 +35,8 @@ dim(bra_hrmis)
 
 Before harmonizing, it’s useful to check whether raw data sources
 (e.g. multiple years or offices) share a consistent column naming (i.e.,
-schema).
+schema). This is the case when a government shares multiple extractions
+that span across reference dates.
 [`find_inconsistent_colnames()`](https://wb-pida-data-science-shop.github.io/govhr/reference/find_inconsistent_colnames.md)
 flags columns that aren’t shared across all sources.
 
@@ -52,9 +53,10 @@ find_inconsistent_colnames(list(extract_2020, extract_2021))
 
 ## Step 2: generate module identifiers
 
-Harmonization requires knowing which column identifies a contract and
-which identifies a person. These are our primary keys, that is, unique
-identifiers for contracts and personnel, respectively.
+Harmonization requires knowing which column uniquely identifies a
+contract and which one identifies a person, for example. These are our
+primary keys, that is, unique identifiers for contracts and personnel,
+respectively.
 [`find_duplicate_ids()`](https://wb-pida-data-science-shop.github.io/govhr/reference/find_duplicate_ids.md)
 is a quick way to test whether a candidate column is a valid unique key.
 
@@ -78,8 +80,8 @@ bra_hrmis |> find_duplicate_ids(MATRICULA)
 ```
 
 `MATRICULA` uniquely identifies a contract for a given reference date,
-so it becomes the **contract identifier**, or `contract_id` in our
-standard data dictionary. `CPF` will serve as the **personnel
+so it can be used as a **contract identifier**, or `contract_id` in our
+standard data dictionary. `CPF` can serve as the **personnel
 identifier**, the `personnel_id`.
 
 ## Step 3: map raw columns to standardized names
@@ -112,7 +114,7 @@ bra_hrmis <- harmonize_columns(bra_hrmis, column_dictionary) |>
 ## Building reference dates
 
 Dates are often stored as serial numbers or split across year/month
-columns. Once a `ref_date` column is built,
+columns. Once you define a `ref_date`,
 [`guess_date_frequency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/guess_date_frequency.md)
 confirms the reporting interval — useful for choosing the right window
 when computing growth or turnover indicators later.
@@ -127,11 +129,10 @@ bra_hrmis |>
 #> [1] "quarter"
 ```
 
-## Deduping values
+## Deduplicating values
 
-Attributes like education and gender should be constant for a given
-personnel-period, but raw data sometimes disagrees across rows for the
-same `personnel_id`/`ref_date` (e.g. due to concurrent contracts).
+Attributes like education and gender should be the same for a given
+personnel-reference date, but raw data is sometimes inconsistent.
 [`dedup_values()`](https://wb-pida-data-science-shop.github.io/govhr/reference/dedup_values.md)
 resolves this using a chosen strategy — here, the modal value.
 
@@ -158,7 +159,8 @@ Nominal wages in local currency aren’t comparable across time or
 countries.
 [`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.md)
 uses the bundled `macro_indicators` dataset (with CPI and PPP conversion
-factors) to convert local currency units into international dollars.
+factors) to convert local currency units into international constant
+dollars.
 
 ``` r
 
@@ -254,10 +256,10 @@ bra_hrmis_personnel |> head()
 
 Once harmonized,
 [`validate_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/validate_data.md)
-checks the harmonized dataset against a set of validation rules. It then
-reports both a pass-rate summary and the specific records that violate
-each rule. This helps you identify negative salaries, missing keys, or
-out-of-range dates before analytics are run.
+checks the harmonized dataset against a pre-determined set of validation
+rules. It then reports both a pass-rate summary and the specific records
+that violate each rule. This helps you identify negative salaries,
+missing keys, or out-of-range dates before analytics are run.
 
 ``` r
 
@@ -278,5 +280,5 @@ result$violations[["salary_non_negative"]]
 #> NULL
 ```
 
-Informed by this validation, you might want to revisit your
+Informed by this data validation, you might want to revisit your
 harmonization process and address lingering data quality issues.

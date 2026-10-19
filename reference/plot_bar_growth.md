@@ -15,7 +15,7 @@ plot_bar_growth(data, group_col)
 
   Data frame with the grouping column and a `growth_rate` column, as
   returned by
-  [`compute_growth_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_growth_summary.md).
+  [`compute_growth()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_growth.md).
 
 - group_col:
 

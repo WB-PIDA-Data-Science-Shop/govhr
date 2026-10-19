@@ -1,7 +1,7 @@
 # Compute retirements
 
 Counts, for each reference date, how many people are active and how many
-of them leave active status by the next date into a pension, i.e. whose
+left active status since the previous date into a pension, i.e. whose
 next status after leaving is pensioner.
 
 ## Usage
@@ -59,13 +59,15 @@ A table with one row per `ref_date` and group, containing:
 
 - retirements:
 
-  Active people who are no longer active on the next date and are next
-  recorded as pensioners. `NA` on the last date, which has nothing to
-  compare with.
+  People active on the previous date who are no longer active on this
+  one and are next recorded as pensioners. `NA` on the first date, which
+  has nothing to compare with.
 
 - retirement_rate:
 
-  `retirements` divided by `headcount`.
+  `retirements` divided by the headcount on the previous date, as
+  `separation_rate` in
+  [`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md).
 
 A data.table for data frame input; a lazy table for `tbl_dbi` input (use
 [`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html)
@@ -73,18 +75,22 @@ to bring it into memory).
 
 ## Details
 
-The next date is the neighbouring date found in the data, so the dates
-do not need to be evenly spaced. People are counted once per date, even
-if they hold several contracts. With `group_cols`, each person is
-counted in the group they belong to on that date.
+The previous date is the neighbouring date found in the data, so the
+dates do not need to be evenly spaced. People are counted once per date,
+even if they hold several contracts. With `group_cols`, each person is
+counted in the group they belong to on that date, and each retirement in
+the group the person left. A group that everyone left still appears on
+the next date, with a `headcount` of 0. A group with nobody active on
+the previous date has no headcount to compare with, so its retirements
+and rate are `NA`.
 
 Pension registration can lag the exit, so the pensioner record may
 appear at any later date, not only the next one. A retirement is dated
-by the exit, not by the registration. A person who returns to active
-work before any pensioner record counts as a separation, not a
-retirement, at the earlier exit. There is no limit on the lag, so an
-exit followed years later by a deferred pension also counts as a
-retirement.
+by the exit, the first date the person is absent, not by the
+registration. A person who returns to active work before any pensioner
+record counts as a separation, not a retirement, at the earlier exit.
+There is no limit on the lag, so an exit followed years later by a
+deferred pension also counts as a retirement.
 
 ## See also
 
@@ -107,7 +113,7 @@ hr <- data.frame(
 compute_retirement(hr)
 #>      ref_date headcount retirements retirement_rate
 #>        <Date>     <int>       <int>           <num>
-#> 1: 2020-01-01         2           1             0.5
-#> 2: 2021-01-01         1           0             0.0
-#> 3: 2022-01-01         1          NA              NA
+#> 1: 2020-01-01         2          NA              NA
+#> 2: 2021-01-01         1           1             0.5
+#> 3: 2022-01-01         1           0             0.0
 ```

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,9 +32,9 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="harmonization">Harmonization<a class="anchor" aria-label="anchor" href="#harmonization"></a></h2>
 
-
+      <div class="section-desc"><p><code>R/harmonize.R</code>: align column names, identifiers and values across sources.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -43,402 +43,10 @@
 
       <dl><dt>
 
-          <code><a href="add_contract_to_event.html">add_contract_to_event()</a></code>
+          <code><a href="find_inconsistent_colnames.html">find_inconsistent_colnames()</a></code>
 
         </dt>
-        <dd>Add contract information to event records</dd>
-
-        <dt>
-
-          <code><a href="apply_baseline_index.html">apply_baseline_index()</a></code>
-
-        </dt>
-        <dd>Apply baseline index to a trend summary</dd>
-
-        <dt>
-
-          <code><a href="bra_hrmis.html">bra_hrmis</a></code>
-
-        </dt>
-        <dd>Brazilian Public Employee Payroll Data</dd>
-
-        <dt>
-
-          <code><a href="bra_hrmis_allowance.html">bra_hrmis_allowance</a></code>
-
-        </dt>
-        <dd>Brazil HRMIS Allowance Module</dd>
-
-        <dt>
-
-          <code><a href="bra_hrmis_contract.html">bra_hrmis_contract</a></code>
-
-        </dt>
-        <dd>HRMIS Contract Dataset</dd>
-
-        <dt>
-
-          <code><a href="bra_hrmis_est.html">bra_hrmis_est</a></code>
-
-        </dt>
-        <dd>HRMIS Establishment Dataset</dd>
-
-        <dt>
-
-          <code><a href="bra_hrmis_personnel.html">bra_hrmis_personnel</a></code>
-
-        </dt>
-        <dd>HRMIS Personnel Dataset</dd>
-
-        <dt>
-
-          <code><a href="classify_personnel_event.html">classify_personnel_event()</a></code>
-
-        </dt>
-        <dd>Classify personnel movement events</dd>
-
-        <dt>
-
-          <code><a href="classify_text.html">classify_text()</a></code>
-
-        </dt>
-        <dd>Classify free-text items against a user-supplied taxonomy using TF-IDF</dd>
-
-        <dt>
-
-          <code><a href="clean_hr_data.html">clean_hr_data()</a></code>
-
-        </dt>
-        <dd>Apply Standard HR data cleaning pipeline</dd>
-
-        <dt>
-
-          <code><a href="cofog_taxonomy.html">cofog_taxonomy</a></code>
-
-        </dt>
-        <dd>COFOG Functional Classification Taxonomy</dd>
-
-        <dt>
-
-          <code><a href="complete_columns.html">complete_columns()</a></code>
-
-        </dt>
-        <dd>Complete columns in a dataframe</dd>
-
-        <dt>
-
-          <code><a href="complete_dates.html">complete_dates()</a></code>
-
-        </dt>
-        <dd>Complete panel data by identifier and reference dates</dd>
-
-        <dt>
-
-          <code><a href="compute_baseline_index.html">compute_baseline_index()</a></code>
-
-        </dt>
-        <dd>Compute index values relative to base year</dd>
-
-        <dt>
-
-          <code><a href="compute_compression_ratio.html">compute_compression_ratio()</a></code>
-
-        </dt>
-        <dd>Compute the compression ratio of a measure</dd>
-
-        <dt>
-
-          <code><a href="compute_coverage.html">compute_coverage()</a></code>
-
-        </dt>
-        <dd>Compute data coverage</dd>
-
-        <dt>
-
-          <code><a href="compute_cross_section.html">compute_cross_section()</a></code>
-
-        </dt>
-        <dd>Compute cross-section summary table</dd>
-
-        <dt>
-
-          <code><a href="compute_cross_section_summary.html">compute_cross_section_summary()</a></code>
-
-        </dt>
-        <dd>Compute cross-section summary</dd>
-
-        <dt>
-
-          <code><a href="compute_decile.html">compute_decile()</a></code>
-
-        </dt>
-        <dd>Compute deciles of a measure</dd>
-
-        <dt>
-
-          <code><a href="compute_fastchange.html">compute_fastchange()</a></code>
-
-        </dt>
-        <dd>Calculate year-over-year growth for a numeric column</dd>
-
-        <dt>
-
-          <code><a href="compute_fastshare.html">compute_fastshare()</a></code>
-
-        </dt>
-        <dd>Compute ratio indicators of summarized variables over macro indicators</dd>
-
-        <dt>
-
-          <code><a href="compute_fastsummary.html">compute_fastsummary()</a></code>
-
-        </dt>
-        <dd>Compute Fast Summary Statistics by Group</dd>
-
-        <dt>
-
-          <code><a href="compute_global_consistency.html">compute_global_consistency()</a></code>
-
-        </dt>
-        <dd>Compute global consistency</dd>
-
-        <dt>
-
-          <code><a href="compute_global_coverage.html">compute_global_coverage()</a></code>
-
-        </dt>
-        <dd>Compute global coverage</dd>
-
-        <dt>
-
-          <code><a href="compute_growth.html">compute_growth()</a></code>
-
-        </dt>
-        <dd>Compute growth rate summary table</dd>
-
-        <dt>
-
-          <code><a href="compute_growth_decomposition.html">compute_growth_decomposition()</a></code>
-
-        </dt>
-        <dd>Compute growth decomposition of wagebill</dd>
-
-        <dt>
-
-          <code><a href="compute_growth_summary.html">compute_growth_summary()</a></code>
-
-        </dt>
-        <dd>Compute growth rate summary</dd>
-
-        <dt>
-
-          <code><a href="compute_headcount.html">compute_headcount()</a></code>
-
-        </dt>
-        <dd>Compute headcount by group</dd>
-
-        <dt>
-
-          <code><a href="compute_movement.html">compute_movement()</a></code>
-
-        </dt>
-        <dd>Compute movements as hires and separations</dd>
-
-        <dt>
-
-          <code><a href="compute_movement_cost.html">compute_movement_cost()</a></code>
-
-        </dt>
-        <dd>Compute the cost of hires and separations</dd>
-
-        <dt>
-
-          <code><a href="compute_pension_ratio.html">compute_pension_ratio()</a></code>
-
-        </dt>
-        <dd>Compute ratio of last salary to first pension for retired workers</dd>
-
-        <dt>
-
-          <code><a href="compute_percentile.html">compute_percentile()</a></code>
-
-        </dt>
-        <dd>Compute the percentile of a measure</dd>
-
-        <dt>
-
-          <code><a href="compute_quantile.html">compute_quantile()</a></code>
-
-        </dt>
-        <dd>Function to compute quantiles of a measure column within groups and reference dates</dd>
-
-        <dt>
-
-          <code><a href="compute_record_consistency.html">compute_record_consistency()</a></code>
-
-        </dt>
-        <dd>Compute record consistency</dd>
-
-        <dt>
-
-          <code><a href="compute_retirement.html">compute_retirement()</a></code>
-
-        </dt>
-        <dd>Compute retirements</dd>
-
-        <dt>
-
-          <code><a href="compute_retirement_cost.html">compute_retirement_cost()</a></code>
-
-        </dt>
-        <dd>Compute the cost of retirements</dd>
-
-        <dt>
-
-          <code><a href="compute_service_table.html">compute_service_table()</a></code>
-
-        </dt>
-        <dd>Compute an actuarial service table from a personnel panel</dd>
-
-        <dt>
-
-          <code><a href="compute_time_trend.html">compute_time_trend()</a></code>
-
-        </dt>
-        <dd>Compute time trend</dd>
-
-        <dt>
-
-          <code><a href="compute_transition.html">compute_transition()</a></code>
-
-        </dt>
-        <dd>Compute career transitions</dd>
-
-        <dt>
-
-          <code><a href="compute_trend_summary.html">compute_trend_summary()</a></code>
-
-        </dt>
-        <dd>Compute trend summary</dd>
-
-        <dt>
-
-          <code><a href="compute_value_consistency.html">compute_value_consistency()</a></code>
-
-        </dt>
-        <dd>Compute value consistency</dd>
-
-        <dt>
-
-          <code><a href="compute_wage.html">compute_wage()</a></code>
-
-        </dt>
-        <dd>Compute the average wage</dd>
-
-        <dt>
-
-          <code><a href="compute_wage_decomposition.html">compute_wage_decomposition()</a></code>
-
-        </dt>
-        <dd>Decompose average-wage growth</dd>
-
-        <dt>
-
-          <code><a href="compute_wagebill.html">compute_wagebill()</a></code>
-
-        </dt>
-        <dd>Compute the wagebill</dd>
-
-        <dt>
-
-          <code><a href="compute_wagebill_analytics.html">compute_wagebill_analytics()</a></code>
-
-        </dt>
-        <dd>Compute standard wagebill indicators</dd>
-
-        <dt>
-
-          <code><a href="compute_workforce_analytics.html">compute_workforce_analytics()</a></code>
-
-        </dt>
-        <dd>Compute standard workforce indicators</dd>
-
-        <dt>
-
-          <code><a href="contract_rules.html">contract_rules</a></code>
-
-        </dt>
-        <dd>Contract Validation Rules</dd>
-
-        <dt>
-
-          <code><a href="convert_constant_ppp.html">convert_constant_ppp()</a></code>
-
-        </dt>
-        <dd>Convert nominal wages to real PPP-adjusted wages (2021 base year)</dd>
-
-        <dt>
-
-          <code><a href="convert_data.html">convert_data()</a></code>
-
-        </dt>
-        <dd>Convert data to match original class</dd>
-
-        <dt>
-
-          <code><a href="count_entity.html">count_entity()</a></code>
-
-        </dt>
-        <dd>Count unique entities by group</dd>
-
-        <dt>
-
-          <code><a href="count_unique.html">count_unique()</a></code>
-
-        </dt>
-        <dd>Count unique non-missing values</dd>
-
-        <dt>
-
-          <code><a href="countryclass.html">countryclass</a></code>
-
-        </dt>
-        <dd>World Bank Country and Lending Groups</dd>
-
-        <dt>
-
-          <code><a href="cp_ratio.html">cp_ratio()</a></code>
-
-        </dt>
-        <dd>Compute a compression ratio between two percentiles</dd>
-
-        <dt>
-
-          <code><a href="cpi.html">cpi</a></code>
-
-        </dt>
-        <dd>Monthly consumer price index (CPI) by country</dd>
-
-        <dt>
-
-          <code><a href="cv.html">cv()</a></code>
-
-        </dt>
-        <dd>Compute the coefficient of variation (CV)</dd>
-
-        <dt>
-
-          <code><a href="dedup_values.html">dedup_values()</a></code>
-
-        </dt>
-        <dd>Deduplicate values within grouped data</dd>
-
-        <dt>
-
-          <code><a href="deflate_to_real.html">deflate_to_real()</a></code>
-
-        </dt>
-        <dd>Deflate a nominal LCU column to real values</dd>
+        <dd>Identify inconsistent column names across data frames</dd>
 
         <dt>
 
@@ -449,66 +57,10 @@
 
         <dt>
 
-          <code><a href="detect_movement.html">detect_movement()</a></code>
+          <code><a href="harmonize_columns.html">harmonize_columns()</a></code>
 
         </dt>
-        <dd>Detect hires and separations</dd>
-
-        <dt>
-
-          <code><a href="detect_personnel_event.html">detect_personnel_event()</a></code>
-
-        </dt>
-        <dd>Detect Personnel Events</dd>
-
-        <dt>
-
-          <code><a href="detect_retirement.html">detect_retirement()</a></code>
-
-        </dt>
-        <dd>Detect retirements</dd>
-
-        <dt>
-
-          <code><a href="dictionary.html">dictionary</a></code>
-
-        </dt>
-        <dd>Harmonization Dictionary for Payroll and HRMIS Data</dd>
-
-        <dt>
-
-          <code><a href="enterprise_surveys.html">enterprise_surveys</a></code>
-
-        </dt>
-        <dd>World Bank Enterprise Surveys</dd>
-
-        <dt>
-
-          <code><a href="estimate_decrement_rates.html">estimate_decrement_rates()</a></code>
-
-        </dt>
-        <dd>Estimate empirical decrement rates from a personnel panel</dd>
-
-        <dt>
-
-          <code><a href="estimate_exit_rates.html">estimate_exit_rates()</a></code>
-
-        </dt>
-        <dd>Estimate historical non-retirement exit rates from panel data</dd>
-
-        <dt>
-
-          <code><a href="fastcount.html">fastcount()</a></code>
-
-        </dt>
-        <dd>Fast counting via dtplyr</dd>
-
-        <dt>
-
-          <code><a href="fastprop.html">fastprop()</a></code>
-
-        </dt>
-        <dd>Compute group-wise proportions from counts</dd>
+        <dd>Harmonize column names based on a dictionary</dd>
 
         <dt>
 
@@ -519,101 +71,17 @@
 
         <dt>
 
-          <code><a href="find_inconsistent_colnames.html">find_inconsistent_colnames()</a></code>
+          <code><a href="dedup_values.html">dedup_values()</a></code>
 
         </dt>
-        <dd>Identify inconsistent column names across data frames</dd>
+        <dd>Deduplicate values within grouped data</dd>
 
         <dt>
 
-          <code><a href="fix_invalid_birthdates.html">fix_invalid_birthdates()</a></code>
+          <code><a href="complete_columns.html">complete_columns()</a></code>
 
         </dt>
-        <dd>Fix invalid birth dates</dd>
-
-        <dt>
-
-          <code><a href="fix_invalid_dates.html">fix_invalid_dates()</a></code>
-
-        </dt>
-        <dd>Fix invalid reference dates</dd>
-
-        <dt>
-
-          <code><a href="fix_negative_salaries.html">fix_negative_salaries()</a></code>
-
-        </dt>
-        <dd>Fix negative salary values</dd>
-
-        <dt>
-
-          <code><a href="fix_retirement_age.html">fix_retirement_age()</a></code>
-
-        </dt>
-        <dd>Flag or adjust over-retirement-age workers</dd>
-
-        <dt>
-
-          <code><a href="fix_salary_components.html">fix_salary_components()</a></code>
-
-        </dt>
-        <dd>Fix salary component inconsistencies</dd>
-
-        <dt>
-
-          <code><a href="fix_underage_workers.html">fix_underage_workers()</a></code>
-
-        </dt>
-        <dd>Flag or remove underage workers</dd>
-
-        <dt>
-
-          <code><a href="fix_working_hours.html">fix_working_hours()</a></code>
-
-        </dt>
-        <dd>Fix invalid working hours</dd>
-
-        <dt>
-
-          <code><a href="generate_standard_report.html">generate_standard_report()</a></code>
-
-        </dt>
-        <dd>Generate the standard HR report</dd>
-
-        <dt>
-
-          <code><a href="get_data360_api.html">get_data360_api()</a></code>
-
-        </dt>
-        <dd>This function retrieves data from the Data360 API.</dd>
-
-        <dt>
-
-          <code><a href="get_metadata360.html">get_metadata360()</a></code>
-
-        </dt>
-        <dd>Retrieve dataset metadata from the World Bank Data360 API</dd>
-
-        <dt>
-
-          <code><a href="ggplot_coef.html">ggplot_coef()</a></code>
-
-        </dt>
-        <dd>Plot model coefficients with confidence intervals</dd>
-
-        <dt>
-
-          <code><a href="ggplot_point_line.html">ggplot_point_line()</a></code>
-
-        </dt>
-        <dd>Plot grouped line chart with labeled points</dd>
-
-        <dt>
-
-          <code><a href="ggplot_segment.html">ggplot_segment()</a></code>
-
-        </dt>
-        <dd>Plot segments overlaid with points, ordered by median</dd>
+        <dd>Complete columns in a dataframe</dd>
 
         <dt>
 
@@ -624,80 +92,181 @@
 
         <dt>
 
-          <code><a href="harmonize_columns.html">harmonize_columns()</a></code>
+          <code><a href="convert_constant_ppp.html">convert_constant_ppp()</a></code>
 
         </dt>
-        <dd>Harmonize column names based on a dictionary</dd>
+        <dd>Convert nominal wages to real PPP-adjusted wages (2021 base year)</dd>
 
         <dt>
 
-          <code><a href="isco.html">isco</a></code>
+          <code><a href="deflate_to_real.html">deflate_to_real()</a></code>
 
         </dt>
-        <dd>International Standard Classification of Occupations (ISCO-08)</dd>
+        <dd>Deflate a nominal LCU column to real values</dd>
+      </dl></div><div class="section level2">
+      <h2 id="data-treatment">Data treatment<a class="anchor" aria-label="anchor" href="#data-treatment"></a></h2>
+
+      <div class="section-desc"><p><code>R/treatment.R</code>: remove duplicates and fix invalid records.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="clean_hr_data.html">clean_hr_data()</a></code>
+
+        </dt>
+        <dd>Apply Standard HR data cleaning pipeline</dd>
 
         <dt>
 
-          <code><a href="macro_indicators.html">macro_indicators</a></code>
+          <code><a href="remove_duplicate_personnel.html">remove_duplicate_personnel()</a></code>
 
         </dt>
-        <dd>Macro-level World Bank WDI indicators</dd>
+        <dd>Remove duplicate personnel records</dd>
 
         <dt>
 
-          <code><a href="model_wage.html">model_wage()</a></code>
+          <code><a href="remove_duplicate_contracts.html">remove_duplicate_contracts()</a></code>
 
         </dt>
-        <dd>Fit a wage model with fixed effects</dd>
+        <dd>Remove duplicate contract records</dd>
 
         <dt>
 
-          <code><a href="personnel_rules.html">personnel_rules</a></code>
+          <code><a href="fix_invalid_dates.html">fix_invalid_dates()</a></code>
 
         </dt>
-        <dd>Personnel Validation Rules</dd>
+        <dd>Fix invalid reference dates</dd>
 
         <dt>
 
-          <code><a href="pivot_data360.html">pivot_data360()</a></code>
+          <code><a href="fix_invalid_birthdates.html">fix_invalid_birthdates()</a></code>
 
         </dt>
-        <dd>Pivot Data360 dataset to wide format</dd>
+        <dd>Fix invalid birth dates</dd>
 
         <dt>
 
-          <code><a href="plot_bar_growth.html">plot_bar_growth()</a></code>
+          <code><a href="fix_underage_workers.html">fix_underage_workers()</a></code>
 
         </dt>
-        <dd>Plot growth rates by group</dd>
+        <dd>Flag or remove underage workers</dd>
 
         <dt>
 
-          <code><a href="plot_bar_total.html">plot_bar_total()</a></code>
+          <code><a href="fix_retirement_age.html">fix_retirement_age()</a></code>
 
         </dt>
-        <dd>Plot totals by group</dd>
+        <dd>Flag or adjust over-retirement-age workers</dd>
 
         <dt>
 
-          <code><a href="plot_compression_ratio.html">plot_compression_ratio()</a></code>
+          <code><a href="fix_working_hours.html">fix_working_hours()</a></code>
 
         </dt>
-        <dd>Plot compression ratio</dd>
+        <dd>Fix invalid working hours</dd>
 
         <dt>
 
-          <code><a href="plot_consistency_heatmap.html">plot_consistency_heatmap()</a></code>
+          <code><a href="fix_salary_components.html">fix_salary_components()</a></code>
 
         </dt>
-        <dd>Plot value consistency by variable and group</dd>
+        <dd>Fix salary component inconsistencies</dd>
 
         <dt>
 
-          <code><a href="plot_consistency_trend.html">plot_consistency_trend()</a></code>
+          <code><a href="fix_negative_salaries.html">fix_negative_salaries()</a></code>
 
         </dt>
-        <dd>Plot consistency over time</dd>
+        <dd>Fix negative salary values</dd>
+      </dl></div><div class="section level2">
+      <h2 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a></h2>
+
+      <div class="section-desc"><p><code>R/validation.R</code>: check data against quality rules.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="validate_data.html">validate_data()</a></code>
+
+        </dt>
+        <dd>Validate Data Quality Using Rule-Based Framework</dd>
+      </dl></div><div class="section level2">
+      <h2 id="coverage">Coverage<a class="anchor" aria-label="anchor" href="#coverage"></a></h2>
+
+      <div class="section-desc"><p><code>R/coverage.R</code>: how complete each column is.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compute_coverage.html">compute_coverage()</a></code>
+
+        </dt>
+        <dd>Compute data coverage</dd>
+
+        <dt>
+
+          <code><a href="compute_global_coverage.html">compute_global_coverage()</a></code>
+
+        </dt>
+        <dd>Compute global coverage</dd>
+      </dl></div><div class="section level2">
+      <h2 id="consistency">Consistency<a class="anchor" aria-label="anchor" href="#consistency"></a></h2>
+
+      <div class="section-desc"><p><code>R/consistency.R</code>: how consistent records and values are over time.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compute_record_consistency.html">compute_record_consistency()</a></code>
+
+        </dt>
+        <dd>Compute record consistency</dd>
+
+        <dt>
+
+          <code><a href="compute_value_consistency.html">compute_value_consistency()</a></code>
+
+        </dt>
+        <dd>Compute value consistency</dd>
+
+        <dt>
+
+          <code><a href="compute_global_consistency.html">compute_global_consistency()</a></code>
+
+        </dt>
+        <dd>Compute global consistency</dd>
+      </dl></div><div class="section level2">
+      <h2 id="quality-check-plots">Quality check plots<a class="anchor" aria-label="anchor" href="#quality-check-plots"></a></h2>
+
+      <div class="section-desc"><p><code>R/qcheck_plots.R</code>: plot coverage and consistency.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="plot_coverage_trend.html">plot_coverage_trend()</a></code>
+
+        </dt>
+        <dd>Plot coverage over time</dd>
 
         <dt>
 
@@ -715,24 +284,317 @@
 
         <dt>
 
-          <code><a href="plot_coverage_trend.html">plot_coverage_trend()</a></code>
+          <code><a href="plot_consistency_trend.html">plot_consistency_trend()</a></code>
 
         </dt>
-        <dd>Plot coverage over time</dd>
+        <dd>Plot consistency over time</dd>
 
         <dt>
 
-          <code><a href="plot_decile.html">plot_decile()</a></code>
+          <code><a href="plot_consistency_heatmap.html">plot_consistency_heatmap()</a></code>
 
         </dt>
-        <dd>Plot decile summary</dd>
+        <dd>Plot value consistency by variable and group</dd>
+      </dl></div><div class="section level2">
+      <h2 id="headcount">Headcount<a class="anchor" aria-label="anchor" href="#headcount"></a></h2>
+
+      <div class="section-desc"><p><code>R/headcount.R</code></p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compute_headcount.html">compute_headcount()</a></code>
+
+        </dt>
+        <dd>Compute headcount by group</dd>
+      </dl></div><div class="section level2">
+      <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a></h2>
+
+      <div class="section-desc"><p><code>R/overview.R</code>: trends, cross-sections and growth by group.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="count_entity.html">count_entity()</a></code>
+
+        </dt>
+        <dd>Count unique entities by group</dd>
 
         <dt>
 
-          <code><a href="plot_histogram.html">plot_histogram()</a></code>
+          <code><a href="compute_trend_summary.html">compute_trend_summary()</a></code>
 
         </dt>
-        <dd>Plot density as percentage share</dd>
+        <dd>Compute trend summary</dd>
+
+        <dt>
+
+          <code><a href="apply_baseline_index.html">apply_baseline_index()</a></code>
+
+        </dt>
+        <dd>Apply baseline index to a trend summary</dd>
+
+        <dt>
+
+          <code><a href="compute_cross_section_summary.html">compute_cross_section_summary()</a></code>
+
+        </dt>
+        <dd>Compute cross-section summary</dd>
+
+        <dt>
+
+          <code><a href="plot_trend.html">plot_trend()</a></code>
+
+        </dt>
+        <dd>Plot time trend</dd>
+
+        <dt>
+
+          <code><a href="plot_bar_total.html">plot_bar_total()</a></code>
+
+        </dt>
+        <dd>Plot totals by group</dd>
+
+        <dt>
+
+          <code><a href="plot_bar_growth.html">plot_bar_growth()</a></code>
+
+        </dt>
+        <dd>Plot growth rates by group</dd>
+      </dl></div><div class="section level2">
+      <h2 id="movement">Movement<a class="anchor" aria-label="anchor" href="#movement"></a></h2>
+
+      <div class="section-desc"><p><code>R/movement.R</code>: hires, separations and retirements, and their cost.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="detect_movement.html">detect_movement()</a></code>
+
+        </dt>
+        <dd>Detect hires and separations</dd>
+
+        <dt>
+
+          <code><a href="compute_movement.html">compute_movement()</a></code>
+
+        </dt>
+        <dd>Compute movements as hires and separations</dd>
+
+        <dt>
+
+          <code><a href="compute_movement_cost.html">compute_movement_cost()</a></code>
+
+        </dt>
+        <dd>Compute the cost of hires and separations</dd>
+
+        <dt>
+
+          <code><a href="detect_retirement.html">detect_retirement()</a></code>
+
+        </dt>
+        <dd>Detect retirements</dd>
+
+        <dt>
+
+          <code><a href="compute_retirement.html">compute_retirement()</a></code>
+
+        </dt>
+        <dd>Compute retirements</dd>
+
+        <dt>
+
+          <code><a href="compute_retirement_cost.html">compute_retirement_cost()</a></code>
+
+        </dt>
+        <dd>Compute the cost of retirements</dd>
+
+        <dt>
+
+          <code><a href="detect_personnel_event.html">detect_personnel_event()</a></code>
+
+        </dt>
+        <dd>Detect Personnel Events</dd>
+
+        <dt>
+
+          <code><a href="complete_dates.html">complete_dates()</a></code>
+
+        </dt>
+        <dd>Complete panel data by identifier and reference dates</dd>
+      </dl></div><div class="section level2">
+      <h2 id="transitions">Transitions<a class="anchor" aria-label="anchor" href="#transitions"></a></h2>
+
+      <div class="section-desc"><p><code>R/transition.R</code>: moves between groups, such as paygrades.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="detect_transition.html">detect_transition()</a></code>
+
+        </dt>
+        <dd>Detect transitions</dd>
+
+        <dt>
+
+          <code><a href="compute_transition.html">compute_transition()</a></code>
+
+        </dt>
+        <dd>Compute career transitions</dd>
+
+        <dt>
+
+          <code><a href="plot_transition_network.html">plot_transition_network()</a></code>
+
+        </dt>
+        <dd>Plot transition network</dd>
+      </dl></div><div class="section level2">
+      <h2 id="retirement-projections">Retirement projections<a class="anchor" aria-label="anchor" href="#retirement-projections"></a></h2>
+
+      <div class="section-desc"><p><code>R/retirement.R</code></p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="project_retirement.html">project_retirement()</a></code>
+
+        </dt>
+        <dd>Project retirements of the current workforce</dd>
+
+        <dt>
+
+          <code><a href="add_contract_to_event.html">add_contract_to_event()</a></code>
+
+        </dt>
+        <dd>Add contract information to event records</dd>
+
+        <dt>
+
+          <code><a href="compute_pension_ratio.html">compute_pension_ratio()</a></code>
+
+        </dt>
+        <dd>Compute ratio of last salary to first pension for retired workers</dd>
+      </dl></div><div class="section level2">
+      <h2 id="demographics">Demographics<a class="anchor" aria-label="anchor" href="#demographics"></a></h2>
+
+      <div class="section-desc"><p><code>R/demographics.R</code>: decrement rates and service tables.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="estimate_decrement_rates.html">estimate_decrement_rates()</a></code>
+
+        </dt>
+        <dd>Estimate empirical decrement rates from a personnel panel</dd>
+
+        <dt>
+
+          <code><a href="smooth_decrement_rates.html">smooth_decrement_rates()</a></code>
+
+        </dt>
+        <dd>Graduate (smooth and gap-fill) empirical decrement rates</dd>
+
+        <dt>
+
+          <code><a href="compute_service_table.html">compute_service_table()</a></code>
+
+        </dt>
+        <dd>Compute an actuarial service table from a personnel panel</dd>
+      </dl></div><div class="section level2">
+      <h2 id="workforce-analytics">Workforce analytics<a class="anchor" aria-label="anchor" href="#workforce-analytics"></a></h2>
+
+      <div class="section-desc"><p><code>R/workforce.R</code>: the standard workforce indicators in one call.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compute_workforce_analytics.html">compute_workforce_analytics()</a></code>
+
+        </dt>
+        <dd>Compute standard workforce indicators</dd>
+      </dl></div><div class="section level2">
+      <h2 id="wages">Wages<a class="anchor" aria-label="anchor" href="#wages"></a></h2>
+
+      <div class="section-desc"><p><code>R/wage.R</code></p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compute_wage.html">compute_wage()</a></code>
+
+        </dt>
+        <dd>Compute the average wage</dd>
+      </dl></div><div class="section level2">
+      <h2 id="wage-distribution">Wage distribution<a class="anchor" aria-label="anchor" href="#wage-distribution"></a></h2>
+
+      <div class="section-desc"><p><code>R/distribution.R</code></p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compute_percentile.html">compute_percentile()</a></code>
+
+        </dt>
+        <dd>Compute the percentile of a measure</dd>
+
+        <dt>
+
+          <code><a href="compute_decile.html">compute_decile()</a></code>
+
+        </dt>
+        <dd>Compute deciles of a measure</dd>
+      </dl></div><div class="section level2">
+      <h2 id="wage-models">Wage models<a class="anchor" aria-label="anchor" href="#wage-models"></a></h2>
+
+      <div class="section-desc"><p><code>R/wage_model.R</code></p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="model_wage.html">model_wage()</a></code>
+
+        </dt>
+        <dd>Fit a wage model with fixed effects</dd>
 
         <dt>
 
@@ -747,6 +609,221 @@
 
         </dt>
         <dd>Plot fixed effects from a wage model fit</dd>
+      </dl></div><div class="section level2">
+      <h2 id="wage-bill">Wage bill<a class="anchor" aria-label="anchor" href="#wage-bill"></a></h2>
+
+      <div class="section-desc"><p><code>R/wagebill_total.R</code></p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compute_wagebill.html">compute_wagebill()</a></code>
+
+        </dt>
+        <dd>Compute the wagebill</dd>
+      </dl></div><div class="section level2">
+      <h2 id="wage-bill-growth">Wage bill growth<a class="anchor" aria-label="anchor" href="#wage-bill-growth"></a></h2>
+
+      <div class="section-desc"><p><code>R/wagebill_growth.R</code>: decompose wage bill and wage growth.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compute_growth_decomposition.html">compute_growth_decomposition()</a></code>
+
+        </dt>
+        <dd>Compute growth decomposition of wagebill</dd>
+
+        <dt>
+
+          <code><a href="compute_wage_decomposition.html">compute_wage_decomposition()</a></code>
+
+        </dt>
+        <dd>Decompose average-wage growth</dd>
+      </dl></div><div class="section level2">
+      <h2 id="wage-bill-analytics">Wage bill analytics<a class="anchor" aria-label="anchor" href="#wage-bill-analytics"></a></h2>
+
+      <div class="section-desc"><p><code>R/wagebill.R</code>: the standard wage bill indicators in one call.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compute_wagebill_analytics.html">compute_wagebill_analytics()</a></code>
+
+        </dt>
+        <dd>Compute standard wagebill indicators</dd>
+      </dl></div><div class="section level2">
+      <h2 id="reports">Reports<a class="anchor" aria-label="anchor" href="#reports"></a></h2>
+
+      <div class="section-desc"><p><code>R/report.R</code></p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="generate_standard_report.html">generate_standard_report()</a></code>
+
+        </dt>
+        <dd>Generate the standard HR report</dd>
+      </dl></div><div class="section level2">
+      <h2 id="summary-helpers">Summary helpers<a class="anchor" aria-label="anchor" href="#summary-helpers"></a></h2>
+
+      <div class="section-desc"><p><code>R/summarize.R</code>: fast grouped summaries and summary statistics.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compute_fastsummary.html">compute_fastsummary()</a></code>
+
+        </dt>
+        <dd>Compute Fast Summary Statistics by Group</dd>
+
+        <dt>
+
+          <code><a href="compute_fastshare.html">compute_fastshare()</a></code>
+
+        </dt>
+        <dd>Compute ratio indicators of summarized variables over macro indicators</dd>
+
+        <dt>
+
+          <code><a href="compute_fastchange.html">compute_fastchange()</a></code>
+
+        </dt>
+        <dd>Calculate year-over-year growth for a numeric column</dd>
+
+        <dt>
+
+          <code><a href="fastcount.html">fastcount()</a></code>
+
+        </dt>
+        <dd>Fast counting via dtplyr</dd>
+
+        <dt>
+
+          <code><a href="fastprop.html">fastprop()</a></code>
+
+        </dt>
+        <dd>Compute group-wise proportions from counts</dd>
+
+        <dt>
+
+          <code><a href="compute_baseline_index.html">compute_baseline_index()</a></code>
+
+        </dt>
+        <dd>Compute index values relative to base year</dd>
+
+        <dt>
+
+          <code><a href="compute_quantile.html">compute_quantile()</a></code>
+
+        </dt>
+        <dd>Function to compute quantiles of a measure column within groups and reference dates</dd>
+
+        <dt>
+
+          <code><a href="compute_growth.html">compute_growth()</a></code>
+
+        </dt>
+        <dd>Compute growth rate summary table</dd>
+
+        <dt>
+
+          <code><a href="compute_compression_ratio.html">compute_compression_ratio()</a></code>
+
+        </dt>
+        <dd>Compute the compression ratio of a measure</dd>
+
+        <dt>
+
+          <code><a href="define_fns.html">define_fns()</a></code>
+
+        </dt>
+        <dd>Define default summary functions</dd>
+
+        <dt>
+
+          <code><a href="cv.html">cv()</a></code>
+
+        </dt>
+        <dd>Compute the coefficient of variation (CV)</dd>
+
+        <dt>
+
+          <code><a href="cp_ratio.html">cp_ratio()</a></code>
+
+        </dt>
+        <dd>Compute a compression ratio between two percentiles</dd>
+
+        <dt>
+
+          <code><a href="count_unique.html">count_unique()</a></code>
+
+        </dt>
+        <dd>Count unique non-missing values</dd>
+      </dl></div><div class="section level2">
+      <h2 id="plot-helpers">Plot helpers<a class="anchor" aria-label="anchor" href="#plot-helpers"></a></h2>
+
+      <div class="section-desc"><p><code>R/plots.R</code></p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="scale_plot_height.html">scale_plot_height()</a></code>
+
+        </dt>
+        <dd>Plot Height for a Grouped Bar Chart</dd>
+
+        <dt>
+
+          <code><a href="ggplot_point_line.html">ggplot_point_line()</a></code>
+
+        </dt>
+        <dd>Plot grouped line chart with labeled points</dd>
+
+        <dt>
+
+          <code><a href="ggplot_segment.html">ggplot_segment()</a></code>
+
+        </dt>
+        <dd>Plot segments overlaid with points, ordered by median</dd>
+
+        <dt>
+
+          <code><a href="ggplot_coef.html">ggplot_coef()</a></code>
+
+        </dt>
+        <dd>Plot model coefficients with confidence intervals</dd>
+
+        <dt>
+
+          <code><a href="plot_segment.html">plot_segment()</a></code>
+
+        </dt>
+        <dd>Create a segment plot with jittered points</dd>
 
         <dt>
 
@@ -764,66 +841,170 @@
 
         <dt>
 
-          <code><a href="plot_segment.html">plot_segment()</a></code>
+          <code><a href="plot_decile.html">plot_decile()</a></code>
 
         </dt>
-        <dd>Create a segment plot with jittered points</dd>
+        <dd>Plot decile summary</dd>
 
         <dt>
 
-          <code><a href="plot_trend.html">plot_trend()</a></code>
+          <code><a href="plot_histogram.html">plot_histogram()</a></code>
 
         </dt>
-        <dd>Plot time trend</dd>
+        <dd>Plot density as percentage share</dd>
 
         <dt>
 
-          <code><a href="project_retirement.html">project_retirement()</a></code>
+          <code><a href="plot_compression_ratio.html">plot_compression_ratio()</a></code>
 
         </dt>
-        <dd>Project retirements of the current workforce</dd>
+        <dd>Plot compression ratio</dd>
+      </dl></div><div class="section level2">
+      <h2 id="sampling">Sampling<a class="anchor" aria-label="anchor" href="#sampling"></a></h2>
 
-        <dt>
+      <div class="section-desc"><p><code>R/sample.R</code></p></div>
 
-          <code><a href="remove_duplicate_contracts.html">remove_duplicate_contracts()</a></code>
+      <dl></dl></div><div class="section level2">
 
-        </dt>
-        <dd>Remove duplicate contract records</dd>
 
-        <dt>
 
-          <code><a href="remove_duplicate_personnel.html">remove_duplicate_personnel()</a></code>
 
-        </dt>
-        <dd>Remove duplicate personnel records</dd>
-
-        <dt>
-
-          <code><a href="rescale_baseline.html">rescale_baseline()</a></code>
-
-        </dt>
-        <dd>Rescale to baseline index</dd>
-
-        <dt>
+      <dl><dt>
 
           <code><a href="sample_group.html">sample_group()</a></code>
 
         </dt>
         <dd>Sample groups and return all rows for those groups</dd>
+      </dl></div><div class="section level2">
+      <h2 id="data-api">Data360 API<a class="anchor" aria-label="anchor" href="#data-api"></a></h2>
+
+      <div class="section-desc"><p><code>R/data360api.R</code>: download World Bank Data360 datasets.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="get_data360_api.html">get_data360_api()</a></code>
+
+        </dt>
+        <dd>This function retrieves data from the Data360 API.</dd>
 
         <dt>
 
-          <code><a href="scale_plot_height.html">scale_plot_height()</a></code>
+          <code><a href="pivot_data360.html">pivot_data360()</a></code>
 
         </dt>
-        <dd>Plot Height for a Grouped Bar Chart</dd>
+        <dd>Pivot Data360 dataset to wide format</dd>
 
         <dt>
 
-          <code><a href="smooth_decrement_rates.html">smooth_decrement_rates()</a></code>
+          <code><a href="get_metadata360.html">get_metadata360()</a></code>
 
         </dt>
-        <dd>Graduate (smooth and gap-fill) empirical decrement rates</dd>
+        <dd>Retrieve dataset metadata from the World Bank Data360 API</dd>
+      </dl></div><div class="section level2">
+      <h2 id="datasets">Datasets<a class="anchor" aria-label="anchor" href="#datasets"></a></h2>
+
+      <div class="section-desc"><p><code>R/data.R</code></p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="bra_hrmis.html">bra_hrmis</a></code>
+
+        </dt>
+        <dd>Brazilian Public Employee Payroll Data</dd>
+
+        <dt>
+
+          <code><a href="bra_hrmis_personnel.html">bra_hrmis_personnel</a></code>
+
+        </dt>
+        <dd>HRMIS Personnel Dataset</dd>
+
+        <dt>
+
+          <code><a href="bra_hrmis_contract.html">bra_hrmis_contract</a></code>
+
+        </dt>
+        <dd>HRMIS Contract Dataset</dd>
+
+        <dt>
+
+          <code><a href="bra_hrmis_allowance.html">bra_hrmis_allowance</a></code>
+
+        </dt>
+        <dd>Brazil HRMIS Allowance Module</dd>
+
+        <dt>
+
+          <code><a href="bra_hrmis_est.html">bra_hrmis_est</a></code>
+
+        </dt>
+        <dd>HRMIS Establishment Dataset</dd>
+
+        <dt>
+
+          <code><a href="dictionary.html">dictionary</a></code>
+
+        </dt>
+        <dd>Harmonization Dictionary for Payroll and HRMIS Data</dd>
+
+        <dt>
+
+          <code><a href="contract_rules.html">contract_rules</a></code>
+
+        </dt>
+        <dd>Contract Validation Rules</dd>
+
+        <dt>
+
+          <code><a href="personnel_rules.html">personnel_rules</a></code>
+
+        </dt>
+        <dd>Personnel Validation Rules</dd>
+
+        <dt>
+
+          <code><a href="cpi.html">cpi</a></code>
+
+        </dt>
+        <dd>Monthly consumer price index (CPI) by country</dd>
+
+        <dt>
+
+          <code><a href="countryclass.html">countryclass</a></code>
+
+        </dt>
+        <dd>World Bank Country and Lending Groups</dd>
+
+        <dt>
+
+          <code><a href="macro_indicators.html">macro_indicators</a></code>
+
+        </dt>
+        <dd>Macro-level World Bank WDI indicators</dd>
+
+        <dt>
+
+          <code><a href="wwbi.html">wwbi</a></code>
+
+        </dt>
+        <dd>Worldwide Bureaucracy Indicators</dd>
+
+        <dt>
+
+          <code><a href="enterprise_surveys.html">enterprise_surveys</a></code>
+
+        </dt>
+        <dd>World Bank Enterprise Surveys</dd>
 
         <dt>
 
@@ -834,19 +1015,20 @@
 
         <dt>
 
-          <code><a href="validate_data.html">validate_data()</a></code>
+          <code><a href="cofog_taxonomy.html">cofog_taxonomy</a></code>
 
         </dt>
-        <dd>Validate Data Quality Using Rule-Based Framework</dd>
+        <dd>COFOG Functional Classification Taxonomy</dd>
 
         <dt>
 
-          <code><a href="wwbi.html">wwbi</a></code>
+          <code><a href="isco.html">isco</a></code>
 
         </dt>
-        <dd>Worldwide Bureaucracy Indicators</dd>
+        <dd>International Standard Classification of Occupations (ISCO-08)</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

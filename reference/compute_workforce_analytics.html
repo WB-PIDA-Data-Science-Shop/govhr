@@ -15,7 +15,7 @@ own."><meta property="og:image" content="https://wb-pida-data-science-shop.githu
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,14 +82,14 @@ establishment and <code>ref_date</code>, from <code><a href="compute_headcount.h
 
 <dt>movement</dt>
 <dd><p>Headcount, hires, separations and their rates for each
-<code>ref_date</code>, from <code><a href="compute_movement.html">compute_movement()</a></code>. Hires are <code>NA</code> on the first date
-and separations on the last, since there is nothing to compare with.</p></dd>
+<code>ref_date</code>, from <code><a href="compute_movement.html">compute_movement()</a></code>. Hires and separations are <code>NA</code>
+on the first date, since there is nothing to compare with.</p></dd>
 
 <dt>transitions</dt>
 <dd><p>One row per move between establishments, with
 <code>personnel_id</code>, origin (<code>from</code>), destination (<code>to</code>), when the person
 joined the origin (<code>from_date</code>) and when they arrived at the destination
-(<code>ref_date</code>), from <code><a href="compute_transition.html">compute_transition()</a></code>.</p></dd>
+(<code>ref_date</code>), from <code><a href="detect_transition.html">detect_transition()</a></code>.</p></dd>
 
 
 </dl><p>Each table has the class its function returns for <code>contracts</code>: data.tables
@@ -105,9 +105,9 @@ left out. Each indicator function then picks the method for the class of
 the data, so a database table is processed in the database.</p>
 <p>Hires and separations are counted per person, so someone holding several
 contracts on the same date is counted once.</p>
-<p>A person recorded in more than one establishment on the same date has no
-single position that period, so <code><a href="compute_transition.html">compute_transition()</a></code> leaves them out of
-<code>transitions</code> and warns about it.</p>
+<p>A person recorded in more than one establishment on the same date moves
+from each of them to every establishment they join next, as described in
+<code><a href="detect_transition.html">detect_transition()</a></code>.</p>
     </div>
 
     <div class="section level2">
@@ -145,14 +145,14 @@ single position that period, so <code><a href="compute_transition.html">compute_
 <span class="r-out co"><span class="r-pr">#&gt;</span> $movement</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      ref_date headcount hires separations hire_rate separation_rate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;Date&gt;     &lt;int&gt; &lt;int&gt;       &lt;int&gt;     &lt;num&gt;           &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 2020-01-01         2    NA           0        NA       0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 2021-01-01         3     1           1 0.3333333       0.3333333</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 2022-01-01         2     0          NA 0.0000000              NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 2020-01-01         2    NA          NA        NA              NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 2021-01-01         3     1           0       0.5       0.0000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 2022-01-01         2     0           1       0.0       0.3333333</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    replacement_rate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:               NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:               NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:              Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $transitions</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    personnel_id   from     to  from_date   ref_date</span>

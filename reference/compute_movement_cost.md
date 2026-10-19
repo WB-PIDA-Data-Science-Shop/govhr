@@ -1,7 +1,7 @@
 # Compute the cost of hires and separations
 
-Adds up, for each reference date, the pay of the people who are hired or
-separate at that date.
+Adds up, for each reference date, the pay of the people who were hired
+or separated since the previous date.
 
 ## Usage
 
@@ -64,24 +64,28 @@ compute_movement_cost(
 
 A table with one row per `ref_date`, group and movement type, containing
 `movement_type` (one of `event_type`) and `movement_cost`, the movers'
-pay. `movement_cost` is 0 when nobody moved, and `NA` on the date with
-nothing to compare with: the first date for hires, the last for
-separations. A data.table for data frame input; a lazy table for
-`tbl_dbi` input (use
+pay. `movement_cost` is 0 when nobody moved, and `NA` on the first date,
+which has nothing to compare with, and for the separations of a group
+with nobody active on the previous date. A data.table for data frame
+input; a lazy table for `tbl_dbi` input (use
 [`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html)
 to bring it into memory).
 
 ## Details
 
-Hires are costed at their pay on the date they are hired, and
-separations at their pay on their last active date. The pay on all of a
-mover's active records that date is added up, so people with several
-contracts are costed in full; pay recorded alongside, such as a pension,
-is not. Missing pay counts as 0.
+As in
+[`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md),
+hires are counted on the date they are hired, and separations on the
+first date the person is absent. Hires are costed at their pay on the
+date they are hired, and separations at their pay on their last active
+date. The pay on all of a mover's active records that date is added up,
+so people with several contracts are costed in full; pay recorded
+alongside, such as a pension, is not. Missing pay counts as 0.
 
 With `group_cols`, each mover's pay is counted in the group of the
 record it comes from. Every group with active personnel on a date
-appears for that date.
+appears for that date, and a group that everyone left still appears on
+the next date.
 
 ## See also
 

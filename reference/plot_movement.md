@@ -45,7 +45,7 @@ A ggplot2 object.
 ## Details
 
 Dates with no hires or separations to compare with (`NA` in `data`),
-such as the first date for hires, are left out of the plot.
+such as the first date, are left out of the plot.
 
 ## Examples
 

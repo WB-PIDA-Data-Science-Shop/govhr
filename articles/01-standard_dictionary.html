@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,10 +68,11 @@
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
 <p>This article describes the standard dictionary for
-<code>govhr</code>, organized into four main modules: Establishment,
+<code>govhr</code>, organized into four modules: Establishment,
 Personnel, Contract, and Allowance. These modules are designed to
-organize and standardize information about public sector personnel
-across different countries and administrative levels.</p>
+provide a standard template to guide harmonization of public sector
+human resources data from different countries. The modules are
+structured as follows:</p>
 </div>
 <div class="section level2">
 <h2 id="module-1-establishment">Module 1: Establishment<a class="anchor" aria-label="anchor" href="#module-1-establishment"></a>
@@ -184,12 +185,12 @@ county.</td>
 </h3>
 <ul>
 <li>
-<strong>Sector</strong>: Uses the COFOG (Classification of the
-Functions of Government) classification to categorize
-establishments.</li>
+<strong>Sector</strong>: We recommend you to use the COFOG
+(Classification of the Functions of Government) classification to map
+establishments to sectors.</li>
 <li>
 <strong>Administration vs. Geography</strong>: Administration levels
-(<code>adm1</code>/<code>adm2</code>/<code>adm3</code>) refer to
+(<code>adm1</code>/<code>adm2</code>/<code>adm3</code>) to
 institutional/administrative divisions (e.g., Ministry, Department,
 Agency), while geography levels (<code>geo1</code>/<code>geo2</code>)
 refer to physical location (e.g., state/region,
@@ -200,8 +201,8 @@ municipality/county).</li>
 <div class="section level2">
 <h2 id="module-2-personnel">Module 2: Personnel<a class="anchor" aria-label="anchor" href="#module-2-personnel"></a>
 </h2>
-<p>The Personnel module contains demographic and employment information
-about individual public sector employees.</p>
+<p>The Personnel module contains demographic and other employee-specific
+information such as first employment date in the public sector.</p>
 <div class="section level3">
 <h3 id="fields-1">Fields<a class="anchor" aria-label="anchor" href="#fields-1"></a>
 </h3>
@@ -308,8 +309,9 @@ applicable data protection regulations.</li>
 <div class="section level2">
 <h2 id="module-3-contract">Module 3: Contract<a class="anchor" aria-label="anchor" href="#module-3-contract"></a>
 </h2>
-<p>The Contract module captures details about employment contracts,
-compensation, and job characteristics.</p>
+<p>The Contract module contains information about the contract,
+compensation, and occupational characteristics. Please note that a same
+worker can hold multiple contracts.</p>
 <div class="section level3">
 <h3 id="fields-2">Fields<a class="anchor" aria-label="anchor" href="#fields-2"></a>
 </h3>
@@ -435,22 +437,24 @@ classifications. For example: permanent (e.g., civil servant), etc.</td>
 <ul>
 <li>
 <strong>Compensation Fields</strong>: Base, gross, and net salary
-fields (local currency only) allow analysis of gross-to-net ratios and
-the effect of deductions and allowances. Itemized allowance amounts are
-tracked separately in the Allowance module.</li>
+(local currency units or international dollars) allow analysis of
+gross-to-net ratios and the effect of deductions and allowances.
+Itemized allowance amounts are tracked separately in the Allowance
+module.</li>
 <li>
-<strong>Contract Type (International)</strong>: Follows the ILO’s
-ICSE-18 (International Classification of Status in Employment) standard
-for cross-country comparability, while <code>contract_type_native</code>
-preserves local terminology.</li>
+<strong>Contract Type (International)</strong>: We suggest using the
+ILO’s ICSE-18 (International Classification of Status in Employment)
+standard for cross-country comparability, while
+<code>contract_type_native</code> preserves local terminology.</li>
 <li>
-<strong>Occupation Coding</strong>: Both native and standardized
+<strong>Occupation Coding</strong>: Both local and standardized
 (ISCO-08) classifications enable within-country detail and cross-country
 comparability.</li>
 <li>
-<strong>Tenure vs. Seniority</strong>: <code>contract_tenure</code>
+<strong>Tenure and Seniority</strong>: <code>contract_tenure</code>
 tracks time worked in the current contract, while <code>seniority</code>
-tracks the level within the paygrade.</li>
+tracks a hierarchical position such as a director, if that distinction
+is made.</li>
 </ul>
 </div>
 </div>
@@ -458,9 +462,8 @@ tracks the level within the paygrade.</li>
 <h2 id="module-4-allowance">Module 4: Allowance<a class="anchor" aria-label="anchor" href="#module-4-allowance"></a>
 </h2>
 <p>The Allowance module captures detailed, itemized allowance payments
-associated with a contract, allowing analysis of allowance composition
-beyond the aggregate <code>allowance_lcu</code> figure in the Contract
-module.</p>
+associated with a contract, enabling a more granular analysis of
+allowance compositione.</p>
 <div class="section level3">
 <h3 id="fields-3">Fields<a class="anchor" aria-label="anchor" href="#fields-3"></a>
 </h3>
@@ -512,7 +515,7 @@ units.</td>
 <li>
 <strong>Granularity</strong>: Unlike the aggregate
 <code>allowance_lcu</code> field in the Contract module, this module
-stores one row per allowance type per contract per reference date,
+records one row per allowance type per contract per reference date,
 enabling detailed breakdowns of allowance composition.</li>
 </ul>
 </div>

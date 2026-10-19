@@ -9,7 +9,7 @@ since the previous date and whether they are gone by the next date."><meta prope
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,6 +98,9 @@ on the last date.</p></dd>
 so the dates do not need to be evenly spaced. People with several contracts
 on a date appear once. A separation is any exit from active status,
 including retirement.</p>
+<p>A separation is flagged on the person's last active date, which holds their
+pay and group, but happens by <code>next_date</code>, the first date they are absent.
+<code><a href="compute_movement.html">compute_movement()</a></code> counts it on <code>next_date</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

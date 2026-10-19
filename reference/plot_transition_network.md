@@ -17,8 +17,7 @@ plot_transition_network(data, interactive = TRUE)
 
   Data frame with one row per move and `from` and `to` columns, as
   returned by
-  [`compute_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_transition.md)
-  with `summarize = FALSE`.
+  [`detect_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_transition.md).
 
 - interactive:
 

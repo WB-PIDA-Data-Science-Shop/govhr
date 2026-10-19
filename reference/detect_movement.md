@@ -67,6 +67,12 @@ data, so the dates do not need to be evenly spaced. People with several
 contracts on a date appear once. A separation is any exit from active
 status, including retirement.
 
+A separation is flagged on the person's last active date, which holds
+their pay and group, but happens by `next_date`, the first date they are
+absent.
+[`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md)
+counts it on `next_date`.
+
 ## See also
 
 [`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md),

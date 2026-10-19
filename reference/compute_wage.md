@@ -1,8 +1,7 @@
 # Compute the average wage
 
-Computes the average wage for each group within each reference group,
-usually a reference date, and how much it grew since the previous
-reference group.
+Computes the average wage for each group on each reference date, and how
+much it grew since the previous reference date.
 
 ## Usage
 
@@ -10,30 +9,18 @@ reference group.
 compute_wage(data, ...)
 
 # S3 method for class 'data.frame'
-compute_wage(
-  data,
-  measure_col = "gross_salary_lcu",
-  group_cols = NULL,
-  reference_group_col = "ref_date",
-  ...
-)
+compute_wage(data, measure_col = "gross_salary_lcu", group_cols = NULL, ...)
 
 # S3 method for class 'tbl_dbi'
-compute_wage(
-  data,
-  measure_col = "gross_salary_lcu",
-  group_cols = NULL,
-  reference_group_col = "ref_date",
-  ...
-)
+compute_wage(data, measure_col = "gross_salary_lcu", group_cols = NULL, ...)
 ```
 
 ## Arguments
 
 - data:
 
-  Data frame or remote database table (`tbl_dbi`) with the column named
-  in `reference_group_col` and the pay column named in `measure_col`.
+  Data frame or remote database table (`tbl_dbi`) with a `ref_date`
+  column and the pay column named in `measure_col`.
 
 - ...:
 
@@ -47,20 +34,14 @@ compute_wage(
 - group_cols:
 
   Character vector of columns to group by, or `NULL` to average over
-  everyone. Must not include `reference_group_col`.
-
-- reference_group_col:
-
-  Character. Name of the column that defines the reference groups,
-  usually a date. Growth compares each reference group with the one
-  before it in sorted order. Default `"ref_date"`.
+  everyone. Must not include `ref_date`.
 
 ## Value
 
-A table with the grouping columns, `reference_group_col`, `wage` (the
-average of `measure_col`) and `wage_growth` (the change from the
-previous reference group as a proportion, so `0.1` means 10% growth). A
-data.table for data frame input; a lazy table for `tbl_dbi` input (use
+A table with the grouping columns, `ref_date`, `wage` (the average of
+`measure_col`) and `wage_growth` (the change from the previous reference
+date as a proportion, so `0.1` means 10% growth). A data.table for data
+frame input; a lazy table for `tbl_dbi` input (use
 [`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html)
 to bring it into memory).
 
@@ -68,15 +49,15 @@ to bring it into memory).
 
 The average is taken over rows, so with contract data it is the average
 pay per contract. Missing wage values are skipped. If every wage value
-for a group in a reference group is missing, its wage is `NA`.
+for a group on a reference date is missing, its wage is `NA`.
 
 As in
 [`compute_wagebill()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wagebill.md),
-every group appears in every reference group in `data`. A group with no
-records in a reference group gets `wage = NA`, so gaps stay visible and
-growth is never measured across a gap.
+every group appears on every reference date in `data`. A group with no
+records on a date gets `wage = NA`, so gaps stay visible and growth is
+never measured across a gap.
 
-`wage_growth` is `NA` in the first reference group, and whenever the
+`wage_growth` is `NA` on the first reference date, and whenever the
 current or previous wage is `NA`.
 
 ## Examples

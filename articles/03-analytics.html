@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,56 +79,56 @@
 <h2 id="analytics">Analytics<a class="anchor" aria-label="anchor" href="#analytics"></a>
 </h2>
 <p>Once data are harmonized, analytics helps governments answer specific
-policy questions: How compressed is the wage structure? Is the workforce
-growing or shrinking? How is headcount distributed across groups?</p>
-<p><code>govhr</code> provides functionalities that enable users to
-generate analytics, along with companion plotting functions to visualize
-them. Broadly speaking, we differentiate between analytics on the
-workforce and the wagebill. Workforce analytics focus on the
-composition, growth, and distribution of personnel, while wagebill
-analytics examine patterns and trends in compensation (e.g., base
-salaries, allowances).</p>
-<p>The following examples illustrate how to leverage <code>govhr</code>
-to generate analytics.</p>
+policy questions: Is your public sector growing in headcount, wages, or
+both? How much variation is there across ministries, occupations, and
+individual workers?</p>
+<p><code>govhr</code> empowers you to generate analytics, as well as
+giving you accessible means to visualize them. Broadly speaking, we
+differentiate between analytics on the workforce and the wagebill.
+Workforce analytics focus on the composition, growth, and distribution
+of personnel. Meanwhile, wagebill analytics examine patterns and trends
+in compensation (e.g., base salaries and allowances).</p>
+<p>The following examples illustrate how to use <code>govhr</code> to
+generate analytics.</p>
 </div>
 <div class="section level2">
 <h2 id="workforce-analytics">Workforce analytics<a class="anchor" aria-label="anchor" href="#workforce-analytics"></a>
 </h2>
 <p>When analyzing the workforce, a first order concern is understanding
-time trends in headcount. One way to do this is to compute the total
-headcount by reference date, allowing the user to visualize the
-trajectory of the public sector workforce over time.</p>
-<p>The function <code>compute_time_trend</code> and its companion
+how the headcount has evolved over time. One way to do this is to
+compute the total headcount by reference date.</p>
+<p>The function <code>compute_headcount</code> and its companion
 plotting function <code>plot_trend</code> allow users to quickly
 generate this type of analysis.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># total headcount by reference date</span></span>
-<span><span class="va">headcount_trend</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
-<span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
-<span>  group_col <span class="op">=</span> <span class="st">"ref_date"</span></span>
+<span><span class="va">headcount_trend</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_headcount.html">compute_headcount</a></span><span class="op">(</span></span>
+<span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">headcount_trend</span>, group_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03-analytics_files/figure-html/unnamed-chunk-1-1.png" class="r-plt" alt="" width="700"></p>
+<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span></span>
+<span>  <span class="va">headcount_trend</span>, y_col <span class="op">=</span> <span class="st">"headcount"</span>, group_col <span class="op">=</span> <span class="st">"ref_date"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="700"></p>
 <p>You might also be curious about how time trends for headcount varies
 across groups, such as gender. Modifying the <code>group_col</code>
 argument makes that possible. Note that implicitly the function will
 still take the reference date into account.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># total headcount by reference date and gender</span></span>
-<span><span class="va">headcount_trend_gender</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
+<span><span class="va">headcount_trend_gender</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_headcount.html">compute_headcount</a></span><span class="op">(</span></span>
 <span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span>,</span>
-<span>  group_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gender"</span><span class="op">)</span></span>
+<span>  group_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gender"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">headcount_trend_gender</span>, group_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03-analytics_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="700"></p>
+<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">headcount_trend_gender</span>, y_col <span class="op">=</span> <span class="st">"headcount"</span>, group_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="movement">Movement<a class="anchor" aria-label="anchor" href="#movement"></a>
 </h2>
-<p>Beyond the stock of personnel, governments are often interested in
-the flows of personnel into and out of the public sector. The
+<p>Beyond headcount, governments are often interested in the movements
+of personnel into and out of the public sector. The
 <code>compute_movement</code> function counts, for each reference date,
 the number of active personnel, new hires and separations, along with
 hire and separation rates. The companion plotting function
@@ -137,7 +137,7 @@ hire and separation rates. The companion plotting function
 <code class="sourceCode R"><span><span class="va">movement</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_movement.html">compute_movement</a></span><span class="op">(</span><span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_personnel.html">bra_hrmis_personnel</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot_movement.html">plot_movement</a></span><span class="op">(</span><span class="va">movement</span>, movement_type <span class="op">=</span> <span class="st">"hire"</span>, measurement_type <span class="op">=</span> <span class="st">"count"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03-analytics_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="700">
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="700">
 Again, if you are interested in how these flows vary across groups, you
 can use the <code>group_cols</code> argument. Here we plot the
 separation rate by gender.</p>
@@ -153,39 +153,43 @@ separation rate by gender.</p>
 <span>  measurement_type <span class="op">=</span> <span class="st">"rate"</span>,</span>
 <span>  group_cols <span class="op">=</span> <span class="st">"gender"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="03-analytics_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="700"></p>
+<p>You might also be interested in visualizing how people move within
+the public sector. This is what we call transitions: how personnel move
+from one group to another, or across multiple groups. The
+<code>compute_transition</code> function helps you visualize this.</p>
 </div>
 <div class="section level2">
 <h2 id="wagebill-analytics">Wagebill analytics<a class="anchor" aria-label="anchor" href="#wagebill-analytics"></a>
 </h2>
 <p>Most of the analysis presented in the workforce analytics section can
 be replicated for the wagebill. For example, the
-<code>compute_time_trend</code> function can be used to compute the
+<code>compute_trend_summary</code> function can be used to compute the
 total wagebill by reference date, while the <code>plot_trend</code>
 function can visualize that trend.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># total wagebill by reference date</span></span>
-<span><span class="va">wagebill_trend</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
+<span><span class="va">wagebill_trend</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_trend_summary.html">compute_trend_summary</a></span><span class="op">(</span></span>
 <span>  <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_contract.html">bra_hrmis_contract</a></span>,</span>
 <span>  group_col <span class="op">=</span> <span class="st">"ref_date"</span>,</span>
 <span>  measure_col <span class="op">=</span> <span class="st">"gross_salary_lcu"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">wagebill_trend</span>, group_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03-analytics_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
 <p>A similar differentiation by group is possible, using the same
 grammar for the <code>group_col</code> argument.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># total wagebill by reference date</span></span>
 <span><span class="va">wagebill_paygrade_trend</span> <span class="op">&lt;-</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_contract.html">bra_hrmis_contract</a></span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">paygrade</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="../reference/compute_time_trend.html">compute_time_trend</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="../reference/compute_trend_summary.html">compute_trend_summary</a></span><span class="op">(</span></span>
 <span>        group_col <span class="op">=</span> <span class="st">"paygrade"</span>,</span>
 <span>        measure_col <span class="op">=</span> <span class="st">"gross_salary_lcu"</span></span>
 <span>    <span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">wagebill_paygrade_trend</span>, group_col <span class="op">=</span> <span class="st">"paygrade"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03-analytics_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="equity">Equity<a class="anchor" aria-label="anchor" href="#equity"></a>
@@ -208,7 +212,7 @@ preferences of governments and their public sector workers.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot_compression_ratio.html">plot_compression_ratio</a></span><span class="op">(</span><span class="va">compression_ratio</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03-analytics_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="03-analytics_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="700"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

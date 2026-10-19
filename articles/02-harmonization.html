@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,12 +80,11 @@ Data Dictionary</a>, organized into three modules:
 <strong>Contract</strong>. Once harmonized, data becomes comparable
 across countries and over time, and can feed directly into
 <code>govhr</code>’s analytics functions.</p>
-<p>This article walks through harmonizing a synthetic dataset,
-<code>bra_hrmis</code>, built from a contract-level extract from
-Brazil’s HRMIS system in the Alagoas state, using the helper functions
-in <code>govhr</code>. The example focuses primarily on generating one
-module, Personnel, but a similar logic can be applied to the
-Establishment and Contract modules.</p>
+<p>This article walks through a harmonization example for a synthetic
+dataset, <code>bra_hrmis</code>, built from a contract-level extract
+from Brazil’s HR data in the Alagoas state, using <code>govhr</code>.
+The example focuses primarily on generating one module, Personnel, but a
+similar logic can be applied to Establishment and Contract modules.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis.html">bra_hrmis</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">bra_hrmis</span><span class="op">)</span></span>
@@ -96,8 +95,10 @@ Establishment and Contract modules.</p>
 </h2>
 <p>Before harmonizing, it’s useful to check whether raw data sources
 (e.g. multiple years or offices) share a consistent column naming (i.e.,
-schema). <code><a href="../reference/find_inconsistent_colnames.html">find_inconsistent_colnames()</a></code> flags columns that
-aren’t shared across all sources.</p>
+schema). This is the case when a government shares multiple extractions
+that span across reference dates.
+<code><a href="../reference/find_inconsistent_colnames.html">find_inconsistent_colnames()</a></code> flags columns that aren’t
+shared across all sources.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># simulate two extracts with slightly different schemas</span></span>
 <span><span class="va">extract_2020</span> <span class="op">&lt;-</span> <span class="va">bra_hrmis</span><span class="op">[</span><span class="va">ANO_PAGAMENTO</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">ANO_PAGAMENTO</span><span class="op">)</span><span class="op">]</span></span>
@@ -110,11 +111,11 @@ aren’t shared across all sources.</p>
 <div class="section level2">
 <h2 id="step-2-generate-module-identifiers">Step 2: generate module identifiers<a class="anchor" aria-label="anchor" href="#step-2-generate-module-identifiers"></a>
 </h2>
-<p>Harmonization requires knowing which column identifies a contract and
-which identifies a person. These are our primary keys, that is, unique
-identifiers for contracts and personnel, respectively.
-<code><a href="../reference/find_duplicate_ids.html">find_duplicate_ids()</a></code> is a quick way to test whether a
-candidate column is a valid unique key.</p>
+<p>Harmonization requires knowing which column uniquely identifies a
+contract and which one identifies a person, for example. These are our
+primary keys, that is, unique identifiers for contracts and personnel,
+respectively. <code><a href="../reference/find_duplicate_ids.html">find_duplicate_ids()</a></code> is a quick way to test
+whether a candidate column is a valid unique key.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bra_hrmis</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_duplicate_ids.html">find_duplicate_ids</a></span><span class="op">(</span><span class="va">MATRICULA</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Index: &lt;ANO_PAGAMENTO&gt;</span></span>
@@ -132,9 +133,9 @@ candidate column is a valid unique key.</p>
 <span><span class="co">#&gt; 1964:     99962    10</span></span>
 <span><span class="co">#&gt; 1965:     99990    10</span></span></code></pre></div>
 <p><code>MATRICULA</code> uniquely identifies a contract for a given
-reference date, so it becomes the <strong>contract identifier</strong>,
-or <code>contract_id</code> in our standard data dictionary.
-<code>CPF</code> will serve as the <strong>personnel
+reference date, so it can be used as a <strong>contract
+identifier</strong>, or <code>contract_id</code> in our standard data
+dictionary. <code>CPF</code> can serve as the <strong>personnel
 identifier</strong>, the <code>personnel_id</code>.</p>
 </div>
 <div class="section level2">
@@ -165,7 +166,7 @@ columns.</p>
 <h2 id="building-reference-dates">Building reference dates<a class="anchor" aria-label="anchor" href="#building-reference-dates"></a>
 </h2>
 <p>Dates are often stored as serial numbers or split across year/month
-columns. Once a <code>ref_date</code> column is built,
+columns. Once you define a <code>ref_date</code>,
 <code><a href="../reference/guess_date_frequency.html">guess_date_frequency()</a></code> confirms the reporting interval —
 useful for choosing the right window when computing growth or turnover
 indicators later.</p>
@@ -178,13 +179,12 @@ indicators later.</p>
 <span><span class="co">#&gt; [1] "quarter"</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="deduping-values">Deduping values<a class="anchor" aria-label="anchor" href="#deduping-values"></a>
+<h2 id="deduplicating-values">Deduplicating values<a class="anchor" aria-label="anchor" href="#deduplicating-values"></a>
 </h2>
-<p>Attributes like education and gender should be constant for a given
-personnel-period, but raw data sometimes disagrees across rows for the
-same <code>personnel_id</code>/<code>ref_date</code> (e.g. due to
-concurrent contracts). <code><a href="../reference/dedup_values.html">dedup_values()</a></code> resolves this using a
-chosen strategy — here, the modal value.</p>
+<p>Attributes like education and gender should be the same for a given
+personnel-reference date, but raw data is sometimes inconsistent.
+<code><a href="../reference/dedup_values.html">dedup_values()</a></code> resolves this using a chosen strategy —
+here, the modal value.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bra_hrmis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup_values.html">dedup_values</a></span><span class="op">(</span></span>
 <span>  <span class="va">bra_hrmis</span>,</span>
@@ -206,7 +206,8 @@ chosen strategy — here, the modal value.</p>
 <p>Nominal wages in local currency aren’t comparable across time or
 countries. <code><a href="../reference/convert_constant_ppp.html">convert_constant_ppp()</a></code> uses the bundled
 <code>macro_indicators</code> dataset (with CPI and PPP conversion
-factors) to convert local currency units into international dollars.</p>
+factors) to convert local currency units into international constant
+dollars.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/setattr.html" class="external-link">setnames</a></span><span class="op">(</span></span>
 <span>  <span class="va">bra_hrmis</span>,</span>
@@ -292,10 +293,10 @@ schema — no more, no less.</p>
 <h2 id="validating-the-harmonized-data">Validating the harmonized data<a class="anchor" aria-label="anchor" href="#validating-the-harmonized-data"></a>
 </h2>
 <p>Once harmonized, <code><a href="../reference/validate_data.html">validate_data()</a></code> checks the harmonized
-dataset against a set of validation rules. It then reports both a
-pass-rate summary and the specific records that violate each rule. This
-helps you identify negative salaries, missing keys, or out-of-range
-dates before analytics are run.</p>
+dataset against a pre-determined set of validation rules. It then
+reports both a pass-rate summary and the specific records that violate
+each rule. This helps you identify negative salaries, missing keys, or
+out-of-range dates before analytics are run.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate_data.html">validate_data</a></span><span class="op">(</span></span>
 <span>  data        <span class="op">=</span> <span class="fu">govhr</span><span class="fu">::</span><span class="va"><a href="../reference/bra_hrmis_contract.html">bra_hrmis_contract</a></span>,</span>
@@ -308,7 +309,7 @@ example, the <code>salary_non_negative</code> rule:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span><span class="op">$</span><span class="va">violations</span><span class="op">[[</span><span class="st">"salary_non_negative"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div>
-<p>Informed by this validation, you might want to revisit your
+<p>Informed by this data validation, you might want to revisit your
 harmonization process and address lingering data quality issues.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

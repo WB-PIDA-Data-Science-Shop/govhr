@@ -11,7 +11,7 @@ after leaving is pensioner."><meta property="og:image" content="https://wb-pida-
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,7 +86,9 @@ bring it into memory).</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>A retirement is a separation whose next status is pensioner. A pension
-drawn alongside an active contract is therefore not a retirement.</p>
+drawn alongside an active contract is therefore not a retirement. As with
+separations, it is flagged on the person's last active date and counted by
+<code><a href="compute_retirement.html">compute_retirement()</a></code> on <code>next_date</code>, the first date they are absent.</p>
 <p>Pension registration can lag the exit, so the pensioner record may appear
 at any later date, not only the next one. A retirement is dated by the exit,
 not by the registration. A person who returns to active work before any

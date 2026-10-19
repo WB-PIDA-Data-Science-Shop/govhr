@@ -3,7 +3,7 @@
 Computes the wagebill (total pay) for each group within each reference
 group, usually a reference date. It also reports each group's share of
 its reference group's total wagebill, and how much the wagebill grew
-since the previous reference group.
+since the previous reference date.
 
 ## Usage
 
@@ -15,7 +15,7 @@ compute_wagebill(
   data,
   measure_col = "gross_salary_lcu",
   group_cols = NULL,
-  reference_group_col = "ref_date",
+  reference_group_cols = "ref_date",
   ...
 )
 
@@ -24,7 +24,7 @@ compute_wagebill(
   data,
   measure_col = "gross_salary_lcu",
   group_cols = NULL,
-  reference_group_col = "ref_date",
+  reference_group_cols = "ref_date",
   ...
 )
 ```
@@ -33,8 +33,8 @@ compute_wagebill(
 
 - data:
 
-  Data frame or remote database table (`tbl_dbi`) with the column named
-  in `reference_group_col` and the pay column named in `measure_col`.
+  Data frame or remote database table (`tbl_dbi`) with the columns named
+  in `reference_group_cols` and the pay column named in `measure_col`.
 
 - ...:
 
@@ -48,21 +48,21 @@ compute_wagebill(
 - group_cols:
 
   Character vector of columns to group by, or `NULL` to add up everyone
-  together. Must not include `reference_group_col`.
+  together. Must not overlap with `reference_group_cols`.
 
-- reference_group_col:
+- reference_group_cols:
 
-  Character. Name of the column that defines the reference groups,
-  usually a date. Shares are computed within each reference group, and
-  growth compares each reference group with the one before it in sorted
-  order. Default `"ref_date"`.
+  Character vector of the columns that together define the reference
+  groups, such as a date, or a date and a country. Shares are computed
+  within each combination of these columns. Must include `ref_date`,
+  over which growth is measured. Default `"ref_date"`.
 
 ## Value
 
-A table with the grouping columns, `reference_group_col`, `wagebill`,
+A table with the grouping columns, `reference_group_cols`, `wagebill`,
 `share_wagebill` (the group's share of its reference group's total,
 between 0 and 1; only when `group_cols` is given) and `wagebill_growth`
-(the change from the previous reference group as a proportion, so `0.1`
+(the change from the previous reference date as a proportion, so `0.1`
 means 10% growth). A data.table for data frame input; a lazy table for
 `tbl_dbi` input (use
 [`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html)
@@ -74,12 +74,17 @@ Missing wage values are skipped when adding up. If every wage value for
 a group in a reference group is missing, its wagebill is `NA` rather
 than 0, so missing data is not mistaken for zero pay.
 
-When `group_cols` is given, every group appears in every reference group
-in `data`. A group with no records in a reference group gets
-`wagebill = NA`, so gaps stay visible instead of disappearing. Rows with
-a missing group value are kept as their own group.
+Growth follows each group from one reference date to the next,
+separately for every combination of the other reference columns: with
+`reference_group_cols = c("ref_date", "country")`, each country's groups
+form their own series.
 
-`wagebill_growth` is `NA` in the first reference group, and whenever the
+Every such series appears on every reference date in `data`. A series
+with no records on a date gets `wagebill = NA`, so gaps stay visible
+instead of disappearing. Rows with a missing group value are kept as
+their own group.
+
+`wagebill_growth` is `NA` on the first reference date, and whenever the
 current or previous wagebill is `NA`.
 
 ## See also
@@ -93,8 +98,7 @@ due to average pay.
 ``` r
 compute_wagebill(
   bra_hrmis_contract,
-  group_cols = "contract_type",
-  reference_group_col = "ref_date"
+  group_cols = "contract_type"
 )
 #>     contract_type   ref_date   wagebill share_wagebill wagebill_growth
 #>            <char>     <Date>      <num>          <num>           <num>
