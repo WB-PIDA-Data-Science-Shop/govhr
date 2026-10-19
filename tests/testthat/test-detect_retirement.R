@@ -35,18 +35,28 @@ test_that("detect_movement flags hires and separations", {
 })
 
 test_that("detect_movement adds up to compute_movement()", {
-  counts <- detect_movement(retirement_panel) |>
+  flags <- detect_movement(retirement_panel)
+
+  hires <- flags |>
     dplyr::summarise(
       hires = sum(.data[["hire"]]),
-      separations = sum(.data[["separation"]]),
       .by = "ref_date"
+    )
+
+  # separations are flagged on the last active date but counted on the next
+  separations <- flags |>
+    dplyr::filter(!is.na(.data[["next_date"]])) |>
+    dplyr::summarise(
+      separations = sum(.data[["separation"]]),
+      .by = "next_date"
     )
 
   expected <- compute_movement(retirement_panel)
 
-  expect_equal(counts$ref_date, expected$ref_date)
-  expect_equal(counts$hires, expected$hires)
-  expect_equal(counts$separations, expected$separations)
+  expect_equal(hires$ref_date, expected$ref_date)
+  expect_equal(hires$hires, expected$hires)
+  expect_equal(separations$next_date, expected$ref_date[-1])
+  expect_equal(separations$separations, expected$separations[-1])
 })
 
 test_that("detect_retirement flags the separations into a pension", {

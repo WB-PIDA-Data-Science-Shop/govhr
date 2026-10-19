@@ -11,33 +11,34 @@ compute_headcount(data, ...)
 \method{compute_headcount}{data.frame}(
   data,
   group_cols = NULL,
-  reference_group_col = "ref_date",
+  reference_group_cols = "ref_date",
   ...
 )
 
 \method{compute_headcount}{tbl_dbi}(
   data,
   group_cols = NULL,
-  reference_group_col = "ref_date",
+  reference_group_cols = "ref_date",
   ...
 )
 }
 \arguments{
 \item{data}{Data frame or remote database table (\code{tbl_dbi}) with one row
-per person-record. Must contain \code{personnel_id} and the column named in
-\code{reference_group_col}.}
+per person-record. Must contain \code{personnel_id} and the columns named in
+\code{reference_group_cols}.}
 
 \item{...}{Arguments passed to methods.}
 
 \item{group_cols}{Character vector of columns to group by, or \code{NULL} to
-count everyone together. Must not include \code{reference_group_col}.}
+count everyone together. Must not overlap with \code{reference_group_cols}.}
 
-\item{reference_group_col}{Character. Name of the column that defines the
-reference groups, usually a date. Shares are computed within each
-reference group. Default \code{"ref_date"}.}
+\item{reference_group_cols}{Character vector of the columns that together
+define the reference groups, such as a date, or a date and a country.
+Shares are computed within each combination of these columns. Default
+\code{"ref_date"}.}
 }
 \value{
-A table with the grouping columns, \code{reference_group_col},
+A table with the grouping columns, \code{reference_group_cols},
 \code{headcount} (number of distinct people) and \code{share_headcount} (the
 group's share of all people in its reference group, between 0 and 1). A
 data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
@@ -56,8 +57,16 @@ IDs are all missing still appears, with a headcount of 0.
 hr <- data.frame(
   personnel_id = c(1, 2, 3, 1, 2),
   ref_date = as.Date(c(rep("2020-01-01", 3), rep("2021-01-01", 2))),
+  country = c("A", "A", "B", "A", "B"),
   gender = c("F", "M", "F", "F", "M")
 )
 compute_headcount(hr, group_cols = "gender")
+
+# shares within each date and country
+compute_headcount(
+  hr,
+  group_cols = "gender",
+  reference_group_cols = c("ref_date", "country")
+)
 
 }
