@@ -79,6 +79,7 @@ if (getRversion() >= "2.15.1") {
     ".contrib",
     ".e",
     ".eff_end",
+    ".end",
     ".lag_max_e",
     ".pid",
     ".s",
@@ -352,20 +353,7 @@ if (getRversion() >= "2.15.1") {
     "pay_growth",
     "pay_index",
     "projected_pay",
-    "start_tenure",
-    # build_career_panel()
-    ".date",
-    ".ahead_snap",
-    ".ahead_row",
-    ".ahead_status",
-    ".ahead_pay",
-    "next_ref_date",
-    "exit_type",
-    "exposure",
-    "spell",
-    ".no_pay",
-    ".interval_years",
-    ".left_before"
+    "start_tenure"
   ))
 }
 

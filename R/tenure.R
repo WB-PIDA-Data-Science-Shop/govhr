@@ -228,12 +228,15 @@ compute_tenure_panel <- function(
       !get(contract_type_col) %in% c("inactive", "pensioner")
   ]
 
-  # 2. Cap open-ended / future contracts at each row's ref_date
+  # 2. Cap open-ended / future contracts at each row's ref_date. The end date
+  #    is read as a Date: a column of nothing but NA (no contract has an end
+  #    date) is logical, which fifelse() will not mix with the dates
+  dt[, .end := as.Date(get(end_date_col))]
   dt[,
     .eff_end := data.table::fifelse(
-      is.na(get(end_date_col)) | get(end_date_col) > get(ref_date_col),
+      is.na(.end) | .end > get(ref_date_col),
       get(ref_date_col),
-      get(end_date_col)
+      .end
     )
   ]
 

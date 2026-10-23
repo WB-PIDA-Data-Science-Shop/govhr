@@ -381,9 +381,8 @@ estimate_progression_rates.data.frame <- function(personnel,
 
 #' Total pay per person and snapshot, with contract columns from one contract
 #'
-#' Shared by `estimate_progression_rates()` and `build_career_panel()`, so
-#' both levels turn contracts into one row per person and snapshot the same
-#' way:
+#' Used by `estimate_progression_rates()` to turn contracts into one row per
+#' person and snapshot:
 #' * `.pay` is the total across the person's contracts, leaving out a
 #'   contract with missing pay (`NA` only if all of them are missing);
 #' * `contract_cols` (e.g. occupation) come from the one contract that

@@ -234,3 +234,36 @@ test_that("data.frame input is accepted without error", {
   df <- as.data.frame(make_contracts("P1", "C1", "2015-01-01", "2019-01-01"))
   expect_no_error(compute_tenure(df, ref_date = ref))
 })
+
+# ---------------------------------------------------------------------------
+# An end-date column that is entirely missing: open-ended contracts
+#
+# A column of nothing but NA (e.g. created as NA, or read from a file where
+# every value is empty) is logical, not Date; it must mean "no end date"
+# just as missing dates do
+# ---------------------------------------------------------------------------
+test_that("an end-date column of logical NA means open-ended contracts, as NA dates do", {
+  as_date_na <- make_contracts("P1", "C1", "2015-01-01", NA)
+  as_logical_na <- data.table::copy(as_date_na)[, end_date := NA]
+
+  expect_equal(
+    compute_tenure(as_logical_na, ref_date = ref),
+    compute_tenure(as_date_na, ref_date = ref)
+  )
+})
+
+test_that("compute_tenure_panel(): an end-date column of logical NA means open-ended contracts", {
+  # a contract seen at two snapshots: tenure runs to each snapshot
+  panel <- data.table::data.table(
+    personnel_id = "P1",
+    contract_id = "C1",
+    ref_date = as.Date(c("2020-01-01", "2021-01-01")),
+    start_date = as.Date("2019-01-01"),
+    end_date = NA,
+    contract_type = "permanent"
+  )
+
+  out <- compute_tenure_panel(panel)
+
+  expect_equal(out$tenure_days, c(365, 731))
+})
