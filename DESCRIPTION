@@ -45,6 +45,7 @@ Suggests:
     duckdb,
     readr,
     testthat (>= 3.0.0),
+    withr,
     reactable
 Config/testthat/edition: 3
 Depends: 

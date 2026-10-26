@@ -85,20 +85,27 @@ if \code{FALSE}, keep only \code{group_cols}, \code{tenure_col}, \code{px}, \cod
 \code{status_col}, \code{personnel_id_col}, \code{ref_date_col}, \code{contract_id_col}.}
 }
 \value{
-A data.table with one row per \code{group_cols} combination and whole
-year of tenure, from each group's first tenure to its last with no
-gaps. Column names follow actuarial notation: \code{l} is a number of people,
-\code{L} and \code{T} person-years, \code{e} an expected number of years. With
+A \code{career_table}: a data.table with one row per \code{group_cols}
+combination and whole year of tenure, from each group's first tenure to
+its last with no gaps, which \link[=plot.career_table]{plot()} draws. Column
+names follow actuarial notation: \code{l} is a number of people, \code{L} and \code{T}
+person-years, \code{e} an expected number of years. With
 \code{include_all = FALSE}, only the columns marked * are kept.
 \describe{
 \item{group_cols*, tenure_col*}{The group and whole years of service.}
 \item{start_tenure}{Integer. The tenure the group's career starts at:
 0, unless no one in the group was seen at tenure 0.}
-\item{pop, stayers, n_pay, median_pay_growth, share_pay_cut, mean_pay,
-median_pay, n_periods}{As in \code{\link[=estimate_progression_rates]{estimate_progression_rates()}}.
-\code{NA} on a tenure filled in by smoothing.}
+\item{pop*, n_pay*}{As in \code{\link[=estimate_progression_rates]{estimate_progression_rates()}}: the people
+behind \code{px} and \code{pay_growth}, to judge how reliable they are. \code{NA}
+on a tenure filled in by smoothing.}
+\item{stayers, median_pay_growth, share_pay_cut, mean_pay, median_pay,
+n_periods}{As in \code{\link[=estimate_progression_rates]{estimate_progression_rates()}}. \code{NA} on a tenure
+filled in by smoothing.}
 \item{px*}{Share of those in service at this tenure still in service a
 year later (smoothed if the rates were).}
+\item{px_obs, pay_growth_obs}{\code{px} and \code{pay_growth} as observed, before
+smoothing; \code{NA} on a tenure filled in by smoothing. Equal to \code{px}
+and \code{pay_growth} when nothing was smoothed.}
 \item{lx}{Number of the imaginary group still in service at this
 tenure, starting from \code{radix}: \eqn{l(t) = radix \prod_{u<t} p(u)}.}
 \item{lx_next}{Number still in service a year later:

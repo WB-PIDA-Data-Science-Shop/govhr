@@ -391,7 +391,10 @@ test_that("include_all = FALSE keeps only the essential columns", {
   full <- do.call(compute_career_table, args)
   short <- do.call(compute_career_table, c(args, include_all = FALSE))
 
-  expect_named(short, c("gender", "tenure", "px", "ex", "pay_growth", "projected_pay"))
+  expect_named(
+    short,
+    c("gender", "tenure", "pop", "px", "ex", "n_pay", "pay_growth", "projected_pay")
+  )
   expect_equal(as.data.frame(short), as.data.frame(full)[names(short)], ignore_attr = TRUE)
   expect_true(all(c("pop", "lx", "Tx", "pay_index", "expected_earnings", "mean_pay") %in% names(full)))
 })
@@ -582,4 +585,136 @@ test_that("without groups, a panel with no new hires warns that the whole table 
     "the table [(]from tenure 1[)]"
   )
   expect_equal(career$start_tenure[1], 1L)
+})
+
+test_that("the result is a career_table that remembers its tenure and group columns", {
+  personnel <- career_personnel()
+  personnel[, gender := ifelse(personnel_id %in% c("P1", "P2"), "F", "M")]
+
+  career <- compute_career_table(
+    personnel, career_contracts(),
+    tenure_col = "tenure", salary_col = "pay", group_cols = "gender"
+  )
+
+  expect_s3_class(career, c("career_table", "data.table", "data.frame"), exact = TRUE)
+  expect_identical(attr(career, "tenure_col"), "tenure")
+  expect_identical(attr(career, "group_cols"), "gender")
+})
+
+test_that("smoothing keeps the observed rates beside the smoothed ones, NA on a filled-in tenure", {
+  # tenures 0 and 2 are seen staying with a 10% raise; tenure 1 is a gap
+  panel <- gapped_career_panel()
+
+  career <- compute_career_table(
+    panel$personnel, panel$contracts, tenure_col = "tenure", salary_col = "pay",
+    smooth = TRUE
+  )
+
+  expect_equal(career$px_obs, c(1, NA, 1))
+  expect_equal(career$pay_growth_obs, c(0.1, NA, 0.1))
+})
+
+test_that("without smoothing the observed rates are the rates", {
+  career <- compute_career_table(
+    career_personnel(), career_contracts(),
+    tenure_col = "tenure", salary_col = "pay"
+  )
+
+  expect_equal(career$px_obs, c(2 / 3, 1 / 2))
+  expect_equal(career$pay_growth_obs, c(sqrt(0.99) - 1, 0.1))
+})
+
+# ---------------------------------------------------------------------------
+# plot.career_table()
+# ---------------------------------------------------------------------------
+
+test_that("plot() draws one panel per measure asked for, in that order", {
+  career <- compute_career_table(
+    career_personnel(), career_contracts(),
+    tenure_col = "tenure", salary_col = "pay"
+  )
+
+  p <- plot(career, which = c("ex", "pay_growth"))
+
+  expect_s3_class(p, "ggplot")
+  expect_equal(
+    levels(p$data$measure),
+    c("Expected years of service left", "Pay growth (% per year)")
+  )
+  expect_equal(nrow(ggplot2::ggplot_build(p)$layout$layout), 2L)
+})
+
+test_that("pay growth is plotted in percent, with dots at the observed rates sized by the stayers behind them", {
+  # tenures 0 and 2 each have one stayer with a 10% raise; tenure 1 is
+  # filled in by smoothing, so it has a line but no dot
+  panel <- gapped_career_panel()
+  career <- compute_career_table(
+    panel$personnel, panel$contracts, tenure_col = "tenure", salary_col = "pay",
+    smooth = TRUE
+  )
+
+  p <- plot(career, which = "pay_growth")
+
+  expect_equal(p$data$tenure, 0:2)
+  expect_equal(p$data$value, c(10, 10, 10))
+  expect_equal(p$data$observed, c(10, NA, 10))
+  expect_equal(p$data$n, c(1, NA, 1))
+})
+
+test_that("projected pay dots count the stayers behind the last raise, career expectancy dots the people in service", {
+  # tenure 0: pop 3, of whom 2 stay on pay; tenure 1: pop 2. Pay at tenure
+  # 0 is entry pay, which no raise produced, so it has no dot
+  career <- compute_career_table(
+    career_personnel(), career_contracts(),
+    tenure_col = "tenure", salary_col = "pay"
+  )
+
+  p <- plot(career, which = c("projected_pay", "ex"))
+
+  expect_equal(p$data$n, c(NA, 2, 3, 2))
+  expect_equal(p$data$observed, c(NA, p$data$value[2:4]))
+})
+
+test_that("each group gets its own line", {
+  personnel <- career_personnel()
+  personnel[, gender := ifelse(personnel_id %in% c("P1", "P2"), "F", "M")]
+  career <- compute_career_table(
+    personnel, career_contracts(),
+    tenure_col = "tenure", salary_col = "pay", group_cols = "gender"
+  )
+
+  p <- plot(career, which = "ex")
+
+  expect_equal(as.character(p$data$group), c("F", "F", "M", "M"))
+})
+
+test_that("show_n = FALSE draws the lines without dots", {
+  career <- compute_career_table(
+    career_personnel(), career_contracts(),
+    tenure_col = "tenure", salary_col = "pay"
+  )
+
+  p <- plot(career, show_n = FALSE)
+
+  geoms <- vapply(p$layers, function(layer) class(layer$geom)[1], character(1))
+  expect_false("GeomPoint" %in% geoms)
+  expect_true("GeomLine" %in% geoms)
+})
+
+test_that("an unknown measure errors", {
+  career <- compute_career_table(
+    career_personnel(), career_contracts(),
+    tenure_col = "tenure", salary_col = "pay"
+  )
+
+  expect_error(plot(career, which = "lx"), "should be one of")
+})
+
+test_that("a table missing a column the plot needs errors naming it", {
+  career <- compute_career_table(
+    career_personnel(), career_contracts(),
+    tenure_col = "tenure", salary_col = "pay"
+  )
+
+  expect_error(plot(career[, !"n_pay"], which = "pay_growth"), "n_pay")
 })

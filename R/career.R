@@ -195,15 +195,22 @@ estimate_progression_rates.data.frame <- function(personnel,
   )
 
   ### the person-year panel: each personnel record with that year's pay
-  panel <- merge(
-    as.data.table(personnel)[,
-      c(person_year, status_col, tenure_col, person_group_cols),
-      with = FALSE
-    ],
-    pay_dt,
-    by = person_year,
-    all.x = TRUE
-  )
+  ### using a data.table join
+  # panel <- merge(
+  #   as.data.table(personnel)[,
+  #     c(person_year, status_col, tenure_col, person_group_cols),
+  #     with = FALSE
+  #   ],
+  #   pay_dt,
+  #   by = person_year,
+  #   all.x = TRUE
+  # )
+
+  panel <- pay_dt[as.data.table(personnel)[,
+    c(person_year, status_col, tenure_col, person_group_cols),
+    with = FALSE
+  ], on = person_year]
+  
 
   ### attrition: exposure and the share still active a year later, by
   ### group and tenure, from estimate_decrement_rates() with tenure as the
@@ -506,20 +513,27 @@ estimate_progression_rates.data.frame <- function(personnel,
 #' @param ... Passed to [estimate_progression_rates()]: `select_contract`,
 #'   `status_col`, `personnel_id_col`, `ref_date_col`, `contract_id_col`.
 #'
-#' @returns A data.table with one row per `group_cols` combination and whole
-#'   year of tenure, from each group's first tenure to its last with no
-#'   gaps. Column names follow actuarial notation: `l` is a number of people,
-#'   `L` and `T` person-years, `e` an expected number of years. With
+#' @returns A `career_table`: a data.table with one row per `group_cols`
+#'   combination and whole year of tenure, from each group's first tenure to
+#'   its last with no gaps, which [plot()][plot.career_table()] draws. Column
+#'   names follow actuarial notation: `l` is a number of people, `L` and `T`
+#'   person-years, `e` an expected number of years. With
 #'   `include_all = FALSE`, only the columns marked * are kept.
 #'   \describe{
 #'     \item{group_cols*, tenure_col*}{The group and whole years of service.}
 #'     \item{start_tenure}{Integer. The tenure the group's career starts at:
 #'       0, unless no one in the group was seen at tenure 0.}
-#'     \item{pop, stayers, n_pay, median_pay_growth, share_pay_cut, mean_pay,
-#'       median_pay, n_periods}{As in [estimate_progression_rates()].
-#'       `NA` on a tenure filled in by smoothing.}
+#'     \item{pop*, n_pay*}{As in [estimate_progression_rates()]: the people
+#'       behind `px` and `pay_growth`, to judge how reliable they are. `NA`
+#'       on a tenure filled in by smoothing.}
+#'     \item{stayers, median_pay_growth, share_pay_cut, mean_pay, median_pay,
+#'       n_periods}{As in [estimate_progression_rates()]. `NA` on a tenure
+#'       filled in by smoothing.}
 #'     \item{px*}{Share of those in service at this tenure still in service a
 #'       year later (smoothed if the rates were).}
+#'     \item{px_obs, pay_growth_obs}{`px` and `pay_growth` as observed, before
+#'       smoothing; `NA` on a tenure filled in by smoothing. Equal to `px`
+#'       and `pay_growth` when nothing was smoothed.}
 #'     \item{lx}{Number of the imaginary group still in service at this
 #'       tenure, starting from `radix`: \eqn{l(t) = radix \prod_{u<t} p(u)}.}
 #'     \item{lx_next}{Number still in service a year later:
@@ -604,6 +618,7 @@ estimate_progression_rates.data.frame <- function(personnel,
 #'
 #' @seealso [estimate_progression_rates()] for the yearly rates this table
 #'   chains, and [compute_service_table()] for years of service by age.
+#' @importFrom data.table setattr
 #' @export
 compute_career_table <- function(personnel,
                                  contracts,
@@ -643,6 +658,8 @@ compute_career_table <- function(personnel,
       call. = FALSE
     )
   }
+  ### keep the rates as observed, so smoothing can be judged against them
+  career_dt[, `:=`(px_obs = px, pay_growth_obs = pay_growth)]
   if (isTRUE(smooth) || any(gap_dt$gap)) {
     career_dt <- .smooth_career_rates(career_dt, tenure_col, group_cols, span)
   }
@@ -712,16 +729,196 @@ compute_career_table <- function(personnel,
   ### the full table, or only the headline columns
   keep_cols <- if (isTRUE(include_all)) {
     c(
-      group_cols, tenure_col, "start_tenure", "pop", "stayers", "px", "lx",
-      "lx_next", "Lx", "Tx", "ex", "n_pay", "pay_growth", "median_pay_growth",
-      "share_pay_cut", "mean_pay", "median_pay", "projected_pay", "pay_index",
-      "expected_earnings", "n_periods"
+      group_cols, tenure_col, "start_tenure", "pop", "stayers", "px", "px_obs",
+      "lx", "lx_next", "Lx", "Tx", "ex", "n_pay", "pay_growth",
+      "pay_growth_obs", "median_pay_growth", "share_pay_cut", "mean_pay",
+      "median_pay", "projected_pay", "pay_index", "expected_earnings",
+      "n_periods"
     )
   } else {
-    c(group_cols, tenure_col, "px", "ex", "pay_growth", "projected_pay")
+    c(
+      group_cols, tenure_col, "pop", "px", "ex", "n_pay", "pay_growth",
+      "projected_pay"
+    )
   }
 
-  career_dt[, keep_cols, with = FALSE]
+  ### a career_table, so plot() knows how to draw it
+  career_dt <- career_dt[, keep_cols, with = FALSE]
+  setattr(career_dt, "tenure_col", tenure_col)
+  setattr(career_dt, "group_cols", group_cols)
+  setattr(career_dt, "class", c("career_table", class(career_dt)))
+
+  career_dt[]
+}
+
+#' Plot a career table
+#'
+#' Draws the career a table from [compute_career_table()] describes: pay
+#' growth, projected pay and expected years of service left, one panel each,
+#' against years of service, with one line per group. Dots show how many
+#' people each year's estimate rests on, so thin years stand out.
+#'
+#' @param x A career table from [compute_career_table()].
+#' @param which Character. The panels to draw, in order: any of
+#'   `"pay_growth"`, `"projected_pay"` and `"ex"`. Defaults to pay growth and
+#'   projected pay.
+#' @param show_n Logical. If `TRUE` (the default), add a dot at each year of
+#'   service sized by the number of people behind the estimate.
+#' @param ... Not used.
+#'
+#' @return A ggplot object; print it to draw, or add to it (for example
+#'   `+ ggplot2::scale_colour_manual()` for your own colours and group names).
+#'
+#' @details
+#' **The line and the dots.** The line is the value in the table, smoothed
+#' if the table was. The dot sits at the value observed at that year of
+#' service, so on a smoothed table the gap between dot and line shows how
+#' much smoothing moved it. A year filled in by smoothing has no dot.
+#'
+#' **What the dot size counts.**
+#' \describe{
+#'   \item{Pay growth}{`n_pay`, the people who stayed with pay in both years.}
+#'   \item{Projected pay}{`n_pay` of the year before: pay at a year of service
+#'     comes from the previous year's raise. Entry pay has no dot.}
+#'   \item{Expected years of service left}{`pop`, the people in service at
+#'     that year of service, whose stay rate it rests on. The years after it
+#'     count too, so read it as a guide.}
+#' }
+#'
+#' Pay growth is drawn in percent. Projected pay is in the units of the
+#' table's `projected_pay`, which the plot cannot know; name them with
+#' `+ ggplot2::labs(caption = ...)`.
+#'
+#' @examples
+#' library(data.table)
+#' contracts <- as.data.table(bra_hrmis_contract)
+#' personnel <- as.data.table(bra_hrmis_personnel)
+#' contracts[, gross_salary_real := deflate_to_real(gross_salary_lcu, ref_date, "BRA")]
+#' tenure <- compute_tenure_panel(contracts)
+#' personnel <- merge(personnel, tenure, by = c("personnel_id", "ref_date"), all.x = TRUE)
+#'
+#' by_gender <- compute_career_table(
+#'   personnel, contracts,
+#'   tenure_col = "tenure_years", salary_col = "gross_salary_real",
+#'   group_cols = "gender", smooth = TRUE
+#' )
+#' plot(by_gender)
+#' plot(by_gender, which = c("pay_growth", "ex"))
+#'
+#' @seealso [compute_career_table()] for the table.
+#' @importFrom data.table data.table rbindlist shift
+#' @export
+plot.career_table <- function(x,
+                              which = c("pay_growth", "projected_pay"),
+                              show_n = TRUE,
+                              ...) {
+  which <- match.arg(which, c("pay_growth", "projected_pay", "ex"), several.ok = TRUE)
+  tenure_col <- attr(x, "tenure_col")
+  group_cols <- attr(x, "group_cols")
+
+  measure_labels <- c(
+    pay_growth = "Pay growth (% per year)",
+    projected_pay = "Projected pay",
+    ex = "Expected years of service left"
+  )
+  ### the people each measure rests on
+  n_cols <- c(pay_growth = "n_pay", projected_pay = "n_pay", ex = "pop")
+
+  missing_cols <- setdiff(
+    c(tenure_col, group_cols, which, n_cols[which]),
+    names(x)
+  )
+  if (length(missing_cols) > 0L) {
+    stop(
+      "plot() needs the column(s) ", paste(missing_cols, collapse = ", "),
+      " of the career table; keep them, or use compute_career_table() output ",
+      "as it is.",
+      call. = FALSE
+    )
+  }
+
+  ### one line per group, groups in the order of the table
+  group <- if (length(group_cols) > 0L) {
+    do.call(paste, c(lapply(group_cols, function(col) x[[col]]), sep = " / "))
+  } else {
+    rep("All", nrow(x))
+  }
+  group <- factor(group, levels = unique(group))
+
+  ### the observed pay growth, if the table kept it apart from the smoothed
+  observed_growth <- if ("pay_growth_obs" %in% names(x)) {
+    x$pay_growth_obs
+  } else {
+    x$pay_growth
+  }
+
+  ### long format: one row per group, tenure and measure
+  plot_dt <- rbindlist(lapply(which, function(measure_col) {
+    measure_dt <- data.table(
+      group = group,
+      tenure = x[[tenure_col]],
+      value = x[[measure_col]],
+      observed = x[[measure_col]],
+      n = as.numeric(x[[n_cols[[measure_col]]]])
+    )
+    if (measure_col == "pay_growth") {
+      measure_dt[, `:=`(value = 100 * value, observed = 100 * observed_growth)]
+    }
+    ### pay at a tenure is the result of the previous year's raise
+    if (measure_col == "projected_pay") {
+      measure_dt[, n := shift(n), by = group]
+    }
+    ### no one behind it (a year filled in by smoothing, or entry pay): no dot
+    measure_dt[is.na(n) | n == 0, observed := NA_real_]
+    measure_dt[, measure := measure_labels[[measure_col]]]
+  }))
+  plot_dt[, measure := factor(measure, levels = measure_labels[which])]
+
+  p <- ggplot2::ggplot(
+    plot_dt,
+    ggplot2::aes(x = .data$tenure, y = .data$value, colour = .data$group)
+  )
+  if ("pay_growth" %in% which) {
+    zero_dt <- data.table(
+      measure = factor(measure_labels[["pay_growth"]], levels = levels(plot_dt$measure))
+    )
+    p <- p + ggplot2::geom_hline(
+      data = zero_dt, ggplot2::aes(yintercept = 0),
+      linewidth = 0.25, linetype = "dashed"
+    )
+  }
+  p <- p + ggplot2::geom_line(linewidth = 0.8, na.rm = TRUE)
+  if (isTRUE(show_n)) {
+    p <- p +
+      ggplot2::geom_point(
+        ggplot2::aes(y = .data$observed, size = .data$n),
+        alpha = 0.6, na.rm = TRUE
+      ) +
+      ggplot2::scale_size_area(max_size = 4, labels = scales::label_comma())
+  }
+  if (length(group_cols) == 0L) {
+    p <- p + ggplot2::guides(colour = "none")
+  }
+
+  ### one panel per measure, its name standing in for the y axis title
+  p +
+    ggplot2::facet_wrap(~measure, scales = "free_y", strip.position = "left") +
+    ggplot2::scale_x_continuous(n.breaks = 7) +
+    ggplot2::scale_y_continuous(n.breaks = 7, labels = scales::label_comma()) +
+    ggplot2::labs(
+      x = "Years of service", y = NULL, colour = NULL,
+      size = "People behind\nthe estimate"
+    ) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(
+      panel.border = ggplot2::element_rect(colour = "black", linewidth = 0.5, fill = NA),
+      axis.ticks = ggplot2::element_line(colour = "black", linewidth = 0.25),
+      axis.ticks.length = ggplot2::unit(0.4, "lines"),
+      panel.grid.major = ggplot2::element_line(linewidth = 0.25),
+      strip.placement = "outside",
+      strip.background = ggplot2::element_blank(),
+      legend.position = "top"
+    )
 }
 
 #' Smooth and gap-fill the rates of a career table

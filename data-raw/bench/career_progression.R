@@ -2,7 +2,6 @@
 #### CHECK OUT HOW THESE CAREER PROGRESSION FUNCTIONS WORK #####
 ################################################################
 library(ggplot2)
-library(patchwork)
 library(dplyr)
 ### lets do this
 
@@ -34,60 +33,24 @@ career_dt <- compute_career_table(personnel = personnel_dt,
 #### PLOT: PAY GROWTH AND PROJECTED PAY, WOMEN VS MEN      #####
 ################################################################
 
+### plot() draws a career_table: pay growth and projected pay by default,
+### dots sized by the people behind each year's estimate. it returns a
+### ggplot, so the colours, labels and pay units are added on top
+gender_colours <- c(FEMININO = "orange", MASCULINO = "dodgerblue4")
 
-### house style: theme_bw with a black frame and long outward ticks
-pretty_plot <- function(lp = "top") {
-  theme_bw() +
-    theme(
-      panel.border = element_rect(colour = "black", linewidth = 0.5, fill = NA),
-      axis.ticks = element_line(colour = "black", linewidth = 0.25),
-      axis.ticks.length = unit(0.4, "lines"),
-      panel.grid.major = element_line(linewidth = 0.25),
-      legend.position = lp,
-      legend.margin = margin(t = 0, b = 2, unit = "pt")
-    )
-}
-
-### one row per gender and year of service, with readable labels
-plot_dt <- career_dt[, .(
-  gender = fifelse(gender == "FEMININO", "Women", "Men"),
-  personnel_tenure,
-  pay_growth,
-  projected_pay
-)]
-gender_colours <- c(Women = "orange", Men = "dodgerblue4")
-
-### left: real pay growth from each year of service to the next
-p_growth <- ggplot(plot_dt, aes(x = personnel_tenure, y = pay_growth, colour = gender)) +
-  geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dashed") +
-  geom_line(linewidth = 0.8) +
-  scale_x_continuous(n.breaks = 7, expand = c(0.02, 0)) +
-  scale_y_continuous(n.breaks = 7, labels = scales::label_percent(accuracy = 0.1)) +
-  scale_colour_manual(values = gender_colours) +
-  labs(x = "Years of service", y = "Real pay growth per year", colour = NULL) +
-  pretty_plot()
-
-### right: pay path for a typical new hire who stays, compounding that growth
-p_pay <- ggplot(plot_dt, aes(x = personnel_tenure, y = projected_pay, colour = gender)) +
-  geom_line(linewidth = 0.8) +
-  scale_x_continuous(n.breaks = 7, expand = c(0.02, 0)) +
-  scale_y_continuous(n.breaks = 7, labels = scales::label_comma()) +
-  scale_colour_manual(values = gender_colours) +
-  labs(
-    x = "Years of service",
-    y = "Projected monthly pay\n(BRL, Dec 2021 prices)",
-    colour = NULL
+p_career <- plot(career_dt) +
+  scale_colour_manual(
+    values = gender_colours,
+    labels = c(FEMININO = "Women", MASCULINO = "Men")
   ) +
-  pretty_plot()
-
-### side by side, one shared legend on top
-p_career <- p_growth + p_pay +
-  plot_layout(guides = "collect") &
-  theme(legend.position = "top")
+  labs(caption = "Pay is monthly, in BRL at December 2021 prices.")
 
 print(p_career)
 
+### the same, with expected years of service left
+print(plot(career_dt, which = c("pay_growth", "projected_pay", "ex")))
+
 ### save as a vector pdf
-pdf("data-raw/bench/career_progression_gender.pdf", width = 10, height = 4)
+pdf("data-raw/bench/career_progression_gender.pdf", width = 10, height = 4.5)
 print(p_career)
 dev.off()

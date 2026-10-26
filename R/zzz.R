@@ -353,7 +353,13 @@ if (getRversion() >= "2.15.1") {
     "pay_growth",
     "pay_index",
     "projected_pay",
-    "start_tenure"
+    "px_obs",
+    "pay_growth_obs",
+    "start_tenure",
+    # plot.career_table
+    "measure",
+    "n",
+    "observed"
   ))
 }
 
