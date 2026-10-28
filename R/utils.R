@@ -984,3 +984,144 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
 
   out[]
 }
+
+#' Check the inputs of the tenure functions
+#'
+#' Shared by every method of `compute_tenure()`, `compute_tenure_panel()` and
+#' `compute_employment_spells()`. Uses `check_required_cols()`, which also
+#' lists a lazy database table's columns.
+#'
+#' @param contracts The contract table.
+#' @param cols Character vector. The columns the function needs.
+#'
+#' @returns `contracts`, invisibly. Stops with an error naming any missing
+#'   column.
+#' @keywords internal
+.check_tenure_args <- function(contracts, cols) {
+  check_required_cols(contracts, cols, "contracts")
+}
+
+#' Tenure as the union of contract intervals, for a data frame
+#'
+#' The calculation behind the data frame methods of `compute_tenure()` and
+#' `compute_tenure_panel()`: per key (person, groups and, for a panel, the
+#' snapshot), the days covered by at least one active contract up to the
+#' reference date.
+#'
+#' Each contract counts only the part not already covered by the key's
+#' earlier-starting contracts: `max(0, end - max(start, latest earlier end))`.
+#' The latest earlier end is a running maximum within each key. Rather than a
+#' grouped `cummax()` (one R call per key, slow with millions of keys), it is
+#' one vectorised pass: after sorting, each key's end dates are lifted by
+#' `key number * step`, with `step` wider than the span of all dates, so the
+#' running maximum can never carry over from the key before.
+#'
+#' Only the needed columns of the kept rows are copied, so `contracts` stays
+#' untouched.
+#'
+#' @param contracts A data frame of contracts.
+#' @param keys Character vector. The columns to compute tenure by.
+#' @param ref A `Date`: one for every row, or one per row (a panel's
+#'   snapshot dates).
+#' @param start_date_col,end_date_col,contract_type_col Character. The
+#'   contract start date, end date and type columns.
+#'
+#' @returns A data.table with `keys`, `tenure_days` and `tenure_years`, sorted
+#'   by `keys`.
+#' @importFrom data.table := data.table fifelse rleidv setDT setorderv shift
+#' @keywords internal
+.tenure_days <- function(contracts, keys, ref, start_date_col, end_date_col,
+                         contract_type_col) {
+  start <- contracts[[start_date_col]]
+  ### an all-NA end column is logical: as.Date() makes it the missing dates
+  ### it means. Open or later ends stop at the reference date
+  end <- as.Date(contracts[[end_date_col]])
+  end <- fifelse(is.na(end) | end > ref, ref, end)
+
+  ### active contracts (a missing type counts as active), started by the
+  ### reference date, with some time in them
+  keep <- which(
+    !contracts[[contract_type_col]] %in% c("inactive", "pensioner") &
+      start <= ref & end > start
+  )
+
+  intervals <- setDT(lapply(
+    stats::setNames(keys, keys),
+    function(col) contracts[[col]][keep]
+  ))
+  intervals[, `:=`(.start = as.numeric(start[keep]), .end = as.numeric(end[keep]))]
+  setorderv(intervals, c(keys, ".start"))
+
+  ### the latest end among the key's earlier contracts (see Details); -Inf
+  ### for each key's first contract
+  if (nrow(intervals) > 0L) {
+    key_id <- rleidv(intervals, cols = keys)
+    step <- max(intervals$.end) - min(intervals$.end) + 1
+    lift <- key_id * step
+    intervals[, .prev_end := shift(cummax(.end + lift)) - lift]
+    intervals[c(TRUE, key_id[-1L] != key_id[-length(key_id)]), .prev_end := -Inf]
+  } else {
+    intervals[, .prev_end := numeric(0)]
+  }
+
+  ### the part of each contract not already covered
+  intervals[, .days := pmax(.end - pmax(.start, .prev_end), 0)]
+
+  out <- intervals[, .(tenure_days = sum(.days)), by = keys]
+  out[, tenure_years := tenure_days / 365.25][]
+}
+
+#' Tenure as the union of contract intervals, in a database
+#'
+#' The database version of `.tenure_days()`, as dplyr verbs that dbplyr
+#' turns into SQL. The latest end among the key's earlier contracts is a
+#' window function, `MAX(end) OVER (PARTITION BY keys ORDER BY start ROWS
+#' BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)`, and days are differences of
+#' dates (`DATE - DATE`, a number of days in DuckDB and PostgreSQL). Contracts
+#' with the same start add up to their latest end whatever order the window
+#' puts them in, so the result matches `.tenure_days()`.
+#'
+#' @param contracts A lazy table of contracts.
+#' @param keys Character vector. The columns to compute tenure by.
+#' @param ref The reference date, as an expression for `mutate()`: a column
+#'   symbol (a panel's snapshot date) or a SQL date literal.
+#' @param start_date_col,end_date_col,contract_type_col Character. The
+#'   contract start date, end date and type columns.
+#'
+#' @returns A lazy table with `keys`, `tenure_days` and `tenure_years`.
+#' @importFrom dplyr across all_of coalesce filter group_by if_else mutate
+#'   summarise ungroup
+#' @importFrom rlang .data !!
+#' @keywords internal
+.tenure_days_db <- function(contracts, keys, ref, start_date_col, end_date_col,
+                            contract_type_col) {
+  contracts |>
+    mutate(
+      .ref = !!ref,
+      .start = .data[[start_date_col]],
+      .end = .data[[end_date_col]],
+      .type = .data[[contract_type_col]]
+    ) |>
+    ### open or later ends stop at the reference date
+    mutate(.end = if_else(is.na(.end) | .end > .ref, .ref, .end)) |>
+    ### active contracts (NOT IN drops a missing type, so keep it explicitly),
+    ### started by the reference date, with some time in them
+    filter(
+      (is.na(.type) | !.type %in% c("inactive", "pensioner")) &
+        .start <= .ref & .end > .start
+    ) |>
+    group_by(across(all_of(keys))) |>
+    dbplyr::window_order(.start) |>
+    dbplyr::window_frame(-Inf, -1) |>
+    mutate(.prev_end = max(.end, na.rm = TRUE)) |>
+    ### clear the order and frame, which would otherwise stay on the table
+    ### and apply to later window functions (e.g. a max() by group)
+    dbplyr::window_order() |>
+    dbplyr::window_frame() |>
+    ungroup() |>
+    ### the part of each contract not already covered; a key's first
+    ### contract has no earlier end
+    mutate(.days = pmax(.end - pmax(.start, coalesce(.prev_end, .start), na.rm = TRUE), 0, na.rm = TRUE)) |>
+    summarise(tenure_days = as.numeric(sum(.days, na.rm = TRUE)), .by = all_of(keys)) |>
+    mutate(tenure_years = tenure_days / 365.25)
+}
