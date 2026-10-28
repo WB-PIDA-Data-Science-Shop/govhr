@@ -359,7 +359,18 @@ if (getRversion() >= "2.15.1") {
     # plot.career_table
     "measure",
     "n",
-    "observed"
+    "observed",
+    # build_survival_panel, fit_survival_model
+    ".band",
+    ".year",
+    ".cid",
+    ".interval",
+    ".next_seen",
+    ".pay_missing",
+    ".pay_order",
+    ".present",
+    "exit_type",
+    "exposure"
   ))
 }
 
