@@ -9,59 +9,52 @@
 \arguments{
 \item{object}{A \code{survival_model} from \code{\link[=fit_survival_model]{fit_survival_model()}}.}
 
-\item{newdata}{\code{NULL} (the default) for the fitted cells, or a data frame
-to predict for, with the columns the panel was built from: its tenure
-column, its covariates and, if the model has year effects, its snapshot
-date column (the year is taken from it). A \code{survival_panel} works, and
-so does a lazy database table (it is collected).}
+\item{newdata}{\code{NULL} (the default), or a data frame with the panel's
+tenure column, covariates and, if the model has year effects, snapshot
+date column. A \code{survival_panel} works; a database table is collected.}
 
 \item{horizon}{Number. With \code{newdata}, the years ahead the chances are
-for, e.g. \code{1 / 12} for a monthly simulation. Default \code{1}.}
+for, e.g. \code{1 / 12} for a month. Default \code{1}.}
 
 \item{...}{Not used.}
 }
 \value{
 A data.table.
 
-\strong{Without \code{newdata}}, one row per cell: the snapshot date, \code{tenure_band}
-(the band's lower bound), the covariates, \code{exposure} (years at risk),
-and for each exit type modelled \verb{exit_<type>} (exits seen) and
-\verb{pred_<type>} (expected exits).
+\strong{Without \code{newdata}:} the snapshot date, \code{tenure_band} (its lower
+bound), the covariates, \code{exposure} (years at risk) and, for each exit
+type modelled, \verb{exit_<type>} (exits seen) and \verb{pred_<type>} (exits
+expected).
 
-\strong{With \code{newdata}}, \code{newdata} with, for each exit type modelled,
-\verb{hazard_<type>}: exits per year at risk. If both exit types were
-modelled, also \code{prob_retired}, \code{prob_other} and \code{prob_stay}: the chances
-within \code{horizon}, which add up to 1. With one exit type left out
-(\code{exit_types = "other"}), the chances are not given: leaving would look
-less likely than it is.
+\strong{With \code{newdata}:} \code{newdata} plus \verb{hazard_<type>} (exits per year at
+risk) for each exit type modelled and, if both were, \code{prob_retired},
+\code{prob_other} and \code{prob_stay}, which add up to 1.
 }
 \description{
-Two uses, from the same model:
 \itemize{
-\item \strong{Without \code{newdata}:} the cells the model was fitted on (one per
-tenure band, snapshot and covariate values), with the expected exits of
-each exit type next to the exits seen. This is the scale of the model's
-outcome, a count of exits, so it shows how well the model fits.
-\item \strong{With \code{newdata}:} one row per row of \code{newdata}, e.g. one per person,
-with the hazard of each exit type and the chance of retiring, leaving
-otherwise and staying within \code{horizon} years: what a simulation draws
-each person's next step from.
+\item \strong{Without \code{newdata}:} the groups the model was fitted on (one row per
+tenure band, snapshot date and covariate values), with the exits
+expected next to the exits seen, to check how well the model fits.
+\item \strong{With \code{newdata}:} for each row, e.g. each person, the hazard of each
+exit type and the chance of retiring, leaving otherwise or staying
+within \code{horizon} years, e.g. for a simulation.
 }
 }
 \details{
 \strong{Chances from hazards.} The hazard is constant within a tenure band, so
-the chance of leaving within \code{horizon} is \code{1 - exp(-h * horizon)}, \code{h}
-the sum of the two hazards, split between the exit types in proportion to
-their hazards.
+the chance of leaving within \code{horizon} is \code{1 - exp(-h * horizon)}, with
+\code{h} the sum of the two hazards, split between the exit types in
+proportion to their hazards. With one exit type not modelled, \code{h} is
+unknown, so no chances are given.
 
-\strong{Bands and years with no exits.} fixest drops a tenure band or year in
-which no one left (its effect is minus infinity), and predicts \code{NA} there.
-The model's estimate is 0 exits, so a band or year seen in the data but
-dropped gives 0. One never seen (e.g. a tenure beyond the panel's, or a
-year outside it) gives \code{NA}, as does a covariate level never seen.
+\strong{Levels with no exits.} fixest drops a tenure band or year in which no
+one left (its fixed effect is minus infinity) and predicts \code{NA} there. The
+maximum likelihood estimate is 0 exits, so a band or year seen in the
+data but dropped gives 0; one never seen, or a covariate level never seen,
+gives \code{NA}.
 
 \strong{No intervals.} fixest gives no standard errors for its fixed effects,
-which are most of a prediction, so no confidence intervals are given.
+which carry most of a prediction, so none are given.
 }
 \examples{
 library(data.table)
@@ -77,10 +70,10 @@ panel <- build_survival_panel(
 )
 fit <- fit_survival_model(panel, band_width = 5)
 
-# exits seen and expected in each cell
+# exits seen and expected in each group
 predict(fit)
 
-# each person's chances of retiring, leaving otherwise and staying in the
+# each person's chances of retiring, leaving otherwise or staying over the
 # next month
 predict(fit, newdata = panel, horizon = 1 / 12)
 

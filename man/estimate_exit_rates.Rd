@@ -29,8 +29,8 @@ estimate_exit_rates(
 \item{group_cols}{Character vector or \code{NULL}.  Columns to group by
 (e.g. \code{"est_id"}).  Pass \code{NULL} for an overall (ungrouped) rate.}
 
-\item{freq}{Character.  Frequency passed to
-\code{govhr::detect_personnel_event()}.  Default \code{"year"}.}
+\item{freq}{Character.  Not used: exits are found between the dates in the
+data, whatever their spacing.  Kept so existing calls still work.}
 
 \item{ref_date}{Date or character. Optional reference date (currently unused;
 included to prevent partial argument matching against \code{ref_date_col}).}
@@ -56,9 +56,9 @@ data.table with \code{group_cols} (if specified) and
 \code{exit_rate} column.
 }
 \description{
-Uses \code{govhr::detect_personnel_event(event_type = "fire")} to identify
-non-retirement attrition events (voluntary resignation, dismissal, contract
-non-renewal) across the full historical panel.  Computes
+Uses \code{\link[=detect_movement]{detect_movement()}} to identify exits from active status (an active
+person with no active record on the next date in the data) across the full
+historical panel.  Computes
 \code{exit_rate = n_exits / n_active} per group per panel snapshot, then
 returns the mean rate per group.
 }

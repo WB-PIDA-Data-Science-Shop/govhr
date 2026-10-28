@@ -703,7 +703,7 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
       paste0("`", reserved, "`", collapse = ", "),
       " cannot be passed through `...`: fit_survival_model() sets `fml`, ",
       "`data`, `offset`, `vcov` and `ssc` itself, and `weights` or `cluster` ",
-      "would be wrong on the summed cells it fits.",
+      "would be wrong once people are added up into groups.",
       call. = FALSE
     )
   }

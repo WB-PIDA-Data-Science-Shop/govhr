@@ -1,86 +1,72 @@
 #' Build a person-interval panel for survival (hazard) models
 #'
 #' @description
-#' Turns HRMIS snapshots into the dataframe a survival model of exits
-#' can is fitted on: one row per person and interval between two
-#' snapshots in which they were at risk of leaving, with how long they were
-#' at risk (`exposure`), whether and how they left by the next snapshot
-#' (`exit_type`), their pay and their covariates at the start of the
-#' interval.
+#' Turns HRMIS snapshots into the table a model of exits is fitted on: one
+#' row per person and interval between two snapshots in which they could
+#' leave, with how long they were at risk (`exposure`), whether and how they
+#' left by the next snapshot (`exit_type`), and their pay and covariates at
+#' the start of the interval.
 #'
-#'
-#' @param personnel Personnel snapshots: one row per person and
-#'   `ref_date`, as a data frame or a lazy database table (`tbl_dbi`).
-#' @param contracts Contract snapshots, one row per contract and `ref_date`,
+#' @param personnel Personnel snapshots: one row per person and `ref_date`,
+#'   as a data frame or a lazy database table (`tbl_dbi`).
+#' @param contracts Contract snapshots: one row per contract and `ref_date`,
 #'   of the same kind as `personnel`.
-#' @param tenure_col Character. The column of `personnel` with years of
-#'   service at each snapshot, e.g. from [compute_tenure_panel()]. It must
-#'   count from hiring, not from the first snapshot, or people already in
-#'   service when the panel starts look like new hires.
-#' @param salary_col Character. The pay column of `contracts`, summed across
-#'   a person's contracts. Deflate it first (see [deflate_to_real()]) to
-#'   compare pay across years.
-#' @param status_col Character or `NULL`. The column of `personnel` with
-#'   employment status: `"active"` is at risk, `"pensioner"` has retired.
-#'   `NULL` (the default) treats everyone on the payroll as active, so every
-#'   exit is `"other"`.
+#' @param tenure_col Character. The `personnel` column with years of service,
+#'   e.g. from [compute_tenure_panel()]. It must count from hiring, not from
+#'   the first snapshot.
+#' @param salary_col Character. The `contracts` pay column, summed across a
+#'   person's contracts. Deflate it first ([deflate_to_real()]) to compare
+#'   years.
+#' @param status_col Character or `NULL`. The `personnel` status column:
+#'   `"active"` can leave, `"pensioner"` has retired. `NULL` (the default)
+#'   treats everyone as active, so every exit is `"other"`.
 #' @param covariate_cols Character vector or `NULL`. Columns to carry into
-#'   the panel, each from the table that has it: `personnel` (e.g. gender)
-#'   or `contracts` (e.g. occupation, taken from the contract chosen by
-#'   `select_contract`).
+#'   the panel, from `personnel` (e.g. gender) or `contracts` (e.g.
+#'   occupation, from the contract chosen by `select_contract`).
 #' @param personnel_id_col,ref_date_col,contract_id_col Character. The
 #'   person, snapshot date and contract id columns.
 #' @param select_contract `"highest_paid"` (the default) or `"lowest_paid"`:
-#'   the contract that contract covariates come from when a person holds
+#'   which contract the contract covariates come from when a person has
 #'   several. Ties go to the lowest contract id.
 #' @param ... Not used.
 #'
-#' @returns A `survival_panel`, ready for [fit_survival_model()]: one row
-#'   per person and interval at risk, as a data.table for a data frame input
-#'   or a lazy table (unsorted) for a `tbl_dbi`. It remembers the column
-#'   arguments it was built with as attributes (`tenure_col`, `salary_col`,
-#'   `covariate_cols`, `personnel_id_col`, `ref_date_col`). Columns:
+#' @returns A `survival_panel` for [fit_survival_model()]: a data.table (a
+#'   lazy table for a `tbl_dbi`) with one row per person and interval:
 #'   \describe{
 #'     \item{personnel_id_col, ref_date_col}{The person and the start of the
 #'       interval.}
-#'     \item{next_date}{The next snapshot in the data, where the interval
-#'       ends.}
-#'     \item{tenure_col}{Years of service at the start of the interval, as
-#'       given (`NA` kept; a model drops it).}
-#'     \item{exposure}{Years at risk: the length of the interval, or half of
-#'       it for someone who left, since they left at some point within it.}
-#'     \item{exit_type}{`"none"` (active at the next snapshot), `"retired"`
-#'       (a pensioner at the next snapshot) or `"other"` (absent from it, or
-#'       any other status).}
-#'     \item{salary_col}{Total pay at the start of the interval; `NA` if the
-#'       person has no contract then.}
+#'     \item{next_date}{The next snapshot, where the interval ends.}
+#'     \item{tenure_col}{Years of service at the start (`NA` kept).}
+#'     \item{exposure}{Years at risk: the interval's length, or half of it
+#'       for someone who left.}
+#'     \item{exit_type}{At the next snapshot: `"none"` (still active),
+#'       `"retired"` (a pensioner) or `"other"` (gone, or any other status).}
+#'     \item{salary_col}{Total pay at the start; `NA` with no contract.}
 #'     \item{covariate_cols}{As at the start of the interval.}
 #'   }
+#'   It remembers the column arguments, so [fit_survival_model()] needs none.
 #'
 #' @details
-#' A Poisson regression of exits with `log(exposure)` as an offset on this
-#' panel estimates a piecewise-constant proportional hazards model; `exp()`
-#' of a covariate's coefficient is its hazard ratio. Fit one model per exit
-#' type (retirement, other exits) for cause-specific hazards.
-#' 
-#' **Who is at risk.** Everyone active at a snapshot that has a next one.
-#' Pensioners are not at risk.
+#' **Model.** A Poisson regression of exits with a `log(exposure)` offset on
+#' this panel is a piecewise-constant proportional hazards model;
+#' [fit_survival_model()] fits one per exit type (cause-specific hazards).
 #'
-#' **Censoring.** The last snapshot has no next one, so no one is seen
-#' leaving after it: it adds no rows. Someone still in service at the end
-#' counts as at risk for every interval seen, and never as a leaver.
+#' **Risk set and censoring.** Everyone active at a snapshot that has a next
+#' one; pensioners are not at risk. The last snapshot is right-censored: it
+#' adds no rows, and someone still in service then never counts as a leaver.
 #'
-#' **Truncation.** Someone already in service when the panel starts enters
-#' at the tenure they are first seen at and adds nothing to earlier tenures.
-#' This is right as long as `tenure_col` counts from hiring.
+#' **Left truncation.** Someone in service when the panel starts enters at
+#' the tenure first seen and adds nothing to earlier tenures, which is right
+#' as long as `tenure_col` counts from hiring.
 #'
-#' **Leaving and coming back.** Absence at the next snapshot is an exit. If
-#' the person reappears later, their rows start again from there.
+#' **Exits and returns.** Absence at the next snapshot is an exit, counted as
+#' half the interval at risk; someone who reappears is at risk again from
+#' there.
 #'
-#' **Intervals.** An interval runs to the next snapshot in the data, so one
-#' that spans a snapshot missing for everyone counts its real length, and
-#' monthly snapshots give monthly exposures, in years (January 2020 is
-#' 31/366).
+#' **Intervals.** An interval runs to the next snapshot in the data, so
+#' monthly or irregular snapshots work: exposure is always in years (January
+#' 2020 is 31/366), and a snapshot missing for everyone makes the interval
+#' longer rather than counting as exits.
 #'
 #' **Duplicates.** A person seen twice at one snapshot is kept once (the
 #' first by status), with a warning.
@@ -100,16 +86,8 @@
 #' )
 #' panel[, .N, by = exit_type]
 #'
-#' # hazard ratio of other exits for men vs women, by 5-year tenure band
-#' panel[, tenure_band := floor(tenure_years / 5) * 5]
-#' fit <- fixest::fepois(
-#'   I(exit_type == "other") ~ gender | tenure_band,
-#'   offset = ~ log(exposure), data = panel
-#' )
-#' exp(stats::coef(fit))
-#'
-#' @seealso [compute_career_table()] for stay rates and pay growth by tenure
-#'   without covariates.
+#' @seealso [fit_survival_model()] to model the exits; [compute_career_table()]
+#'   for stay rates and pay growth by tenure without covariates.
 #' @export
 build_survival_panel <- function(personnel, ...) {
   UseMethod("build_survival_panel")
@@ -331,60 +309,60 @@ build_survival_panel.default <- function(personnel, ...) {
 #' Fit a survival (hazard) model of leaving the service
 #'
 #' @description
-#' Fits a piecewise-constant proportional hazards model to a panel from
-#' [build_survival_panel()]: a Poisson regression of exits on the covariates,
-#' with `log(exposure)` as an offset and fixed effects for tenure band (the
-#' baseline hazard) and calendar year. One model per exit type, so the
-#' hazards of retiring and of leaving otherwise are estimated separately
-#' (cause-specific hazards).
+#' Estimates how covariates such as gender or occupation change the chance of
+#' leaving the service in a given year, for people of the same tenure in the
+#' same year, separately for retiring and for leaving otherwise.
 #'
-#' `exp()` of a coefficient is a hazard ratio: e.g. `0.8` for women means a
-#' woman is 20% less likely to leave in a given year than a man of the same
-#' tenure, in the same year, with the same other covariates.
+#' The effects are hazard ratios (see [tidy.survival_model()]): `0.8` for
+#' women means a woman is 20% less likely to leave in a given year than a
+#' comparable man.
 #'
 #' @param panel A `survival_panel` from [build_survival_panel()], in memory
 #'   or in a database.
-#' @param covariate_cols Character vector. The covariates to put in the
-#'   model. Defaults to those the panel was built with; `character(0)` fits
-#'   tenure (and year) effects only. Character columns become categories,
-#'   numeric columns enter linearly.
-#' @param exit_types Which exits to model: any of `"retired"` and `"other"`.
-#'   Both by default. An exit type no one in the panel had is left out, with
-#'   a warning.
-#' @param band_width Number. The width of the tenure bands the baseline
-#'   hazard is constant within, in years. Default `1`.
-#' @param period_effects Logical. If `TRUE` (the default), add a fixed effect
-#'   for each calendar year, which absorbs shocks that hit everyone in a
+#' @param covariate_cols Character vector. The covariates to model. Defaults
+#'   to those the panel was built with; `character(0)` for tenure (and year)
+#'   effects only. Character columns become categories, numeric ones enter
+#'   linearly.
+#' @param exit_types Any of `"retired"` and `"other"` (both by default). An
+#'   exit type no one had is left out, with a warning.
+#' @param band_width Number. The width in years of the tenure bands within
+#'   which the chance of leaving is taken as constant. Default `1`.
+#' @param period_effects Logical. If `TRUE` (the default), each calendar year
+#'   gets its own level of exits, absorbing shocks that hit everyone in a
 #'   year.
-#' @param make_tidy_output Logical. If `TRUE`, return the table of hazard
-#'   ratios from [tidy.survival_model()] instead of the model. If `FALSE`
-#'   (the default), return the model.
-#' @param ... Further arguments passed to [fixest::fepois()], e.g.
-#'   `nthreads` or `fixef.tol`. Not `fml`, `data`, `offset`, `vcov`, `ssc`,
-#'   `weights` or `cluster`: the first five are set by this function, and
-#'   weights or clusters would be wrong on the summed cells (see Details).
+#' @param make_tidy_output Logical. If `TRUE`, return the hazard ratio table
+#'   from [tidy.survival_model()] instead of the model. Default `FALSE`.
+#' @param ... Passed to [fixest::fepois()], e.g. `nthreads`. Not `fml`,
+#'   `data`, `offset`, `vcov`, `ssc`, `weights` or `cluster` (see Details).
 #'
-#' @returns A `survival_model`: the output of [fixest::fepois()], a
-#'   `fixest_multi` with one model per exit type (`exit_retired`,
-#'   `exit_other`), or a `fixest` if only one is fitted. fixest's own
-#'   functions (`summary()`, `coef()`, `fixest::fixef()`, `fixest::etable()`)
-#'   work on it as usual; [tidy.survival_model()] gives a table of hazard
-#'   ratios. With `make_tidy_output = TRUE`, that table (a tibble) instead.
+#' @returns A `survival_model`, for [tidy.survival_model()] and
+#'   [predict.survival_model()]; fixest's own functions (`summary()`,
+#'   `coef()`, `fixest::fixef()`, `fixest::etable()`) work on it too. With
+#'   `make_tidy_output = TRUE`, the hazard ratio table instead.
 #'
 #' @details
-#' **Cells, not rows.** Exits and years at risk are all a Poisson model
-#' needs, so the panel is first summed to cells of tenure band, snapshot and
-#' covariates (in the database, for a database panel). The estimates and
-#' standard errors are the same as on the person-intervals; the number of
-#' observations fixest reports is the number of cells.
+#' **Model.** A piecewise-constant proportional hazards model, fitted as a
+#' Poisson regression of exits ([fixest::fepois()]) with a `log(exposure)`
+#' offset and fixed effects for tenure band (the baseline hazard) and, with
+#' `period_effects`, calendar year. One model per exit type gives
+#' cause-specific hazards. The result is fixest's output (a `fixest_multi`,
+#' or a `fixest` for one exit type) with class `survival_model` added.
 #'
-#' **Standard errors** are the model's own (`vcov = "iid"`, with no
-#' small-sample adjustment, which would depend on the number of cells).
+#' **Groups, not people.** The panel is first added up into groups of people
+#' with the same tenure band, snapshot date and covariate values (in the
+#' database, for a database panel). Exit counts and years at risk are
+#' sufficient statistics for a Poisson model, so the estimates and standard
+#' errors equal those on the person-level panel; fixest's number of
+#' observations is the number of groups.
+#'
+#' **Standard errors** are the model's own (`vcov = "iid"`), with no
+#' small-sample adjustment, which would depend on the number of groups. As
+#' `fml`, `data`, `offset`, `vcov` and `ssc` are set here, and `weights` or
+#' `cluster` would be wrong on grouped data, `...` cannot pass them.
 #'
 #' **Tenure and year.** Within a person, tenure and year rise together, so
-#' with both sets of fixed effects the hire cohort is implied. The model
-#' assumes that the shape of the hazard over tenure is the same for every
-#' cohort.
+#' with both sets of fixed effects the hire cohort is implied: the model
+#' assumes the shape of the hazard over tenure is the same for every cohort.
 #'
 #' @examples
 #' library(data.table)
@@ -405,7 +383,7 @@ build_survival_panel.default <- function(personnel, ...) {
 #' broom::tidy(fit)
 #'
 #' @seealso [build_survival_panel()] for the panel, [tidy.survival_model()]
-#'   for the hazard ratios.
+#'   for the hazard ratios, [predict.survival_model()] for predictions.
 #' @export
 fit_survival_model <- function(panel, ...) {
   UseMethod("fit_survival_model")
@@ -488,39 +466,36 @@ fit_survival_model.default <- function(panel, ...) {
   stop_unsupported_data(panel, "panel")
 }
 
-
-
 #' Tidy a survival model into a table of hazard ratios
 #'
 #' @description
-#' Turns the output of [fit_survival_model()] into one row per exit type and
-#' covariate term, with the hazard ratio, its standard error, test and
+#' One row per exit type and covariate, with its hazard ratio, test and
 #' confidence interval. Call it as `broom::tidy(fit)`.
 #'
-#' The tenure band and year effects are not in the table: they are the
-#' baseline hazard, not covariate effects (see `fixest::fixef()`).
-#'
 #' @param x A `survival_model` from [fit_survival_model()].
-#' @param conf.level Number. The confidence level of the interval. Default
-#'   `0.95`.
+#' @param conf.level Number. The confidence level. Default `0.95`.
 #' @param ... Not used.
 #'
-#' @returns A tibble with one row per exit type and term:
+#' @returns A tibble with one row per exit type and term, and none if the
+#'   model has no covariates:
 #'   \describe{
 #'     \item{exit_type}{`"retired"` or `"other"`.}
-#'     \item{term}{The covariate term, as fixest names it: a category's
-#'       column name followed by its level (e.g. `genderM`), or a numeric
-#'       column's name.}
-#'     \item{estimate}{The hazard ratio, `exp()` of the coefficient: e.g.
-#'       `0.8` means a 20% lower chance of leaving in a given year than the
-#'       reference category, or per unit of a numeric covariate.}
-#'     \item{std.error, statistic, p.value}{The standard error, z statistic
-#'       and p-value of the coefficient, on the log scale they are computed
-#'       on (as `broom::tidy()` does for `survival::coxph()`).}
+#'     \item{term}{The covariate as fixest names it: a category's column and
+#'       level (e.g. `genderM`), or a numeric column's name.}
+#'     \item{estimate}{The hazard ratio: e.g. `0.8` is a 20% lower chance of
+#'       leaving in a given year than the reference category (or per unit of
+#'       a numeric covariate).}
+#'     \item{std.error, statistic, p.value}{On the log scale (see Details).}
 #'     \item{conf.low, conf.high}{The confidence interval of the hazard
 #'       ratio.}
 #'   }
-#'   No rows if the model has no covariates.
+#'
+#' @details
+#' `estimate`, `conf.low` and `conf.high` are `exp()` of the coefficient and
+#' its Wald interval; `std.error`, `statistic` (z) and `p.value` are for the
+#' log coefficient, as `broom::tidy()` gives them for `survival::coxph()`.
+#' The tenure band and year fixed effects (the baseline hazard) are left
+#' out: see `fixest::fixef()`.
 #'
 #' @examples
 #' library(data.table)
@@ -571,55 +546,47 @@ tidy.survival_model <- function(x, conf.level = 0.95, ...) {
 #' Predict exits from a survival model
 #'
 #' @description
-#' Two uses, from the same model:
-#'
-#' * **Without `newdata`:** the cells the model was fitted on (one per
-#'   tenure band, snapshot and covariate values), with the expected exits of
-#'   each exit type next to the exits seen. This is the scale of the model's
-#'   outcome, a count of exits, so it shows how well the model fits.
-#' * **With `newdata`:** one row per row of `newdata`, e.g. one per person,
-#'   with the hazard of each exit type and the chance of retiring, leaving
-#'   otherwise and staying within `horizon` years: what a simulation draws
-#'   each person's next step from.
+#' * **Without `newdata`:** the groups the model was fitted on (one row per
+#'   tenure band, snapshot date and covariate values), with the exits
+#'   expected next to the exits seen, to check how well the model fits.
+#' * **With `newdata`:** for each row, e.g. each person, the hazard of each
+#'   exit type and the chance of retiring, leaving otherwise or staying
+#'   within `horizon` years, e.g. for a simulation.
 #'
 #' @param object A `survival_model` from [fit_survival_model()].
-#' @param newdata `NULL` (the default) for the fitted cells, or a data frame
-#'   to predict for, with the columns the panel was built from: its tenure
-#'   column, its covariates and, if the model has year effects, its snapshot
-#'   date column (the year is taken from it). A `survival_panel` works, and
-#'   so does a lazy database table (it is collected).
+#' @param newdata `NULL` (the default), or a data frame with the panel's
+#'   tenure column, covariates and, if the model has year effects, snapshot
+#'   date column. A `survival_panel` works; a database table is collected.
 #' @param horizon Number. With `newdata`, the years ahead the chances are
-#'   for, e.g. `1 / 12` for a monthly simulation. Default `1`.
+#'   for, e.g. `1 / 12` for a month. Default `1`.
 #' @param ... Not used.
 #'
 #' @returns A data.table.
 #'
-#'   **Without `newdata`**, one row per cell: the snapshot date, `tenure_band`
-#'   (the band's lower bound), the covariates, `exposure` (years at risk),
-#'   and for each exit type modelled `exit_<type>` (exits seen) and
-#'   `pred_<type>` (expected exits).
+#'   **Without `newdata`:** the snapshot date, `tenure_band` (its lower
+#'   bound), the covariates, `exposure` (years at risk) and, for each exit
+#'   type modelled, `exit_<type>` (exits seen) and `pred_<type>` (exits
+#'   expected).
 #'
-#'   **With `newdata`**, `newdata` with, for each exit type modelled,
-#'   `hazard_<type>`: exits per year at risk. If both exit types were
-#'   modelled, also `prob_retired`, `prob_other` and `prob_stay`: the chances
-#'   within `horizon`, which add up to 1. With one exit type left out
-#'   (`exit_types = "other"`), the chances are not given: leaving would look
-#'   less likely than it is.
+#'   **With `newdata`:** `newdata` plus `hazard_<type>` (exits per year at
+#'   risk) for each exit type modelled and, if both were, `prob_retired`,
+#'   `prob_other` and `prob_stay`, which add up to 1.
 #'
 #' @details
 #' **Chances from hazards.** The hazard is constant within a tenure band, so
-#' the chance of leaving within `horizon` is `1 - exp(-h * horizon)`, `h`
-#' the sum of the two hazards, split between the exit types in proportion to
-#' their hazards.
+#' the chance of leaving within `horizon` is `1 - exp(-h * horizon)`, with
+#' `h` the sum of the two hazards, split between the exit types in
+#' proportion to their hazards. With one exit type not modelled, `h` is
+#' unknown, so no chances are given.
 #'
-#' **Bands and years with no exits.** fixest drops a tenure band or year in
-#' which no one left (its effect is minus infinity), and predicts `NA` there.
-#' The model's estimate is 0 exits, so a band or year seen in the data but
-#' dropped gives 0. One never seen (e.g. a tenure beyond the panel's, or a
-#' year outside it) gives `NA`, as does a covariate level never seen.
+#' **Levels with no exits.** fixest drops a tenure band or year in which no
+#' one left (its fixed effect is minus infinity) and predicts `NA` there. The
+#' maximum likelihood estimate is 0 exits, so a band or year seen in the
+#' data but dropped gives 0; one never seen, or a covariate level never seen,
+#' gives `NA`.
 #'
 #' **No intervals.** fixest gives no standard errors for its fixed effects,
-#' which are most of a prediction, so no confidence intervals are given.
+#' which carry most of a prediction, so none are given.
 #'
 #' @examples
 #' library(data.table)
@@ -635,10 +602,10 @@ tidy.survival_model <- function(x, conf.level = 0.95, ...) {
 #' )
 #' fit <- fit_survival_model(panel, band_width = 5)
 #'
-#' # exits seen and expected in each cell
+#' # exits seen and expected in each group
 #' predict(fit)
 #'
-#' # each person's chances of retiring, leaving otherwise and staying in the
+#' # each person's chances of retiring, leaving otherwise or staying over the
 #' # next month
 #' predict(fit, newdata = panel, horizon = 1 / 12)
 #'

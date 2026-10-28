@@ -35,65 +35,65 @@ fit_survival_model(panel, ...)
 \item{panel}{A \code{survival_panel} from \code{\link[=build_survival_panel]{build_survival_panel()}}, in memory
 or in a database.}
 
-\item{...}{Further arguments passed to \code{\link[fixest:fepois]{fixest::fepois()}}, e.g.
-\code{nthreads} or \code{fixef.tol}. Not \code{fml}, \code{data}, \code{offset}, \code{vcov}, \code{ssc},
-\code{weights} or \code{cluster}: the first five are set by this function, and
-weights or clusters would be wrong on the summed cells (see Details).}
+\item{...}{Passed to \code{\link[fixest:fepois]{fixest::fepois()}}, e.g. \code{nthreads}. Not \code{fml},
+\code{data}, \code{offset}, \code{vcov}, \code{ssc}, \code{weights} or \code{cluster} (see Details).}
 
-\item{covariate_cols}{Character vector. The covariates to put in the
-model. Defaults to those the panel was built with; \code{character(0)} fits
-tenure (and year) effects only. Character columns become categories,
-numeric columns enter linearly.}
+\item{covariate_cols}{Character vector. The covariates to model. Defaults
+to those the panel was built with; \code{character(0)} for tenure (and year)
+effects only. Character columns become categories, numeric ones enter
+linearly.}
 
-\item{exit_types}{Which exits to model: any of \code{"retired"} and \code{"other"}.
-Both by default. An exit type no one in the panel had is left out, with
-a warning.}
+\item{exit_types}{Any of \code{"retired"} and \code{"other"} (both by default). An
+exit type no one had is left out, with a warning.}
 
-\item{band_width}{Number. The width of the tenure bands the baseline
-hazard is constant within, in years. Default \code{1}.}
+\item{band_width}{Number. The width in years of the tenure bands within
+which the chance of leaving is taken as constant. Default \code{1}.}
 
-\item{period_effects}{Logical. If \code{TRUE} (the default), add a fixed effect
-for each calendar year, which absorbs shocks that hit everyone in a
+\item{period_effects}{Logical. If \code{TRUE} (the default), each calendar year
+gets its own level of exits, absorbing shocks that hit everyone in a
 year.}
 
-\item{make_tidy_output}{Logical. If \code{TRUE}, return the table of hazard
-ratios from \code{\link[=tidy.survival_model]{tidy.survival_model()}} instead of the model. If \code{FALSE}
-(the default), return the model.}
+\item{make_tidy_output}{Logical. If \code{TRUE}, return the hazard ratio table
+from \code{\link[=tidy.survival_model]{tidy.survival_model()}} instead of the model. Default \code{FALSE}.}
 }
 \value{
-A \code{survival_model}: the output of \code{\link[fixest:fepois]{fixest::fepois()}}, a
-\code{fixest_multi} with one model per exit type (\code{exit_retired},
-\code{exit_other}), or a \code{fixest} if only one is fitted. fixest's own
-functions (\code{summary()}, \code{coef()}, \code{fixest::fixef()}, \code{fixest::etable()})
-work on it as usual; \code{\link[=tidy.survival_model]{tidy.survival_model()}} gives a table of hazard
-ratios. With \code{make_tidy_output = TRUE}, that table (a tibble) instead.
+A \code{survival_model}, for \code{\link[=tidy.survival_model]{tidy.survival_model()}} and
+\code{\link[=predict.survival_model]{predict.survival_model()}}; fixest's own functions (\code{summary()},
+\code{coef()}, \code{fixest::fixef()}, \code{fixest::etable()}) work on it too. With
+\code{make_tidy_output = TRUE}, the hazard ratio table instead.
 }
 \description{
-Fits a piecewise-constant proportional hazards model to a panel from
-\code{\link[=build_survival_panel]{build_survival_panel()}}: a Poisson regression of exits on the covariates,
-with \code{log(exposure)} as an offset and fixed effects for tenure band (the
-baseline hazard) and calendar year. One model per exit type, so the
-hazards of retiring and of leaving otherwise are estimated separately
-(cause-specific hazards).
+Estimates how covariates such as gender or occupation change the chance of
+leaving the service in a given year, for people of the same tenure in the
+same year, separately for retiring and for leaving otherwise.
 
-\code{exp()} of a coefficient is a hazard ratio: e.g. \code{0.8} for women means a
-woman is 20\% less likely to leave in a given year than a man of the same
-tenure, in the same year, with the same other covariates.
+The effects are hazard ratios (see \code{\link[=tidy.survival_model]{tidy.survival_model()}}): \code{0.8} for
+women means a woman is 20\% less likely to leave in a given year than a
+comparable man.
 }
 \details{
-\strong{Cells, not rows.} Exits and years at risk are all a Poisson model
-needs, so the panel is first summed to cells of tenure band, snapshot and
-covariates (in the database, for a database panel). The estimates and
-standard errors are the same as on the person-intervals; the number of
-observations fixest reports is the number of cells.
+\strong{Model.} A piecewise-constant proportional hazards model, fitted as a
+Poisson regression of exits (\code{\link[fixest:fepois]{fixest::fepois()}}) with a \code{log(exposure)}
+offset and fixed effects for tenure band (the baseline hazard) and, with
+\code{period_effects}, calendar year. One model per exit type gives
+cause-specific hazards. The result is fixest's output (a \code{fixest_multi},
+or a \code{fixest} for one exit type) with class \code{survival_model} added.
 
-\strong{Standard errors} are the model's own (\code{vcov = "iid"}, with no
-small-sample adjustment, which would depend on the number of cells).
+\strong{Groups, not people.} The panel is first added up into groups of people
+with the same tenure band, snapshot date and covariate values (in the
+database, for a database panel). Exit counts and years at risk are
+sufficient statistics for a Poisson model, so the estimates and standard
+errors equal those on the person-level panel; fixest's number of
+observations is the number of groups.
+
+\strong{Standard errors} are the model's own (\code{vcov = "iid"}), with no
+small-sample adjustment, which would depend on the number of groups. As
+\code{fml}, \code{data}, \code{offset}, \code{vcov} and \code{ssc} are set here, and \code{weights} or
+\code{cluster} would be wrong on grouped data, \code{...} cannot pass them.
 
 \strong{Tenure and year.} Within a person, tenure and year rise together, so
-with both sets of fixed effects the hire cohort is implied. The model
-assumes that the shape of the hazard over tenure is the same for every
-cohort.
+with both sets of fixed effects the hire cohort is implied: the model
+assumes the shape of the hazard over tenure is the same for every cohort.
 }
 \examples{
 library(data.table)
@@ -116,5 +116,5 @@ broom::tidy(fit)
 }
 \seealso{
 \code{\link[=build_survival_panel]{build_survival_panel()}} for the panel, \code{\link[=tidy.survival_model]{tidy.survival_model()}}
-for the hazard ratios.
+for the hazard ratios, \code{\link[=predict.survival_model]{predict.survival_model()}} for predictions.
 }

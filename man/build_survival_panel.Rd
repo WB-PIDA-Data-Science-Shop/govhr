@@ -40,95 +40,82 @@ build_survival_panel(personnel, ...)
 \method{build_survival_panel}{default}(personnel, ...)
 }
 \arguments{
-\item{personnel}{Personnel snapshots: one row per person and
-\code{ref_date}, as a data frame or a lazy database table (\code{tbl_dbi}).}
+\item{personnel}{Personnel snapshots: one row per person and \code{ref_date},
+as a data frame or a lazy database table (\code{tbl_dbi}).}
 
 \item{...}{Not used.}
 
-\item{contracts}{Contract snapshots, one row per contract and \code{ref_date},
+\item{contracts}{Contract snapshots: one row per contract and \code{ref_date},
 of the same kind as \code{personnel}.}
 
-\item{tenure_col}{Character. The column of \code{personnel} with years of
-service at each snapshot, e.g. from \code{\link[=compute_tenure_panel]{compute_tenure_panel()}}. It must
-count from hiring, not from the first snapshot, or people already in
-service when the panel starts look like new hires.}
+\item{tenure_col}{Character. The \code{personnel} column with years of service,
+e.g. from \code{\link[=compute_tenure_panel]{compute_tenure_panel()}}. It must count from hiring, not from
+the first snapshot.}
 
-\item{salary_col}{Character. The pay column of \code{contracts}, summed across
-a person's contracts. Deflate it first (see \code{\link[=deflate_to_real]{deflate_to_real()}}) to
-compare pay across years.}
+\item{salary_col}{Character. The \code{contracts} pay column, summed across a
+person's contracts. Deflate it first (\code{\link[=deflate_to_real]{deflate_to_real()}}) to compare
+years.}
 
-\item{status_col}{Character or \code{NULL}. The column of \code{personnel} with
-employment status: \code{"active"} is at risk, \code{"pensioner"} has retired.
-\code{NULL} (the default) treats everyone on the payroll as active, so every
-exit is \code{"other"}.}
+\item{status_col}{Character or \code{NULL}. The \code{personnel} status column:
+\code{"active"} can leave, \code{"pensioner"} has retired. \code{NULL} (the default)
+treats everyone as active, so every exit is \code{"other"}.}
 
 \item{covariate_cols}{Character vector or \code{NULL}. Columns to carry into
-the panel, each from the table that has it: \code{personnel} (e.g. gender)
-or \code{contracts} (e.g. occupation, taken from the contract chosen by
-\code{select_contract}).}
+the panel, from \code{personnel} (e.g. gender) or \code{contracts} (e.g.
+occupation, from the contract chosen by \code{select_contract}).}
 
 \item{personnel_id_col, ref_date_col, contract_id_col}{Character. The
 person, snapshot date and contract id columns.}
 
 \item{select_contract}{\code{"highest_paid"} (the default) or \code{"lowest_paid"}:
-the contract that contract covariates come from when a person holds
+which contract the contract covariates come from when a person has
 several. Ties go to the lowest contract id.}
 }
 \value{
-A \code{survival_panel}, ready for \code{\link[=fit_survival_model]{fit_survival_model()}}: one row
-per person and interval at risk, as a data.table for a data frame input
-or a lazy table (unsorted) for a \code{tbl_dbi}. It remembers the column
-arguments it was built with as attributes (\code{tenure_col}, \code{salary_col},
-\code{covariate_cols}, \code{personnel_id_col}, \code{ref_date_col}). Columns:
+A \code{survival_panel} for \code{\link[=fit_survival_model]{fit_survival_model()}}: a data.table (a
+lazy table for a \code{tbl_dbi}) with one row per person and interval:
 \describe{
 \item{personnel_id_col, ref_date_col}{The person and the start of the
 interval.}
-\item{next_date}{The next snapshot in the data, where the interval
-ends.}
-\item{tenure_col}{Years of service at the start of the interval, as
-given (\code{NA} kept; a model drops it).}
-\item{exposure}{Years at risk: the length of the interval, or half of
-it for someone who left, since they left at some point within it.}
-\item{exit_type}{\code{"none"} (active at the next snapshot), \code{"retired"}
-(a pensioner at the next snapshot) or \code{"other"} (absent from it, or
-any other status).}
-\item{salary_col}{Total pay at the start of the interval; \code{NA} if the
-person has no contract then.}
+\item{next_date}{The next snapshot, where the interval ends.}
+\item{tenure_col}{Years of service at the start (\code{NA} kept).}
+\item{exposure}{Years at risk: the interval's length, or half of it
+for someone who left.}
+\item{exit_type}{At the next snapshot: \code{"none"} (still active),
+\code{"retired"} (a pensioner) or \code{"other"} (gone, or any other status).}
+\item{salary_col}{Total pay at the start; \code{NA} with no contract.}
 \item{covariate_cols}{As at the start of the interval.}
 }
+It remembers the column arguments, so \code{\link[=fit_survival_model]{fit_survival_model()}} needs none.
 }
 \description{
-Turns HRMIS snapshots into the dataframe a survival model of exits
-can is fitted on: one row per person and interval between two
-snapshots in which they were at risk of leaving, with how long they were
-at risk (\code{exposure}), whether and how they left by the next snapshot
-(\code{exit_type}), their pay and their covariates at the start of the
-interval.
+Turns HRMIS snapshots into the table a model of exits is fitted on: one
+row per person and interval between two snapshots in which they could
+leave, with how long they were at risk (\code{exposure}), whether and how they
+left by the next snapshot (\code{exit_type}), and their pay and covariates at
+the start of the interval.
 }
 \details{
-A Poisson regression of exits with \code{log(exposure)} as an offset on this
-panel estimates a piecewise-constant proportional hazards model; \code{exp()}
-of a covariate's coefficient is its hazard ratio. Fit one model per exit
-type (retirement, other exits) for cause-specific hazards.
+\strong{Model.} A Poisson regression of exits with a \code{log(exposure)} offset on
+this panel is a piecewise-constant proportional hazards model;
+\code{\link[=fit_survival_model]{fit_survival_model()}} fits one per exit type (cause-specific hazards).
 
-\strong{Who is at risk.} Everyone active at a snapshot that has a next one.
-Pensioners are not at risk.
+\strong{Risk set and censoring.} Everyone active at a snapshot that has a next
+one; pensioners are not at risk. The last snapshot is right-censored: it
+adds no rows, and someone still in service then never counts as a leaver.
 
-\strong{Censoring.} The last snapshot has no next one, so no one is seen
-leaving after it: it adds no rows. Someone still in service at the end
-counts as at risk for every interval seen, and never as a leaver.
+\strong{Left truncation.} Someone in service when the panel starts enters at
+the tenure first seen and adds nothing to earlier tenures, which is right
+as long as \code{tenure_col} counts from hiring.
 
-\strong{Truncation.} Someone already in service when the panel starts enters
-at the tenure they are first seen at and adds nothing to earlier tenures.
-This is right as long as \code{tenure_col} counts from hiring.
+\strong{Exits and returns.} Absence at the next snapshot is an exit, counted as
+half the interval at risk; someone who reappears is at risk again from
+there.
 
-\strong{Leaving and coming back.} Absence at the next snapshot is an exit. If
-the person reappears later, their rows start again from there.
-
-\strong{Intervals.} An interval runs to the next snapshot in the data, so one
-that spans a snapshot missing for everyone counts its real length, and
-monthly snapshots give monthly exposures, in years (January 2020 is
-31/366).
+\strong{Intervals.} An interval runs to the next snapshot in the data, so
+monthly or irregular snapshots work: exposure is always in years (January
+2020 is 31/366), and a snapshot missing for everyone makes the interval
+longer rather than counting as exits.
 
 \strong{Duplicates.} A person seen twice at one snapshot is kept once (the
 first by status), with a warning.
@@ -148,16 +135,8 @@ panel <- build_survival_panel(
 )
 panel[, .N, by = exit_type]
 
-# hazard ratio of other exits for men vs women, by 5-year tenure band
-panel[, tenure_band := floor(tenure_years / 5) * 5]
-fit <- fixest::fepois(
-  I(exit_type == "other") ~ gender | tenure_band,
-  offset = ~ log(exposure), data = panel
-)
-exp(stats::coef(fit))
-
 }
 \seealso{
-\code{\link[=compute_career_table]{compute_career_table()}} for stay rates and pay growth by tenure
-without covariates.
+\code{\link[=fit_survival_model]{fit_survival_model()}} to model the exits; \code{\link[=compute_career_table]{compute_career_table()}}
+for stay rates and pay growth by tenure without covariates.
 }

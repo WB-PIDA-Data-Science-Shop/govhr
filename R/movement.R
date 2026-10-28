@@ -1132,9 +1132,9 @@ compute_retirement.tbl_dbi <- function(
 #' Estimate historical non-retirement exit rates from panel data
 #'
 #' @description
-#' Uses \code{govhr::detect_personnel_event(event_type = "fire")} to identify
-#' non-retirement attrition events (voluntary resignation, dismissal, contract
-#' non-renewal) across the full historical panel.  Computes
+#' Uses [detect_movement()] to identify exits from active status (an active
+#' person with no active record on the next date in the data) across the full
+#' historical panel.  Computes
 #' \code{exit_rate = n_exits / n_active} per group per panel snapshot, then
 #' returns the mean rate per group.
 #'
@@ -1143,8 +1143,8 @@ compute_retirement.tbl_dbi <- function(
 #' @param personnel Data.table.  Full panel of personnel data.
 #' @param group_cols Character vector or \code{NULL}.  Columns to group by
 #'   (e.g. \code{"est_id"}).  Pass \code{NULL} for an overall (ungrouped) rate.
-#' @param freq Character.  Frequency passed to
-#'   \code{govhr::detect_personnel_event()}.  Default \code{"year"}.
+#' @param freq Character.  Not used: exits are found between the dates in the
+#'   data, whatever their spacing.  Kept so existing calls still work.
 #' @param personnel_id_col Character.  Default \code{"personnel_id"}.
 #' @param ref_date Date or character. Optional reference date (currently unused;
 #'   included to prevent partial argument matching against \code{ref_date_col}).
@@ -1227,20 +1227,27 @@ estimate_exit_rates <- function(
     )
   }
 
-  start_str <- format(min(panel_dates))
-  end_str <- format(max(panel_dates))
-
-  # Detect non-retirement exit events across the full panel
-  fire_events <- govhr::detect_personnel_event(
-    data = panel_personnel_dt,
-    id_col = personnel_id_col,
-    event_type = "fire",
-    start_date = start_str,
-    end_date = end_str,
-    freq = freq,
-    status_col = status_col
+  # Detect exit events across the full panel: an active person with no active
+  # record on the next date in the data. detect_movement() expects the columns
+  # to be called personnel_id and ref_date, so rename on the way in and out
+  person_dt <- panel_personnel_dt[,
+    c(personnel_id_col, ref_date_col, status_col),
+    with = FALSE
+  ]
+  data.table::setnames(
+    person_dt,
+    c(personnel_id_col, ref_date_col),
+    c("personnel_id", "ref_date")
   )
-  # fire_events columns: personnel_id_col, ref_date, type_event
+  fire_events <- detect_movement(person_dt, status_col = status_col)[
+    separation %in% TRUE,
+    .(personnel_id, ref_date)
+  ]
+  data.table::setnames(
+    fire_events,
+    c("personnel_id", "ref_date"),
+    c(personnel_id_col, ref_date_col)
+  )
 
   # Join to contract panel to retrieve group_cols per exit
   if (!is.null(group_cols) && length(group_cols) > 0) {

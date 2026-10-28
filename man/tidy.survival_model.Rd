@@ -9,36 +9,35 @@
 \arguments{
 \item{x}{A \code{survival_model} from \code{\link[=fit_survival_model]{fit_survival_model()}}.}
 
-\item{conf.level}{Number. The confidence level of the interval. Default
-\code{0.95}.}
+\item{conf.level}{Number. The confidence level. Default \code{0.95}.}
 
 \item{...}{Not used.}
 }
 \value{
-A tibble with one row per exit type and term:
+A tibble with one row per exit type and term, and none if the
+model has no covariates:
 \describe{
 \item{exit_type}{\code{"retired"} or \code{"other"}.}
-\item{term}{The covariate term, as fixest names it: a category's
-column name followed by its level (e.g. \code{genderM}), or a numeric
-column's name.}
-\item{estimate}{The hazard ratio, \code{exp()} of the coefficient: e.g.
-\code{0.8} means a 20\% lower chance of leaving in a given year than the
-reference category, or per unit of a numeric covariate.}
-\item{std.error, statistic, p.value}{The standard error, z statistic
-and p-value of the coefficient, on the log scale they are computed
-on (as \code{broom::tidy()} does for \code{survival::coxph()}).}
+\item{term}{The covariate as fixest names it: a category's column and
+level (e.g. \code{genderM}), or a numeric column's name.}
+\item{estimate}{The hazard ratio: e.g. \code{0.8} is a 20\% lower chance of
+leaving in a given year than the reference category (or per unit of
+a numeric covariate).}
+\item{std.error, statistic, p.value}{On the log scale (see Details).}
 \item{conf.low, conf.high}{The confidence interval of the hazard
 ratio.}
 }
-No rows if the model has no covariates.
 }
 \description{
-Turns the output of \code{\link[=fit_survival_model]{fit_survival_model()}} into one row per exit type and
-covariate term, with the hazard ratio, its standard error, test and
+One row per exit type and covariate, with its hazard ratio, test and
 confidence interval. Call it as \code{broom::tidy(fit)}.
-
-The tenure band and year effects are not in the table: they are the
-baseline hazard, not covariate effects (see \code{fixest::fixef()}).
+}
+\details{
+\code{estimate}, \code{conf.low} and \code{conf.high} are \code{exp()} of the coefficient and
+its Wald interval; \code{std.error}, \code{statistic} (z) and \code{p.value} are for the
+log coefficient, as \code{broom::tidy()} gives them for \code{survival::coxph()}.
+The tenure band and year fixed effects (the baseline hazard) are left
+out: see \code{fixest::fixef()}.
 }
 \examples{
 library(data.table)
