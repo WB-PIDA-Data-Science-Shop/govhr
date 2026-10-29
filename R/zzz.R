@@ -5,6 +5,10 @@
 
 if (getRversion() >= "2.15.1") {
   utils::globalVariables(c(
+    # detect_personnel_event
+    "is_active",
+    "is_event",
+    "type_event",
     "contract_id",
     "est_date",
     "personnel_id",
@@ -206,11 +210,9 @@ if (getRversion() >= "2.15.1") {
     "INDICATOR",
     "ref_date",
     "lead_status",
-    "expanded",
     "interval_days",
     "birth_date",
     "ppp_2021",
-    "type_event",
     "employment_status",
     "est_id_nested",
     "term",

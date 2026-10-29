@@ -54,12 +54,10 @@ test_that("grouped plot helpers accept ref_date without a ref_date column", {
     percentile_50 = c(2, 2.1),
     percentile_upper = c(3, 3.1)
   )
-  costs <- tibble::tibble(ref_date = as.Date("2020-01-01"), movement_cost = 500)
 
   expect_no_error(plot_trend(trend, group_col = "ref_date"))
   expect_no_error(plot_decile(deciles, group_col = "ref_date"))
   expect_no_error(plot_compression_ratio(compression, group_col = "ref_date"))
-  expect_no_error(plot_movement_cost(costs, group_col = "ref_date"))
 })
 # ---- plot_movement -----------------------------------------------------------
 

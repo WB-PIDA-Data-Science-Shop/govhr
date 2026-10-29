@@ -92,7 +92,6 @@ reference:
       - compute_retirement
       - compute_retirement_cost
       - detect_personnel_event
-      - complete_dates
 
   - title: Transitions
     desc: "`R/transition.R`: moves between groups, such as paygrades."
@@ -180,12 +179,7 @@ reference:
     desc: "`R/plots.R`"
     contents:
       - scale_plot_height
-      - ggplot_point_line
-      - ggplot_segment
-      - ggplot_coef
-      - plot_segment
       - plot_movement
-      - plot_movement_cost
       - plot_decile
       - plot_histogram
       - plot_compression_ratio

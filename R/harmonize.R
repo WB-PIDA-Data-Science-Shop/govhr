@@ -725,56 +725,6 @@ classify_text <- function(
   result[]
 }
 
-#' Convert data to match original class
-#'
-#' Converts a dataset to have the same class as another reference dataset.
-#' This is useful for ensuring consistent output formats when performing
-#' operations that temporarily convert data structures (e.g., between
-#' `data.table`, `data.frame`, or `tibble`).
-#'
-#' @param data A dataset to be converted. Typically a `data.table` or `data.frame`.
-#' @param data_original The original dataset whose class should be matched.
-#'
-#' @returns The input \code{data} converted to the same class as \code{data_original}.
-#'
-#' @details
-#' The function checks the class of \code{data_original} in the following order:
-#' \itemize{
-#'   \item If it is a tibble (`tbl_df`), \code{data} is converted using
-#'     \code{tibble::as_tibble()}.
-#'   \item If it is a base data frame but not a data.table, \code{data} is converted
-#'     using \code{as.data.frame()}.
-#'   \item Otherwise, \code{data} is returned unchanged (e.g., for data.table input).
-#' }
-#'
-#' @examples
-#' \dontrun{
-#' df <- data.frame(x = 1:3)
-#' dt <- data.table::as.data.table(df)
-#'
-#' # Convert dt back to data.frame to match df
-#' convert_data(dt, df)
-#'
-#' # Convert to tibble if original was tibble
-#' convert_data(dt, tibble::as_tibble(df))
-#' }
-#'
-#' @importFrom tibble as_tibble
-#' @keywords internal
-#'
-convert_data <- function(data, data_original) {
-  if ("tbl_df" %in% class(data_original)) {
-    data <- tibble::as_tibble(data)
-  } else if (
-    "data.frame" %in%
-      class(data_original) &&
-      !"data.table" %in% class(data_original)
-  ) {
-    data <- as.data.frame(data)
-  }
-  return(data)
-}
-
 #' Guess the reporting frequency of the reference dates
 #'
 #' Evaluates a vector of reference dates and returns a single

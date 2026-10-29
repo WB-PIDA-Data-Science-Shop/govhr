@@ -1,125 +1,78 @@
-library(testthat)
-library(data.table)
-library(lubridate)
-library(dplyr)
+# ---- detect_personnel_event --------------------------------------------------
+# Deprecated in favour of detect_movement() and detect_retirement(), but kept
+# for callers such as govhrcast, so its behaviour is pinned down here.
 
-set.seed(123)
-
-# Large synthetic dataset
-n_personnel <- 1000
-years <- 2015:2025
-
-personnel_dt <- data.table(
-  personnel_id = rep(1:n_personnel, each = length(years)),
-  ref_date = rep(ymd(paste0(years, "-01-01")), times = n_personnel),
-  employment_status = sample(c("active", "inactive"), n_personnel * length(years), replace = TRUE, prob = c(0.7, 0.3))
+# 1 is active throughout. 2 joins in 2021, so is a hire. 3 leaves after 2021,
+# so is a fire. 4 is missing in 2021 and back in 2022, so is a fire in 2020 and
+# a hire in 2022. 5 is only ever inactive
+personnel <- data.frame(
+  personnel_id = c(1, 1, 1, 2, 2, 3, 3, 4, 4, 5),
+  ref_date = as.Date(c(
+    "2020-01-01", "2021-01-01", "2022-01-01",
+    "2021-01-01", "2022-01-01",
+    "2020-01-01", "2021-01-01",
+    "2020-01-01", "2022-01-01",
+    "2021-01-01"
+  )),
+  employment_status = c(rep("active", 9), "inactive")
 )
 
-convert_data <- function(dt_expanded, original_data) {
-  # For testing: return dt_expanded
-  return(dt_expanded)
+detect <- function(data, event_type, ...) {
+  detect_personnel_event(
+    data,
+    id_col = "personnel_id",
+    event_type = event_type,
+    start_date = "2020-01-01",
+    end_date = "2022-01-01",
+    status_col = "employment_status",
+    ...
+  )
 }
 
-test_that("detect_personnel_event detects hires correctly", {
-  res <- detect_personnel_event(
-    data = personnel_dt,
-    id_col = "personnel_id",
-    event_type = "hire",
-    start_date = "2015-01-01",
-    end_date = "2025-12-31",
-    freq = "year",
-    status_col = "employment_status"
+test_that("detect_personnel_event flags hires and fires, with a warning naming the replacement", {
+  lifecycle::expect_deprecated(
+    hires <- detect(personnel, "hire"),
+    "the `hire` column of `detect_movement\\(\\)`"
+  )
+  lifecycle::expect_deprecated(
+    fires <- detect(personnel, "fire"),
+    "`separation` column of `detect_movement\\(\\)`, and `detect_retirement\\(\\)`"
   )
 
-  # Output should have only 'hire' events
-  expect_true(all(res$type_event == "hire"))
+  expect_s3_class(hires, "data.frame")
+  expect_false(data.table::is.data.table(hires))
+  expect_named(hires, c("personnel_id", "ref_date", "type_event"))
+  expect_equal(hires$personnel_id, c(2, 4))
+  expect_equal(hires$ref_date, as.Date(c("2021-01-01", "2022-01-01")))
+  expect_equal(unique(hires$type_event), "hire")
 
-  # Output columns should exist
-  expect_true(all(c("personnel_id", "ref_date", "type_event") %in% names(res)))
+  expect_equal(fires$personnel_id, c(3, 4))
+  expect_equal(fires$ref_date, as.Date(c("2021-01-01", "2020-01-01")))
+  expect_equal(unique(fires$type_event), "fire")
 
-  # All personnel_id should be in 1:n_personnel
-  expect_true(all(res$personnel_id %in% 1:n_personnel))
+  expect_error(
+    suppressWarnings(detect(personnel, "retire")),
+    "should be one of"
+  )
 })
 
-test_that("detect_personnel_event detects fires correctly", {
-  res <- detect_personnel_event(
-    data = personnel_dt,
-    id_col = "personnel_id",
-    event_type = "fire",
-    start_date = "2015-01-01",
-    end_date = "2025-12-31",
-    freq = "year",
-    status_col = "employment_status"
+test_that("detect_personnel_event matches detect_movement on evenly spaced dates", {
+  movement <- detect_movement(personnel)
+
+  hires <- suppressWarnings(detect(data.table::as.data.table(personnel), "hire"))
+  fires <- suppressWarnings(detect(data.table::as.data.table(personnel), "fire"))
+
+  expect_true(data.table::is.data.table(hires))
+  expect_equal(
+    hires[order(ref_date, personnel_id), .(personnel_id, ref_date)],
+    movement[hire %in% TRUE, .(personnel_id, ref_date)]
+  )
+  expect_equal(
+    fires[order(ref_date, personnel_id), .(personnel_id, ref_date)],
+    movement[separation %in% TRUE, .(personnel_id, ref_date)]
   )
 
-  # Output should have only 'fire' events
-  expect_true(all(res$type_event == "fire"))
-
-  # Columns should exist
-  expect_true(all(c("personnel_id", "ref_date", "type_event") %in% names(res)))
-
-  # All personnel_id should be in 1:n_personnel
-  expect_true(all(res$personnel_id %in% 1:n_personnel))
+  # a date nobody is recorded on still counts as a gap: 1 is missing in 2021
+  biennial <- personnel[personnel$personnel_id == 1 & personnel$ref_date != as.Date("2021-01-01"), ]
+  expect_equal(suppressWarnings(detect(biennial, "hire"))$ref_date, as.Date("2022-01-01"))
 })
-
-test_that("detect_personnel_event ignores inactive personnel", {
-  # Add a fully inactive personnel
-  dt2 <- copy(personnel_dt)
-  dt2[personnel_id == 1, employment_status := "inactive"]
-
-  res <- detect_personnel_event(
-    data = dt2,
-    id_col = "personnel_id",
-    event_type = "hire",
-    start_date = "2015-01-01",
-    end_date = "2025-12-31",
-    freq = "year",
-    status_col = "employment_status"
-  )
-
-  # personnel_id 1 should not appear
-  expect_false(1 %in% res$personnel_id)
-})
-
-test_that("detect_personnel_event works with multiple personnel and dates", {
-  # Randomly set some active/inactive transitions
-  dt3 <- copy(personnel_dt)
-  dt3[, status := sample(c("active", "inactive"), .N, replace = TRUE)]
-
-  res_hire <- detect_personnel_event(dt3, "personnel_id", "hire", "2015-01-01", "2025-12-31", status_col = "employment_status")
-  res_fire <- detect_personnel_event(dt3, "personnel_id", "fire", "2015-01-01", "2025-12-31", status_col = "employment_status")
-
-  # Should return data.tables with correct columns
-  expect_true(all(c("personnel_id", "ref_date", "type_event") %in% names(res_hire)))
-  expect_true(all(c("personnel_id", "ref_date", "type_event") %in% names(res_fire)))
-
-  # Should contain at least some events
-  expect_true(nrow(res_hire) > 0)
-  expect_true(nrow(res_fire) > 0)
-})
-
-test_that("detect_personnel_event output respects start_date / end_date filtering", {
-  # Set start_date in the middle
-  res <- detect_personnel_event(
-    data = personnel_dt,
-    id_col = "personnel_id",
-    event_type = "hire",
-    start_date = "2020-01-01",
-    end_date = "2025-12-31",
-    status_col = "employment_status"
-  )
-
-  expect_true(all(res$ref_date > ymd("2020-01-01")))
-
-  res_fire <- detect_personnel_event(
-    data = personnel_dt,
-    id_col = "personnel_id",
-    event_type = "fire",
-    start_date = "2015-01-01",
-    end_date = "2020-01-01",
-    status_col = "employment_status"
-  )
-
-  expect_true(all(res_fire$ref_date < ymd("2020-01-01")))
-})
-

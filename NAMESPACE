@@ -46,7 +46,6 @@ export(add_contract_to_event)
 export(apply_baseline_index)
 export(clean_hr_data)
 export(complete_columns)
-export(complete_dates)
 export(compute_baseline_index)
 export(compute_compression_ratio)
 export(compute_coverage)
@@ -105,9 +104,6 @@ export(fix_working_hours)
 export(generate_standard_report)
 export(get_data360_api)
 export(get_metadata360)
-export(ggplot_coef)
-export(ggplot_point_line)
-export(ggplot_segment)
 export(guess_date_frequency)
 export(harmonize_columns)
 export(model_wage)
@@ -125,8 +121,6 @@ export(plot_histogram)
 export(plot_model_wage)
 export(plot_model_wage_fes)
 export(plot_movement)
-export(plot_movement_cost)
-export(plot_segment)
 export(plot_transition_network)
 export(plot_trend)
 export(project_retirement)
@@ -139,14 +133,12 @@ export(validate_data)
 import(dplyr)
 import(ggplot2)
 import(httr)
-importFrom(broom,tidy)
 importFrom(collapse,fquantile)
 importFrom(data.table,
   ":=",
   .N,
   .SD,
   as.data.table,
-  copy,
   data.table,
   dcast,
   fcase,
@@ -216,11 +208,9 @@ importFrom(ggplot2,
   facet_wrap,
   geom_col,
   geom_hline,
-  geom_jitter,
   geom_line,
   geom_linerange,
   geom_point,
-  geom_segment,
   geom_vline,
   ggplot,
   guide_axis,
@@ -232,13 +222,10 @@ importFrom(ggplot2,
   scale_y_continuous,
   scale_y_discrete,
   theme,
-  theme_minimal,
   xlab,
   ylab
 )
-importFrom(ggrepel,geom_text_repel)
 importFrom(ggstats,ggcoef_model)
-importFrom(ggthemes,scale_colour_few)
 importFrom(glue,glue)
 importFrom(grDevices,colorRampPalette)
 importFrom(httr,
@@ -253,8 +240,7 @@ importFrom(lubridate,
   add_with_rollback,
   floor_date,
   year,
-  years,
-  ymd
+  years
 )
 importFrom(plotly,
   layout,
@@ -271,7 +257,6 @@ importFrom(rlang,
   .data,
   arg_match,
   as_function,
-  as_label,
   as_name,
   as_string,
   check_dots_empty,
@@ -287,8 +272,7 @@ importFrom(rlang,
 importFrom(scales,
   cut_short_scale,
   label_number,
-  label_percent,
-  pretty_breaks
+  label_percent
 )
 importFrom(stats,
   as.formula,
@@ -297,10 +281,7 @@ importFrom(stats,
   reorder,
   setNames
 )
-importFrom(stringr,
-  str_detect,
-  str_wrap
-)
+importFrom(stringr,str_wrap)
 importFrom(tibble,
   as_tibble,
   is_tibble,

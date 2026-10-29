@@ -2,12 +2,12 @@
 % Please edit documentation in R/movement.R
 \name{detect_personnel_event}
 \alias{detect_personnel_event}
-\title{Detect Personnel Events}
+\title{Detect personnel events}
 \usage{
 detect_personnel_event(
   data,
   id_col,
-  event_type,
+  event_type = c("hire", "fire"),
   start_date,
   end_date,
   status_col,
@@ -15,42 +15,64 @@ detect_personnel_event(
 )
 }
 \arguments{
-\item{data}{A data.table or data.frame containing at least the columns:
-\itemize{
-\item \code{personnel_id}: Unique identifier for personnel.
-\item \code{ref_date}: Reference date (must be coercible to Date).
-\item \code{employment_status}: Personnel status (e.g., "active", "pensioner", "inactive").
-}}
+\item{data}{A data frame with \code{ref_date}, the identifier column and the
+status column.}
 
-\item{id_col}{Character. Name of the identifier column (e.g., \code{"personnel_id"}).}
+\item{id_col}{Character. Name of the identifier column, such as
+\code{"personnel_id"}.}
 
-\item{event_type}{Character. Either \code{"hire"} or \code{"fire"}, controlling which event to detect.}
+\item{event_type}{Character. \code{"hire"} or \code{"fire"}.}
 
-\item{start_date}{Optional start date for the full date sequence
-(default: \code{"2007-09-01"}).}
+\item{start_date, end_date}{Character or Date. First and last date of the
+date sequence.}
 
-\item{end_date}{Optional end date for the full date sequence
-(default: \code{"2018-01-01"}).}
+\item{status_col}{Character. Column holding employment status. Only rows
+equal to \code{"active"} are considered.}
 
-\item{status_col}{A column within \code{data} object for the employment status of personnel.}
-
-\item{freq}{Frequency for the sequence of dates (default: \code{"year"}).
-Can be any valid value for \code{seq.Date(by = ...)}.}
+\item{freq}{Character. Spacing of the date sequence, passed to
+\code{\link[=seq.Date]{seq.Date()}} as \code{by}. Default \code{"year"}.}
 }
 \value{
-A dataset with event types detected (e.g., hire or fire).
+A table with one row per event: the identifier, \code{ref_date} and
+\code{type_event} (\code{"hire"} or \code{"fire"}). It has the class of \code{data}: a
+data.table, tibble or data frame.
 }
 \description{
-Expands a dataset of personnel and reference dates to include all possible
-personnel–date combinations, fills missing periods, and identifies "hire" or
-"fire" events based on changes in status over time.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function is deprecated. Use \code{\link[=detect_movement]{detect_movement()}} to flag hires
+(\code{event_type = "hire"}) and separations (\code{event_type = "fire"}), and
+\code{\link[=detect_retirement]{detect_retirement()}} to tell retirements apart from other separations.
+
+Flags when each person becomes active (a hire) or stops being active (a
+fire), comparing every date from \code{start_date} to \code{end_date}, spaced by
+\code{freq}.
+}
+\details{
+A hire is dated on the first date a person is active after a date they were
+not, and a fire on the last date they are active before a date they are
+not. A person missing from \code{data} on a date of the sequence is not active
+then. Hires on \code{start_date} and fires on \code{end_date} have nothing to compare
+with, so are left out.
 }
 \examples{
-\dontrun{
-hires <- detect_personnel_event(personnel_df, id_col = "personnel_id", start_date = "2007-09-01",
-                       end_date = "2018-01-01", event_type = "hire")
+personnel <- data.frame(
+  personnel_id = c(1, 1, 2, 2),
+  ref_date = as.Date(c("2020-01-01", "2021-01-01", "2021-01-01", "2022-01-01")),
+  employment_status = "active"
+)
+suppressWarnings(
+  detect_personnel_event(
+    personnel,
+    id_col = "personnel_id",
+    event_type = "hire",
+    start_date = "2020-01-01",
+    end_date = "2022-01-01",
+    status_col = "employment_status"
+  )
+)
 
-fires <- detect_personnel_event(personnel_df, id_col = "personnel_id", start_date = "2007-09-01",
-                       end_date = "2018-01-01", event_type = "fire")
 }
+\seealso{
+\code{\link[=detect_movement]{detect_movement()}} and \code{\link[=detect_retirement]{detect_retirement()}}, which replace it.
 }

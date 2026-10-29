@@ -1,125 +1,133 @@
-#' Detect Personnel Events
+#' Detect personnel events
 #'
-#' Expands a dataset of personnel and reference dates to include all possible
-#' personnel–date combinations, fills missing periods, and identifies "hire" or
-#' "fire" events based on changes in status over time.
+#' @description
+#' `r lifecycle::badge("deprecated")`
 #'
-#' @param data A data.table or data.frame containing at least the columns:
-#'   - `personnel_id`: Unique identifier for personnel.
-#'   - `ref_date`: Reference date (must be coercible to Date).
-#'   - `employment_status`: Personnel status (e.g., "active", "pensioner", "inactive").
-#' @param id_col Character. Name of the identifier column (e.g., `"personnel_id"`).
-#' @param event_type Character. Either `"hire"` or `"fire"`, controlling which event to detect.
-#' @param start_date Optional start date for the full date sequence
-#'   (default: `"2007-09-01"`).
-#' @param status_col A column within `data` object for the employment status of personnel.
-#' @param end_date Optional end date for the full date sequence
-#'   (default: `"2018-01-01"`).
-#' @param freq Frequency for the sequence of dates (default: `"year"`).
-#'   Can be any valid value for \code{seq.Date(by = ...)}.
+#' This function is deprecated. Use [detect_movement()] to flag hires
+#' (`event_type = "hire"`) and separations (`event_type = "fire"`), and
+#' [detect_retirement()] to tell retirements apart from other separations.
 #'
-#' @returns A dataset with event types detected (e.g., hire or fire).
+#' Flags when each person becomes active (a hire) or stops being active (a
+#' fire), comparing every date from `start_date` to `end_date`, spaced by
+#' `freq`.
 #'
-#' @importFrom data.table as.data.table copy setorderv shift fifelse
-#' @importFrom lubridate ymd
+#' @param data A data frame with `ref_date`, the identifier column and the
+#'   status column.
+#' @param id_col Character. Name of the identifier column, such as
+#'   `"personnel_id"`.
+#' @param event_type Character. `"hire"` or `"fire"`.
+#' @param start_date,end_date Character or Date. First and last date of the
+#'   date sequence.
+#' @param status_col Character. Column holding employment status. Only rows
+#'   equal to `"active"` are considered.
+#' @param freq Character. Spacing of the date sequence, passed to
+#'   [seq.Date()] as `by`. Default `"year"`.
+#'
+#' @returns A table with one row per event: the identifier, `ref_date` and
+#'   `type_event` (`"hire"` or `"fire"`). It has the class of `data`: a
+#'   data.table, tibble or data frame.
+#'
+#' @details
+#' A hire is dated on the first date a person is active after a date they were
+#' not, and a fire on the last date they are active before a date they are
+#' not. A person missing from `data` on a date of the sequence is not active
+#' then. Hires on `start_date` and fires on `end_date` have nothing to compare
+#' with, so are left out.
+#'
+#' @seealso [detect_movement()] and [detect_retirement()], which replace it.
 #'
 #' @examples
-#' \dontrun{
-#' hires <- detect_personnel_event(personnel_df, id_col = "personnel_id", start_date = "2007-09-01",
-#'                        end_date = "2018-01-01", event_type = "hire")
+#' personnel <- data.frame(
+#'   personnel_id = c(1, 1, 2, 2),
+#'   ref_date = as.Date(c("2020-01-01", "2021-01-01", "2021-01-01", "2022-01-01")),
+#'   employment_status = "active"
+#' )
+#' suppressWarnings(
+#'   detect_personnel_event(
+#'     personnel,
+#'     id_col = "personnel_id",
+#'     event_type = "hire",
+#'     start_date = "2020-01-01",
+#'     end_date = "2022-01-01",
+#'     status_col = "employment_status"
+#'   )
+#' )
 #'
-#' fires <- detect_personnel_event(personnel_df, id_col = "personnel_id", start_date = "2007-09-01",
-#'                        end_date = "2018-01-01", event_type = "fire")
-#' }
 #' @export
 detect_personnel_event <- function(
   data,
   id_col,
-  event_type,
+  event_type = c("hire", "fire"),
   start_date,
   end_date,
   status_col,
   freq = "year"
 ) {
-  .Deprecated(
-    msg = paste0(
-      "`detect_personnel_event()` is deprecated and will be removed in a ",
-      "future release; use `detect_movement()` instead."
+  event_type <- match.arg(event_type)
+
+  lifecycle::deprecate_warn(
+    when = "0.4.2",
+    what = "detect_personnel_event()",
+    with = "detect_movement()",
+    details = switch(
+      event_type,
+      hire = "For `event_type = \"hire\"`, use the `hire` column of `detect_movement()`.",
+      fire = paste(
+        "For `event_type = \"fire\"`, use the `separation` column of",
+        "`detect_movement()`, and `detect_retirement()` to tell retirements apart."
+      )
     )
   )
 
-  # Convert to data.table
-  dt <- data.table::as.data.table(data)
+  start_date <- lubridate::ymd(start_date)
+  end_date <- lubridate::ymd(end_date)
 
-  # Filter for active personnel
-  active_personnel_dt <- dt[get(status_col) == "active"]
-
-  # Build full date range and unique personnel IDs
-  expanded_active_personnel_dt <- active_personnel_dt |>
-    complete_dates(
-      id_col,
-      start_date,
-      end_date,
-      freq
-    ) |>
-    data.table::copy()
-
-  # Sort by personnel and date
-  data.table::setorderv(
-    expanded_active_personnel_dt,
-    cols = c(id_col, "ref_date")
+  # several active records on a date are one active person
+  active <- unique(
+    data.table::as.data.table(data)[
+      get(status_col) == "active",
+      c(id_col, "ref_date"),
+      with = FALSE
+    ]
   )
+  active[, is_active := TRUE]
 
-  # Add lag/lead and event detection
-  if (event_type == "hire") {
-    expanded_active_personnel_dt <- expanded_active_personnel_dt[,
-      .(
-        personnel_id = get(id_col),
-        ref_date,
-        get(status_col),
-        type_event = data.table::fifelse(
-          get(status_col) == "active" &
-            is.na(data.table::shift(get(status_col), type = "lag")),
-          "hire",
-          "no hire"
-        )
-      ),
-      by = id_col
-    ]
+  # every person on every date of the sequence, so a date a person is missing
+  # from counts as not active, even if nobody was recorded on it
+  panel <- data.table::CJ(
+    id = unique(active[[id_col]]),
+    ref_date = seq(start_date, end_date, by = freq)
+  )
+  data.table::setnames(panel, "id", id_col)
 
-    expanded_active_personnel_dt <- expanded_active_personnel_dt[
-      ref_date > lubridate::ymd(start_date)
-    ]
-  } else {
-    expanded_active_personnel_dt <- expanded_active_personnel_dt[,
-      .(
-        personnel_id = get(id_col),
-        ref_date,
-        get(status_col),
-        type_event = data.table::fifelse(
-          get(status_col) == "active" &
-            is.na(data.table::shift(get(status_col), type = "lead")),
-          "fire",
-          "no fire"
-        )
-      ),
-      by = id_col
-    ]
+  panel <- active[panel, on = c(id_col, "ref_date")]
+  data.table::setorderv(panel, c(id_col, "ref_date"))
 
-    expanded_active_personnel_dt <- expanded_active_personnel_dt[
-      ref_date < lubridate::ymd(end_date)
-    ]
-  }
-
-  expanded_active_personnel_dt <- expanded_active_personnel_dt[
-    type_event %in% c("hire", "fire"),
-    c(id_col, "ref_date", "type_event"),
-    with = FALSE
+  # a hire is not active the date before, a fire not active the date after
+  neighbour <- if (event_type == "hire") "lag" else "lead"
+  panel[
+    , is_event := !is.na(is_active) &
+      is.na(data.table::shift(is_active, type = neighbour)),
+    by = id_col
   ]
 
-  data_out <- convert_data(expanded_active_personnel_dt, data)
+  # the first (last) date has nothing before (after) it to compare with
+  events <- if (event_type == "hire") {
+    panel[is_event & ref_date > start_date]
+  } else {
+    panel[is_event & ref_date < end_date]
+  }
 
-  return(data_out)
+  events <- events[, c(id_col, "ref_date"), with = FALSE]
+  events[, type_event := event_type]
+
+  if (inherits(data, "tbl_df")) {
+    tibble::as_tibble(events)
+  } else if (!data.table::is.data.table(data)) {
+    as.data.frame(events)
+  } else {
+    events[]
+  }
 }
 
 #' Detect hires and separations
@@ -1259,100 +1267,4 @@ compute_retirement.tbl_dbi <- function(
         c("ref_date", group_cols, "headcount", "retirements", "retirement_rate")
       )
     )
-}
-
-# helpers ----------------------------------------------------------------
-
-#' Complete panel data by identifier and reference dates
-#'
-#' Expands a dataset to include all combinations of identifiers and reference
-#' dates within a specified start–end range. This is useful for ensuring that
-#' each identifier has a record for every time point, even if data are missing.
-#'
-#' @param data A data.frame or data.table containing at least an identifier column.
-#' @param id_col Character. Name of the identifier column (e.g., `"personnel_id"`).
-#' @param start_date Character or Date. Start of the full date sequence
-#'   (e.g., `"2007-09-01"`).
-#' @param end_date Character or Date. End of the full date sequence
-#'   (e.g., `"2018-01-01"`).
-#' @param freq Character. Interval for date sequence passed to
-#'   \code{seq.Date(by = ...)}. Default is `"year"`.
-#'
-#' @returns A \code{data.table} containing all possible combinations of identifiers
-#'   and reference dates between the given start and end points, merged with
-#'   the original data.
-#'
-#' @details
-#' This function generates a complete identifier–date grid using
-#' \code{seq.Date()} between \code{start_date} and \code{end_date}, then merges
-#' it with the original dataset using a left join (\code{all.x = TRUE}).
-#'
-#' @importFrom data.table as.data.table data.table setnames
-#' @importFrom lubridate ymd
-#' @importFrom dplyr mutate if_else
-#'
-#' @examples
-#' \dontrun{
-#' complete_dt <- complete_dates(
-#'   data = personnel_df,
-#'   id_col = "personnel_id",
-#'   start_date = "2007-09-01",
-#'   end_date = "2018-01-01",
-#'   freq = "year"
-#' )
-#' }
-#' @export
-complete_dates <- function(data, id_col, start_date = NULL, end_date = NULL, freq = "year") {
-  # Convert to data.table
-  dt <- data.table::as.data.table(data)
-
-  dt[,
-    expanded := FALSE
-  ]
-
-  # Build full date range and unique identifiers
-  if(is.null(start_date)) {
-    start_date <- as.character(min(dt[["ref_date"]]))
-  }
-
-  if(is.null(end_date)) {
-    end_date <- as.character(max(dt[["ref_date"]]))
-  }
-
-  full_dates <- lubridate::ymd(start_date) %>%
-    seq(lubridate::ymd(end_date), by = freq)
-
-  unique_id <- unique(dt[[id_col]])
-
-  # Create complete identifier–date grid
-  full_grid <- data.table::data.table(
-    id = rep(unique_id, each = length(full_dates)),
-    ref_date = rep(full_dates, length(unique_id))
-  )
-
-  # Merge grid with original data (dynamic column name assignment)
-  expanded_dt <- merge(
-    full_grid,
-    dt,
-    by.x = c("id", "ref_date"),
-    by.y = c(id_col, "ref_date"),
-    all.x = TRUE
-  )
-
-  # Rename id column back to its original name
-  data.table::setnames(expanded_dt, "id", id_col)
-
-  expanded_dt <- convert_data(
-    expanded_dt,
-    data
-  ) |>
-    dplyr::mutate(
-      expanded = dplyr::if_else(
-        is.na(.data[["expanded"]]),
-        TRUE,
-        .data[["expanded"]]
-      )
-    )
-
-  return(expanded_dt)
 }
