@@ -159,7 +159,6 @@ plot_movement <- function(
       ggplot2::scale_fill_manual(values = movement_colours, guide = "none")
   } else {
     plot <- plot +
-      ggplot2::geom_point() +
       ggplot2::geom_line()
   }
 

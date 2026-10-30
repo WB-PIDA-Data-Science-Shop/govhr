@@ -52,7 +52,6 @@ plot_trend <- function(
     ggplot2::ggplot(
       ggplot2::aes(x = .data[["ref_date"]], y = .data[[y_col]])
     ) +
-    ggplot2::geom_point() +
     ggplot2::geom_line() +
     ggplot2::xlab("Time")
 
