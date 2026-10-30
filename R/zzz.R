@@ -5,6 +5,10 @@
 
 if (getRversion() >= "2.15.1") {
   utils::globalVariables(c(
+    # compute_transition_flows
+    "transitions_inflow",
+    "transitions_outflow",
+    "group",
     # detect_personnel_event
     "is_active",
     "is_event",

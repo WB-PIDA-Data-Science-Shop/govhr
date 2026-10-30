@@ -24,7 +24,7 @@ run_transition <- function(backend, fun, data, ...) {
   result <- as.data.frame(dplyr::collect(fun(data, ...)))
 
   sort_cols <- intersect(
-    c("personnel_id", "from_date", "ref_date", "from", "to"),
+    c("personnel_id", "group", "from_date", "ref_date", "from", "to"),
     names(result)
   )
   result <- result[do.call(order, unname(result[sort_cols])), ]
@@ -281,6 +281,28 @@ for (backend in backends) {
     expect_equal(counts[["ref_date"]], moves[["ref_date"]])
     expect_equal(as.integer(counts[["transitions"]]), c(1L, 1L))
     expect_equal(counts[["transition_rate"]], c(1, 1))
+  })
+
+  test_that(paste(backend, "- compute_transition_flows counts moves out by origin and in by destination"), {
+    # in 2021 A sends 3 and receives 1; in 2022 B only sends and C only receives
+    counts <- data.frame(
+      from = c("A", "B", "A", "B"),
+      to = c("B", "A", "C", "C"),
+      ref_date = as.Date(c("2021-01-01", "2021-01-01", "2021-01-01", "2022-01-01")),
+      transitions = c(2L, 1L, 1L, 1L)
+    )
+
+    flows <- run_transition(backend, compute_transition_flows, counts)
+
+    expect_named(flows, c("group", "ref_date", "transitions_inflow", "transitions_outflow"))
+    expect_equal(flows[["group"]], c("A", "B", "B", "C", "C"))
+    expect_equal(
+      flows[["ref_date"]],
+      as.Date(c("2021-01-01", "2021-01-01", "2022-01-01", "2021-01-01", "2022-01-01"))
+    )
+    # a group with moves one way only keeps 0 the other way
+    expect_equal(as.integer(flows[["transitions_inflow"]]), c(1L, 2L, 0L, 1L, 1L))
+    expect_equal(as.integer(flows[["transitions_outflow"]]), c(3L, 1L, 1L, 0L, 0L))
   })
 }
 

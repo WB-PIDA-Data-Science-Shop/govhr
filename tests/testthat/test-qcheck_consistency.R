@@ -158,14 +158,15 @@ test_that("the consistency functions give the same result on a database table", 
   )
   expect_equal(compute_global_coverage(remote), compute_global_coverage(hr))
 
-  # a lazy table straight from the database is collected before plotting
-  lazy_trend <- compute_record_consistency(
+  # plots do not collect, so the caller brings the lazy table into memory
+  trend <- compute_record_consistency(
     remote,
     "id",
     group_cols = c("unit", "ref_date")
-  )
+  ) |>
+    dplyr::collect()
   expect_no_error(
-    ggplot2::ggplot_build(plot_consistency_trend(lazy_trend, group_col = "unit"))
+    ggplot2::ggplot_build(plot_consistency_trend(trend, group_col = "unit"))
   )
 
   DBI::dbDisconnect(con, shutdown = TRUE)

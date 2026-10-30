@@ -1,49 +1,16 @@
-
 # ---- scale_plot_height --------------------------------------------------------
 
-test_that("scale_plot_height grows with the number of rows", {
+test_that("scale_plot_height grows with the number of rows, never below 350", {
   expect_equal(scale_plot_height(data.frame(x = 1:10)), 450)
   expect_equal(scale_plot_height(data.frame(x = 1:20)), 800)
-})
-
-test_that("scale_plot_height never drops below 350", {
   expect_equal(scale_plot_height(data.frame(x = integer(0))), 350)
   expect_equal(scale_plot_height(data.frame(x = 1)), 350)
 })
 
-# ---- "no grouping" convention ------------------------------------------------
+# ---- "no grouping" convention -------------------------------------------------
 # Module sidebars pass input$group_filter straight through, and its "All" option
-# is the string "ref_date", never NULL. Every plot helper must therefore treat
-# "ref_date" as "no grouping" -- a helper that only checks for NULL tries to
-# facet or colour by a column the summary frames need not carry.
-
-binned <- tibble::tibble(
-  bin = c(0, 100, 200, 0, 100, 200),
-  count = c(3L, 5L, 2L, 1L, 4L, 6L),
-  pct = c(0.3, 0.5, 0.2, 0.1, 0.4, 0.6),
-  cum_pct = c(0.3, 0.8, 1.0, 0.1, 0.5, 1.0),
-  paygrade = rep(c("G1", "G2"), each = 3)
-)
-
-test_that("plot_histogram treats ref_date as no grouping", {
-  # the cached percentile frame carries no ref_date column at all, so faceting
-  # by it errored on the equity panel's first paint
-  ungrouped <- binned[binned$paygrade == "G1", c("bin", "count", "pct", "cum_pct")]
-
-  expect_no_error(plot_histogram(ungrouped, "histogram", group_col = "ref_date"))
-  expect_no_error(plot_histogram(ungrouped, "cumulative", group_col = NULL))
-})
-
-test_that("plot_histogram facets when a real group is supplied", {
-  built <- ggplot2::ggplot_build(
-    ggplot2::ggplot(binned, ggplot2::aes(x = .data[["bin"]], y = .data[["pct"]])) +
-      ggplot2::geom_col() +
-      ggplot2::facet_wrap(ggplot2::vars(.data[["paygrade"]]))
-  )
-  expect_equal(nrow(built$layout$layout), 2L)
-
-  expect_no_error(plot_histogram(binned, "histogram", group_col = "paygrade"))
-})
+# is the string "ref_date", never NULL, so every plot helper must treat it as
+# no grouping, even when the data has no ref_date column.
 
 test_that("grouped plot helpers accept ref_date without a ref_date column", {
   trend <- tibble::tibble(ref_date = as.Date(c("2020-01-01", "2021-01-01")), value = c(10, 20))
@@ -59,65 +26,43 @@ test_that("grouped plot helpers accept ref_date without a ref_date column", {
   expect_no_error(plot_decile(deciles, group_col = "ref_date"))
   expect_no_error(plot_compression_ratio(compression, group_col = "ref_date"))
 })
-# ---- plot_movement -----------------------------------------------------------
 
-movement_hr <- data.frame(
-  personnel_id = c(1, 2, 1, 3, 1, 3),
-  ref_date = as.Date(rep(c("2020-01-01", "2021-01-01", "2022-01-01"), each = 2)),
-  gender = c("F", "M", "F", "M", "F", "M"),
-  employment_status = "active"
+# ---- plot_change and plot_area --------------------------------------------------
+
+growth <- data.frame(
+  ref_date = as.Date(rep(c("2020-01-01", "2021-01-01", "2022-01-01"), times = 2)),
+  unit = rep(c("A", "B"), each = 3),
+  wage_growth = c(NA, 0.05, -0.02, NA, -0.01, 0.03)
 )
 
-test_that("plot_movement plots the column matching movement and measurement", {
-  movement <- compute_movement(movement_hr)
+test_that("plot_change colours bars by sign and leaves out missing changes", {
+  plot <- plot_change(growth, x_col = "ref_date", y_col = "wage_growth", group_cols = "unit")
 
-  hire_count <- plot_movement(movement)
-  separation_rate <- plot_movement(
-    movement,
-    movement_type = "separation",
-    measurement_type = "rate"
+  # the first date has nothing to change from
+  expect_equal(plot$data$wage_growth, c(0.05, -0.02, -0.01, 0.03))
+  expect_equal(plot$data$change_sign, c("positive", "negative", "negative", "positive"))
+  expect_s3_class(plot$facet, "FacetWrap")
+
+  expect_error(
+    plot_change(growth, x_col = "ref_date", y_col = "wage_growth", group_cols = "paygrade"),
+    "`group_cols` not found in data: paygrade"
+  )
+})
+
+test_that("plot_area stacks one area per fill value, or a single area", {
+  headcount <- data.frame(
+    ref_date = as.Date(rep(c("2020-01-01", "2021-01-01"), each = 2)),
+    contract_type = rep(c("permanent", "temporary"), times = 2),
+    headcount = c(80, 20, 85, 25)
   )
 
-  expect_equal(rlang::as_label(hire_count$mapping$y), "hires")
-  expect_equal(hire_count$labels$y, "Hires")
-  expect_equal(rlang::as_label(separation_rate$mapping$y), "separation_rate")
-  expect_equal(separation_rate$labels$y, "Separation rate")
-})
+  stacked <- ggplot2::ggplot_build(
+    plot_area(headcount, y_col = "headcount", fill_col = "contract_type")
+  )
+  expect_equal(length(unique(stacked$data[[1]]$fill)), 2L)
+  # the second area sits on top of the first
+  expect_equal(max(stacked$data[[1]]$ymax), 85 + 25)
 
-test_that("plot_movement leaves out dates without hires to compare with", {
-  plot <- plot_movement(compute_movement(movement_hr))
-
-  # the first date has no previous date, so its hires are NA
-  expect_equal(plot$data$ref_date, as.Date(c("2021-01-01", "2022-01-01")))
-})
-
-test_that("plot_movement draws one line per group", {
-  movement <- compute_movement(movement_hr, group_cols = "gender")
-
-  grouped <- plot_movement(movement, group_cols = "gender")
-
-  expect_equal(rlang::as_label(grouped$mapping$colour), "gender")
-  expect_null(plot_movement(movement, group_cols = "ref_date")$mapping$colour)
-})
-
-test_that("plot_movement rejects unknown movement types", {
-  movement <- compute_movement(movement_hr)
-
-  expect_error(plot_movement(movement, movement_type = "fire"), "should be one of")
-  expect_error(plot_movement(movement, group_cols = c("a", "b")), "single column")
-})
-
-test_that("plot_movement accepts a lazy database table", {
-  skip_if_not_installed("duckdb")
-  skip_if_not_installed("dbplyr")
-
-  # silence duckdb's notice about where it stores extensions
-  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
-  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
-  DBI::dbWriteTable(con, "movement_hr", movement_hr)
-
-  plot <- plot_movement(compute_movement(dplyr::tbl(con, "movement_hr")))
-
-  expect_s3_class(plot, "ggplot")
-  expect_equal(nrow(plot$data), 2L)
+  single <- ggplot2::ggplot_build(plot_area(headcount, y_col = "headcount"))
+  expect_equal(length(unique(single$data[[1]]$fill)), 1L)
 })
