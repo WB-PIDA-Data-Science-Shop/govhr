@@ -2,8 +2,8 @@
 - Separates detecting from summarizing transitions: `detect_transition()` returns individual moves and `compute_transition()` counts them, with `compute_transition_flows()` adding moves in and out of each group.
 - `compute_headcount()` and `compute_wagebill()` now accept several reference columns, and `compute_wage()` always compares against the previous `ref_date`.
 - Reorganizes plotting functions into scripts matching the analyses they plot, and adds `plot_transition()`, `plot_transition_flows()`, `plot_change()` and `plot_area()`. `plot_movement()` can now draw hires and separations jointly or as net movement.
-- Removes unused and legacy functions, and standardizes `group_col` (one column) and `group_cols` (several columns) across functions.
-- Deprecated functions and arguments, such as `detect_personnel_event()`, `plot_transition_network()` and `group_cols` in single-column plots, now warn via lifecycle before removal.
+- Removes unused and legacy functions, including `detect_personnel_event()` (use `detect_movement()` and `detect_retirement()`), and standardizes `group_col` (one column) and `group_cols` (several columns) across functions.
+- Deprecated functions and arguments, such as `plot_transition_network()` and `group_cols` in single-column plots, now warn via lifecycle before removal.
 
 
 # govhr 0.4.2

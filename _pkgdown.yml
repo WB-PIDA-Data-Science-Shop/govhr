@@ -96,7 +96,6 @@ reference:
       - detect_retirement
       - compute_retirement
       - compute_retirement_cost
-      - detect_personnel_event
 
   - title: Movement plots
     desc: "`R/plot_movement.R`"

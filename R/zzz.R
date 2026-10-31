@@ -9,10 +9,6 @@ if (getRversion() >= "2.15.1") {
     "transitions_inflow",
     "transitions_outflow",
     "group",
-    # detect_personnel_event
-    "is_active",
-    "is_event",
-    "type_event",
     "contract_id",
     "est_date",
     "personnel_id",
