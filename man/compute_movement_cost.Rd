@@ -42,8 +42,9 @@ columns named in \code{measure_col} and \code{status_col}.}
 \code{"est_id"}, or \code{NULL} (default) for the whole workforce. Must not include
 \code{ref_date}.}
 
-\item{status_col}{Character. Column holding employment status. Only rows
-equal to \code{"active"} are considered. Default \code{"employment_status"}.}
+\item{status_col}{Character. Column holding employment status. Rows equal
+to \code{"active"} are the active workforce, and rows equal to \code{"pensioner"}
+mark exits as retirements. Default \code{"employment_status"}.}
 }
 \value{
 A table with one row per \code{ref_date}, group and movement type,
@@ -56,7 +57,8 @@ it into memory).
 }
 \description{
 Adds up, for each reference date, the pay of the people who were hired or
-separated since the previous date.
+separated since the previous date. Retirements are not separations, and are
+costed by \code{\link[=compute_retirement_cost]{compute_retirement_cost()}}.
 }
 \details{
 As in \code{\link[=compute_movement]{compute_movement()}}, hires are counted on the date they are hired,

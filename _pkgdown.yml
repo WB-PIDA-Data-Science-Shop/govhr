@@ -89,6 +89,7 @@ reference:
   - title: Movement
     desc: "`R/movement.R`: hires, separations and retirements, and their cost."
     contents:
+      - detect_workforce_flows
       - detect_movement
       - compute_movement
       - compute_movement_cost

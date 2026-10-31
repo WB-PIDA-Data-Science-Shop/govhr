@@ -41,8 +41,9 @@ data.table, tibble or data frame.
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
 
 This function is deprecated. Use \code{\link[=detect_movement]{detect_movement()}} to flag hires
-(\code{event_type = "hire"}) and separations (\code{event_type = "fire"}), and
-\code{\link[=detect_retirement]{detect_retirement()}} to tell retirements apart from other separations.
+(\code{event_type = "hire"}). A fire (\code{event_type = "fire"}) is any exit, which
+is either a separation, flagged by \code{\link[=detect_movement]{detect_movement()}}, or a retirement,
+flagged by \code{\link[=detect_retirement]{detect_retirement()}}.
 
 Flags when each person becomes active (a hire) or stops being active (a
 fire), comparing every date from \code{start_date} to \code{end_date}, spaced by

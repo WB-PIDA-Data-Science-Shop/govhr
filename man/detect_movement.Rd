@@ -19,33 +19,42 @@ named in \code{status_col}.}
 
 \item{...}{Arguments passed to methods.}
 
-\item{status_col}{Character. Column holding employment status. Only rows
-equal to \code{"active"} are considered. Default \code{"employment_status"}.}
+\item{status_col}{Character. Column holding employment status. Rows equal
+to \code{"active"} are the active workforce, and rows equal to \code{"pensioner"}
+mark exits as retirements. Default \code{"employment_status"}.}
 }
 \value{
 A table with one row per active person and \code{ref_date}, containing:
 \describe{
 \item{personnel_id, ref_date}{The person and date.}
-\item{prev_date, next_date}{The neighbouring dates found in the data,
-which the person's status is compared with. \code{NA} on the first and last
-date.}
+\item{prev_date, next_date}{The neighbouring dates with active
+personnel, which the person's status is compared with. \code{NA} on the
+first and last date.}
 \item{hire}{\code{TRUE} if the person was not active on \code{prev_date}. \code{NA} on
 the first date, which has nothing to compare with.}
-\item{separation}{\code{TRUE} if the person is not active on \code{next_date}. \code{NA}
-on the last date.}
+\item{separation}{\code{TRUE} if the person is not active on \code{next_date} and
+did not retire. \code{NA} on the last date.}
 }
 A data.table for data frame input; a lazy table for \code{tbl_dbi} input (use
 \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
 Flags, for each active person and reference date, whether they were hired
-since the previous date and whether they are gone by the next date.
+since the previous date and whether they leave active status, other than
+into retirement, by the next date.
 }
 \details{
-The previous and next dates are the neighbouring dates found in the data,
-so the dates do not need to be evenly spaced. People with several contracts
-on a date appear once. A separation is any exit from active status,
-including retirement.
+The previous and next dates are the neighbouring dates with active
+personnel, however far apart, so the dates do not need to be evenly spaced
+and a date missing for everyone is not a gap. Dates holding only other
+statuses, such as pensioner, are skipped. People with several contracts on
+a date appear once.
+
+A separation is any exit from active status other than a retirement, such
+as a resignation or a dismissal. An exit whose next status is pensioner is
+a retirement, flagged by \code{\link[=detect_retirement]{detect_retirement()}} instead, so every exit is
+either a separation or a retirement, never both. Without pensioner records
+in \code{data}, every exit is a separation.
 
 A separation is flagged on the person's last active date, which holds their
 pay and group, but happens by \code{next_date}, the first date they are absent.
@@ -62,5 +71,5 @@ detect_movement(hr)
 }
 \seealso{
 \code{\link[=compute_movement]{compute_movement()}}, which counts these hires and separations.
-\code{\link[=detect_retirement]{detect_retirement()}}, which flags the retirements among the separations.
+\code{\link[=detect_retirement]{detect_retirement()}}, which flags the retirements.
 }

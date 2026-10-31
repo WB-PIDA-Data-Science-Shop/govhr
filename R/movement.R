@@ -4,8 +4,9 @@
 #' `r lifecycle::badge("deprecated")`
 #'
 #' This function is deprecated. Use [detect_movement()] to flag hires
-#' (`event_type = "hire"`) and separations (`event_type = "fire"`), and
-#' [detect_retirement()] to tell retirements apart from other separations.
+#' (`event_type = "hire"`). A fire (`event_type = "fire"`) is any exit, which
+#' is either a separation, flagged by [detect_movement()], or a retirement,
+#' flagged by [detect_retirement()].
 #'
 #' Flags when each person becomes active (a hire) or stops being active (a
 #' fire), comparing every date from `start_date` to `end_date`, spaced by
@@ -74,7 +75,8 @@ detect_personnel_event <- function(
       hire = "For `event_type = \"hire\"`, use the `hire` column of `detect_movement()`.",
       fire = paste(
         "For `event_type = \"fire\"`, use the `separation` column of",
-        "`detect_movement()`, and `detect_retirement()` to tell retirements apart."
+        "`detect_movement()` and the `retirement` column of",
+        "`detect_retirement()`, which together flag every exit."
       )
     )
   )
@@ -133,41 +135,50 @@ detect_personnel_event <- function(
 #' Detect hires and separations
 #'
 #' Flags, for each active person and reference date, whether they were hired
-#' since the previous date and whether they are gone by the next date.
+#' since the previous date and whether they leave active status, other than
+#' into retirement, by the next date.
 #'
 #' @param data Data frame or remote database table (`tbl_dbi`) with one row
 #'   per person-record. Must contain `personnel_id`, `ref_date` and the column
 #'   named in `status_col`.
-#' @param status_col Character. Column holding employment status. Only rows
-#'   equal to `"active"` are considered. Default `"employment_status"`.
+#' @param status_col Character. Column holding employment status. Rows equal
+#'   to `"active"` are the active workforce, and rows equal to `"pensioner"`
+#'   mark exits as retirements. Default `"employment_status"`.
 #' @param ... Arguments passed to methods.
 #'
 #' @returns A table with one row per active person and `ref_date`, containing:
 #' \describe{
 #'   \item{personnel_id, ref_date}{The person and date.}
-#'   \item{prev_date, next_date}{The neighbouring dates found in the data,
-#'     which the person's status is compared with. `NA` on the first and last
-#'     date.}
+#'   \item{prev_date, next_date}{The neighbouring dates with active
+#'     personnel, which the person's status is compared with. `NA` on the
+#'     first and last date.}
 #'   \item{hire}{`TRUE` if the person was not active on `prev_date`. `NA` on
 #'     the first date, which has nothing to compare with.}
-#'   \item{separation}{`TRUE` if the person is not active on `next_date`. `NA`
-#'     on the last date.}
+#'   \item{separation}{`TRUE` if the person is not active on `next_date` and
+#'     did not retire. `NA` on the last date.}
 #' }
 #' A data.table for data frame input; a lazy table for `tbl_dbi` input (use
 #' [dplyr::collect()] to bring it into memory).
 #'
 #' @details
-#' The previous and next dates are the neighbouring dates found in the data,
-#' so the dates do not need to be evenly spaced. People with several contracts
-#' on a date appear once. A separation is any exit from active status,
-#' including retirement.
+#' The previous and next dates are the neighbouring dates with active
+#' personnel, however far apart, so the dates do not need to be evenly spaced
+#' and a date missing for everyone is not a gap. Dates holding only other
+#' statuses, such as pensioner, are skipped. People with several contracts on
+#' a date appear once.
+#'
+#' A separation is any exit from active status other than a retirement, such
+#' as a resignation or a dismissal. An exit whose next status is pensioner is
+#' a retirement, flagged by [detect_retirement()] instead, so every exit is
+#' either a separation or a retirement, never both. Without pensioner records
+#' in `data`, every exit is a separation.
 #'
 #' A separation is flagged on the person's last active date, which holds their
 #' pay and group, but happens by `next_date`, the first date they are absent.
 #' [compute_movement()] counts it on `next_date`.
 #'
 #' @seealso [compute_movement()], which counts these hires and separations.
-#'   [detect_retirement()], which flags the retirements among the separations.
+#'   [detect_retirement()], which flags the retirements.
 #'
 #' @examples
 #' hr <- data.frame(
@@ -183,7 +194,6 @@ detect_movement <- function(data, ...) {
 }
 
 #' @rdname detect_movement
-#' @importFrom data.table := as.data.table data.table fifelse setorderv shift
 #' @importFrom rlang check_dots_empty
 #' @export
 detect_movement.data.frame <- function(
@@ -193,49 +203,13 @@ detect_movement.data.frame <- function(
 ) {
   rlang::check_dots_empty()
 
-  dt <- data.table::as.data.table(data)
-
-  # one row per person and date, so people with several contracts count once
-  person_dates <- unique(
-    dt[get(status_col) == "active", .(personnel_id, ref_date)]
-  )
-
-  # previous and next date for each date in the data
-  dates <- sort(unique(person_dates[["ref_date"]]))
-  calendar <- data.table::data.table(
-    ref_date = dates,
-    prev_date = data.table::shift(dates),
-    next_date = data.table::shift(dates, type = "lead")
-  )
-
-  movement <- calendar[person_dates, on = "ref_date"]
-
-  # hired: no active record on the previous date. NA when there is no
-  # previous date to compare with
-  movement[, hire := data.table::fifelse(is.na(prev_date), NA, TRUE)]
-  movement[
-    person_dates,
-    on = .(personnel_id, prev_date = ref_date),
-    hire := FALSE
+  detect_workforce_flows(data, status_col = status_col)[
+    , .(personnel_id, ref_date, prev_date, next_date, hire, separation)
   ]
-
-  # separated: no active record on the next date
-  movement[, separation := data.table::fifelse(is.na(next_date), NA, TRUE)]
-  movement[
-    person_dates,
-    on = .(personnel_id, next_date = ref_date),
-    separation := FALSE
-  ]
-
-  data.table::setorderv(movement, c("ref_date", "personnel_id"))
-
-  movement[, .(personnel_id, ref_date, prev_date, next_date, hire, separation)]
 }
 
 #' @rdname detect_movement
-#' @importFrom dplyr all_of anti_join distinct filter if_else inner_join
-#'   join_by left_join mutate select
-#' @importFrom rlang .data check_dots_empty
+#' @importFrom rlang check_dots_empty
 #' @export
 detect_movement.tbl_dbi <- function(
   data,
@@ -244,59 +218,12 @@ detect_movement.tbl_dbi <- function(
 ) {
   rlang::check_dots_empty()
 
-  # one row per person and date, so people with several contracts count once
-  person_dates <- data |>
-    filter(.data[[status_col]] == "active") |>
-    select(all_of(c("personnel_id", "ref_date"))) |>
-    distinct()
-
-  movement <- person_dates |>
-    inner_join(build_calendar(person_dates), by = "ref_date")
-
-  # hired: no active record on the previous date
-  hires <- movement |>
-    filter(
-      !is.na(prev_date)
-    ) |>
-    anti_join(
-      person_dates,
-      by = join_by(personnel_id, prev_date == ref_date)
-    ) |>
-    select(
-      all_of(
-        c("personnel_id", "ref_date")
+  detect_workforce_flows(data, status_col = status_col) |>
+    dplyr::select(
+      dplyr::all_of(
+        c("personnel_id", "ref_date", "prev_date", "next_date", "hire", "separation")
       )
-    ) |>
-    mutate(hired = 1)
-
-  # separated: no active record on the next date
-  separations <- movement |>
-    filter(
-      !is.na(next_date)
-    ) |>
-    anti_join(
-      person_dates, by = join_by(personnel_id, next_date == ref_date)
-    ) |>
-    select(
-      all_of(c("personnel_id", "ref_date"))
-    ) |>
-    mutate(separated = 1)
-
-  movement |>
-    left_join(
-      hires, 
-      by = c("personnel_id", "ref_date")
-    ) |>
-    left_join(
-      separations,
-      by = c("personnel_id", "ref_date")
-    ) |>
-    # NA when there is no previous (next) date to compare with
-    mutate(
-      hire = if_else(is.na(prev_date), NA, !is.na(hired)),
-      separation = if_else(is.na(next_date), NA, !is.na(separated))
-    ) |>
-    select(personnel_id, ref_date, prev_date, next_date, hire, separation)
+    )
 }
 
 #' Detect retirements
@@ -311,17 +238,20 @@ detect_movement.tbl_dbi <- function(
 #'   `"employment_status"`.
 #'
 #' @returns A table with one row per active person and `ref_date`, containing
-#'   `personnel_id`, `ref_date`, `next_date` (the next date found in the data)
-#'   and `retirement`: `TRUE` if the person retires by `next_date`, and `NA` on
-#'   the last date, which has nothing to compare with. A data.table for data
-#'   frame input; a lazy table for `tbl_dbi` input (use [dplyr::collect()] to
-#'   bring it into memory).
+#'   `personnel_id`, `ref_date`, `next_date` (the next date with active
+#'   personnel) and `retirement`: `TRUE` if the person retires by
+#'   `next_date`, and `NA` on the last date, which has nothing to compare
+#'   with. A data.table for data frame input; a lazy table for `tbl_dbi` input
+#'   (use [dplyr::collect()] to bring it into memory).
 #'
 #' @details
-#' A retirement is a separation whose next status is pensioner. A pension
-#' drawn alongside an active contract is therefore not a retirement. As with
-#' separations, it is flagged on the person's last active date and counted by
-#' [compute_retirement()] on `next_date`, the first date they are absent.
+#' A retirement is an exit from active status whose next status is
+#' pensioner. [detect_movement()] counts every other exit as a separation, so
+#' every exit is either a separation or a retirement, never both, and the two
+#' tables share their rows. A pension drawn alongside an active contract is
+#' not a retirement. As with separations, a retirement is flagged on the
+#' person's last active date and counted by [compute_retirement()] on
+#' `next_date`, the first date they are absent.
 #'
 #' Pension registration can lag the exit, so the pensioner record may appear
 #' at any later date, not only the next one. A retirement is dated by the exit,
@@ -330,12 +260,21 @@ detect_movement.tbl_dbi <- function(
 #' the lag, so an exit followed years later by a deferred pension also counts
 #' as a retirement.
 #'
-#' As in [detect_movement()], only dates with active personnel are compared,
-#' so pensioner records dated before the next such date are not seen, and an
-#' exit on the last such date is `NA`.
+#' As in [detect_movement()], `next_date` is the next date with active
+#' personnel, and pensioner records are looked up from `next_date` onwards. A
+#' date holding only pensioner records is never a `next_date`, so:
+#' \itemize{
+#'   \item a pensioner record dated after the exit but before `next_date` is
+#'     not seen. The exit is still a retirement if another pensioner record
+#'     follows on or after `next_date`, and a separation otherwise.
+#'   \item an exit after the last date with active personnel is `NA`, even if
+#'     pensioner records follow.
+#'   \item an exit shortly before the last date with active personnel may be
+#'     flagged as a separation because the pension is not registered yet.
+#' }
 #'
 #' @seealso [compute_retirement()], which counts these retirements.
-#'   [detect_movement()], which flags the separations they are drawn from.
+#'   [detect_movement()], which flags the other exits as separations.
 #'
 #' @examples
 #' hr <- data.frame(
@@ -353,7 +292,6 @@ detect_retirement <- function(data, ...) {
 }
 
 #' @rdname detect_retirement
-#' @importFrom data.table := as.data.table fifelse
 #' @importFrom rlang check_dots_empty
 #' @export
 detect_retirement.data.frame <- function(
@@ -363,50 +301,13 @@ detect_retirement.data.frame <- function(
 ) {
   rlang::check_dots_empty()
 
-  dt <- data.table::as.data.table(data)
-  movement <- detect_movement(dt, status_col = status_col)
-
-  person_dates <- movement[, .(personnel_id, ref_date)]
-  pensioner_dates <- unique(
-    dt[get(status_col) == "pensioner", .(personnel_id, ref_date)]
-  )
-
-  # pension registration can lag the exit, so roll forward to the first
-  # pensioner and active records from the next date onwards rather than
-  # looking at the next date only
-  next_pension <- pensioner_dates[
-    movement,
-    on = .(personnel_id, ref_date = next_date),
-    roll = -Inf,
-    x.ref_date
+  detect_workforce_flows(data, status_col = status_col)[
+    , .(personnel_id, ref_date, next_date, retirement)
   ]
-  next_return <- person_dates[
-    movement,
-    on = .(personnel_id, ref_date = next_date),
-    roll = -Inf,
-    x.ref_date
-  ]
-
-  # NA when there is no next date to compare with. a pension that starts by
-  # the time the person returns, e.g. a retiree rehired on contract, still
-  # marks the exit as a retirement
-  movement[
-    , retirement := data.table::fifelse(
-      is.na(next_date),
-      NA,
-      separation &
-        !is.na(next_pension) &
-        (is.na(next_return) | next_pension <= next_return)
-    )
-  ]
-
-  movement[, .(personnel_id, ref_date, next_date, retirement)]
 }
 
 #' @rdname detect_retirement
-#' @importFrom dplyr all_of distinct filter if_else inner_join join_by
-#'   left_join mutate rename select summarise
-#' @importFrom rlang .data check_dots_empty
+#' @importFrom rlang check_dots_empty
 #' @export
 detect_retirement.tbl_dbi <- function(
   data,
@@ -415,60 +316,276 @@ detect_retirement.tbl_dbi <- function(
 ) {
   rlang::check_dots_empty()
 
-  movement <- detect_movement(data, status_col = status_col)
+  detect_workforce_flows(data, status_col = status_col) |>
+    dplyr::select(
+      dplyr::all_of(c("personnel_id", "ref_date", "next_date", "retirement"))
+    )
+}
 
-  person_dates <- movement |>
-    select(all_of(c("personnel_id", "ref_date")))
+#' Flag the flows of each active person and date
+#'
+#' Flags, for each active person and reference date, whether they were hired
+#' since the previous date, and whether they leave active status by the next
+#' date into a pension (a retirement) or exiting the public sector (a separation).
+#'
+#' @inheritParams detect_movement
+#'
+#' @returns A table with one row per active person and `ref_date`, containing
+#'   `personnel_id`, `ref_date`, `prev_date`, `next_date`, `hire`,
+#'   `separation` and `retirement`. `hire` is `NA` on the first date, and
+#'   `separation` and `retirement` on the last, which have nothing to compare
+#'   with. A data.table for data frame input; a lazy table for `tbl_dbi` input.
+#'
+#' @details See [detect_movement()] and [detect_retirement()] for how hires,
+#'   separations and retirements are defined.
+#'
+#' @export
+detect_workforce_flows <- function(data, ...) {
+  UseMethod("detect_workforce_flows")
+}
 
+#' @rdname detect_workforce_flows
+#' @importFrom data.table := as.data.table data.table fifelse setorderv shift
+#' @importFrom rlang check_dots_empty
+#' @export
+detect_workforce_flows.data.frame <- function(
+  data,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
+  dt <- data.table::as.data.table(data)
+
+  # one row per person and date, so people with several contracts count once
+  person_dates <- unique(
+    dt[get(status_col) == "active", .(personnel_id, ref_date)]
+  )
+  pensioner_dates <- unique(
+    dt[get(status_col) == "pensioner", .(personnel_id, ref_date)]
+  )
+
+  # previous and next date for each date in the data
+  dates <- sort(unique(person_dates[["ref_date"]]))
+  calendar <- data.table::data.table(
+    ref_date = dates,
+    prev_date = data.table::shift(dates),
+    next_date = data.table::shift(dates, type = "lead")
+  )
+
+  flows <- calendar[person_dates, on = "ref_date"]
+
+  # hired: no active record on the previous date. NA when there is no
+  # previous date to compare with
+  flows[, hire := data.table::fifelse(is.na(prev_date), NA, TRUE)]
+  flows[
+    person_dates,
+    on = .(personnel_id, prev_date = ref_date),
+    hire := FALSE
+  ]
+
+  # exited: no active record on the next date. NA when there is no next date
+  # to compare with
+  flows[, exited := data.table::fifelse(is.na(next_date), NA, TRUE)]
+  flows[
+    person_dates,
+    on = .(personnel_id, next_date = ref_date),
+    exited := FALSE
+  ]
+
+  exits <- flows[exited %in% TRUE, .(personnel_id, ref_date, next_date)]
+
+  # pension registration can lag the exit, so roll forward to the first
+  # pensioner and active records from the next date onwards rather than
+  # looking at the next date only
+  next_pension <- pensioner_dates[
+    exits,
+    on = .(personnel_id, ref_date = next_date),
+    roll = -Inf,
+    x.ref_date
+  ]
+  next_return <- person_dates[
+    exits,
+    on = .(personnel_id, ref_date = next_date),
+    roll = -Inf,
+    x.ref_date
+  ]
+
+  # a pension that starts by the time the person returns, e.g. a retiree
+  # rehired on contract, still marks the exit as a retirement
+  retirees <- exits[
+    !is.na(next_pension) & (is.na(next_return) | next_pension <= next_return),
+    .(personnel_id, ref_date)
+  ]
+
+  flows[, retirement := data.table::fifelse(is.na(next_date), NA, FALSE)]
+  flows[retirees, on = .(personnel_id, ref_date), retirement := TRUE]
+
+  # an exit is either a retirement or a separation, never both
+  flows[, separation := exited & !retirement]
+
+  data.table::setorderv(flows, c("ref_date", "personnel_id"))
+
+  flows[
+    , .(personnel_id, ref_date, prev_date, next_date, hire, separation, retirement)
+  ]
+}
+
+#' @rdname detect_workforce_flows
+#' @importFrom rlang .data check_dots_empty
+#' @export
+detect_workforce_flows.tbl_dbi <- function(
+  data,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
+  # one row per person and date
+  person_dates <- data |>
+    dplyr::filter(.data[[status_col]] == "active") |>
+    dplyr::select(
+      dplyr::all_of(c("personnel_id", "ref_date"))
+    ) |>
+    dplyr::distinct()
+
+  # renamed so they can be compared with each exit's dates
   pensioner_dates <- data |>
-    filter(.data[[status_col]] == "pensioner") |>
-    select(all_of(c("personnel_id", "ref_date"))) |>
-    distinct()
+    dplyr::filter(
+      .data[[status_col]] == "pensioner"
+    ) |>
+    dplyr::select(
+      personnel_id, pension_date = ref_date
+    ) |>
+    dplyr::distinct()
 
-  separations <- movement |>
-    filter(separation)
+  active_dates <- person_dates |>
+    dplyr::select(
+      personnel_id, active_date = ref_date
+    )
+
+  flows <- person_dates |>
+    dplyr::inner_join(
+      build_calendar(person_dates),
+      by = "ref_date"
+    )
+
+  # hired: no active record on the previous date
+  hires <- flows |>
+    dplyr::filter(
+      !is.na(prev_date)
+    ) |>
+    dplyr::anti_join(
+      person_dates,
+      by = dplyr::join_by(personnel_id, prev_date == ref_date)
+    ) |>
+    dplyr::select(
+      dplyr::all_of(c("personnel_id", "ref_date"))
+    ) |>
+    dplyr::mutate(hired = 1)
+
+  # separated: no active record on the next date
+  separations <- flows |>
+    dplyr::filter(
+      !is.na(next_date)
+    ) |>
+    dplyr::anti_join(
+      person_dates,
+      by = dplyr::join_by(
+        personnel_id, next_date == ref_date
+      )
+    ) |>
+    dplyr::select(
+      dplyr::all_of(
+        c("personnel_id", "ref_date", "next_date")
+      )
+    )
 
   # pension registration can lag the exit, so take the first pensioner and
   # active records from the next date onwards. SQL has no rolling join, hence
   # the inequality join and min()
-  first_record_after_exit <- function(records, name) {
-    separations |>
-      inner_join(
-        records |> rename(record_date = "ref_date"),
-        by = join_by(personnel_id, next_date <= record_date)
-      ) |>
-      summarise(
-        !!name := min(record_date, na.rm = TRUE),
-        .by = all_of(c("personnel_id", "ref_date"))
+  next_pension <- separations |>
+    dplyr::inner_join(
+      pensioner_dates,
+      by = dplyr::join_by(personnel_id, next_date <= pension_date)
+    ) |>
+    dplyr::summarise(
+      next_pension = min(pension_date, na.rm = TRUE),
+      .by = c("personnel_id", "ref_date")
+    )
+
+  next_return <- separations |>
+    dplyr::inner_join(
+      active_dates,
+      by = dplyr::join_by(personnel_id, next_date <= active_date)
+    ) |>
+    dplyr::summarise(
+      next_return = min(active_date, na.rm = TRUE),
+      .by = c("personnel_id", "ref_date")
+    )
+
+  # a pension that starts by the time the person returns, e.g. a retiree
+  # rehired on contract, still marks the exit as a retirement
+  retirees <- separations |>
+    dplyr::inner_join(
+      next_pension,
+      by = c("personnel_id", "ref_date")
+    ) |>
+    dplyr::left_join(
+      next_return,
+      by = c("personnel_id", "ref_date")
+    ) |>
+    dplyr::filter(
+      is.na(next_return) | next_pension <= next_return
+    ) |>
+    dplyr::select(
+      dplyr::all_of(c("personnel_id", "ref_date"))
+    ) |>
+    dplyr::mutate(retired = 1)
+
+  flows <- flows |>
+    dplyr::left_join(
+      hires,
+      by = c("personnel_id", "ref_date")
+    ) |>
+    dplyr::left_join(
+      separations |>
+        dplyr::select(dplyr::all_of(c("personnel_id", "ref_date"))) |>
+        dplyr::mutate(separated = 1),
+      by = c("personnel_id", "ref_date")
+    ) |>
+    dplyr::left_join(
+      retirees,
+      by = c("personnel_id", "ref_date")
+    ) 
+  
+  flows |>
+    dplyr::mutate(
+      hire = dplyr::if_else(
+        is.na(prev_date), NA, !is.na(hired)
+      ),
+      separation = dplyr::if_else(
+        is.na(next_date), NA, !is.na(separated) & is.na(retired)
+      ),
+      retirement = dplyr::if_else(
+        is.na(next_date), NA, !is.na(retired)
       )
-  }
-
-  retired <- separations |>
-    inner_join(
-      first_record_after_exit(pensioner_dates, "next_pension"),
-      by = c("personnel_id", "ref_date")
     ) |>
-    left_join(
-      first_record_after_exit(person_dates, "next_return"),
-      by = c("personnel_id", "ref_date")
-    ) |>
-    # a pension that starts by the time the person returns, e.g. a retiree
-    # rehired on contract, still marks the exit as a retirement
-    filter(is.na(next_return) | next_pension <= next_return) |>
-    select(all_of(c("personnel_id", "ref_date"))) |>
-    mutate(retired = 1)
-
-  movement |>
-    left_join(retired, by = c("personnel_id", "ref_date")) |>
-    # NA when there is no next date to compare with
-    mutate(retirement = if_else(is.na(next_date), NA, !is.na(retired))) |>
-    select(personnel_id, ref_date, next_date, retirement)
+    dplyr::select(
+      dplyr::all_of(
+        c(
+          "personnel_id", "ref_date", "prev_date", "next_date",
+          "hire", "separation", "retirement"
+        )
+      )
+    )
 }
 
 #' Compute the cost of hires and separations
 #'
 #' Adds up, for each reference date, the pay of the people who were hired or
-#' separated since the previous date.
+#' separated since the previous date. Retirements are not separations, and are
+#' costed by [compute_retirement_cost()].
 #'
 #' @param data Data frame or remote database table (`tbl_dbi`) with one row
 #'   per person-record. Must contain `personnel_id`, `ref_date` and the
@@ -479,8 +596,7 @@ detect_retirement.tbl_dbi <- function(
 #' @param group_cols Character vector of columns to group by, such as
 #'   `"est_id"`, or `NULL` (default) for the whole workforce. Must not include
 #'   `ref_date`.
-#' @param status_col Character. Column holding employment status. Only rows
-#'   equal to `"active"` are considered. Default `"employment_status"`.
+#' @inheritParams detect_movement
 #' @param ... Arguments passed to methods.
 #'
 #' @returns A table with one row per `ref_date`, group and movement type,
@@ -851,8 +967,7 @@ compute_retirement_cost.tbl_dbi <- function(
 #' @param group_cols Character vector of columns to group by, such as
 #'   `"est_id"`, or `NULL` (default) for the whole workforce. Must not include
 #'   `ref_date`.
-#' @param status_col Character. Column holding employment status. Only rows
-#'   equal to `"active"` are counted. Default `"employment_status"`.
+#' @inheritParams detect_movement
 #' @param ... Arguments passed to methods.
 #'
 #' @returns A table with one row per `ref_date` and group, containing:
@@ -860,7 +975,7 @@ compute_retirement_cost.tbl_dbi <- function(
 #'   \item{headcount}{Number of active people.}
 #'   \item{hires}{People active on this date but not on the previous one.}
 #'   \item{separations}{People active on the previous date but not on this
-#'     one.}
+#'     one, other than retirees, whom [compute_retirement()] counts.}
 #'   \item{hire_rate, separation_rate}{`hires` and `separations` divided by
 #'     the headcount on the previous date.}
 #'   \item{replacement_rate}{`hires` divided by `separations`.}
@@ -873,12 +988,15 @@ compute_retirement_cost.tbl_dbi <- function(
 #' The previous date is the neighbouring date found in the data, so the dates
 #' do not need to be evenly spaced.
 #'
-#' Hires and separations both cover the time since the previous date, so on
-#' every date after the first, `headcount` equals the previous date's
-#' `headcount` plus `hires` minus `separations`.
+#' Hires, separations and retirements all cover the time since the previous
+#' date, so on every date after the first, `headcount` equals the previous
+#' date's `headcount` plus `hires` minus `separations` and the `retirements`
+#' of [compute_retirement()].
 #'
 #' People are counted once per date, even if they hold several contracts. A
-#' separation is any exit from active status, including retirement.
+#' separation is any exit from active status other than a retirement, as in
+#' [detect_movement()]. Without pensioner records in `data`, every exit is a
+#' separation.
 #'
 #' With `group_cols`, each person is counted in the group they belong to on
 #' that date, and each separation in the group the person left. A group that
@@ -1005,11 +1123,14 @@ compute_movement.tbl_dbi <- function(
 
   by_cols <- c("ref_date", group_cols)
 
-  # one row per person, date and group, so people with several contracts
-  # count once
+  # one row per person, date and group
   person_groups <- data |>
     filter(.data[[status_col]] == "active") |>
-    select(all_of(c("personnel_id", "ref_date", group_cols))) |>
+    select(
+      all_of(
+        c("personnel_id", "ref_date", group_cols)
+      )
+    ) |>
     distinct()
 
   people <- person_groups |>
@@ -1105,9 +1226,9 @@ compute_movement.tbl_dbi <- function(
 #' exit. There is no limit on the lag, so an exit followed years later by a
 #' deferred pension also counts as a retirement.
 #'
-#' @seealso [compute_movement()], whose separations include these retirements
-#'   and whose rates share their denominator. [detect_retirement()], which
-#'   flags the retirements of each person.
+#' @seealso [compute_movement()], whose separations are the exits other than
+#'   these retirements, and whose rates share their denominator.
+#'   [detect_retirement()], which flags the retirements of each person.
 #'
 #' @examples
 #' hr <- data.frame(

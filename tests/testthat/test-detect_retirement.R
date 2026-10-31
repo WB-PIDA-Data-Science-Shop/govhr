@@ -1,10 +1,13 @@
-# retirement_panel is in helper-retirement_panel.R
+# retirement_panel is in helper-retirement_panel.R. Edges, gaps, the headcount
+# identity and the database methods are tested on detect_workforce_flows(),
+# which both functions select from
 
 # detect_movement() and detect_retirement() flag the active person-dates of
 # retirement_panel:
 # hires: p7 in 2022, returning after the 2021 gap
-# separations: p2, p5, p6 and p7 in 2020, p1 in 2021 and p7 in 2022
+# exits: p2, p5, p6 and p7 in 2020, p1 in 2021 and p7 in 2022, of which
 # retirements: p5 and p6 in 2020, p1 in 2021 and p7 in 2022
+# separations, the other exits: p2 and p7 in 2020
 
 flagged <- function(events, flag) {
   events[events[[flag]] %in% TRUE, c("personnel_id", "ref_date")] |>
@@ -25,11 +28,12 @@ test_that("detect_movement flags hires and separations", {
     flagged(result, "hire"),
     data.frame(personnel_id = "p7", ref_date = as.Date("2022-01-01"))
   )
+  # retirements are netted out, leaving the other exits
   expect_equal(
     flagged(result, "separation"),
     data.frame(
-      personnel_id = c("p2", "p5", "p6", "p7", "p1", "p7"),
-      ref_date = as.Date(c(rep("2020-01-01", 4), "2021-01-01", "2022-01-01"))
+      personnel_id = c("p2", "p7"),
+      ref_date = as.Date(c("2020-01-01", "2020-01-01"))
     )
   )
 })
@@ -72,26 +76,4 @@ test_that("detect_retirement flags the separations into a pension", {
       ref_date = as.Date(c("2020-01-01", "2020-01-01", "2021-01-01", "2022-01-01"))
     )
   )
-})
-
-test_that("detect_movement and detect_retirement agree on a database table", {
-  skip_if_not_installed("dbplyr")
-  skip_if_not_installed("duckdb")
-
-  con <- DBI::dbConnect(duckdb::duckdb())
-  remote <- dplyr::copy_to(con, retirement_panel, "retirement_panel")
-
-  for (detect in list(detect_movement, detect_retirement)) {
-    expected <- detect(retirement_panel) |>
-      as.data.frame()
-
-    result <- detect(remote) |>
-      dplyr::collect() |>
-      dplyr::arrange(.data[["ref_date"]], .data[["personnel_id"]]) |>
-      as.data.frame()
-
-    expect_equal(result, expected, ignore_attr = TRUE)
-  }
-
-  DBI::dbDisconnect(con, shutdown = TRUE)
 })

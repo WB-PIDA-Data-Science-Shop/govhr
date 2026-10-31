@@ -40,6 +40,8 @@ S3method(detect_retirement,data.frame)
 S3method(detect_retirement,tbl_dbi)
 S3method(detect_transition,data.frame)
 S3method(detect_transition,tbl_dbi)
+S3method(detect_workforce_flows,data.frame)
+S3method(detect_workforce_flows,tbl_dbi)
 S3method(drop_duplicate,data.frame)
 S3method(drop_duplicate,tbl_dbi)
 S3method(project_retirement,data.frame)
@@ -92,6 +94,7 @@ export(detect_movement)
 export(detect_personnel_event)
 export(detect_retirement)
 export(detect_transition)
+export(detect_workforce_flows)
 export(estimate_decrement_rates)
 export(fastcount)
 export(fastprop)
@@ -166,7 +169,6 @@ importFrom(data.table,
 importFrom(dplyr,
   across,
   all_of,
-  anti_join,
   any_of,
   arrange,
   case_when,

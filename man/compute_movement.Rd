@@ -33,8 +33,9 @@ named in \code{status_col}.}
 \code{"est_id"}, or \code{NULL} (default) for the whole workforce. Must not include
 \code{ref_date}.}
 
-\item{status_col}{Character. Column holding employment status. Only rows
-equal to \code{"active"} are counted. Default \code{"employment_status"}.}
+\item{status_col}{Character. Column holding employment status. Rows equal
+to \code{"active"} are the active workforce, and rows equal to \code{"pensioner"}
+mark exits as retirements. Default \code{"employment_status"}.}
 }
 \value{
 A table with one row per \code{ref_date} and group, containing:
@@ -42,7 +43,7 @@ A table with one row per \code{ref_date} and group, containing:
 \item{headcount}{Number of active people.}
 \item{hires}{People active on this date but not on the previous one.}
 \item{separations}{People active on the previous date but not on this
-one.}
+one, other than retirees, whom \code{\link[=compute_retirement]{compute_retirement()}} counts.}
 \item{hire_rate, separation_rate}{\code{hires} and \code{separations} divided by
 the headcount on the previous date.}
 \item{replacement_rate}{\code{hires} divided by \code{separations}.}
@@ -61,12 +62,15 @@ returned.
 The previous date is the neighbouring date found in the data, so the dates
 do not need to be evenly spaced.
 
-Hires and separations both cover the time since the previous date, so on
-every date after the first, \code{headcount} equals the previous date's
-\code{headcount} plus \code{hires} minus \code{separations}.
+Hires, separations and retirements all cover the time since the previous
+date, so on every date after the first, \code{headcount} equals the previous
+date's \code{headcount} plus \code{hires} minus \code{separations} and the \code{retirements}
+of \code{\link[=compute_retirement]{compute_retirement()}}.
 
 People are counted once per date, even if they hold several contracts. A
-separation is any exit from active status, including retirement.
+separation is any exit from active status other than a retirement, as in
+\code{\link[=detect_movement]{detect_movement()}}. Without pensioner records in \code{data}, every exit is a
+separation.
 
 With \code{group_cols}, each person is counted in the group they belong to on
 that date, and each separation in the group the person left. A group that

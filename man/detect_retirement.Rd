@@ -25,11 +25,11 @@ personnel recorded as \code{"active"} and retirees as \code{"pensioner"}. Defaul
 }
 \value{
 A table with one row per active person and \code{ref_date}, containing
-\code{personnel_id}, \code{ref_date}, \code{next_date} (the next date found in the data)
-and \code{retirement}: \code{TRUE} if the person retires by \code{next_date}, and \code{NA} on
-the last date, which has nothing to compare with. A data.table for data
-frame input; a lazy table for \code{tbl_dbi} input (use \code{\link[dplyr:collect]{dplyr::collect()}} to
-bring it into memory).
+\code{personnel_id}, \code{ref_date}, \code{next_date} (the next date with active
+personnel) and \code{retirement}: \code{TRUE} if the person retires by
+\code{next_date}, and \code{NA} on the last date, which has nothing to compare
+with. A data.table for data frame input; a lazy table for \code{tbl_dbi} input
+(use \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
 Flags, for each active person and reference date, whether they leave active
@@ -37,10 +37,13 @@ status by the next date into a pension, i.e. whether their next status
 after leaving is pensioner.
 }
 \details{
-A retirement is a separation whose next status is pensioner. A pension
-drawn alongside an active contract is therefore not a retirement. As with
-separations, it is flagged on the person's last active date and counted by
-\code{\link[=compute_retirement]{compute_retirement()}} on \code{next_date}, the first date they are absent.
+A retirement is an exit from active status whose next status is
+pensioner. \code{\link[=detect_movement]{detect_movement()}} counts every other exit as a separation, so
+every exit is either a separation or a retirement, never both, and the two
+tables share their rows. A pension drawn alongside an active contract is
+not a retirement. As with separations, a retirement is flagged on the
+person's last active date and counted by \code{\link[=compute_retirement]{compute_retirement()}} on
+\code{next_date}, the first date they are absent.
 
 Pension registration can lag the exit, so the pensioner record may appear
 at any later date, not only the next one. A retirement is dated by the exit,
@@ -49,9 +52,18 @@ pensioner record is not retired at the earlier exit. There is no limit on
 the lag, so an exit followed years later by a deferred pension also counts
 as a retirement.
 
-As in \code{\link[=detect_movement]{detect_movement()}}, only dates with active personnel are compared,
-so pensioner records dated before the next such date are not seen, and an
-exit on the last such date is \code{NA}.
+As in \code{\link[=detect_movement]{detect_movement()}}, \code{next_date} is the next date with active
+personnel, and pensioner records are looked up from \code{next_date} onwards. A
+date holding only pensioner records is never a \code{next_date}, so:
+\itemize{
+\item a pensioner record dated after the exit but before \code{next_date} is
+not seen. The exit is still a retirement if another pensioner record
+follows on or after \code{next_date}, and a separation otherwise.
+\item an exit after the last date with active personnel is \code{NA}, even if
+pensioner records follow.
+\item an exit shortly before the last date with active personnel may be
+flagged as a separation because the pension is not registered yet.
+}
 }
 \examples{
 hr <- data.frame(
@@ -66,5 +78,5 @@ detect_retirement(hr)
 }
 \seealso{
 \code{\link[=compute_retirement]{compute_retirement()}}, which counts these retirements.
-\code{\link[=detect_movement]{detect_movement()}}, which flags the separations they are drawn from.
+\code{\link[=detect_movement]{detect_movement()}}, which flags the other exits as separations.
 }

@@ -36,7 +36,7 @@ test_that("detect_personnel_event flags hires and fires, with a warning naming t
   )
   lifecycle::expect_deprecated(
     fires <- detect(personnel, "fire"),
-    "`separation` column of `detect_movement\\(\\)`, and `detect_retirement\\(\\)`"
+    "the `retirement` column of `detect_retirement\\(\\)`"
   )
 
   expect_s3_class(hires, "data.frame")

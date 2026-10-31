@@ -311,10 +311,13 @@ if (getRversion() >= "2.15.1") {
     "pay",
     # detect_movement, detect_retirement, compute_retirement
     "hired",
+    "exited",
     "separated",
     "retired",
     "record_date",
     "next_pension",
+    "pension_date",
+    "active_date",
     "next_return",
     "x.ref_date",
     "retirement",
