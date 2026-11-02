@@ -5,6 +5,10 @@
 
 if (getRversion() >= "2.15.1") {
   utils::globalVariables(c(
+    # compute_transition_flows
+    "transitions_inflow",
+    "transitions_outflow",
+    "group",
     "contract_id",
     "est_date",
     "personnel_id",
@@ -208,11 +212,9 @@ if (getRversion() >= "2.15.1") {
     "INDICATOR",
     "ref_date",
     "lead_status",
-    "expanded",
     "interval_days",
     "birth_date",
     "ppp_2021",
-    "type_event",
     "employment_status",
     "est_id_nested",
     "term",
@@ -325,10 +327,13 @@ if (getRversion() >= "2.15.1") {
     "pay",
     # detect_movement, detect_retirement, compute_retirement
     "hired",
+    "exited",
     "separated",
     "retired",
     "record_date",
     "next_pension",
+    "pension_date",
+    "active_date",
     "next_return",
     "x.ref_date",
     "retirement",

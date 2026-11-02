@@ -84,7 +84,7 @@ compute_retirement(hr)
 
 }
 \seealso{
-\code{\link[=compute_movement]{compute_movement()}}, whose separations include these retirements
-and whose rates share their denominator. \code{\link[=detect_retirement]{detect_retirement()}}, which
-flags the retirements of each person.
+\code{\link[=compute_movement]{compute_movement()}}, whose separations are the exits other than
+these retirements, and whose rates share their denominator.
+\code{\link[=detect_retirement]{detect_retirement()}}, which flags the retirements of each person.
 }

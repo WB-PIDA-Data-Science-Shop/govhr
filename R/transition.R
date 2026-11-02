@@ -513,6 +513,107 @@ compute_transition.tbl_dbi <- function(
   transitions
 }
 
+#' Compute transitions in and out of each group
+#'
+#' Adds up, for each group and reference date, the moves into the group and
+#' the moves out of it.
+#'
+#' @param data Output of [compute_transition()], with `from`, `to`,
+#'   `ref_date` and `transitions` columns.
+#' @param ... Arguments passed to methods.
+#'
+#' @returns A table with one row per group and `ref_date`, containing `group`,
+#'   `ref_date`, `transitions_inflow` (moves into the group) and
+#'   `transitions_outflow` (moves out of it). A data.table for data frame
+#'   input; a lazy table for `tbl_dbi` input (use [dplyr::collect()] to bring
+#'   it into memory).
+#'
+#' @details A group that only received or only sent people on a date has 0
+#'   moves the other way, rather than being left out.
+#'
+#' @seealso [plot_transition_flows()] to draw these flows.
+#'
+#' @examples
+#' careers <- data.frame(
+#'   personnel_id = c("a", "a", "b", "b", "c", "c"),
+#'   ref_date = as.Date(rep(c("2020-01-01", "2021-01-01"), times = 3)),
+#'   unit = c("A", "B", "A", "C", "B", "A")
+#' )
+#' compute_transition(careers, group_col = "unit") |>
+#'   compute_transition_flows()
+#'
+#' @export
+compute_transition_flows <- function(data, ...) {
+  UseMethod("compute_transition_flows")
+}
+
+#' @rdname compute_transition_flows
+#' @export
+compute_transition_flows.data.frame <- function(data, ...) {
+  rlang::check_dots_empty()
+
+  dt <- data.table::as.data.table(data)
+
+  # moves out of a group are counted by their origin, and moves in by their
+  # destination
+  outflow <- dt[
+    , .(transitions_outflow = sum(transitions)),
+    by = .(group = from, ref_date)
+  ]
+  inflow <- dt[
+    , .(transitions_inflow = sum(transitions)),
+    by = .(group = to, ref_date)
+  ]
+
+  flows <- merge(
+    inflow,
+    outflow,
+    by = c("group", "ref_date"),
+    all = TRUE
+  )
+
+  flows[is.na(transitions_inflow), transitions_inflow := 0L]
+  flows[is.na(transitions_outflow), transitions_outflow := 0L]
+
+  data.table::setkey(flows, NULL)
+  data.table::setorderv(flows, c("group", "ref_date"))
+
+  flows[]
+}
+
+#' @rdname compute_transition_flows
+#' @export
+compute_transition_flows.tbl_dbi <- function(data, ...) {
+  rlang::check_dots_empty()
+
+  # moves out of a group are counted by their origin, and moves in by their
+  # destination
+  outflow <- data |>
+    dplyr::summarise(
+      transitions_outflow = sum(transitions, na.rm = TRUE),
+      .by = c("from", "ref_date")
+    ) |>
+    dplyr::rename(group = from)
+
+  inflow <- data |>
+    dplyr::summarise(
+      transitions_inflow = sum(transitions, na.rm = TRUE),
+      .by = c("to", "ref_date")
+    ) |>
+    dplyr::rename(group = to)
+
+  inflow |>
+    dplyr::full_join(
+      outflow,
+      by = c("group", "ref_date")
+    ) |>
+    dplyr::mutate(
+      transitions_inflow = dplyr::coalesce(transitions_inflow, 0),
+      transitions_outflow = dplyr::coalesce(transitions_outflow, 0)
+    ) |>
+    dplyr::select(group, ref_date, transitions_inflow, transitions_outflow)
+}
+
 #' Compare each row with its neighbour
 #'
 #' Flags the rows whose values in `cols` all equal those of the row before (or
@@ -541,158 +642,4 @@ same_as_neighbour <- function(dt, cols, type = "lag") {
   same <- Reduce(`&`, matches)
 
   !is.na(same) & same
-}
-
-#' Plot transfer heatmap
-#'
-#' Draws transfers between groups as a heatmap, origin groups on the y-axis and
-#' destination groups on the x-axis.
-#'
-#' @param data Data frame with `from`, `to` and `transfer` columns.
-#'
-#' @returns A plotly object.
-#'
-#' @keywords internal
-plot_transfer_heatmap <- function(data) {
-  transfer <- data[["transfer"]]
-
-  plotly::plot_ly(
-    data = data,
-    x = ~ data[["to"]],
-    y = ~ data[["from"]],
-    z = ~ data[["transfer"]],
-    type = "heatmap",
-    colorscale = list(
-      c(min(transfer, na.rm = TRUE), "#d32f2f"),
-      c(stats::median(transfer, na.rm = TRUE), "#f9a825"),
-      c(max(transfer, na.rm = TRUE), "#388e3c")
-    ),
-    zmin = min(transfer, na.rm = TRUE),
-    zmax = max(transfer, na.rm = TRUE),
-    xgap = 2,
-    ygap = 2,
-    hovertemplate = paste0(
-      "Group (to): %{x}<br>",
-      "Group (from): %{y}<br>",
-      "Transfers: %{z}",
-      "<extra></extra>"
-    ),
-    colorbar = list(title = "Transfers")
-  ) |>
-    plotly::layout(
-      xaxis = list(title = "Group (to)"),
-      yaxis = list(title = "Group (from)")
-    )
-}
-
-#' Plot transition network
-#'
-#' Draws career transitions as a directed graph, with edge width proportional to
-#' the number of transitions and node size to degree centrality. Networks of ten
-#' or more nodes are labelled by index rather than by name.
-#'
-#' @param data Data frame with one row per move and `from` and `to` columns,
-#'   as returned by [detect_transition()].
-#' @param interactive Logical. If `TRUE` (default), return an interactive
-#'   chart that shows each establishment's name on hover. If `FALSE`, return a
-#'   static ggplot, for outputs such as Word that cannot show interactive
-#'   charts.
-#'
-#' @returns A ggiraph girafe object, or a ggplot object when
-#'   `interactive = FALSE`.
-#'
-#' 
-#' @keywords internal
-#' @export
-plot_transition_network <- function(data, interactive = TRUE) {
-  edges <- govhr::fastcount(data, .data[["from"]], .data[["to"]], name = "weight") |>
-    # coerce to character to ensure that as_tble_graph produces a `name` column
-    dplyr::mutate(
-      dplyr::across(
-        c("from", "to"), 
-        as.character
-      )
-    )
-
-  graph_data <- tidygraph::as_tbl_graph(edges, directed = TRUE)
-
-  n_nodes <- igraph::gorder(graph_data)
-  many_nodes <- n_nodes >= 10
-  orange_palette <- grDevices::colorRampPalette(c("#C34729", "#F5C6A0"))(n_nodes)
-
-  graph_data <- graph_data |>
-    tidygraph::activate(nodes) |>
-    tidygraph::mutate(
-      node_id = as.character(dplyr::row_number()),
-      node_id = factor(
-        .data[["node_id"]],
-        levels = as.character(sort(as.integer(.data[["node_id"]])))
-      ),
-      label = if (many_nodes) .data[["node_id"]] else .data[["name"]],
-      degree = tidygraph::centrality_degree(mode = "all")
-    )
-
-  point_size <- scales::rescale(
-    graph_data |> tidygraph::activate(nodes) |> dplyr::pull(.data[["degree"]]),
-    to = if (many_nodes) c(6, 14) else c(20, 30)
-  )
-
-  plot <- ggraph::ggraph(graph_data, layout = "stress") +
-    ggraph::geom_edge_arc(
-      ggplot2::aes(edge_width = .data[["weight"]], edge_alpha = 0.5),
-      color = "#4a5568",
-      arrow = grid::arrow(length = grid::unit(3, "mm"), type = "closed"),
-      end_cap = ggraph::circle(4, "mm"),
-      start_cap = ggraph::circle(4, "mm")
-    ) +
-    ggraph::geom_node_point(
-      ggplot2::aes(
-        size = point_size,
-        color = if (many_nodes) .data[["node_id"]] else "#C34729"
-      )
-    ) +
-    ggraph::geom_node_text(
-      ggplot2::aes(label = if (many_nodes) .data[["node_id"]] else .data[["name"]]),
-      color = if (many_nodes) "white" else "#2d224e",
-      size = if (many_nodes) 3 else 8,
-      fontface = "bold"
-    ) +
-    ggiraph::geom_point_interactive(
-      ggplot2::aes(
-        x = .data[["x"]],
-        y = .data[["y"]],
-        size = point_size,
-        tooltip = .data[["name"]],
-        data_id = .data[["node_id"]]
-      ),
-      alpha = 0.01
-    ) +
-    ggraph::scale_edge_width_continuous(range = c(0.2, 3), guide = "none") +
-    ggraph::scale_edge_alpha_identity(guide = "none") +
-    ggplot2::scale_size_identity(guide = "none") +
-    ggplot2::scale_color_manual(values = orange_palette, guide = "none") +
-    # the layout pushes nodes to the extremes, so pad the panel and disable
-    # clipping to keep the outermost points and labels whole
-    ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = 0.12)) +
-    ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = 0.12)) +
-    ggplot2::coord_cartesian(clip = "off") +
-    ggplot2::theme_void() +
-    ggplot2::theme(
-      legend.position = "none",
-      plot.margin = ggplot2::margin(10, 10, 10, 10)
-    )
-
-  if (!interactive) {
-    return(plot)
-  }
-
-  ggiraph::girafe(
-    ggobj = plot,
-    width_svg = 10,
-    height_svg = 6,
-    options = list(
-      ggiraph::opts_hover(css = "stroke:#2d224e;stroke-width:2px;"),
-      ggiraph::opts_sizing(rescale = TRUE, width = 1)
-    )
-  )
 }

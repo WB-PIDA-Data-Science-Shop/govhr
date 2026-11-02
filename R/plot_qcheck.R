@@ -1,7 +1,6 @@
 #' Plot coverage over time
 #'
-#' Plots coverage for each reference date, one line per group, from coverage
-#' already computed.
+#' Plots coverage for each reference date, one line per group.
 #'
 #' @param data Data frame with `ref_date`, `coverage` and the column named in
 #'   `group_col`, such as the output of
@@ -48,9 +47,8 @@ plot_coverage_trend <- function(
 
 #' Plot coverage by variable
 #'
-#' Plots one bar per variable with its coverage, coloured by coverage tier,
-#' from coverage already computed.
-#'
+#' Plots one bar per variable with its coverage, coloured by coverage tier.
+#' 
 #' @param data Data frame with `variable` and `coverage`, such as the output
 #'   of [compute_coverage()] without grouping.
 #'
@@ -149,11 +147,11 @@ plot_coverage_heatmap <- function(data, group_col = "ref_date") {
 #' Plots record or value consistency for each reference date, one line per
 #' group, from consistency already computed.
 #'
-#' @param data Data frame or lazy table (`tbl_dbi`) with `ref_date`, the
-#'   column named in `group_col` and `record_consistency` or
-#'   `value_consistency`, such as the output of [compute_record_consistency()]
-#'   or [compute_value_consistency()] grouped by `group_col` and `ref_date`. A
-#'   lazy table is brought into memory first.
+#' @param data Data frame with `ref_date`, the column named in `group_col` and
+#'   `record_consistency` or `value_consistency`, such as the output of
+#'   [compute_record_consistency()] or [compute_value_consistency()] grouped
+#'   by `group_col` and `ref_date`. Bring a lazy table (`tbl_dbi`) into memory
+#'   first with [dplyr::collect()].
 #' @param group_col Character. Column to draw one line per group, or
 #'   `"ref_date"` (default) for a single line.
 #' @param type_plot Character. `"record"` (default) or `"value"`, the kind of
@@ -175,7 +173,7 @@ plot_coverage_heatmap <- function(data, group_col = "ref_date") {
 #'   compute_record_consistency("personnel_id", group_cols = "ref_date") |>
 #'   plot_consistency_trend()
 #'
-#' @importFrom dplyr collect rename
+#' @importFrom dplyr rename
 #' @export
 plot_consistency_trend <- function(
   data,
@@ -186,11 +184,8 @@ plot_consistency_trend <- function(
   type_plot <- match.arg(type_plot)
   consistency_col <- paste0(type_plot, "_consistency")
 
-  # plot_trend() sizes its group colours from `data[[group_col]]`, which is
-  # NULL on a lazy table, hence the collect(). apply_baseline_index() and
-  # plot_trend() read the measure from `value`
+  # apply_baseline_index() and plot_trend() read the measure from `value`
   consistency <- data |>
-    dplyr::collect() |>
     dplyr::rename(value = dplyr::all_of(consistency_col))
 
   if (toggle_growth) {

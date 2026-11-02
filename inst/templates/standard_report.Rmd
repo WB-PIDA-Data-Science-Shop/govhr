@@ -95,7 +95,7 @@ if (nrow(workforce$transitions) == 0) {
   cat("No moves between establishments were recorded.")
 } else {
   # Word cannot show interactive charts, so draw a static network there
-  plot_transition_network(
+  plot_transition(
     workforce$transitions,
     interactive = knitr::is_html_output()
   )

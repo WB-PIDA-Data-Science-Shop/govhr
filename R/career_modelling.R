@@ -544,6 +544,7 @@ fit_survival_model.default <- function(panel, ...) {
 #' broom::tidy(fit)
 #'
 #' @seealso [fit_survival_model()] for the model.
+#' @importFrom broom tidy
 #' @importFrom dplyr across all_of bind_rows mutate tibble
 #' @export
 tidy.survival_model <- function(x, conf.level = 0.95, ...) {

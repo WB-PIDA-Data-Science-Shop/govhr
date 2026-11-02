@@ -3,7 +3,7 @@
 # compute_movement_cost() and compute_retirement_cost() add up the movers' pay
 # in retirement_panel, where each record's pay is ten times its row number:
 # hires: p7 in 2022
-# separations: p2, p5, p6 and p7 in 2020, p1 in 2021 and p7 in 2022
+# separations: p2 and p7 in 2020
 # retirements: p5 and p6 in 2020, p1 in 2021 and p7 in 2022
 cost_panel <- retirement_panel
 cost_panel$pay <- seq_len(nrow(cost_panel)) * 10
@@ -17,12 +17,13 @@ test_that("compute_movement_cost adds up the movers' pay on each date", {
   expect_equal(result$movement_type, rep(c("hire", "separation"), each = 4))
 
   # the first date has nothing to compare with. separations are costed at
-  # their last active pay but counted on the first date they are absent
+  # their last active pay but counted on the first date they are absent.
+  # retirees are not separations
   expect_equal(
     result$movement_cost,
     c(
       NA, 0, 180, 0,
-      NA, 20 + 60 + 70 + 80, 90, 180
+      NA, 20 + 80, 0, 0
     )
   )
 })
@@ -36,11 +37,11 @@ test_that("compute_movement_cost counts pay in the group of its record", {
   )
 
   # every unit with active personnel on a date or the date before appears, so
-  # unit A still appears on the last date, when p7 leaves it
+  # unit A still appears on the last date, when p7 retires from it
   expect_equal(result$unit, rep(c("A", "B"), times = 4))
   expect_equal(
     result$movement_cost,
-    c(NA, NA, 20 + 70 + 80, 60, 90, 0, 180, 0)
+    c(NA, NA, 20 + 80, 0, 0, 0, 0, 0)
   )
 })
 

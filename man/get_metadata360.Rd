@@ -21,6 +21,8 @@ URL, retrieves the metadata in JSON format, and parses it into an R list or
 data frame.
 }
 \examples{
-get_metadata360("WB_MPO")
+\dontrun{
+  get_metadata360("WB_MPO")
+}
 
 }

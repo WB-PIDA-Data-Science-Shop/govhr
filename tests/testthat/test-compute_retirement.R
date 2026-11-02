@@ -41,14 +41,18 @@ test_that("compute_retirement counts each person in their group on that date", {
   expect_equal(result$retirements, c(NA, NA, 1L, 1L, 1L, 0L, 1L, 0L))
 })
 
-test_that("compute_retirement counts only separations as retirements", {
+test_that("compute_retirement and compute_movement split exits without overlap", {
   retirement <- compute_retirement(retirement_panel)
   movement <- compute_movement(retirement_panel)
 
-  expect_true(
-    all(retirement$retirements <= movement$separations, na.rm = TRUE)
-  )
   expect_identical(retirement$headcount, movement$headcount)
+
+  # each exit is a separation or a retirement, so the headcount adds up
+  expect_equal(
+    movement$headcount[-1],
+    movement$headcount[-nrow(movement)] + movement$hires[-1] -
+      movement$separations[-1] - retirement$retirements[-1]
+  )
 })
 
 test_that("compute_retirement rejects ref_date as a group", {

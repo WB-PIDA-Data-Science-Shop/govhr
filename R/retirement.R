@@ -1,3 +1,100 @@
+
+#' Detect retirements
+#'
+#' Detects, for each active person and reference date, whether they leave active
+#' status by the next date into a pension, i.e. whether their next status
+#' after leaving is pensioner.
+#'
+#' @inheritParams detect_movement
+#' @param status_col Character. Column holding employment status, with active
+#'   personnel recorded as `"active"` and retirees as `"pensioner"`. Default
+#'   `"employment_status"`.
+#'
+#' @returns A table with one row per active person and `ref_date`, containing
+#'   `personnel_id`, `ref_date`, `next_date` (the next date with active
+#'   personnel) and `retirement`: `TRUE` if the person retires by
+#'   `next_date`, and `NA` on the last date, which has nothing to compare
+#'   with. A data.table for data frame input; a lazy table for `tbl_dbi` input
+#'   (use [dplyr::collect()] to bring it into memory).
+#'
+#' @details
+#' A retirement is an exit from active status whose next status is
+#' pensioner. [detect_movement()] counts every other exit as a separation, so
+#' every exit is either a separation or a retirement, never both, and the two
+#' tables share their rows. A pension drawn alongside an active contract is
+#' not a retirement. As with separations, a retirement is flagged on the
+#' person's last active date and counted by [compute_retirement()] on
+#' `next_date`, the first date they are absent.
+#'
+#' Pension registration can lag the exit, so the pensioner record may appear
+#' at any later date, not only the next one. A retirement is dated by the exit,
+#' not by the registration. A person who returns to active work before any
+#' pensioner record is not retired at the earlier exit. There is no limit on
+#' the lag, so an exit followed years later by a deferred pension also counts
+#' as a retirement.
+#'
+#' As in [detect_movement()], `next_date` is the next date with active
+#' personnel, and pensioner records are looked up from `next_date` onwards. A
+#' date holding only pensioner records is never a `next_date`, so:
+#' \itemize{
+#'   \item a pensioner record dated after the exit but before `next_date` is
+#'     not seen. The exit is still a retirement if another pensioner record
+#'     follows on or after `next_date`, and a separation otherwise.
+#'   \item an exit after the last date with active personnel is `NA`, even if
+#'     pensioner records follow.
+#'   \item an exit shortly before the last date with active personnel may be
+#'     flagged as a separation because the pension is not registered yet.
+#' }
+#'
+#' @seealso [compute_retirement()], which counts these retirements.
+#'   [detect_movement()], which flags the other exits as separations.
+#'
+#' @examples
+#' hr <- data.frame(
+#'   personnel_id = c(1, 2, 1, 2, 2),
+#'   ref_date = as.Date(c(
+#'     "2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01", "2022-01-01"
+#'   )),
+#'   employment_status = c("active", "active", "pensioner", "active", "active")
+#' )
+#' detect_retirement(hr)
+#'
+#' @export
+detect_retirement <- function(data, ...) {
+  UseMethod("detect_retirement")
+}
+
+#' @rdname detect_retirement
+#' @importFrom rlang check_dots_empty
+#' @export
+detect_retirement.data.frame <- function(
+  data,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
+  detect_workforce_flows(data, status_col = status_col)[
+    , .(personnel_id, ref_date, next_date, retirement)
+  ]
+}
+
+#' @rdname detect_retirement
+#' @importFrom rlang check_dots_empty
+#' @export
+detect_retirement.tbl_dbi <- function(
+  data,
+  status_col = "employment_status",
+  ...
+) {
+  rlang::check_dots_empty()
+
+  detect_workforce_flows(data, status_col = status_col) |>
+    dplyr::select(
+      dplyr::all_of(c("personnel_id", "ref_date", "next_date", "retirement"))
+    )
+}
+
 #' Project retirements of the current workforce
 #'
 #' Projects, for each year ahead, how many people in the current workforce

@@ -1,8 +1,13 @@
+# govhr 0.4.4
+This release:
+- Separates detecting from summarizing transitions. It also reorganizes plotting functions into scripts matching the analyses they plot.
+- `compute_headcount()` and `compute_wagebill()` now accept several reference columns, and `compute_wage()` always compares against the previous `ref_date`.
+- Removes unused and legacy functions, including `detect_personnel_event()` (use `detect_movement()` and `detect_retirement()` instead), and standardizes arguments across functions.
+
 # govhr 0.4.3
 This release: 
 - Simplifies the lifecycle functions to remove wage bill path growth from the compute_service_table() function. 
-- Includes the hazard modelling as well as plotting functions to estimate the relationship between survival/exit
-choice and harmonized contract and personnel variables.
+- Includes the hazard modelling as well as plotting functions to estimate the relationship between survival/exit choice and harmonized contract and personnel variables.
 
 # govhr 0.4.2
 This release:

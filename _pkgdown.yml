@@ -58,7 +58,7 @@ reference:
       - compute_global_consistency
 
   - title: Quality check plots
-    desc: "`R/qcheck_plots.R`: plot coverage and consistency."
+    desc: "`R/plot_qcheck.R`: plot coverage and consistency."
     contents:
       - plot_coverage_trend
       - plot_coverage_bar
@@ -78,6 +78,10 @@ reference:
       - compute_trend_summary
       - apply_baseline_index
       - compute_cross_section_summary
+
+  - title: Overview plots
+    desc: "`R/plot_overview.R`: plot trends, totals and growth by group."
+    contents:
       - plot_trend
       - plot_bar_total
       - plot_bar_growth
@@ -85,20 +89,31 @@ reference:
   - title: Movement
     desc: "`R/movement.R`: hires, separations and retirements, and their cost."
     contents:
+      - detect_workforce_flows
       - detect_movement
       - compute_movement
       - compute_movement_cost
       - detect_retirement
       - compute_retirement
       - compute_retirement_cost
-      - detect_personnel_event
-      - complete_dates
+
+  - title: Movement plots
+    desc: "`R/plot_movement.R`"
+    contents:
+      - plot_movement
 
   - title: Transitions
     desc: "`R/transition.R`: moves between groups, such as paygrades."
     contents:
       - detect_transition
       - compute_transition
+      - compute_transition_flows
+
+  - title: Transition plots
+    desc: "`R/plot_transition.R`: plot moves between groups, and in and out of each."
+    contents:
+      - plot_transition
+      - plot_transition_flows
       - plot_transition_network
 
   - title: Retirement projections
@@ -145,10 +160,21 @@ reference:
       - compute_percentile
       - compute_decile
 
+  - title: Distribution plots
+    desc: "`R/plot_distribution.R`: plot deciles, histograms and compression ratios."
+    contents:
+      - plot_decile
+      - plot_histogram
+      - plot_compression_ratio
+
   - title: Wage models
     desc: "`R/wage_model.R`"
     contents:
       - model_wage
+
+  - title: Wage model plots
+    desc: "`R/plot_wage_model.R`"
+    contents:
       - plot_model_wage
       - plot_model_wage_fes
 
@@ -191,18 +217,11 @@ reference:
       - count_unique
 
   - title: Plot helpers
-    desc: "`R/plots.R`"
+    desc: "`R/plot.R`: plots that work with any table."
     contents:
       - scale_plot_height
-      - ggplot_point_line
-      - ggplot_segment
-      - ggplot_coef
-      - plot_segment
-      - plot_movement
-      - plot_movement_cost
-      - plot_decile
-      - plot_histogram
-      - plot_compression_ratio
+      - plot_change
+      - plot_area
 
   - title: Sampling
     desc: "`R/sample.R`"
