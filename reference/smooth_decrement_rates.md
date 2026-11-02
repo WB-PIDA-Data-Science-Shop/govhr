@@ -24,7 +24,7 @@ that).
 ``` r
 smooth_decrement_rates(
   decrements,
-  age_col,
+  duration_col,
   status_col,
   group_cols,
   active_value = "active",
@@ -37,14 +37,16 @@ smooth_decrement_rates(
 
 - decrements:
 
-  A data.table (or coercible) shaped like the output of
+  A data frame or lazy database table (`tbl_dbi`) shaped like the output
+  of
   [`estimate_decrement_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_decrement_rates.md):
   one row per age / `group_cols` / `status_col`, with a `pop` (exposure)
-  and `decrement_rate` column.
+  and `decrement_rate` column. A lazy table is collected into memory
+  first; it is small, and the smoothing runs in R.
 
-- age_col:
+- duration_col:
 
-  A single string naming the age column.
+  A single string naming the duration column (e.g. age).
 
 - status_col:
 
@@ -73,10 +75,11 @@ smooth_decrement_rates(
 
 ## Value
 
-A data.table with one row per age / `group_cols` / `status_col`,
-spanning the full observed age range within each group with no gaps:
+A data.table (also for `tbl_dbi` input) with one row per age /
+`group_cols` / `status_col`, spanning the full observed age range within
+each group with no gaps:
 
-- age_col, group_cols:
+- duration_col, group_cols:
 
   As supplied.
 

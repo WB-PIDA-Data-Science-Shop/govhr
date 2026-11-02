@@ -10,6 +10,9 @@ total tenure.
 ## Usage
 
 ``` r
+compute_tenure_panel(contracts, ...)
+
+# S3 method for class 'data.frame'
 compute_tenure_panel(
   contracts,
   personnel_id_col = "personnel_id",
@@ -18,18 +21,39 @@ compute_tenure_panel(
   start_date_col = "start_date",
   end_date_col = "end_date",
   contract_type_col = "contract_type",
-  group_cols = NULL
+  group_cols = NULL,
+  ...
 )
+
+# S3 method for class 'tbl_dbi'
+compute_tenure_panel(
+  contracts,
+  personnel_id_col = "personnel_id",
+  ref_date_col = "ref_date",
+  contract_id_col = "contract_id",
+  start_date_col = "start_date",
+  end_date_col = "end_date",
+  contract_type_col = "contract_type",
+  group_cols = NULL,
+  ...
+)
+
+# Default S3 method
+compute_tenure_panel(contracts, ...)
 ```
 
 ## Arguments
 
 - contracts:
 
-  Data.table containing the stacked contract panel. Must include
-  personnel identifiers, contract identifiers, contract start and end
-  dates, reference dates, contract types, and any grouping variables
+  The stacked contract panel, as a data frame or a lazy database table
+  (`tbl_dbi`). Must include personnel identifiers, contract start and
+  end dates, reference dates, contract types, and any grouping variables
   supplied in `group_cols`.
+
+- ...:
+
+  Not used.
 
 - personnel_id_col:
 
@@ -42,8 +66,8 @@ compute_tenure_panel(
 
 - contract_id_col:
 
-  Character. Name of the contract identifier column. Default is
-  `"contract_id"`.
+  Character. Not used: a contract seen more than once counts once
+  without it. Kept so existing calls still work.
 
 - start_date_col:
 
@@ -68,8 +92,9 @@ compute_tenure_panel(
 
 ## Value
 
-A data.table with one row per unique combination of `personnel_id`,
-optional `group_cols`, and `ref_date`, containing:
+One row per unique combination of `personnel_id`, optional `group_cols`,
+and `ref_date` (a data.table for a data frame, a lazy table for a
+`tbl_dbi`), containing:
 
 - tenure_days:
 
@@ -84,4 +109,12 @@ optional `group_cols`, and `ref_date`, containing:
 
 Tenure is calculated independently within each combination of
 `personnel_id`, optional grouping variables supplied through
-`group_cols`, and `ref_date`.
+`group_cols`, and `ref_date`, from the contracts listed at that
+reference date.
+
+As in
+[`compute_tenure()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_tenure.md),
+each snapshot's contracts count only the part not already covered by the
+person's earlier-starting ones, a contract listed twice in a snapshot
+counts once (to its latest end), and missing contract types count as
+active.

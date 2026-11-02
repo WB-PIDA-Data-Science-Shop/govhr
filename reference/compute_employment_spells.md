@@ -13,6 +13,9 @@ this function collapses that panel down to one row per
 ## Usage
 
 ``` r
+compute_employment_spells(contracts, ...)
+
+# S3 method for class 'data.frame'
 compute_employment_spells(
   contracts,
   personnel_id_col = "personnel_id",
@@ -21,16 +24,38 @@ compute_employment_spells(
   start_date_col = "start_date",
   end_date_col = "end_date",
   contract_type_col = "contract_type",
-  group_cols = NULL
+  group_cols = NULL,
+  ...
 )
+
+# S3 method for class 'tbl_dbi'
+compute_employment_spells(
+  contracts,
+  personnel_id_col = "personnel_id",
+  ref_date_col = "ref_date",
+  contract_id_col = "contract_id",
+  start_date_col = "start_date",
+  end_date_col = "end_date",
+  contract_type_col = "contract_type",
+  group_cols = NULL,
+  ...
+)
+
+# Default S3 method
+compute_employment_spells(contracts, ...)
 ```
 
 ## Arguments
 
 - contracts:
 
-  Data.table. Stacked contract panel, as passed to
-  [`compute_tenure_panel`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_tenure_panel.md).
+  The stacked contract panel, as passed to
+  [`compute_tenure_panel`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_tenure_panel.md):
+  a data frame or a lazy database table (`tbl_dbi`).
+
+- ...:
+
+  Not used.
 
 - personnel_id_col:
 
@@ -43,8 +68,8 @@ compute_employment_spells(
 
 - contract_id_col:
 
-  Character. Name of the contract identifier column. Default is
-  `"contract_id"`.
+  Character. Not used: a contract seen more than once counts once
+  without it. Kept so existing calls still work.
 
 - start_date_col:
 
@@ -69,8 +94,8 @@ compute_employment_spells(
 
 ## Value
 
-A data.table with one row per unique combination of `personnel_id` and
-`group_cols`, containing:
+One row per unique combination of `personnel_id` and `group_cols` (a
+data.table for a data frame, a lazy table for a `tbl_dbi`), containing:
 
 - ref_date:
 
@@ -88,8 +113,7 @@ A `group_cols` combination (e.g. `paygrade`, or `contract_id` +
 `paygrade`) stops appearing in the underlying tenure panel once the
 person's recorded state changes, so the last `ref_date` at which a
 combination is observed marks the end of that spell. `spell_years` is
-the cumulative tenure value at that final snapshot, summed across any
-residual duplicate rows for the same combination and date.
+the cumulative tenure value at that final snapshot.
 
 Two caveats affect interpretation:
 

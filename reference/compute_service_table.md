@@ -1,178 +1,162 @@
-# Compute an actuarial service table from a personnel panel
+# Compute a service table: expected years of service left
 
-Builds a multiple-decrement service table: for each age (and any
-`group_cols` you supply), the number of survivors (`lx`), person- years
-of service (`Lx`, `Tx`), and expected remaining years of service (`ex`)
-for a synthetic cohort experiencing today's age-specific empirical
-decrement rates at every future age.
+For each value of a duration, such as age or years of service, estimates
+how many more years an employee in service at that duration stays, on
+average (`ex`).
 
-This chains
-[`estimate_decrement_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_decrement_rates.md)'s
-pooled, age-indexed rates across *age* – a different axis from the
-time-pooling that function already did. By default the rates are
-graduated first via
-[`smooth_decrement_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/smooth_decrement_rates.md),
-since the chain below requires a complete, gapless, reasonably stable
-`qx` curve to produce a sensible result.
+It works like a life table. From
+[`estimate_decrement_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_decrement_rates.md)
+it takes the share of employees still in service a year later (`px`). It
+then follows an imaginary group of employees from the lowest duration to
+the highest, keeping a share `px` of them each year, and adds up the
+years they serve.
 
 ## Usage
 
 ``` r
+compute_service_table(personnel, ...)
+
+# S3 method for class 'data.frame'
 compute_service_table(
   personnel,
-  age_col,
-  status_col,
-  personnel_id_col,
-  ref_date_col,
-  group_cols,
-  radix = 1e+05,
-  smooth = FALSE,
-  span = 0.75,
-  personnel_dt = NULL
+  duration_col,
+  status_col = "employment_status",
+  personnel_id_col = "personnel_id",
+  ref_date_col = "ref_date",
+  group_cols = NULL,
+  include_all = TRUE,
+  ...
 )
+
+# S3 method for class 'tbl_dbi'
+compute_service_table(
+  personnel,
+  duration_col,
+  status_col = "employment_status",
+  personnel_id_col = "personnel_id",
+  ref_date_col = "ref_date",
+  group_cols = NULL,
+  include_all = TRUE,
+  ...
+)
+
+# Default S3 method
+compute_service_table(personnel, ...)
 ```
 
 ## Arguments
 
 - personnel:
 
-  A data.table (or data.frame/tibble, coerced automatically) containing
-  the personnel panel. Passed straight through to
-  [`estimate_decrement_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_decrement_rates.md).
+  A data frame, or a database table (`tbl_dbi`), with one row per person
+  and snapshot.
 
-- age_col:
+- ...:
 
-  A single string naming the age column.
+  Rarely needed settings:
+
+  - `smooth`: `TRUE` to smooth the stay rates across durations first,
+    which evens out durations with few people. Default `FALSE`.
+
+  - `span`: how much to smooth; larger is smoother. Default `0.75`.
+
+  - `radix`: the size of the imaginary group. Default `100000`. It only
+    scales `lx`, `Lx` and `Tx`.
+
+- duration_col:
+
+  The column of `personnel` to build the table on, in years: e.g.
+  `"age"`, or years of service from
+  [`compute_tenure_panel()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_tenure_panel.md).
+  Cut to whole years (2.9 counts as 2).
 
 - status_col:
 
-  A single string naming the employment status column. The value
-  `"active"` identifies the "stayed" outcome that the survival chain is
-  built from.
+  The employment status column. `"active"` means in service; any other
+  value is a way of leaving.
 
-- personnel_id_col:
+- personnel_id_col, ref_date_col:
 
-  A single string naming the personnel identifier column.
-
-- ref_date_col:
-
-  A single string naming the reference date column.
+  The person and snapshot date columns.
 
 - group_cols:
 
-  A character vector of additional columns (e.g. gender, service type)
-  to compute a separate service table for, or `NULL` for a single table
-  over the whole population.
+  Columns to build a separate table for, e.g. `"gender"`, or `NULL` (the
+  default) for one table.
 
-- radix:
+- include_all:
 
-  Numeric. The size of the synthetic starting cohort at the youngest
-  observed age. Purely a normalizing constant – it cancels out of `ex`
-  and does not represent real people. Defaults to `100000`.
-
-- smooth:
-
-  Logical. Whether to graduate the decrement rates via
-  [`smooth_decrement_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/smooth_decrement_rates.md)
-  before chaining. Defaults to `FALSE`: the raw pooled rates are chained
-  directly, *unless* a `group_cols` stratum has an age gap, in which
-  case `compute_service_table()` smooths reactively (with a warning)
-  regardless of this setting, since the chain cannot run on a gappy age
-  sequence. Set to `TRUE` to always smooth up front, including for noise
-  reduction on strata that have no gap at all.
-
-- span:
-
-  Numeric. Forwarded to
-  [`smooth_decrement_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/smooth_decrement_rates.md)
-  when `smooth = TRUE`. Defaults to `0.75`.
-
-- personnel_dt:
-
-  Deprecated. Use `personnel` instead.
+  `TRUE` (the default) for every column; `FALSE` for only the duration,
+  the groups, `px` and `ex`.
 
 ## Value
 
-A data.table with one row per age / `group_cols`:
+A `service_table`: a data.table with one row per group and duration,
+from the lowest to the highest seen.
+[plot()](https://wb-pida-data-science-shop.github.io/govhr/reference/plot.service_table.md)
+draws it.
 
-- age_col, group_cols:
+- pop:
 
-  As supplied.
+  People in service at that duration, whom `px` is measured on. `NA`
+  where smoothing filled in a missing duration.
 
 - px:
 
-  Probability of remaining active from age x to x+1.
+  The share of them still in service a year later.
 
-- lx:
+- lx, lx_next:
 
-  Survivors at age x, out of `radix` at the youngest age: \\l(x) = radix
-  \prod\_{y\<x} p(y)\\.
-
-- lx_next:
-
-  Survivors at age x+1: \\l(x) \cdot p(x)\\.
+  How many of the imaginary group are in service at that duration, and a
+  year later.
 
 - Lx:
 
-  Person-years of service between age x and x+1: \\(l(x) + l\_{next}(x))
-  / 2\\ (trapezoidal approximation, assuming exits are spread uniformly
-  across the year).
+  Years they serve in that year (someone who leaves counts half).
 
 - Tx:
 
-  Total remaining person-years of service from age x onward: \\\sum\_{y
-  \ge x} L(y)\\.
+  Years they serve from that duration to the end of the table.
 
 - ex:
 
-  Expected remaining years of service at age x: \\T(x) / l(x)\\.
+  Expected years of service left: `Tx / lx`.
 
 ## Details
 
-**This is a stationary-cohort summary, not a projection of your real
-workforce headcount.** `lx` describe a hypothetical synthetic cohort
-that experiences today's cross-sectional age-specific rates at every
-future age – they are not a forecast of how many of your actual current
-employees will retire in each future calendar year. For that, the raw
-output of
+**Not a forecast.** The table assumes someone meets, at every later
+duration, the stay rates seen at that duration in your data. To project
+your own workforce, apply
 [`estimate_decrement_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_decrement_rates.md)
-(applied to your real current headcount by age, stepped forward through
-calendar time) is the right input, not this table.
+to it year by year.
 
-**Caveat.** The literal string `"active"` is hardcoded as the
-`status_col` value the survival chain is built from – inherited directly
-from
-[`estimate_decrement_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_decrement_rates.md)
-and
-[`.compute_decrement_pair()`](https://wb-pida-data-science-shop.github.io/govhr/reference/dot-compute_decrement_pair.md),
-where the same caveat applies.
+**One snapshot a year.** `px` is read as the chance of staying a year,
+so with monthly data, keep one month a year first.
+
+**Missing durations.** People with no `duration_col` are left out, with
+a warning. If a whole duration is missing in a group (no one in service
+at it), every group's rates are smoothed to fill the gap, with a
+warning.
+
+**Where it ends.** The table stops at the highest duration seen, so `ex`
+counts no service after it. If everyone at some duration left, no one is
+left after it: `ex` is `NA` from there, with a warning.
 
 ## See also
 
-[`estimate_decrement_rates`](https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_decrement_rates.md),
-[`smooth_decrement_rates`](https://wb-pida-data-science-shop.github.io/govhr/reference/smooth_decrement_rates.md)
+[`estimate_decrement_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/estimate_decrement_rates.md)
+for the rates of each way of leaving.
 
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-library(data.table)
+st <- compute_service_table(bra_hrmis_personnel, "age", smooth = TRUE)
+subset(st, age %in% c(25, 40, 55), select = c(age, px, ex))
+#>      age        px        ex
+#>    <int>     <num>     <num>
+#> 1:    25 0.9052762 15.471887
+#> 2:    40 0.9687776 15.068774
+#> 3:    55 0.9152548  7.734391
+plot(st)
 
-personnel_dt <- data.table(
-  personnel_id = c("P1", "P2", "P1", "P2"),
-  ref_date = as.Date(c("2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01")),
-  age = c(60L, 45L, 61L, 46L),
-  employment_status = c("active", "active", "pensioner", "active"),
-  gender = c("M", "F", "M", "F")
-)
-
-compute_service_table(
-  personnel_dt = personnel_dt,
-  age_col = "age",
-  status_col = "employment_status",
-  personnel_id_col = "personnel_id",
-  ref_date_col = "ref_date",
-  group_cols = "gender"
-)
-} # }
 ```

@@ -10,6 +10,9 @@ tenure.
 ## Usage
 
 ``` r
+compute_tenure(contracts, ...)
+
+# S3 method for class 'data.frame'
 compute_tenure(
   contracts,
   ref_date,
@@ -18,17 +21,39 @@ compute_tenure(
   start_date_col = "start_date",
   end_date_col = "end_date",
   contract_type_col = "contract_type",
-  group_cols = NULL
+  group_cols = NULL,
+  ...
 )
+
+# S3 method for class 'tbl_dbi'
+compute_tenure(
+  contracts,
+  ref_date,
+  personnel_id_col = "personnel_id",
+  contract_id_col = "contract_id",
+  start_date_col = "start_date",
+  end_date_col = "end_date",
+  contract_type_col = "contract_type",
+  group_cols = NULL,
+  ...
+)
+
+# Default S3 method
+compute_tenure(contracts, ...)
 ```
 
 ## Arguments
 
 - contracts:
 
-  Data.table containing the contract history. Must include personnel
-  identifiers, contract identifiers, contract start and end dates,
-  contract types, and any grouping variables supplied in `group_cols`.
+  The contract history, as a data frame or a lazy database table
+  (`tbl_dbi`). Must include personnel identifiers, contract start and
+  end dates, contract types, and any grouping variables supplied in
+  `group_cols`.
+
+- ...:
+
+  Not used.
 
 - ref_date:
 
@@ -41,8 +66,8 @@ compute_tenure(
 
 - contract_id_col:
 
-  Character. Name of the contract identifier column. Default is
-  `"contract_id"`.
+  Character. Not used: a contract seen more than once counts once
+  without it. Kept so existing calls still work.
 
 - start_date_col:
 
@@ -67,8 +92,9 @@ compute_tenure(
 
 ## Value
 
-A data.table with one row per unique combination of `personnel_id` and
-optional `group_cols`, containing:
+One row per unique combination of `personnel_id` and optional
+`group_cols` (a data.table for a data frame, a lazy table for a
+`tbl_dbi`), containing:
 
 - tenure_days:
 
@@ -85,17 +111,25 @@ Tenure is calculated independently for each personnel member and,
 optionally, within additional grouping variables supplied through
 `group_cols`. Gaps between contracts are excluded from the total tenure.
 
-The implementation uses an interval-union algorithm based on
-[`cummax()`](https://rdrr.io/r/base/cumsum.html) to efficiently merge
-overlapping contract periods, resulting in an \\O(n \log n)\\ algorithm
-dominated by the initial sorting step.
+**Overlaps.** Contracts are sorted by start date, and each counts only
+the part not already covered by the person's earlier ones (the union of
+the intervals). This is \\O(n \log n)\\, dominated by the sort; the
+running maximum of earlier end dates is one vectorised pass for data
+frames and a window function in the database.
+
+**A contract seen more than once** (e.g. at several snapshots of a
+panel) counts once, from its start to its latest recorded end. With
+`group_cols`, a contract seen in several groups (e.g. paygrades) counts
+in each.
+
+**Missing contract types** count as active.
 
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
 tenure_dt <- compute_tenure(
-  contract_dt = contract_data,
+  contracts = contract_data,
   ref_date = as.Date("2025-01-01")
 )
 } # }

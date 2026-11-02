@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -495,6 +495,22 @@
         </dt>
         <dd>Compute ratio of last salary to first pension for retired workers</dd>
       </dl></div><div class="section level2">
+      <h2 id="tenure">Tenure<a class="anchor" aria-label="anchor" href="#tenure"></a></h2>
+
+      <div class="section-desc"><p><code>R/tenure.R</code>: years of service from contract history.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compute_tenure_panel.html">compute_tenure_panel()</a></code>
+
+        </dt>
+        <dd>Compute employment tenure from a stacked contract panel</dd>
+      </dl></div><div class="section level2">
       <h2 id="demographics">Demographics<a class="anchor" aria-label="anchor" href="#demographics"></a></h2>
 
       <div class="section-desc"><p><code>R/demographics.R</code>: decrement rates and service tables.</p></div>
@@ -523,7 +539,51 @@
           <code><a href="compute_service_table.html">compute_service_table()</a></code>
 
         </dt>
-        <dd>Compute an actuarial service table from a personnel panel</dd>
+        <dd>Compute a service table: expected years of service left</dd>
+
+        <dt>
+
+          <code><a href="plot.service_table.html">plot(<i>&lt;service_table&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot a service table</dd>
+      </dl></div><div class="section level2">
+      <h2 id="survival-models">Survival models<a class="anchor" aria-label="anchor" href="#survival-models"></a></h2>
+
+      <div class="section-desc"><p><code>R/career_modelling.R</code>: hazard models of leaving the service.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="build_survival_panel.html">build_survival_panel()</a></code>
+
+        </dt>
+        <dd>Build a person-interval panel for survival (hazard) models</dd>
+
+        <dt>
+
+          <code><a href="fit_survival_model.html">fit_survival_model()</a></code>
+
+        </dt>
+        <dd>Fit a survival (hazard) model of leaving the service</dd>
+
+        <dt>
+
+          <code><a href="tidy.survival_model.html">tidy(<i>&lt;survival_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Tidy a survival model into a table of hazard ratios</dd>
+
+        <dt>
+
+          <code><a href="predict.survival_model.html">predict(<i>&lt;survival_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Predict exits from a survival model</dd>
       </dl></div><div class="section level2">
       <h2 id="workforce-analytics">Workforce analytics<a class="anchor" aria-label="anchor" href="#workforce-analytics"></a></h2>
 

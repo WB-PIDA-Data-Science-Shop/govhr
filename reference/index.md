@@ -160,6 +160,13 @@ sources.
 - [`compute_pension_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_pension_ratio.md)
   : Compute ratio of last salary to first pension for retired workers
 
+## Tenure
+
+`R/tenure.R`: years of service from contract history.
+
+- [`compute_tenure_panel()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_tenure_panel.md)
+  : Compute employment tenure from a stacked contract panel
+
 ## Demographics
 
 `R/demographics.R`: decrement rates and service tables.
@@ -169,7 +176,22 @@ sources.
 - [`smooth_decrement_rates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/smooth_decrement_rates.md)
   : Graduate (smooth and gap-fill) empirical decrement rates
 - [`compute_service_table()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_service_table.md)
-  : Compute an actuarial service table from a personnel panel
+  : Compute a service table: expected years of service left
+- [`plot(`*`<service_table>`*`)`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot.service_table.md)
+  : Plot a service table
+
+## Survival models
+
+`R/career_modelling.R`: hazard models of leaving the service.
+
+- [`build_survival_panel()`](https://wb-pida-data-science-shop.github.io/govhr/reference/build_survival_panel.md)
+  : Build a person-interval panel for survival (hazard) models
+- [`fit_survival_model()`](https://wb-pida-data-science-shop.github.io/govhr/reference/fit_survival_model.md)
+  : Fit a survival (hazard) model of leaving the service
+- [`tidy(`*`<survival_model>`*`)`](https://wb-pida-data-science-shop.github.io/govhr/reference/tidy.survival_model.md)
+  : Tidy a survival model into a table of hazard ratios
+- [`predict(`*`<survival_model>`*`)`](https://wb-pida-data-science-shop.github.io/govhr/reference/predict.survival_model.md)
+  : Predict exits from a survival model
 
 ## Workforce analytics
 

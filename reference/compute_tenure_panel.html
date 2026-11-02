@@ -17,7 +17,7 @@ total tenure.'><meta property="og:image" content="https://wb-pida-data-science-s
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,10 @@ total tenure.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_tenure_panel</span><span class="op">(</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_tenure_panel</span><span class="op">(</span><span class="va">contracts</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'data.frame'</span></span>
+<span><span class="fu">compute_tenure_panel</span><span class="op">(</span></span>
 <span>  <span class="va">contracts</span>,</span>
 <span>  personnel_id_col <span class="op">=</span> <span class="st">"personnel_id"</span>,</span>
 <span>  ref_date_col <span class="op">=</span> <span class="st">"ref_date"</span>,</span>
@@ -62,8 +65,25 @@ total tenure.</p>
 <span>  start_date_col <span class="op">=</span> <span class="st">"start_date"</span>,</span>
 <span>  end_date_col <span class="op">=</span> <span class="st">"end_date"</span>,</span>
 <span>  contract_type_col <span class="op">=</span> <span class="st">"contract_type"</span>,</span>
-<span>  group_cols <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span>  group_cols <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'tbl_dbi'</span></span>
+<span><span class="fu">compute_tenure_panel</span><span class="op">(</span></span>
+<span>  <span class="va">contracts</span>,</span>
+<span>  personnel_id_col <span class="op">=</span> <span class="st">"personnel_id"</span>,</span>
+<span>  ref_date_col <span class="op">=</span> <span class="st">"ref_date"</span>,</span>
+<span>  contract_id_col <span class="op">=</span> <span class="st">"contract_id"</span>,</span>
+<span>  start_date_col <span class="op">=</span> <span class="st">"start_date"</span>,</span>
+<span>  end_date_col <span class="op">=</span> <span class="st">"end_date"</span>,</span>
+<span>  contract_type_col <span class="op">=</span> <span class="st">"contract_type"</span>,</span>
+<span>  group_cols <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Default S3 method</span></span>
+<span><span class="fu">compute_tenure_panel</span><span class="op">(</span><span class="va">contracts</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -71,10 +91,14 @@ total tenure.</p>
 
 
 <dl><dt id="arg-contracts">contracts<a class="anchor" aria-label="anchor" href="#arg-contracts"></a></dt>
-<dd><p>Data.table containing the stacked contract panel.
-Must include personnel identifiers, contract identifiers, contract
+<dd><p>The stacked contract panel, as a data frame or a lazy
+database table (<code>tbl_dbi</code>). Must include personnel identifiers, contract
 start and end dates, reference dates, contract types, and any grouping
 variables supplied in <code>group_cols</code>.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Not used.</p></dd>
 
 
 <dt id="arg-personnel-id-col">personnel_id_col<a class="anchor" aria-label="anchor" href="#arg-personnel-id-col"></a></dt>
@@ -88,8 +112,8 @@ Default is <code>"ref_date"</code>.</p></dd>
 
 
 <dt id="arg-contract-id-col">contract_id_col<a class="anchor" aria-label="anchor" href="#arg-contract-id-col"></a></dt>
-<dd><p>Character. Name of the contract identifier column.
-Default is <code>"contract_id"</code>.</p></dd>
+<dd><p>Character. Not used: a contract seen more than once
+counts once without it. Kept so existing calls still work.</p></dd>
 
 
 <dt id="arg-start-date-col">start_date_col<a class="anchor" aria-label="anchor" href="#arg-start-date-col"></a></dt>
@@ -110,14 +134,15 @@ Default is <code>"contract_type"</code>.</p></dd>
 <dt id="arg-group-cols">group_cols<a class="anchor" aria-label="anchor" href="#arg-group-cols"></a></dt>
 <dd><p>Optional character vector of additional variables over
 which tenure should be calculated independently (for example,
-establishment, occupation, or organization). Default is <code>NULL</code>.</p></dd>
+establishment, occupation, or organization). Default is
+<code>NULL</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data.table with one row per unique combination of
-<code>personnel_id</code>, optional <code>group_cols</code>, and
-<code>ref_date</code>, containing:</p><dl><dt>tenure_days</dt>
+    <p>One row per unique combination of <code>personnel_id</code>, optional
+<code>group_cols</code>, and <code>ref_date</code> (a data.table for a data frame, a
+lazy table for a <code>tbl_dbi</code>), containing:</p><dl><dt>tenure_days</dt>
 <dd><p>Total employment tenure in days.</p></dd>
 
 <dt>tenure_years</dt>
@@ -130,7 +155,12 @@ tenure days divided by 365.25.</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Tenure is calculated independently within each combination of
 <code>personnel_id</code>, optional grouping variables supplied through
-<code>group_cols</code>, and <code>ref_date</code>.</p>
+<code>group_cols</code>, and <code>ref_date</code>, from the contracts listed at that
+reference date.</p>
+<p>As in <code><a href="compute_tenure.html">compute_tenure()</a></code>, each snapshot's contracts count only the part
+not already covered by the person's earlier-starting ones, a contract
+listed twice in a snapshot counts once (to its latest end), and missing
+contract types count as active.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

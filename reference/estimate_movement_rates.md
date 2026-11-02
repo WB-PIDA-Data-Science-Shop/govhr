@@ -1,13 +1,9 @@
 # Estimate movement baseline from panel data
 
 Analyzes longitudinal panel data to compute empirical transition
-probabilities for promotions and transfers. Compares consecutive
-snapshots (T0 -\> T1, T1 -\> T2, etc.) using
-[`roll_snapshot_pairs()`](https://wb-pida-data-science-shop.github.io/govhr/reference/roll_snapshot_pairs.md)
-and
-[`.compute_transition_pair()`](https://wb-pida-data-science-shop.github.io/govhr/reference/dot-compute_transition_pair.md),
-and returns one row per `(from_group, to_group, from_period, to_period)`
-pair.
+probabilities for promotions and transfers. Compares every pair of
+consecutive snapshots (T0 -\> T1, T1 -\> T2, etc.) and returns one row
+per `(from_group, to_group, from_period, to_period)` pair.
 
 Only actual transitions (`from_group != to_group`) are returned; stay
 rows and rows where any `group_cols` value is `NA` (or the string
@@ -22,6 +18,9 @@ result:
 ## Usage
 
 ``` r
+estimate_movement_rates(contracts, ...)
+
+# S3 method for class 'data.frame'
 estimate_movement_rates(
   contracts,
   group_cols,
@@ -30,16 +29,38 @@ estimate_movement_rates(
   start_date_col = "start_date",
   end_date_col = "end_date",
   contract_type_col = "contract_type",
-  salary_col = NULL
+  salary_col = NULL,
+  ...
 )
+
+# S3 method for class 'tbl_dbi'
+estimate_movement_rates(
+  contracts,
+  group_cols,
+  personnel_id_col = "personnel_id",
+  ref_date_col = "ref_date",
+  start_date_col = "start_date",
+  end_date_col = "end_date",
+  contract_type_col = "contract_type",
+  salary_col = NULL,
+  ...
+)
+
+# Default S3 method
+estimate_movement_rates(contracts, ...)
 ```
 
 ## Arguments
 
 - contracts:
 
-  Data.table. Contract data in long (panel) format. Must contain
-  `ref_date_col` for panel snapshot identification.
+  A data frame (data.table, data.frame or tibble) or a remote database
+  table (`tbl_dbi`, e.g. DuckDB) of contract data in long (panel)
+  format. Must contain `ref_date_col` for panel snapshot identification.
+
+- ...:
+
+  Arguments passed to methods.
 
 - group_cols:
 
@@ -75,16 +96,19 @@ estimate_movement_rates(
 
 - salary_col:
 
-  Character or `NULL`. Name of a compensation column in `contract_dt`.
+  Character or `NULL`. Name of a compensation column in `contracts`.
   When provided, salary summary columns are appended to the output (see
   Value). Default: `NULL`.
 
 ## Value
 
-A `data.table` with one row per
-`(from_group, to_group, from_period, to_period)` transition pair, keyed
-on those four columns. Returns an empty `data.table` with the same
-schema if no valid transitions are found. Columns:
+A table with one row per
+`(from_group, to_group, from_period, to_period)` transition pair – a
+`data.table` keyed on those four columns for data frame input, or a lazy
+table sorted by them for `tbl_dbi` input (use
+[`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html)
+to bring it into memory). Has no rows if no valid transitions are found.
+Columns:
 
 - from_group:
 
@@ -139,3 +163,34 @@ When `salary_col` is not `NULL`, five additional columns are appended:
 - mean_salary_pct_change:
 
   Numeric. Mean percentage salary change across movers.
+
+## Details
+
+**How it works.** A contract counts on a snapshot date if it has
+started, has not ended (or has no end date) and its type is not
+`"inactive"`. Each person's position on a snapshot is their `group_cols`
+value(s) on such a contract. Snapshots are numbered, and every person's
+positions at snapshot k are joined to their positions at k + 1 in a
+single pass over the panel, rather than one join per snapshot pair.
+
+**Several contracts at once.** A person holding positions in several
+groups on the same snapshot counts in each: they are at risk in every
+`from_group` they hold, and every pairing of a T0 position with a T1
+position is a transition. Someone in G1 and G2 at T0 and only G2 at T1
+moves G1 -\> G2 (and stays in G2).
+
+**Entries, exits and gaps.** Only people present (on an active contract)
+at both T0 and T1 can move. Leavers still count in `n_pop`; entrants do
+not. A person missing from a snapshot and back later is a leaver and
+then an entrant, never a move across the gap.
+
+**Salaries.** With `salary_col`, a person's salaries within one position
+are summed (missing values ignored), and the statistics are taken over
+the transitions in each `(from_group, to_group)` pair. A percentage
+change from a T0 salary of 0 is `Inf`, or undefined (and left out of the
+mean) if the T1 salary is also 0.
+
+For a `tbl_dbi`, the same steps run inside the database as SQL, and the
+result is returned lazily. Two small queries run straight away: the
+snapshot dates, and the distinct `group_cols` values (to build the group
+labels, which SQL cannot paste).
