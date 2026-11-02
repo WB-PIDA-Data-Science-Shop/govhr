@@ -1,11 +1,8 @@
-# Benchmark: three ways to compute estimate_movement_rates()
+# Benchmark: two ways to compute estimate_movement_rates()
 #
-# All three produce the same table; they differ in how each person's
+# Both produce the same table; they differ in how each person's
 # positions at one snapshot are paired with their positions at the next:
 #
-#   pairwise    roll_snapshot_pairs() + .compute_transition_pair(): one join
-#               on personnel_id per consecutive snapshot pair (the
-#               implementation estimate_movement_rates() used up to govhr 0.4.1)
 #   data_table  the current estimate_movement_rates() data.frame method:
 #               number the snapshots and join every position at snapshot k
 #               to the same person's positions at k + 1, in one pass
@@ -108,31 +105,9 @@ make_contracts <- function(n_rows, id_type, seed = 1) {
   panel[, c(".p", ".s", ".g") := NULL][]
 }
 
-# ---- the three methods ----------------------------------------------------
+# ---- the two methods ------------------------------------------------------
 
 key_cols <- c("from_group", "to_group", "from_period", "to_period")
-
-method_pairwise <- function(panel) {
-  # roll_snapshot_pairs() keys the panel in place; it is generated already
-  # ordered by ref_date, so this only sets the attribute (dropped after)
-  on.exit(setattr(panel, "sorted", NULL))
-  all_periods <- roll_snapshot_pairs(
-    panel_dt = panel, date_col = "ref_date", f = .compute_transition_pair,
-    ref_date_col = "ref_date", group_cols = group_cols,
-    personnel_id_col = "personnel_id", start_date_col = "start_date",
-    end_date_col = "end_date", contract_type_col = "contract_type",
-    salary_col = salary_col
-  )
-  setnames(all_periods, c("t0_date", "t1_date", "period_prob"),
-           c("from_period", "to_period", "movement_rate"))
-  out <- all_periods[, c("from_group", "to_group", "movement_rate", "from_period",
-                         "to_period", "n_pop", "n_moves", "mean_salary_t0",
-                         "mean_salary_t1", "mean_salary_change",
-                         "median_salary_change", "mean_salary_pct_change"),
-                     with = FALSE]
-  out <- out[from_group != to_group & from_group != "NA" & to_group != "NA"]
-  setkeyv(out, key_cols)[]
-}
 
 method_data_table <- function(panel) {
   estimate_movement_rates(panel, group_cols = group_cols, salary_col = salary_col)
@@ -147,7 +122,6 @@ method_duckdb <- function(panel) {
 }
 
 methods <- list(
-  pairwise = method_pairwise,
   data_table = method_data_table,
   duckdb = method_duckdb
 )
@@ -228,11 +202,6 @@ csv <- file.path(results_dir, sprintf("movement_rates_%s_%s.csv", id_type, stamp
 # (re)write everything measured so far
 save_results <- function() {
   results <- rbindlist(rows)
-  results[, speedup_vs_pairwise := NA_real_]
-  if ("pairwise" %in% results$method) {
-    pairwise_times <- results[method == "pairwise", .(rows, pairwise_seconds = seconds)]
-    results[pairwise_times, speedup_vs_pairwise := i.pairwise_seconds / seconds, on = "rows"]
-  }
   results[, `:=`(id_type = id_type, threads = getDTthreads(),
                  r_version = as.character(getRversion()))]
   fwrite(results, csv)
@@ -326,7 +295,7 @@ for (n in sizes) {
 
 results <- save_results()
 cat("\n")
-print(results[, .(rows, method, seconds, peak_gb, speedup_vs_pairwise, matches_first, skipped)])
+print(results[, .(rows, method, seconds, peak_gb, matches_first, skipped)])
 
 # ---- plot -----------------------------------------------------------------
 
@@ -345,7 +314,7 @@ p <- ggplot2::ggplot(plot_dt, ggplot2::aes(rows, value, colour = method)) +
   ggplot2::facet_wrap(~metric, scales = "free_y") +
   ggplot2::labs(
     x = "Panel rows", y = NULL, colour = NULL,
-    title = "estimate_movement_rates(): pairwise vs data.table (one join) vs DuckDB",
+    title = "estimate_movement_rates(): data.table (one join) vs DuckDB",
     subtitle = sprintf("%s ids, %d snapshots, group_cols = %s, salary_col = \"%s\", %d data.table threads",
                        id_type, n_snaps, paste(group_cols, collapse = " + "), salary_col,
                        getDTthreads())

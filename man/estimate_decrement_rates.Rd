@@ -132,8 +132,17 @@ outcomes follow the same individuals from T0 to T1 by
 \code{personnel_id_col}, rather than aggregating each snapshot separately
 and matching on age afterward. This matters: someone who was already a
 pensioner at T0 and remains one at T1 is never miscounted as a newly
-observed exit, and each person's age/group is taken from T0, so there is
-no fragile assumption that snapshots are exactly one year apart.
+observed exit, and each person's age/group is taken from T0, so ages
+never need shifting between snapshots.
+
+\strong{A rate per interval between snapshots.} Each rate is the share
+who had that outcome by the \emph{next} snapshot, however far away it
+is. With annual snapshots it is a yearly rate, the \code{qx} of a life
+table, which is what \code{compute_service_table()} assumes. With
+monthly snapshots it is a monthly rate, and chaining it as a yearly one
+greatly overstates years of service; keep one snapshot a year (e.g.
+December) first. For exits over irregular intervals, see
+\code{build_survival_panel()}, which measures exposure in years.
 
 \strong{How each person's T1 status is found.} All snapshot pairs are
 handled in one pass rather than one pair at a time. The panel is sorted
@@ -143,8 +152,7 @@ outcome if it belongs to the same person at the very next snapshot;
 otherwise (no record at T1, or an \code{NA} status there) the outcome is
 \code{"non-retirement-exit"}. This avoids joining every snapshot pair on
 \code{personnel_id_col}, which dominates the run time on large panels
-with character IDs. \code{.compute_decrement_pair()} computes the same
-counts for a single pair and is kept as a reference implementation.
+with character IDs.
 
 \strong{The outcome vocabulary is derived from the data.} Aside from the
 synthetic \code{"non-retirement-exit"} (assigned to anyone who drops out
@@ -170,7 +178,9 @@ few small queries do run straight away: the snapshot dates and statuses
 \strong{Duplicates.} \code{personnel} is expected to be unique at the
 \code{personnel_id_col}/\code{ref_date_col} level. If it is not, a
 warning reports the number of duplicate rows and one row per person and
-snapshot is kept.
+snapshot is kept: the first by status in alphabetical order, with a
+missing status last. Both methods keep the same row, whatever the order
+of the input rows.
 
 \strong{Caveat.} The literal string \code{"active"} is currently
 hardcoded as the value of \code{status_col} that defines who is exposed
@@ -201,5 +211,5 @@ estimate_decrement_rates(
 
 }
 \seealso{
-\code{\link{.compute_decrement_pair}}, \code{\link{smooth_decrement_rates}}
+\code{\link{smooth_decrement_rates}}
 }

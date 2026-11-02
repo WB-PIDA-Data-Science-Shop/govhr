@@ -330,58 +330,9 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
   old
 }
 
-#' Check the inputs of estimate_progression_rates()
-#'
-#' Shared by every method, so the checks cannot drift apart. Uses
-#' `colnames()`, which also lists a lazy database table's columns.
-#'
-#' Stops with an error if:
-#' * `tenure_col` is not in `personnel` (pointing to the two ways to build it),
-#' * a required column is missing from `personnel` or `contracts`,
-#' * a group column is in both tables (ambiguous) or in neither.
-#'
-#' @param personnel,contracts The personnel and contract tables, as data
-#'   frames or lazy database tables.
-#' @param tenure_col,salary_col,status_col Character. The tenure (in
-#'   `personnel`), pay (in `contracts`) and employment status (in
-#'   `personnel`) columns.
-#' @param group_cols Character vector or `NULL`. Group columns, each from
-#'   exactly one of the two tables.
-#' @param personnel_id_col,ref_date_col,contract_id_col Character. The
-#'   person, snapshot date and contract id columns.
-#'
-#' @returns `NULL`, invisibly.
-#' @keywords internal
-.check_progression_args <- function(personnel, contracts, tenure_col,
-                                    salary_col, group_cols, status_col,
-                                    personnel_id_col, ref_date_col,
-                                    contract_id_col) {
-  if (!tenure_col %in% colnames(personnel)) {
-    stop(
-      "`personnel` has no tenure column `", tenure_col, "`. Add years of ",
-      "service at each snapshot first: from contract history with ",
-      "compute_tenure_panel(), or as the years between `ref_date` and ",
-      "`first_employment_date`.",
-      call. = FALSE
-    )
-  }
-
-  check_required_cols(
-    personnel, c(personnel_id_col, ref_date_col, status_col), "personnel"
-  )
-  check_required_cols(
-    contracts, c(personnel_id_col, ref_date_col, contract_id_col, salary_col),
-    "contracts"
-  )
-
-  .check_column_sources(group_cols, personnel, contracts, "group column")
-
-  invisible(NULL)
-}
-
 #' Check that each column comes from exactly one of personnel and contracts
 #'
-#' Shared by Level 1's group columns and the survival panel's covariates.
+#' Used for the survival panel's covariates (see `.check_survival_args()`).
 #' Stops with an error if a column is in both tables (ambiguous) or in
 #' neither.
 #'
@@ -418,7 +369,7 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
 
 #' Total pay per person and snapshot, with contract columns from one contract
 #'
-#' Used by `estimate_progression_rates()` and `build_survival_panel()` to
+#' Used by `build_survival_panel()` to
 #' turn contracts into one row per person and snapshot:
 #' * `.pay` is the total across the person's contracts, leaving out a
 #'   contract with missing pay (`NA` only if all of them are missing);
@@ -489,60 +440,193 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
   contract_dt[!duplicated(contract_dt, by = person_year)]
 }
 
-#' Smooth and gap-fill the rates of a career table
+#' Name the groups of a table in a message
 #'
-#' Puts each group on every whole tenure from its first to its last, and
-#' replaces `px` and `pay_growth` with smoothed curves from
-#' `.smooth_rate_curve()`: the exit rate `1 - px` weighted by exposure
-#' (`pop`), and pay growth weighted by the stayers it was measured on
-#' (`n_pay`). Exit rates are clipped to `[0, 1]`. The other columns of
-#' `career_dt` are kept as observed, and are `NA` on a filled-in tenure.
+#' Labels each row of `dt` by its group values, e.g. `"gender = F,
+#' occupation = nurse"`, for warnings that name the groups affected. Used by
+#' `compute_service_table()`.
 #'
-#' @param career_dt The output of `estimate_progression_rates()`.
-#' @param tenure_col,group_cols As in `compute_career_table()`.
-#' @param span The `loess()` span passed to `.smooth_rate_curve()`.
+#' @param dt A data frame with the `group_cols` columns, one row per group to
+#'   name.
+#' @param group_cols A character vector of group columns, or `NULL`.
 #'
-#' @returns A data.table like `career_dt`, sorted by group and tenure, with
-#'   no tenure gaps.
+#' @returns A character vector with one label per row of `dt`, or
+#'   `"the table"` when `group_cols` is empty.
 #' @keywords internal
-.smooth_career_rates <- function(career_dt, tenure_col, group_cols, span) {
-  smoothed_dt <- career_dt[,
-    {
-      tenure <- get(tenure_col)
-      full_tenure <- seq.int(min(tenure), max(tenure))
+.group_labels <- function(dt, group_cols) {
+  if (length(group_cols) == 0L) {
+    return("the table")
+  }
+  do.call(paste, c(
+    lapply(group_cols, function(col) paste(col, "=", dt[[col]])),
+    sep = ", "
+  ))
+}
 
-      ### exit rates, as a probability
-      exit_rate <- .smooth_rate_curve(tenure, 1 - px, pop, full_tenure, span)
-      smoothed_px <- 1 - pmin(pmax(exit_rate, 0), 1)
+#' The rarely needed settings of compute_service_table()
+#'
+#' `compute_service_table()` takes `radix`, `smooth` and `span` through `...`,
+#' since few users need them. This gives each its default and stops on any
+#' other name, so a misspelt setting (e.g. `smoth = TRUE`) is not silently
+#' ignored.
+#'
+#' @param ... The `...` of `compute_service_table()`.
+#'
+#' @returns A list with `radix`, `smooth` and `span`.
+#' @keywords internal
+.service_table_settings <- function(...) {
+  settings <- list(radix = 100000, smooth = FALSE, span = 0.75)
+  dots <- list(...)
 
-      ### pay growth, from the years it was measured in
-      has_growth <- !is.na(pay_growth)
-      smoothed_growth <- if (any(has_growth)) {
-        .smooth_rate_curve(
-          tenure[has_growth], pay_growth[has_growth], n_pay[has_growth],
-          full_tenure, span
-        )
-      } else {
-        rep(NA_real_, length(full_tenure))
-      }
+  ### names2() gives "" for an unnamed argument, which is unknown too
+  unknown <- setdiff(rlang::names2(dots), names(settings))
+  if (length(unknown) > 0L) {
+    stop(
+      "compute_service_table() got an unknown argument: ",
+      paste0("`", unknown, "`", collapse = ", "),
+      ". Its `...` takes only `smooth`, `span` and `radix`.",
+      call. = FALSE
+    )
+  }
 
-      stats::setNames(
-        list(full_tenure, smoothed_px, smoothed_growth),
-        c(tenure_col, "px", "pay_growth")
-      )
-    },
-    by = group_cols
-  ]
+  settings[names(dots)] <- dots
+  settings
+}
 
-  ### the observed columns, matched back by group and tenure
-  observed_dt <- career_dt[, !c("px", "pay_growth")]
-  smoothed_dt <- merge(
-    smoothed_dt, observed_dt,
-    by = c(group_cols, tenure_col), all.x = TRUE
-  )
-  setorderv(smoothed_dt, c(group_cols, tenure_col))
+#' Build a service table from pooled decrement rates
+#'
+#' The shared engine of both methods of `compute_service_table()`, which only
+#' differ in how they get the rates (in memory, or collected from the
+#' database): the stay rate at every duration (`.stay_rates()`), chained into
+#' `lx`, `Lx`, `Tx` and `ex` (`.chain_service_table()`).
+#'
+#' @param decrement_dt A data.table from `estimate_decrement_rates()`. Its
+#'   duration and status columns are renamed by reference.
+#' @param duration_col,status_col,group_cols,include_all As in
+#'   `compute_service_table()`.
+#' @param settings The list from `.service_table_settings()`.
+#'
+#' @returns A `service_table` (see `compute_service_table()`).
+#' @importFrom data.table setattr
+#' @keywords internal
+.service_table_from_rates <- function(decrement_dt, duration_col, status_col,
+                                      group_cols, include_all, settings) {
+  smooth <- isTRUE(settings$smooth)
 
-  smoothed_dt[]
+  ### fixed names for the duration and status, so the steps below can name
+  ### them directly; the duration gets its own name back at the end
+  setnames(decrement_dt, c(duration_col, status_col), c(".duration", ".status"))
+
+  stay_dt <- .stay_rates(decrement_dt, duration_col, group_cols, smooth, settings$span)
+  service_dt <- .chain_service_table(stay_dt, duration_col, group_cols, settings$radix, smooth)
+
+  keep_cols <- if (isTRUE(include_all)) {
+    c(".duration", group_cols, "pop", "px", "lx", "lx_next", "Lx", "Tx", "ex")
+  } else {
+    c(".duration", group_cols, "px", "ex")
+  }
+  service_dt <- service_dt[, keep_cols, with = FALSE]
+  setnames(service_dt, ".duration", duration_col)
+
+  ### a service_table, so plot() knows how to draw it
+  setattr(service_dt, "duration_col", duration_col)
+  setattr(service_dt, "group_cols", group_cols)
+  setattr(service_dt, "class", c("service_table", class(service_dt)))
+  service_dt[]
+}
+
+#' The stay rate at every duration of a service table
+#'
+#' Part of `.service_table_from_rates()`. Leaves out person-snapshots with no
+#' duration, with a warning, and takes the stay rate `px` (the `"active"`
+#' rows) with the people it rests on (`pop`). The chain needs a stay rate at
+#' every duration, so the rates are smoothed if asked, or if a group is missing
+#' a duration (then every group, so they stay comparable, with a warning).
+#'
+#' @param rates Pooled decrement rates with the columns `.duration`,
+#'   `.status`, `group_cols`, `pop` and `decrement_rate`.
+#' @param duration_col The original duration column name, for the warnings.
+#' @param group_cols As in `compute_service_table()`.
+#' @param smooth,span Whether and how much to smooth.
+#'
+#' @returns A data.table with `.duration`, `group_cols`, `pop` (`NA` where
+#'   smoothing filled in a duration) and `px`, sorted by group and duration.
+#' @keywords internal
+.stay_rates <- function(rates, duration_col, group_cols, smooth, span) {
+  n_missing <- rates[is.na(.duration) & .status == "active", sum(pop)]
+  if (n_missing > 0L) {
+    warning(
+      n_missing, " active person-snapshot(s) have no `", duration_col, "` and ",
+      "are left out of the table.",
+      call. = FALSE
+    )
+    rates <- rates[!is.na(.duration)]
+  }
+
+  observed <- rates[.status == "active", c(".duration", group_cols, "pop", "decrement_rate"), with = FALSE]
+  setorderv(observed, c(group_cols, ".duration"))
+  has_gap <- observed[, .(gap = any(diff(.duration) != 1L)), by = group_cols][, any(gap)]
+  if (has_gap && !smooth) {
+    warning(
+      "Some durations have no one in service in a group, so the stay rates ",
+      "have been smoothed to fill the gap; set smooth = TRUE to smooth them ",
+      "up front.",
+      call. = FALSE
+    )
+  }
+
+  stay <- observed
+  if (smooth || has_gap) {
+    stay <- smooth_decrement_rates(rates, ".duration", ".status", group_cols, span = span)
+    stay <- stay[.status == "active"]
+    stay[observed, pop := i.pop, on = c(".duration", group_cols)]
+  }
+
+  stay <- stay[, c(".duration", group_cols, "pop", "decrement_rate"), with = FALSE]
+  setnames(stay, "decrement_rate", "px")
+  setorderv(stay, c(group_cols, ".duration"))
+}
+
+#' Chain stay rates into expected years of service
+#'
+#' Part of `.service_table_from_rates()`. Follows `radix` people from each
+#' group's lowest duration: `lx` are those still in service, `Lx` the years
+#' they serve in the year (someone who leaves counts half), `Tx` the years from
+#' there to the end of the table, and `ex = Tx / lx`. After a duration everyone
+#' left (`px = 0`) no one is left, so `ex` is `NA` there, with a warning.
+#'
+#' @param stay_dt The output of `.stay_rates()`, sorted by group and duration.
+#' @param duration_col The original duration column name, for the warning.
+#' @param group_cols As in `compute_service_table()`.
+#' @param radix The size of the imaginary group.
+#' @param smooth Whether the rates were smoothed (the warning only suggests
+#'   smoothing if not).
+#'
+#' @returns `stay_dt` with `lx`, `lx_next`, `Lx`, `Tx` and `ex` added.
+#' @keywords internal
+.chain_service_table <- function(stay_dt, duration_col, group_cols, radix, smooth) {
+  stay_dt[, lx := radix * cumprod(shift(px, fill = 1)), by = group_cols]
+  stay_dt[, lx_next := lx * px]
+  stay_dt[, Lx := (lx + lx_next) / 2]
+  stay_dt[, Tx := rev(cumsum(rev(Lx))), by = group_cols]
+  stay_dt[, ex := Tx / lx]
+
+  if (any(stay_dt$lx == 0)) {
+    stay_dt[lx == 0, ex := NA_real_]
+    ended <- stay_dt[lx == 0, .(end = min(.duration)), by = group_cols]
+    where <- paste0(
+      .group_labels(ended, group_cols), " (from ", duration_col, " ", ended$end, ")",
+      collapse = "; "
+    )
+    advice <- if (smooth) "" else " Set smooth = TRUE to smooth the rates across durations."
+    warning(
+      "Everyone in service left at some duration in some groups, so `ex` is ",
+      "NA after it: ", where, ".", advice,
+      call. = FALSE
+    )
+  }
+
+  stay_dt
 }
 
 #' Check the inputs of build_survival_panel()
@@ -604,10 +688,11 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
   )
 }
 
-#' Warn about duplicate person-snapshot rows in a survival panel
+#' Warn about duplicate person-snapshot rows in a personnel panel
 #'
-#' Shared by both methods of `build_survival_panel()`, so the message is the
-#' same for in-memory and database tables.
+#' Shared by both methods of `estimate_decrement_rates()` and
+#' `build_survival_panel()`, which
+#' all keep the same row, so the message is the same everywhere.
 #'
 #' @param n_dup Number. How many rows are duplicates.
 #' @param personnel_id_col,ref_date_col Character. The person and snapshot
@@ -615,13 +700,52 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
 #'
 #' @returns The warning message, invisibly (called for its warning).
 #' @keywords internal
-.warn_survival_duplicates <- function(n_dup, personnel_id_col, ref_date_col) {
+.warn_duplicates <- function(n_dup, personnel_id_col, ref_date_col) {
   warning(
     "`personnel` has ", n_dup, " duplicate rows at the ",
     personnel_id_col, "/", ref_date_col, " level, which should be unique. ",
-    "Keeping one row per person and snapshot.",
+    "Keeping one row per person and snapshot: the first by status, with a ",
+    "missing status last.",
     call. = FALSE
   )
+}
+
+#' Keep one row per person and snapshot of a lazy personnel table
+#'
+#' The database counterpart of the de-duplication in the data.frame methods
+#' of `estimate_decrement_rates()` and `build_survival_panel()`: if any
+#' person has several rows at one snapshot, warns with their number and keeps
+#' the first by status, with a missing status last. The missing-last order is
+#' spelled out, because databases differ in where they sort NULLs.
+#'
+#' @param panel A lazy table (`tbl_dbi`) with the columns `.pid`, `.ref` and
+#'   `.status`.
+#' @param personnel_id_col,ref_date_col Character. The original person and
+#'   snapshot date column names, for the warning.
+#'
+#' @returns `panel`, lazily filtered to one row per `.pid` and `.ref`, or
+#'   unchanged if there were no duplicates. Counting them runs one query.
+#' @keywords internal
+.dedupe_person_snapshot_dbi <- function(panel, personnel_id_col, ref_date_col) {
+  n_dup <- panel |>
+    count(.pid, .ref, name = ".n") |>
+    filter(.n > 1L) |>
+    summarise(.n_dup = sum(.n - 1L, na.rm = TRUE)) |>
+    pull(.n_dup)
+  if (!isTRUE(n_dup > 0)) {
+    return(panel)
+  }
+
+  ### window_order() takes columns only, so the missing flag (0/1, which
+  ### sorts the same on every database) gets a column of its own
+  .warn_duplicates(n_dup, personnel_id_col, ref_date_col)
+  panel |>
+    mutate(.status_missing = if_else(is.na(.status), 1L, 0L)) |>
+    group_by(.pid, .ref) |>
+    dbplyr::window_order(.status_missing, .status) |>
+    filter(row_number() == 1L) |>
+    ungroup() |>
+    select(-".status_missing")
 }
 
 #' Tag a panel as a survival_panel

@@ -92,8 +92,6 @@ if (getRversion() >= "2.15.1") {
     "n_moves",
     "n_pop",
     "period_key",
-    "period_prob",
-    "t0_date",
     "tenure_days",
     "tenure_years",
     "to_group",
@@ -144,8 +142,6 @@ if (getRversion() >= "2.15.1") {
     "mean_salary_t1",
     "median_salary_change",
     "replacement_rate",
-    "salary_change",
-    "salary_pct_change",
     "spell_years",
     "bin",
     "decile",
@@ -175,15 +171,13 @@ if (getRversion() >= "2.15.1") {
     "n_duplicates",
     "n_rows",
     "n_ids",
-    # .compute_transition_pair
+    # estimate_movement_rates
     ".pid",
     "from_group",
     "to_group",
     "n_moves",
-    "period_prob",
     "n_pop",
     # estimate_movement_baseline (formerly estimate_movement_rates)
-    "t0_date",
     "movement_rate",
     "from_period",
     "to_period",
@@ -229,12 +223,9 @@ if (getRversion() >= "2.15.1") {
     "conf.high",
     # transition network
     "nodes",
-    # .compute_decrement_pair
     "pop",
     "exits",
     "decrement_rate",
-    "t1_date",
-    ".status_t1",
     # estimate_decrement_rates
     ".snap",
     ".status",
@@ -246,6 +237,7 @@ if (getRversion() >= "2.15.1") {
     ".next_status",
     ".n",
     ".n_dup",
+    ".status_missing",
     # compute_service_table
     "px",
     "lx",
@@ -257,6 +249,9 @@ if (getRversion() >= "2.15.1") {
     "min_age",
     "max_age",
     "has_gap",
+    ".duration",
+    "gap",
+    "end",
     # compute growth decomposition
     "ref_date",
     "transition_type",
@@ -341,22 +336,10 @@ if (getRversion() >= "2.15.1") {
     "projected_retirement_rate",
     # compute_wage
     "wage_growth",
-    # estimate_progression_rates / compute_career_table
-    ".entry_pay",
-    ".next_pay",
+    # used by several functions
     ".next_pid",
     ".pay",
     ".tenure",
-    "expected_earnings",
-    "median_pay",
-    "n_pay",
-    "pay_growth",
-    "pay_index",
-    "projected_pay",
-    "px_obs",
-    "pay_growth_obs",
-    "start_tenure",
-    # plot.career_table
     "measure",
     "n",
     "observed",

@@ -244,6 +244,24 @@ for (backend in backends) {
     expect_equal(result$exit_type, c("none", "none", "other", "retired", "none"))
   })
 
+  test_that(paste0("a duplicate with a missing status keeps the other row (", backend, ")"), {
+    # P1/2020 is also recorded with no status: the first by status puts the
+    # missing one last, so P1 is still at risk in 2020
+    personnel <- survival_personnel()
+    dup <- personnel[1, ]
+    dup$employment_status <- NA_character_
+    personnel <- rbind(dup, personnel)
+
+    expect_warning(
+      result <- do.call(run_survival_panel, c(
+        list(backend, personnel, survival_contracts()), survival_args
+      )),
+      "1 duplicate rows.*first by status"
+    )
+    expect_equal(result$personnel_id, c("P1", "P1", "P2", "P3", "P4"))
+    expect_equal(result$exit_type, c("none", "none", "other", "retired", "none"))
+  })
+
   test_that(paste0("a missing required column errors naming it (", backend, ")"), {
     contracts <- survival_contracts()
     contracts$pay <- NULL
@@ -299,6 +317,30 @@ test_that("both backends give the same panel on the bundled data", {
 
   expect_gt(nrow(from_df), 9000L)
   expect_equal(from_db, from_df)
+})
+
+test_that("a duplicate keeps a missing status last even where the database sorts it first", {
+  skip_if_not_installed("duckdb")
+  skip_if_not_installed("dbplyr")
+  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  DBI::dbExecute(con, "SET default_null_order = 'nulls_first'")
+
+  # P1/2020 is also recorded with no status: P1 is still at risk in 2020
+  personnel <- survival_personnel()
+  dup <- personnel[1, ]
+  dup$employment_status <- NA_character_
+  DBI::dbWriteTable(con, "personnel", rbind(dup, personnel))
+  DBI::dbWriteTable(con, "contracts", survival_contracts())
+
+  expect_warning(
+    panel <- do.call(build_survival_panel, c(
+      list(dplyr::tbl(con, "personnel"), dplyr::tbl(con, "contracts")), survival_args
+    )),
+    "1 duplicate rows"
+  )
+  result <- dplyr::collect(panel)
+  expect_equal(sort(result$personnel_id), c("P1", "P1", "P2", "P3", "P4"))
 })
 
 test_that("an unsupported input errors", {

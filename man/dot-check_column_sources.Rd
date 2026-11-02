@@ -18,7 +18,7 @@
 \code{NULL}, invisibly.
 }
 \description{
-Shared by Level 1's group columns and the survival panel's covariates.
+Used for the survival panel's covariates (see \code{.check_survival_args()}).
 Stops with an error if a column is in both tables (ambiguous) or in
 neither.
 }

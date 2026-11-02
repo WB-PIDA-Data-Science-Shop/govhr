@@ -29,7 +29,7 @@ A data.table with one row per person and snapshot: \code{person_year},
 \code{contract_cols} and \code{.pay}.
 }
 \description{
-Used by \code{estimate_progression_rates()} and \code{build_survival_panel()} to
+Used by \code{build_survival_panel()} to
 turn contracts into one row per person and snapshot:
 \itemize{
 \item \code{.pay} is the total across the person's contracts, leaving out a

@@ -123,9 +123,7 @@ started, has not ended (or has no end date) and its type is not
 \code{group_cols} value(s) on such a contract. Snapshots are numbered, and
 every person's positions at snapshot k are joined to their positions at
 k + 1 in a single pass over the panel, rather than one join per snapshot
-pair (as \code{roll_snapshot_pairs()} + \code{.compute_transition_pair()}
-do; that pair-by-pair version gives the same result and is kept as a
-reference).
+pair.
 
 \strong{Several contracts at once.} A person holding positions in several
 groups on the same snapshot counts in each: they are at risk in every

@@ -16,28 +16,29 @@ make_snap <- function(personnel_id, ref_date, age, status, ...) {
   )
 }
 
-# t0/t1 pair used across the .compute_decrement_pair() bug-regression tests:
+# one t0/t1 pair holding the decrement bug regressions:
 #   P1, P2: active at 60 -> P1 retires, P2 stays active
 #   P3: ALREADY a pensioner at t0 (age 65) and remains one at t1 -- must never
 #       contribute to exposure or exits (the persistent-pensioner bug)
 #   P4: active at 30 -> drops out of the panel entirely by t1 (non-retirement-exit)
 #   P5: active at 45 -> explicit "deceased" status at t1 (agnostic-vocabulary check)
-decrement_pair_snaps <- function() {
-  snap_t0 <- make_snap(
-    c("P1", "P2", "P3", "P4", "P5"),
-    "2020-01-01",
-    c(60L, 60L, 65L, 30L, 45L),
-    c("active", "active", "pensioner", "active", "active"),
-    gender = c("M", "M", "M", "F", "M")
-  )
-  snap_t1 <- make_snap(
-    c("P1", "P2", "P3", "P5"),
-    "2021-01-01",
-    c(61L, 61L, 66L, 46L),
-    c("pensioner", "active", "pensioner", "deceased"),
-    gender = c("M", "M", "M", "M")
-  )
-  list(snap_t0 = snap_t0, snap_t1 = snap_t1)
+decrement_pair_panel <- function() {
+  data.table::rbindlist(list(
+    make_snap(
+      c("P1", "P2", "P3", "P4", "P5"),
+      "2020-01-01",
+      c(60L, 60L, 65L, 30L, 45L),
+      c("active", "active", "pensioner", "active", "active"),
+      gender = c("M", "M", "M", "F", "M")
+    ),
+    make_snap(
+      c("P1", "P2", "P3", "P5"),
+      "2021-01-01",
+      c(61L, 61L, 66L, 46L),
+      c("pensioner", "active", "pensioner", "deceased"),
+      gender = c("M", "M", "M", "M")
+    )
+  ))
 }
 
 # a deterministic 3-age panel with exact, hand-verifiable decrement rates:
@@ -89,109 +90,6 @@ gapped_panel <- function(n_people = 150, seed = 7) {
 }
 
 # ---------------------------------------------------------------------------
-# .compute_decrement_pair() -- single snapshot-pair workhorse
-# ---------------------------------------------------------------------------
-test_that("basic exposure/exit counts and rates are correct", {
-  snaps <- decrement_pair_snaps()
-  out <- .compute_decrement_pair(
-    snaps$snap_t0, snaps$snap_t1,
-    duration_col = "age", status_col = "employment_status",
-    personnel_id_col = "personnel_id", ref_date_col = "ref_date",
-    group_cols = "gender"
-  )
-  row_60_pensioner <- out[age == 60 & gender == "M" & employment_status == "pensioner"]
-  expect_equal(row_60_pensioner$pop, 2L)
-  expect_equal(row_60_pensioner$exits, 1L)
-  expect_equal(row_60_pensioner$decrement_rate, 0.5)
-})
-
-test_that("someone already a pensioner at t0 is excluded from exposure entirely (no rate > 1)", {
-  # regression test: P3 (age 65, already pensioner at t0) must never inflate
-  # any age bucket's exits, and age 65 should not appear in the output at all
-  # since nobody was ACTIVE at age 65 in this panel
-  snaps <- decrement_pair_snaps()
-  out <- .compute_decrement_pair(
-    snaps$snap_t0, snaps$snap_t1,
-    duration_col = "age", status_col = "employment_status",
-    personnel_id_col = "personnel_id", ref_date_col = "ref_date",
-    group_cols = "gender"
-  )
-  expect_true(all(out$decrement_rate <= 1))
-  expect_false(65L %in% out$age)
-})
-
-test_that("a non-retirement-exit is attributed to the person's own t0 age, not shifted", {
-  # regression test: P4 (active, age 30 at t0) drops out of the panel by t1.
-  # must be counted at age 30, never age 29 (the old hardcoded age-1 shift)
-  snaps <- decrement_pair_snaps()
-  out <- .compute_decrement_pair(
-    snaps$snap_t0, snaps$snap_t1,
-    duration_col = "age", status_col = "employment_status",
-    personnel_id_col = "personnel_id", ref_date_col = "ref_date",
-    group_cols = "gender"
-  )
-  row <- out[age == 30 & gender == "F" & employment_status == "non-retirement-exit"]
-  expect_equal(nrow(row), 1L)
-  expect_equal(row$exits, 1L)
-  expect_false(29L %in% out$age)
-})
-
-test_that("outcome vocabulary is derived from the data, not hardcoded", {
-  # P5 has an explicit "deceased" status at t1 -- never special-cased anywhere
-  # in the implementation, so this only works if the vocabulary is data-driven
-  snaps <- decrement_pair_snaps()
-  out <- .compute_decrement_pair(
-    snaps$snap_t0, snaps$snap_t1,
-    duration_col = "age", status_col = "employment_status",
-    personnel_id_col = "personnel_id", ref_date_col = "ref_date",
-    group_cols = "gender"
-  )
-  expect_true("deceased" %in% out$employment_status)
-  row <- out[age == 45 & gender == "M" & employment_status == "deceased"]
-  expect_equal(row$exits, 1L)
-})
-
-test_that("every exposed age/group reports all outcome types with explicit zeros, never NA status", {
-  snaps <- decrement_pair_snaps()
-  out <- .compute_decrement_pair(
-    snaps$snap_t0, snaps$snap_t1,
-    duration_col = "age", status_col = "employment_status",
-    personnel_id_col = "personnel_id", ref_date_col = "ref_date",
-    group_cols = "gender"
-  )
-  expect_false(anyNA(out$employment_status))
-  expect_true(all(out$exits >= 0L))
-  # every age/group present has a row for every outcome type observed anywhere
-  n_types <- data.table::uniqueN(out$employment_status)
-  counts <- out[, .N, by = .(age, gender)]
-  expect_true(all(counts$N == n_types))
-})
-
-test_that("outcome rates sum to exactly 1 for every age/group", {
-  snaps <- decrement_pair_snaps()
-  out <- .compute_decrement_pair(
-    snaps$snap_t0, snaps$snap_t1,
-    duration_col = "age", status_col = "employment_status",
-    personnel_id_col = "personnel_id", ref_date_col = "ref_date",
-    group_cols = "gender"
-  )
-  sums <- out[, .(total = sum(decrement_rate)), by = .(age, gender)]
-  expect_equal(sums$total, rep(1, nrow(sums)))
-})
-
-test_that("t0_date and t1_date are attached correctly", {
-  snaps <- decrement_pair_snaps()
-  out <- .compute_decrement_pair(
-    snaps$snap_t0, snaps$snap_t1,
-    duration_col = "age", status_col = "employment_status",
-    personnel_id_col = "personnel_id", ref_date_col = "ref_date",
-    group_cols = "gender"
-  )
-  expect_true(all(out$t0_date == as.Date("2020-01-01")))
-  expect_true(all(out$t1_date == as.Date("2021-01-01")))
-})
-
-# ---------------------------------------------------------------------------
 # estimate_decrement_rates() -- pooling across period-pairs
 #
 # Behaviour tests run on a data frame (data.table method) and on a duckdb
@@ -234,11 +132,34 @@ for (backend in backends) {
   })
 
   test_that(paste0("returns the documented columns (", backend, ")"), {
-    out <- run_decrements(backend, decrement_pair_snaps() |> data.table::rbindlist(), "gender")
+    out <- run_decrements(backend, decrement_pair_panel(), "gender")
     expect_named(
       out,
       c("age", "gender", "employment_status", "pop", "exits", "n_periods", "decrement_rate")
     )
+  })
+
+  test_that(paste0("one snapshot pair matches a hand-calculated table (", backend, ")"), {
+    # the regressions this table guards (see decrement_pair_panel()):
+    # - P3, a pensioner already at t0, is not exposed: no age 65 rows
+    # - P4's exit counts at their own t0 age 30, not a shifted 29
+    # - P5's "deceased" is picked up from the data, not hardcoded
+    # - every exposed age/group has a row per outcome, zeros included, and
+    #   its rates sum to 1
+    out <- run_decrements(backend, decrement_pair_panel(), "gender")
+    outcomes <- c("active", "deceased", "non-retirement-exit", "pensioner")
+    expected <- data.table::data.table(
+      age = rep(c(30L, 45L, 60L), each = 4),
+      gender = rep(c("F", "M", "M"), each = 4),
+      employment_status = rep(outcomes, 3),
+      pop = rep(c(1L, 1L, 2L), each = 4),
+      exits = c(0L, 0L, 1L, 0L,
+                0L, 1L, 0L, 0L,
+                1L, 0L, 0L, 1L),
+      n_periods = 1L
+    )
+    expected[, decrement_rate := exits / pop]
+    expect_equal(out, expected)
   })
 
   test_that(paste0("pooled decrement rates match hand-calculated values exactly (", backend, ")"), {
@@ -338,6 +259,24 @@ for (backend in backends) {
     expect_equal(out, run_decrements(backend, clean))
   })
 
+  test_that(paste0("conflicting duplicates keep the first row by status, whatever the row order (", backend, ")"), {
+    # P8 is NA and active in 2020, P9 pensioner and active: the first by
+    # status (missing last) is "active" for both, so all three are exposed
+    panel <- data.table::rbindlist(list(
+      make_snap(c("P1", "P8", "P8", "P9", "P9"), "2020-01-01", 50L,
+                c("active", NA, "active", "pensioner", "active")),
+      make_snap(c("P1", "P8", "P9"), "2021-01-01", 51L, "active")
+    ))
+    for (rows in list(seq_len(nrow(panel)), rev(seq_len(nrow(panel))))) {
+      expect_warning(
+        out <- run_decrements(backend, panel[rows]),
+        "2 duplicate rows.*first by status"
+      )
+      expect_equal(out[employment_status == "active"]$pop, 3L)
+      expect_equal(out[employment_status == "active"]$exits, 3L)
+    }
+  })
+
   test_that(paste0("clean (unique) panels raise no warning (", backend, ")"), {
     expect_no_warning(run_decrements(backend, deterministic_panel()))
   })
@@ -373,6 +312,29 @@ test_that("the data.frame and duckdb methods agree on a larger grouped panel", {
   )
 })
 
+test_that("duplicates keep a missing status last even where the database sorts it first", {
+  skip_if_not_installed("duckdb")
+  skip_if_not_installed("dbplyr")
+  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  DBI::dbExecute(con, "SET default_null_order = 'nulls_first'")
+
+  # P8 is NA and active in 2020: "active" is kept, so P8 is exposed
+  panel <- data.table::rbindlist(list(
+    make_snap(c("P1", "P8", "P8"), "2020-01-01", 50L, c("active", NA, "active")),
+    make_snap(c("P1", "P8"), "2021-01-01", 51L, "active")
+  ))
+  DBI::dbWriteTable(con, "personnel", as.data.frame(panel))
+  expect_warning(
+    out <- estimate_decrement_rates(
+      dplyr::tbl(con, "personnel"), "age", "employment_status", "personnel_id", "ref_date"
+    ),
+    "1 duplicate rows"
+  )
+  out <- dplyr::collect(out)
+  expect_equal(out$pop[out$employment_status == "active"], 2L)
+})
+
 test_that("data frame input returns a data.table", {
   df <- as.data.frame(deterministic_panel())
   out <- estimate_decrement_rates(df, "age", "employment_status", "personnel_id", "ref_date", NULL)
@@ -397,25 +359,6 @@ test_that("unsupported input errors naming the argument", {
     estimate_decrement_rates(list(a = 1), "age", "employment_status", "personnel_id", "ref_date", NULL),
     "`personnel` must be a data frame or a lazy database table"
   )
-})
-
-test_that("pooled output over one pair matches .compute_decrement_pair()", {
-  snaps <- decrement_pair_snaps()
-  pair <- .compute_decrement_pair(
-    snaps$snap_t0, snaps$snap_t1,
-    duration_col = "age", status_col = "employment_status",
-    personnel_id_col = "personnel_id", ref_date_col = "ref_date",
-    group_cols = "gender"
-  )
-  out <- estimate_decrement_rates(
-    rbind(snaps$snap_t0, snaps$snap_t1),
-    "age", "employment_status", "personnel_id", "ref_date", "gender"
-  )
-  key <- c("age", "gender", "employment_status")
-  data.table::setorderv(pair, key)
-  expect_equal(out[, .(age, gender, employment_status, pop, exits, decrement_rate)],
-               pair[, .(age, gender, employment_status, pop, exits, decrement_rate)])
-  expect_true(all(out$n_periods == 1L))
 })
 
 test_that("the caller's data.table is not re-keyed or re-ordered", {
@@ -558,12 +501,17 @@ test_that("compute_service_table(smooth = TRUE) accepts a duckdb table and match
   expect_equal(from_db, from_df)
 })
 
-test_that("compute_service_table() returns the full life table by default", {
+test_that("compute_service_table() returns the full life table by default, as a service_table", {
   st <- compute_service_table(
     deterministic_panel(), "age", "employment_status",
     "personnel_id", "ref_date", group_cols = NULL, radix = 100, smooth = FALSE
   )
-  expect_named(st, c("age", "px", "lx", "lx_next", "Lx", "Tx", "ex"))
+  expect_named(st, c("age", "pop", "px", "lx", "lx_next", "Lx", "Tx", "ex"))
+  expect_s3_class(st, c("service_table", "data.table"))
+  expect_equal(attr(st, "duration_col"), "age")
+  expect_null(attr(st, "group_cols"))
+  # pop: the people active at each age, whose stay rate px rests on
+  expect_equal(st$pop, c(4L, 2L, 2L))
 })
 
 test_that("include_all = FALSE keeps only age, group_cols, px and ex", {
@@ -577,7 +525,8 @@ test_that("include_all = FALSE keeps only age, group_cols, px and ex", {
     include_all = FALSE
   )
   expect_named(short, c("age", "px", "ex"))
-  expect_equal(short, full[, .(age, px, ex)])
+  expect_equal(short$px, full$px)
+  expect_equal(short$ex, full$ex)
 
   panel <- deterministic_panel()
   panel[, gender := "M"]
@@ -630,15 +579,120 @@ test_that("a gap with smooth = FALSE warns AND the returned table is actually ga
   panel <- gapped_panel()
   panel[, gender := "M"]
 
-  n_warn <- 0
+  warnings <- character()
   st <- withCallingHandlers(
     compute_service_table(panel, "age", "employment_status", "personnel_id", "ref_date", "gender"),
-    warning = function(w) { n_warn <<- n_warn + 1; invokeRestart("muffleWarning") }
+    warning = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
   )
-  expect_equal(n_warn, 1L)
+  expect_length(warnings, 1L)
+  expect_match(warnings, "smoothed to fill the gap; set smooth = TRUE")
+  expect_no_match(warnings, "\n")
   expect_false(any(diff(st$age) != 1L))
   expect_false(anyNA(st$lx))
   expect_false(anyNA(st$ex))
+})
+
+test_that("an age everyone leaves ends the chain: ex is NA after it, with a warning naming the group", {
+  # both people active at 51 retire, so px = 0 at 51 and no one is left at
+  # 52: ex there is 0 / 0, which is reported as NA rather than NaN
+  panel <- deterministic_panel()
+  panel[personnel_id == "P6" & ref_date == as.Date("2021-01-01"), employment_status := "pensioner"]
+  panel[, gender := "M"]
+
+  expect_warning(
+    st <- compute_service_table(
+      panel, "age", "employment_status", "personnel_id", "ref_date",
+      group_cols = "gender", radix = 100
+    ),
+    "gender = M \\(from age 52\\)"
+  )
+  expect_equal(st$px, c(0.75, 0, 1))
+  expect_equal(st$lx, c(100, 75, 0))
+  expect_equal(st$ex, c(1.25, 0.5, NA))
+
+  expect_warning(
+    compute_service_table(
+      panel, "age", "employment_status", "personnel_id", "ref_date", group_cols = NULL
+    ),
+    "the table \\(from age 52\\)"
+  )
+
+  # with smoothing already on, the warning does not suggest it
+  msg <- tryCatch(
+    compute_service_table(panel, "age", smooth = TRUE),
+    warning = conditionMessage
+  )
+  expect_match(msg, "from age 52")
+  expect_no_match(msg, "smooth = TRUE")
+})
+
+test_that("compute_service_table() is a generic with data.frame, tbl_dbi and default methods", {
+  for (cls in c("data.frame", "tbl_dbi", "default")) {
+    expect_false(is.null(utils::getS3method("compute_service_table", cls, optional = TRUE)), info = cls)
+  }
+  expect_error(
+    compute_service_table(list(a = 1), "age"),
+    "`personnel` must be a data frame or a lazy database table"
+  )
+})
+
+test_that("duration_col is required; the other column arguments have defaults", {
+  expect_error(compute_service_table(deterministic_panel()), "duration_col")
+  expect_equal(
+    compute_service_table(deterministic_panel(), "age"),
+    compute_service_table(
+      deterministic_panel(), "age", "employment_status", "personnel_id", "ref_date",
+      group_cols = NULL
+    )
+  )
+})
+
+test_that("radix, smooth and span come through ..., and a misspelt one errors", {
+  st <- compute_service_table(deterministic_panel(), "age", radix = 100)
+  expect_equal(st$lx, c(100, 75, 37.5))
+  expect_error(compute_service_table(deterministic_panel(), "age", smoth = TRUE), "smoth")
+})
+
+test_that("any precomputed duration works: tenure, by hand", {
+  # tenure 0: P1/2020, P2/2020 and P4/2021 at risk, P2 leaves (px 2/3);
+  # tenure 1: P3/2020 retires, P1/2021 stays (px 1/2)
+  panel <- data.table::data.table(
+    personnel_id = c("P1", "P2", "P3", "P1", "P3", "P4", "P1", "P4"),
+    ref_date = as.Date(rep(c("2020-01-01", "2021-01-01", "2022-01-01"), c(3, 3, 2))),
+    employment_status = c("active", "active", "active", "active", "pensioner",
+                          "active", "active", "active"),
+    tenure = c(0, 0, 1, 1, 2, 0, 2, 1)
+  )
+  st <- compute_service_table(panel, "tenure", radix = 100)
+  expect_equal(st$tenure, 0:1)
+  expect_equal(st$px, c(2 / 3, 1 / 2))
+  expect_equal(st$lx, c(100, 200 / 3))
+  expect_equal(st$Tx, c((100 + 200 / 3) / 2 + (200 / 3 + 100 / 3) / 2, 50))
+  expect_equal(st$ex, c(400 / 300, 0.75))
+})
+
+test_that("a missing duration is left out with a warning", {
+  # P9 is active in both years with no age: left out, with a warning, and
+  # the table is that of the panel without P9
+  panel <- data.table::rbindlist(list(
+    deterministic_panel(),
+    make_snap("P9", c("2020-01-01", "2021-01-01"), NA_integer_, "active")
+  ))
+  expect_warning(
+    st <- compute_service_table(panel, "age", radix = 100),
+    "1 active person-snapshot.*no `age`"
+  )
+  expect_equal(st, compute_service_table(deterministic_panel(), "age", radix = 100))
+})
+
+test_that("pop is NA at an age filled in by smoothing", {
+  panel <- gapped_panel()
+  st <- compute_service_table(panel, "age", smooth = TRUE)
+  expect_true(is.na(st[age == 62]$pop))
+  expect_false(anyNA(st[age != 62]$pop))
 })
 
 test_that("smooth = TRUE up front avoids the reactive warning even with a gap", {
@@ -664,4 +718,31 @@ test_that("group_cols = NULL with a gap works end to end (regression: user's ori
     ),
     NA
   )
+})
+
+# ---------------------------------------------------------------------------
+# plot.service_table()
+# ---------------------------------------------------------------------------
+test_that("plot() draws ex by duration, one line per group, with dots sized by pop", {
+  withr::local_pdf(tempfile(fileext = ".pdf"))
+  panel <- gapped_panel()
+  panel[, gender := fifelse(as.integer(sub("P", "", personnel_id)) %% 2L == 0L, "F", "M")]
+  st <- compute_service_table(panel, "age", group_cols = "gender", smooth = TRUE)
+
+  p <- plot(st)
+  expect_s3_class(p, "ggplot")
+  built <- ggplot2::ggplot_build(p)
+  expect_length(built$data, 2L)                       # line and dots
+  expect_equal(p$labels$x, "age")
+  expect_setequal(unique(as.character(p$data$group)), c("F", "M"))
+
+  expect_length(ggplot2::ggplot_build(plot(st, show_n = FALSE))$data, 1L)
+})
+
+test_that("plot() works without pop (include_all = FALSE), drawing the line only", {
+  withr::local_pdf(tempfile(fileext = ".pdf"))
+  st <- compute_service_table(deterministic_panel(), "age", include_all = FALSE)
+  p <- plot(st)
+  expect_s3_class(p, "ggplot")
+  expect_length(ggplot2::ggplot_build(p)$data, 1L)
 })

@@ -1,11 +1,8 @@
-# Benchmark: four ways to compute estimate_decrement_rates()
+# Benchmark: three ways to compute estimate_decrement_rates()
 #
-# All four produce the same table; they differ only in how each person
+# All three produce the same table; they differ only in how each person
 # active at one snapshot is matched to their status at the next snapshot:
 #
-#   pairwise   roll_snapshot_pairs() + .compute_decrement_pair(): one join on
-#              personnel_id per consecutive snapshot pair (the implementation
-#              estimate_decrement_rates() used up to govhr 0.4.1)
 #   self_join  a calendar of (t0, t1) dates + one join over the whole panel
 #              on (personnel_id, t1) -- the compute_movement.data.frame()
 #              pattern
@@ -68,7 +65,7 @@ results_dir <- file.path("data-raw", "bench", "results")
 # ~n_rows person-snapshot rows: n_snaps annual snapshots, ~5% of people
 # missing from any given snapshot (so non-retirement exits occur), rows
 # ordered by snapshot and shuffled by person within it. Every snapshot is
-# forced to contain every status, so all four methods see the same outcome
+# forced to contain every status, so all three methods see the same outcome
 # vocabulary in every pair and their outputs are directly comparable.
 make_panel <- function(n_rows, id_type, seed = 1) {
   set.seed(seed)
@@ -103,31 +100,13 @@ make_panel <- function(n_rows, id_type, seed = 1) {
   panel[, c(".p", ".s") := NULL][]
 }
 
-# ---- the four methods -----------------------------------------------------
+# ---- the three methods ----------------------------------------------------
 
 cols <- list(
   duration_col = "age", status_col = "employment_status",
   personnel_id_col = "personnel_id", ref_date_col = "ref_date",
   group_cols = "gender"
 )
-
-pool <- function(counts, by_cols, status_col) {
-  out <- counts[, .(pop = sum(pop), exits = sum(exits), n_periods = .N),
-                by = c(by_cols, status_col)]
-  out[, decrement_rate := exits / pop]
-  setorderv(out, c(by_cols, status_col))[]
-}
-
-method_pairwise <- function(panel) {
-  # roll_snapshot_pairs() keys the panel in place; it is generated already
-  # ordered by ref_date, so this only sets the attribute (dropped after)
-  on.exit(setattr(panel, "sorted", NULL))
-  counts <- do.call(roll_snapshot_pairs, c(
-    list(panel_dt = panel, date_col = cols$ref_date_col, f = .compute_decrement_pair),
-    cols
-  ))
-  pool(counts, c(cols$duration_col, cols$group_cols), cols$status_col)
-}
 
 method_self_join <- function(panel) {
   pid <- cols$personnel_id_col; ref <- cols$ref_date_col; st <- cols$status_col
@@ -176,7 +155,6 @@ method_duckdb <- function(panel) {
 }
 
 methods <- list(
-  pairwise = method_pairwise,
   self_join = method_self_join,
   sort_lead = method_sort_lead,
   duckdb = method_duckdb
@@ -258,11 +236,6 @@ csv <- file.path(results_dir, sprintf("decrement_rates_%s_%s.csv", id_type, stam
 # (re)write everything measured so far
 save_results <- function() {
   results <- rbindlist(rows)
-  results[, speedup_vs_pairwise := NA_real_]
-  if ("pairwise" %in% results$method) {
-    pairwise_times <- results[method == "pairwise", .(rows, pairwise_seconds = seconds)]
-    results[pairwise_times, speedup_vs_pairwise := i.pairwise_seconds / seconds, on = "rows"]
-  }
   results[, `:=`(id_type = id_type, threads = getDTthreads(),
                  r_version = as.character(getRversion()))]
   fwrite(results, csv)
@@ -356,7 +329,7 @@ for (n in sizes) {
 
 results <- save_results()
 cat("\n")
-print(results[, .(rows, method, seconds, peak_gb, speedup_vs_pairwise, matches_first, skipped)])
+print(results[, .(rows, method, seconds, peak_gb, matches_first, skipped)])
 
 # ---- plot -----------------------------------------------------------------
 
@@ -375,7 +348,7 @@ p <- ggplot2::ggplot(plot_dt, ggplot2::aes(rows, value, colour = method)) +
   ggplot2::facet_wrap(~metric, scales = "free_y") +
   ggplot2::labs(
     x = "Panel rows", y = NULL, colour = NULL,
-    title = "estimate_decrement_rates(): pairwise vs self-join vs sort + lead vs DuckDB",
+    title = "estimate_decrement_rates(): self-join vs sort + lead vs DuckDB",
     subtitle = sprintf("%s ids, %d snapshots, %d data.table threads",
                        id_type, n_snaps, getDTthreads())
   ) +

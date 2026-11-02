@@ -118,7 +118,7 @@ monthly or irregular snapshots work: exposure is always in years (January
 longer rather than counting as exits.
 
 \strong{Duplicates.} A person seen twice at one snapshot is kept once (the
-first by status), with a warning.
+first by status, a missing status last), with a warning.
 }
 \examples{
 library(data.table)
@@ -137,6 +137,6 @@ panel[, .N, by = exit_type]
 
 }
 \seealso{
-\code{\link[=fit_survival_model]{fit_survival_model()}} to model the exits; \code{\link[=compute_career_table]{compute_career_table()}}
-for stay rates and pay growth by tenure without covariates.
+\code{\link[=fit_survival_model]{fit_survival_model()}} to model the exits; \code{\link[=compute_service_table]{compute_service_table()}}
+for expected years of service by tenure without covariates.
 }

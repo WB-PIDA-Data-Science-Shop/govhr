@@ -69,7 +69,7 @@
 #' longer rather than counting as exits.
 #'
 #' **Duplicates.** A person seen twice at one snapshot is kept once (the
-#' first by status), with a warning.
+#' first by status, a missing status last), with a warning.
 #'
 #' @examples
 #' library(data.table)
@@ -86,8 +86,8 @@
 #' )
 #' panel[, .N, by = exit_type]
 #'
-#' @seealso [fit_survival_model()] to model the exits; [compute_career_table()]
-#'   for stay rates and pay growth by tenure without covariates.
+#' @seealso [fit_survival_model()] to model the exits; [compute_service_table()]
+#'   for expected years of service by tenure without covariates.
 #' @export
 build_survival_panel <- function(personnel, ...) {
   UseMethod("build_survival_panel")
@@ -142,12 +142,12 @@ build_survival_panel.data.frame <- function(personnel,
     setnames(panel, status_col, ".status")
   }
 
-  ### one row per person and snapshot, keeping the first by status (as the
-  ### database method does)
-  setorderv(panel, c(".pid", ".ref", ".status"))
+  ### one row per person and snapshot, keeping the first by status, missing
+  ### last (as the database method does)
+  setorderv(panel, c(".pid", ".ref", ".status"), na.last = TRUE)
   n_dup <- sum(duplicated(panel, by = c(".pid", ".ref")))
   if (n_dup > 0L) {
-    .warn_survival_duplicates(n_dup, personnel_id_col, ref_date_col)
+    .warn_duplicates(n_dup, personnel_id_col, ref_date_col)
     panel <- unique(panel, by = c(".pid", ".ref"))
   }
 
@@ -250,19 +250,7 @@ build_survival_panel.tbl_dbi <- function(personnel,
   }
 
   ### one row per person and snapshot, keeping the first by status
-  n_dup <- panel |>
-    count(.pid, .ref, name = ".n") |>
-    filter(.n > 1L) |>
-    summarise(.n_dup = sum(.n - 1L, na.rm = TRUE)) |>
-    pull(.n_dup)
-  if (isTRUE(n_dup > 0)) {
-    .warn_survival_duplicates(n_dup, personnel_id_col, ref_date_col)
-    panel <- panel |>
-      group_by(.pid, .ref) |>
-      dbplyr::window_order(.status) |>
-      filter(row_number() == 1L) |>
-      ungroup()
-  }
+  panel <- .dedupe_person_snapshot_dbi(panel, personnel_id_col, ref_date_col)
 
   ### the calendar is built in R and sent in inline (no write access
   ### needed), so both methods measure intervals the same way

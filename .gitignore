@@ -8,12 +8,4 @@ spielplatz/
 *.duckdb
 *.duckdb.wal
 data-raw/ideas
-
-# Paraguay (real client data): scratch scripts and aggregate results, never committed
-data-raw/bench/pry/
-
-# Gambia (real client data): scratch scripts and aggregate results, never committed
-data-raw/bench/gmb/
-
-# Botswana (real client data): scratch scripts and aggregate results, never committed
-data-raw/bench/bwa/
+data-raw/bench

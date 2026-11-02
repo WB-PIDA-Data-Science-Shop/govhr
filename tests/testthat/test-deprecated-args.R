@@ -68,33 +68,6 @@ test_that("`groups` still works and matches `group_cols`", {
   )
 })
 
-test_that("`personnel_dt` still works and matches `personnel`", {
-  personnel <- data.frame(
-    personnel_id = rep(1:60, 2),
-    ref_date = rep(as.Date(c("2020-01-01", "2021-01-01")), each = 60),
-    age = rep(sample(25:60, 60, TRUE), 2),
-    employment_status = "active"
-  )
-  args <- list(
-    duration_col = "age",
-    status_col = "employment_status",
-    personnel_id_col = "personnel_id",
-    ref_date_col = "ref_date",
-    group_cols = NULL
-  )
-
-  res <- with_warnings(
-    do.call(compute_service_table, c(list(personnel_dt = personnel), args))
-  )
-  expect_deprecated(res, "personnel_dt")
-  expect_equal(
-    res$value,
-    with_warnings(
-      do.call(compute_service_table, c(list(personnel = personnel), args))
-    )$value
-  )
-})
-
 test_that("supplying both the old and the new name is an error", {
   data <- make_panel()
 
