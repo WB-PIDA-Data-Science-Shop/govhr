@@ -150,7 +150,9 @@ pivot_data360 <- function(data) {
 #'   requested dataset, as returned by the Data360 API.
 #'
 #' @examples
-#' get_metadata360("WB_MPO")
+#' \dontrun{
+#'   get_metadata360("WB_MPO")
+#' }
 #'
 #' @importFrom httr modify_url GET stop_for_status content
 #' @importFrom jsonlite fromJSON
