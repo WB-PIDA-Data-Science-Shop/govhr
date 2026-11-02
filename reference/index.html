@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -254,7 +254,7 @@
       </dl></div><div class="section level2">
       <h2 id="quality-check-plots">Quality check plots<a class="anchor" aria-label="anchor" href="#quality-check-plots"></a></h2>
 
-      <div class="section-desc"><p><code>R/qcheck_plots.R</code>: plot coverage and consistency.</p></div>
+      <div class="section-desc"><p><code>R/plot_qcheck.R</code>: plot coverage and consistency.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -348,8 +348,17 @@
 
         </dt>
         <dd>Compute cross-section summary</dd>
+      </dl></div><div class="section level2">
+      <h2 id="overview-plots">Overview plots<a class="anchor" aria-label="anchor" href="#overview-plots"></a></h2>
 
-        <dt>
+      <div class="section-desc"><p><code>R/plot_overview.R</code>: plot trends, totals and growth by group.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
 
           <code><a href="plot_trend.html">plot_trend()</a></code>
 
@@ -380,6 +389,13 @@
 
 
       <dl><dt>
+
+          <code><a href="detect_workforce_flows.html">detect_workforce_flows()</a></code>
+
+        </dt>
+        <dd>Flag the flows of each active person and date</dd>
+
+        <dt>
 
           <code><a href="detect_movement.html">detect_movement()</a></code>
 
@@ -420,20 +436,22 @@
 
         </dt>
         <dd>Compute the cost of retirements</dd>
+      </dl></div><div class="section level2">
+      <h2 id="movement-plots">Movement plots<a class="anchor" aria-label="anchor" href="#movement-plots"></a></h2>
 
-        <dt>
+      <div class="section-desc"><p><code>R/plot_movement.R</code></p></div>
 
-          <code><a href="detect_personnel_event.html">detect_personnel_event()</a></code>
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="plot_movement.html">plot_movement()</a></code>
 
         </dt>
-        <dd>Detect Personnel Events</dd>
-
-        <dt>
-
-          <code><a href="complete_dates.html">complete_dates()</a></code>
-
-        </dt>
-        <dd>Complete panel data by identifier and reference dates</dd>
+        <dd>Plot hires and separations over time</dd>
       </dl></div><div class="section level2">
       <h2 id="transitions">Transitions<a class="anchor" aria-label="anchor" href="#transitions"></a></h2>
 
@@ -460,8 +478,38 @@
 
         <dt>
 
-          <code><a href="plot_transition_network.html">plot_transition_network()</a></code>
+          <code><a href="compute_transition_flows.html">compute_transition_flows()</a></code>
 
+        </dt>
+        <dd>Compute transitions in and out of each group</dd>
+      </dl></div><div class="section level2">
+      <h2 id="transition-plots">Transition plots<a class="anchor" aria-label="anchor" href="#transition-plots"></a></h2>
+
+      <div class="section-desc"><p><code>R/plot_transition.R</code>: plot moves between groups, and in and out of each.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="plot_transition.html">plot_transition()</a></code>
+
+        </dt>
+        <dd>Plot transitions as a network</dd>
+
+        <dt>
+
+          <code><a href="plot_transition_flows.html">plot_transition_flows()</a></code>
+
+        </dt>
+        <dd>Plot transitions in and out of each group</dd>
+
+        <dt>
+
+          <code><a href="plot_transition_network.html">plot_transition_network()</a></code>
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>Plot transition network</dd>
       </dl></div><div class="section level2">
@@ -640,6 +688,36 @@
         </dt>
         <dd>Compute deciles of a measure</dd>
       </dl></div><div class="section level2">
+      <h2 id="distribution-plots">Distribution plots<a class="anchor" aria-label="anchor" href="#distribution-plots"></a></h2>
+
+      <div class="section-desc"><p><code>R/plot_distribution.R</code>: plot deciles, histograms and compression ratios.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="plot_decile.html">plot_decile()</a></code>
+
+        </dt>
+        <dd>Plot decile summary</dd>
+
+        <dt>
+
+          <code><a href="plot_histogram.html">plot_histogram()</a></code>
+
+        </dt>
+        <dd>Plot density as percentage share</dd>
+
+        <dt>
+
+          <code><a href="plot_compression_ratio.html">plot_compression_ratio()</a></code>
+
+        </dt>
+        <dd>Plot compression ratio</dd>
+      </dl></div><div class="section level2">
       <h2 id="wage-models">Wage models<a class="anchor" aria-label="anchor" href="#wage-models"></a></h2>
 
       <div class="section-desc"><p><code>R/wage_model.R</code></p></div>
@@ -655,8 +733,17 @@
 
         </dt>
         <dd>Fit a wage model with fixed effects</dd>
+      </dl></div><div class="section level2">
+      <h2 id="wage-model-plots">Wage model plots<a class="anchor" aria-label="anchor" href="#wage-model-plots"></a></h2>
 
-        <dt>
+      <div class="section-desc"><p><code>R/plot_wage_model.R</code></p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
 
           <code><a href="plot_model_wage.html">plot_model_wage()</a></code>
 
@@ -843,7 +930,7 @@
       </dl></div><div class="section level2">
       <h2 id="plot-helpers">Plot helpers<a class="anchor" aria-label="anchor" href="#plot-helpers"></a></h2>
 
-      <div class="section-desc"><p><code>R/plots.R</code></p></div>
+      <div class="section-desc"><p><code>R/plot.R</code>: plots that work with any table.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -859,66 +946,17 @@
 
         <dt>
 
-          <code><a href="ggplot_point_line.html">ggplot_point_line()</a></code>
+          <code><a href="plot_change.html">plot_change()</a></code>
 
         </dt>
-        <dd>Plot grouped line chart with labeled points</dd>
+        <dd>Plot changes as bars above or below zero</dd>
 
         <dt>
 
-          <code><a href="ggplot_segment.html">ggplot_segment()</a></code>
+          <code><a href="plot_area.html">plot_area()</a></code>
 
         </dt>
-        <dd>Plot segments overlaid with points, ordered by median</dd>
-
-        <dt>
-
-          <code><a href="ggplot_coef.html">ggplot_coef()</a></code>
-
-        </dt>
-        <dd>Plot model coefficients with confidence intervals</dd>
-
-        <dt>
-
-          <code><a href="plot_segment.html">plot_segment()</a></code>
-
-        </dt>
-        <dd>Create a segment plot with jittered points</dd>
-
-        <dt>
-
-          <code><a href="plot_movement.html">plot_movement()</a></code>
-
-        </dt>
-        <dd>Plot hires or separations over time</dd>
-
-        <dt>
-
-          <code><a href="plot_movement_cost.html">plot_movement_cost()</a></code>
-
-        </dt>
-        <dd>Plot movement cost</dd>
-
-        <dt>
-
-          <code><a href="plot_decile.html">plot_decile()</a></code>
-
-        </dt>
-        <dd>Plot decile summary</dd>
-
-        <dt>
-
-          <code><a href="plot_histogram.html">plot_histogram()</a></code>
-
-        </dt>
-        <dd>Plot density as percentage share</dd>
-
-        <dt>
-
-          <code><a href="plot_compression_ratio.html">plot_compression_ratio()</a></code>
-
-        </dt>
-        <dd>Plot compression ratio</dd>
+        <dd>Plot stacked areas over time</dd>
       </dl></div><div class="section level2">
       <h2 id="sampling">Sampling<a class="anchor" aria-label="anchor" href="#sampling"></a></h2>
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,10 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.4" id="govhr-044">govhr 0.4.4<a class="anchor" aria-label="anchor" href="#govhr-044"></a></h2>
+<p>This release: - Separates detecting from summarizing transitions. It also reorganizes plotting functions into scripts matching the analyses they plot. - <code><a href="../reference/compute_headcount.html">compute_headcount()</a></code> and <code><a href="../reference/compute_wagebill.html">compute_wagebill()</a></code> now accept several reference columns, and <code><a href="../reference/compute_wage.html">compute_wage()</a></code> always compares against the previous <code>ref_date</code>. - Removes unused and legacy functions, including <code>detect_personnel_event()</code> (use <code><a href="../reference/detect_movement.html">detect_movement()</a></code> and <code><a href="../reference/detect_retirement.html">detect_retirement()</a></code> instead), and standardizes arguments across functions.</p>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.3" id="govhr-043">govhr 0.4.3<a class="anchor" aria-label="anchor" href="#govhr-043"></a></h2>
 <p>This release: - Simplifies the lifecycle functions to remove wage bill path growth from the compute_service_table() function. - Includes the hazard modelling as well as plotting functions to estimate the relationship between survival/exit choice and harmonized contract and personnel variables.</p>

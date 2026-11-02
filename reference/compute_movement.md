@@ -46,8 +46,9 @@ compute_movement(
 
 - status_col:
 
-  Character. Column holding employment status. Only rows equal to
-  `"active"` are counted. Default `"employment_status"`.
+  Character. Column holding employment status. Rows equal to `"active"`
+  are the active workforce, and rows equal to `"pensioner"` mark exits
+  as retirements. Default `"employment_status"`.
 
 ## Value
 
@@ -63,7 +64,10 @@ A table with one row per `ref_date` and group, containing:
 
 - separations:
 
-  People active on the previous date but not on this one.
+  People active on the previous date but not on this one, other than
+  retirees, whom
+  [`compute_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement.md)
+  counts.
 
 - hire_rate, separation_rate:
 
@@ -85,12 +89,16 @@ to bring it into memory).
 The previous date is the neighbouring date found in the data, so the
 dates do not need to be evenly spaced.
 
-Hires and separations both cover the time since the previous date, so on
-every date after the first, `headcount` equals the previous date's
-`headcount` plus `hires` minus `separations`.
+Hires, separations and retirements all cover the time since the previous
+date, so on every date after the first, `headcount` equals the previous
+date's `headcount` plus `hires` minus `separations` and the
+`retirements` of
+[`compute_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement.md).
 
 People are counted once per date, even if they hold several contracts. A
-separation is any exit from active status, including retirement.
+separation is any exit from active status other than a retirement, as in
+[`detect_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_movement.md).
+Without pensioner records in `data`, every exit is a separation.
 
 With `group_cols`, each person is counted in the group they belong to on
 that date, and each separation in the group the person left. A group

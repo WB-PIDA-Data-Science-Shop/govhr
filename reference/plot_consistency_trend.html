@@ -9,7 +9,7 @@ group, from consistency already computed."><meta property="og:image" content="ht
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,11 +55,11 @@ group, from consistency already computed.</p>
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>Data frame or lazy table (<code>tbl_dbi</code>) with <code>ref_date</code>, the
-column named in <code>group_col</code> and <code>record_consistency</code> or
-<code>value_consistency</code>, such as the output of <code><a href="compute_record_consistency.html">compute_record_consistency()</a></code>
-or <code><a href="compute_value_consistency.html">compute_value_consistency()</a></code> grouped by <code>group_col</code> and <code>ref_date</code>. A
-lazy table is brought into memory first.</p></dd>
+<dd><p>Data frame with <code>ref_date</code>, the column named in <code>group_col</code> and
+<code>record_consistency</code> or <code>value_consistency</code>, such as the output of
+<code><a href="compute_record_consistency.html">compute_record_consistency()</a></code> or <code><a href="compute_value_consistency.html">compute_value_consistency()</a></code> grouped
+by <code>group_col</code> and <code>ref_date</code>. Bring a lazy table (<code>tbl_dbi</code>) into memory
+first with <code><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">dplyr::collect()</a></code>.</p></dd>
 
 
 <dt id="arg-group-col">group_col<a class="anchor" aria-label="anchor" href="#arg-group-col"></a></dt>

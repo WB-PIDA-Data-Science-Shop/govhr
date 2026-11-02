@@ -1,6 +1,6 @@
 # Detect retirements
 
-Flags, for each active person and reference date, whether they leave
+Detects, for each active person and reference date, whether they leave
 active status by the next date into a pension, i.e. whether their next
 status after leaving is pensioner.
 
@@ -37,19 +37,24 @@ detect_retirement(data, status_col = "employment_status", ...)
 ## Value
 
 A table with one row per active person and `ref_date`, containing
-`personnel_id`, `ref_date`, `next_date` (the next date found in the
-data) and `retirement`: `TRUE` if the person retires by `next_date`, and
-`NA` on the last date, which has nothing to compare with. A data.table
-for data frame input; a lazy table for `tbl_dbi` input (use
+`personnel_id`, `ref_date`, `next_date` (the next date with active
+personnel) and `retirement`: `TRUE` if the person retires by
+`next_date`, and `NA` on the last date, which has nothing to compare
+with. A data.table for data frame input; a lazy table for `tbl_dbi`
+input (use
 [`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html)
 to bring it into memory).
 
 ## Details
 
-A retirement is a separation whose next status is pensioner. A pension
-drawn alongside an active contract is therefore not a retirement. As
-with separations, it is flagged on the person's last active date and
-counted by
+A retirement is an exit from active status whose next status is
+pensioner.
+[`detect_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_movement.md)
+counts every other exit as a separation, so every exit is either a
+separation or a retirement, never both, and the two tables share their
+rows. A pension drawn alongside an active contract is not a retirement.
+As with separations, a retirement is flagged on the person's last active
+date and counted by
 [`compute_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement.md)
 on `next_date`, the first date they are absent.
 
@@ -62,16 +67,26 @@ deferred pension also counts as a retirement.
 
 As in
 [`detect_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_movement.md),
-only dates with active personnel are compared, so pensioner records
-dated before the next such date are not seen, and an exit on the last
-such date is `NA`.
+`next_date` is the next date with active personnel, and pensioner
+records are looked up from `next_date` onwards. A date holding only
+pensioner records is never a `next_date`, so:
+
+- a pensioner record dated after the exit but before `next_date` is not
+  seen. The exit is still a retirement if another pensioner record
+  follows on or after `next_date`, and a separation otherwise.
+
+- an exit after the last date with active personnel is `NA`, even if
+  pensioner records follow.
+
+- an exit shortly before the last date with active personnel may be
+  flagged as a separation because the pension is not registered yet.
 
 ## See also
 
 [`compute_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement.md),
 which counts these retirements.
 [`detect_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_movement.md),
-which flags the separations they are drawn from.
+which flags the other exits as separations.
 
 ## Examples
 

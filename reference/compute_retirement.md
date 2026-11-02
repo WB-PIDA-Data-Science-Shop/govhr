@@ -95,8 +95,8 @@ deferred pension also counts as a retirement.
 ## See also
 
 [`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md),
-whose separations include these retirements and whose rates share their
-denominator.
+whose separations are the exits other than these retirements, and whose
+rates share their denominator.
 [`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md),
 which flags the retirements of each person.
 

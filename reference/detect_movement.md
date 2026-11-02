@@ -1,8 +1,8 @@
 # Detect hires and separations
 
 Flags, for each active person and reference date, whether they were
-hired since the previous date and whether they are gone by the next
-date.
+hired since the previous date and whether they leave active status,
+other than into retirement, by the next date.
 
 ## Usage
 
@@ -30,8 +30,9 @@ detect_movement(data, status_col = "employment_status", ...)
 
 - status_col:
 
-  Character. Column holding employment status. Only rows equal to
-  `"active"` are considered. Default `"employment_status"`.
+  Character. Column holding employment status. Rows equal to `"active"`
+  are the active workforce, and rows equal to `"pensioner"` mark exits
+  as retirements. Default `"employment_status"`.
 
 ## Value
 
@@ -43,8 +44,8 @@ A table with one row per active person and `ref_date`, containing:
 
 - prev_date, next_date:
 
-  The neighbouring dates found in the data, which the person's status is
-  compared with. `NA` on the first and last date.
+  The neighbouring dates with active personnel, which the person's
+  status is compared with. `NA` on the first and last date.
 
 - hire:
 
@@ -53,8 +54,8 @@ A table with one row per active person and `ref_date`, containing:
 
 - separation:
 
-  `TRUE` if the person is not active on `next_date`. `NA` on the last
-  date.
+  `TRUE` if the person is not active on `next_date` and did not retire.
+  `NA` on the last date.
 
 A data.table for data frame input; a lazy table for `tbl_dbi` input (use
 [`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html)
@@ -62,10 +63,18 @@ to bring it into memory).
 
 ## Details
 
-The previous and next dates are the neighbouring dates found in the
-data, so the dates do not need to be evenly spaced. People with several
-contracts on a date appear once. A separation is any exit from active
-status, including retirement.
+The previous and next dates are the neighbouring dates with active
+personnel, however far apart, so the dates do not need to be evenly
+spaced and a date missing for everyone is not a gap. Dates holding only
+other statuses, such as pensioner, are skipped. People with several
+contracts on a date appear once.
+
+A separation is any exit from active status other than a retirement,
+such as a resignation or a dismissal. An exit whose next status is
+pensioner is a retirement, flagged by
+[`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md)
+instead, so every exit is either a separation or a retirement, never
+both. Without pensioner records in `data`, every exit is a separation.
 
 A separation is flagged on the person's last active date, which holds
 their pay and group, but happens by `next_date`, the first date they are
@@ -78,7 +87,7 @@ counts it on `next_date`.
 [`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md),
 which counts these hires and separations.
 [`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md),
-which flags the retirements among the separations.
+which flags the retirements.
 
 ## Examples
 

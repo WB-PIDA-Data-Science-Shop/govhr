@@ -5,7 +5,7 @@ Plot decile summary
 ## Usage
 
 ``` r
-plot_decile(data, group_cols)
+plot_decile(data, group_col, group_cols = lifecycle::deprecated())
 ```
 
 ## Arguments
@@ -17,10 +17,14 @@ plot_decile(data, group_cols)
   containing columns `decile`, `mean_value`, and optionally a grouping
   column.
 
+- group_col:
+
+  Character. A column to draw one panel per group, or `"ref_date"` for
+  no grouping.
+
 - group_cols:
 
-  A character vector of columns to group by, or `"ref_date"` for no
-  grouping.
+  **\[deprecated\]** Use `group_col` instead.
 
 ## Value
 
@@ -34,5 +38,5 @@ govhr::compute_decile(
   measure_col = "gross_salary_lcu",
   group_cols = "paygrade"
 ) |>
-  govhr::plot_decile(group_cols = "paygrade")
+  govhr::plot_decile(group_col = "paygrade")
 ```

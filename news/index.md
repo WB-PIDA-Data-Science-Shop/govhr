@@ -1,5 +1,22 @@
 # Changelog
 
+## govhr 0.4.4
+
+This release: - Separates detecting from summarizing transitions. It
+also reorganizes plotting functions into scripts matching the analyses
+they plot. -
+[`compute_headcount()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_headcount.md)
+and
+[`compute_wagebill()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wagebill.md)
+now accept several reference columns, and
+[`compute_wage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_wage.md)
+always compares against the previous `ref_date`. - Removes unused and
+legacy functions, including `detect_personnel_event()` (use
+[`detect_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_movement.md)
+and
+[`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md)
+instead), and standardizes arguments across functions.
+
 ## govhr 0.4.3
 
 This release: - Simplifies the lifecycle functions to remove wage bill

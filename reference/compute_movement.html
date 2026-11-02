@@ -13,7 +13,7 @@ returned."><meta property="og:image" content="https://wb-pida-data-science-shop.
 
     <a class="navbar-brand me-2" href="../index.html">govhr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,8 +88,9 @@ named in <code>status_col</code>.</p></dd>
 
 
 <dt id="arg-status-col">status_col<a class="anchor" aria-label="anchor" href="#arg-status-col"></a></dt>
-<dd><p>Character. Column holding employment status. Only rows
-equal to <code>"active"</code> are counted. Default <code>"employment_status"</code>.</p></dd>
+<dd><p>Character. Column holding employment status. Rows equal
+to <code>"active"</code> are the active workforce, and rows equal to <code>"pensioner"</code>
+mark exits as retirements. Default <code>"employment_status"</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -102,7 +103,7 @@ equal to <code>"active"</code> are counted. Default <code>"employment_status"</c
 
 <dt>separations</dt>
 <dd><p>People active on the previous date but not on this
-one.</p></dd>
+one, other than retirees, whom <code><a href="compute_retirement.html">compute_retirement()</a></code> counts.</p></dd>
 
 <dt>hire_rate, separation_rate</dt>
 <dd><p><code>hires</code> and <code>separations</code> divided by
@@ -120,11 +121,14 @@ to compare with. A data.table for data frame input; a lazy table for
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The previous date is the neighbouring date found in the data, so the dates
 do not need to be evenly spaced.</p>
-<p>Hires and separations both cover the time since the previous date, so on
-every date after the first, <code>headcount</code> equals the previous date's
-<code>headcount</code> plus <code>hires</code> minus <code>separations</code>.</p>
+<p>Hires, separations and retirements all cover the time since the previous
+date, so on every date after the first, <code>headcount</code> equals the previous
+date's <code>headcount</code> plus <code>hires</code> minus <code>separations</code> and the <code>retirements</code>
+of <code><a href="compute_retirement.html">compute_retirement()</a></code>.</p>
 <p>People are counted once per date, even if they hold several contracts. A
-separation is any exit from active status, including retirement.</p>
+separation is any exit from active status other than a retirement, as in
+<code><a href="detect_movement.html">detect_movement()</a></code>. Without pensioner records in <code>data</code>, every exit is a
+separation.</p>
 <p>With <code>group_cols</code>, each person is counted in the group they belong to on
 that date, and each separation in the group the person left. A group that
 everyone left still appears on the next date, with a <code>headcount</code> of 0. A

@@ -1,7 +1,9 @@
 # Compute the cost of hires and separations
 
 Adds up, for each reference date, the pay of the people who were hired
-or separated since the previous date.
+or separated since the previous date. Retirements are not separations,
+and are costed by
+[`compute_retirement_cost()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement_cost.md).
 
 ## Usage
 
@@ -57,8 +59,9 @@ compute_movement_cost(
 
 - status_col:
 
-  Character. Column holding employment status. Only rows equal to
-  `"active"` are considered. Default `"employment_status"`.
+  Character. Column holding employment status. Rows equal to `"active"`
+  are the active workforce, and rows equal to `"pensioner"` mark exits
+  as retirements. Default `"employment_status"`.
 
 ## Value
 

@@ -18,14 +18,14 @@ plot_consistency_trend(
 
 - data:
 
-  Data frame or lazy table (`tbl_dbi`) with `ref_date`, the column named
-  in `group_col` and `record_consistency` or `value_consistency`, such
-  as the output of
+  Data frame with `ref_date`, the column named in `group_col` and
+  `record_consistency` or `value_consistency`, such as the output of
   [`compute_record_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_record_consistency.md)
   or
   [`compute_value_consistency()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_value_consistency.md)
-  grouped by `group_col` and `ref_date`. A lazy table is brought into
-  memory first.
+  grouped by `group_col` and `ref_date`. Bring a lazy table (`tbl_dbi`)
+  into memory first with
+  [`dplyr::collect()`](https://dplyr.tidyverse.org/reference/compute.html).
 
 - group_col:
 

@@ -1,9 +1,12 @@
 # Plot transition network
 
-Draws career transitions as a directed graph, with edge width
-proportional to the number of transitions and node size to degree
-centrality. Networks of ten or more nodes are labelled by index rather
-than by name.
+**\[deprecated\]**
+
+This function is deprecated. Use
+[`plot_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_transition.md)
+instead, which also takes the counts returned by
+[`compute_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_transition.md)
+through `weight_col`.
 
 ## Usage
 
@@ -22,8 +25,7 @@ plot_transition_network(data, interactive = TRUE)
 - interactive:
 
   Logical. If `TRUE` (default), return an interactive chart that shows
-  each establishment's name on hover. If `FALSE`, return a static
-  ggplot, for outputs such as Word that cannot show interactive charts.
+  each group's name on hover. If `FALSE`, return a static ggplot.
 
 ## Value
 

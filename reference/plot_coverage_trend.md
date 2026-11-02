@@ -1,7 +1,6 @@
 # Plot coverage over time
 
-Plots coverage for each reference date, one line per group, from
-coverage already computed.
+Plots coverage for each reference date, one line per group.
 
 ## Usage
 

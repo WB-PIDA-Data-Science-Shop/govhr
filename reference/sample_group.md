@@ -38,8 +38,8 @@ sample_group(df, grp, 2)
 #> # A tibble: 4 × 2
 #>      id grp  
 #>   <int> <chr>
-#> 1     1 a    
-#> 2     2 a    
-#> 3     3 b    
-#> 4     4 b    
+#> 1     5 c    
+#> 2     6 c    
+#> 3     7 d    
+#> 4     8 d    
 ```

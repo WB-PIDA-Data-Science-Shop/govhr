@@ -106,7 +106,7 @@ plot_movement(
   movement_gender,
   movement_type = "separation",
   measurement_type = "rate",
-  group_cols = "gender"
+  group_col = "gender"
 )
 ```
 

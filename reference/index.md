@@ -78,7 +78,7 @@ sources.
 
 ## Quality check plots
 
-`R/qcheck_plots.R`: plot coverage and consistency.
+`R/plot_qcheck.R`: plot coverage and consistency.
 
 - [`plot_coverage_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_coverage_trend.md)
   : Plot coverage over time
@@ -110,6 +110,11 @@ sources.
   : Apply baseline index to a trend summary
 - [`compute_cross_section_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_cross_section_summary.md)
   : Compute cross-section summary
+
+## Overview plots
+
+`R/plot_overview.R`: plot trends, totals and growth by group.
+
 - [`plot_trend()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_trend.md)
   : Plot time trend
 - [`plot_bar_total()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_bar_total.md)
@@ -121,6 +126,8 @@ sources.
 
 `R/movement.R`: hires, separations and retirements, and their cost.
 
+- [`detect_workforce_flows()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_workforce_flows.md)
+  : Flag the flows of each active person and date
 - [`detect_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_movement.md)
   : Detect hires and separations
 - [`compute_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_movement.md)
@@ -133,10 +140,13 @@ sources.
   : Compute retirements
 - [`compute_retirement_cost()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_retirement_cost.md)
   : Compute the cost of retirements
-- [`detect_personnel_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_personnel_event.md)
-  : Detect Personnel Events
-- [`complete_dates()`](https://wb-pida-data-science-shop.github.io/govhr/reference/complete_dates.md)
-  : Complete panel data by identifier and reference dates
+
+## Movement plots
+
+`R/plot_movement.R`
+
+- [`plot_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_movement.md)
+  : Plot hires and separations over time
 
 ## Transitions
 
@@ -146,8 +156,20 @@ sources.
   : Detect transitions
 - [`compute_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_transition.md)
   : Compute career transitions
+- [`compute_transition_flows()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_transition_flows.md)
+  : Compute transitions in and out of each group
+
+## Transition plots
+
+`R/plot_transition.R`: plot moves between groups, and in and out of
+each.
+
+- [`plot_transition()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_transition.md)
+  : Plot transitions as a network
+- [`plot_transition_flows()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_transition_flows.md)
+  : Plot transitions in and out of each group
 - [`plot_transition_network()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_transition_network.md)
-  : Plot transition network
+  **\[deprecated\]** : Plot transition network
 
 ## Retirement projections
 
@@ -216,12 +238,29 @@ sources.
 - [`compute_decile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_decile.md)
   : Compute deciles of a measure
 
+## Distribution plots
+
+`R/plot_distribution.R`: plot deciles, histograms and compression
+ratios.
+
+- [`plot_decile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_decile.md)
+  : Plot decile summary
+- [`plot_histogram()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_histogram.md)
+  : Plot density as percentage share
+- [`plot_compression_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_compression_ratio.md)
+  : Plot compression ratio
+
 ## Wage models
 
 `R/wage_model.R`
 
 - [`model_wage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/model_wage.md)
   : Fit a wage model with fixed effects
+
+## Wage model plots
+
+`R/plot_wage_model.R`
+
 - [`plot_model_wage()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_model_wage.md)
   : Plot a wage model fit
 - [`plot_model_wage_fes()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_model_wage_fes.md)
@@ -292,28 +331,14 @@ sources.
 
 ## Plot helpers
 
-`R/plots.R`
+`R/plot.R`: plots that work with any table.
 
 - [`scale_plot_height()`](https://wb-pida-data-science-shop.github.io/govhr/reference/scale_plot_height.md)
   : Plot Height for a Grouped Bar Chart
-- [`ggplot_point_line()`](https://wb-pida-data-science-shop.github.io/govhr/reference/ggplot_point_line.md)
-  : Plot grouped line chart with labeled points
-- [`ggplot_segment()`](https://wb-pida-data-science-shop.github.io/govhr/reference/ggplot_segment.md)
-  : Plot segments overlaid with points, ordered by median
-- [`ggplot_coef()`](https://wb-pida-data-science-shop.github.io/govhr/reference/ggplot_coef.md)
-  : Plot model coefficients with confidence intervals
-- [`plot_segment()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_segment.md)
-  : Create a segment plot with jittered points
-- [`plot_movement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_movement.md)
-  : Plot hires or separations over time
-- [`plot_movement_cost()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_movement_cost.md)
-  : Plot movement cost
-- [`plot_decile()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_decile.md)
-  : Plot decile summary
-- [`plot_histogram()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_histogram.md)
-  : Plot density as percentage share
-- [`plot_compression_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_compression_ratio.md)
-  : Plot compression ratio
+- [`plot_change()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_change.md)
+  : Plot changes as bars above or below zero
+- [`plot_area()`](https://wb-pida-data-science-shop.github.io/govhr/reference/plot_area.md)
+  : Plot stacked areas over time
 
 ## Sampling
 

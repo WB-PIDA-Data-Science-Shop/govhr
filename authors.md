@@ -9,13 +9,13 @@
 ## Citation
 
 Kim G, Edochie I (2026). *govhr: Clean and analyze data to inform human
-resource management*. R package version 0.4.3,
+resource management*. R package version 0.4.4,
 <https://wb-pida-data-science-shop.github.io/govhr/>.
 
     @Manual{,
       title = {govhr: Clean and analyze data to inform human resource management},
       author = {Galileu Kim and Ifeanyi Edochie},
       year = {2026},
-      note = {R package version 0.4.3},
+      note = {R package version 0.4.4},
       url = {https://wb-pida-data-science-shop.github.io/govhr/},
     }

@@ -1,7 +1,6 @@
 # Plot coverage by variable
 
-Plots one bar per variable with its coverage, coloured by coverage tier,
-from coverage already computed.
+Plots one bar per variable with its coverage, coloured by coverage tier.
 
 ## Usage
 
