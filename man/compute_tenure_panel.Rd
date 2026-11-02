@@ -2,9 +2,14 @@
 % Please edit documentation in R/tenure.R
 \name{compute_tenure_panel}
 \alias{compute_tenure_panel}
+\alias{compute_tenure_panel.data.frame}
+\alias{compute_tenure_panel.tbl_dbi}
+\alias{compute_tenure_panel.default}
 \title{Compute employment tenure from a stacked contract panel}
 \usage{
-compute_tenure_panel(
+compute_tenure_panel(contracts, ...)
+
+\method{compute_tenure_panel}{data.frame}(
   contracts,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
@@ -12,14 +17,31 @@ compute_tenure_panel(
   start_date_col = "start_date",
   end_date_col = "end_date",
   contract_type_col = "contract_type",
-  group_cols = NULL
+  group_cols = NULL,
+  ...
 )
+
+\method{compute_tenure_panel}{tbl_dbi}(
+  contracts,
+  personnel_id_col = "personnel_id",
+  ref_date_col = "ref_date",
+  contract_id_col = "contract_id",
+  start_date_col = "start_date",
+  end_date_col = "end_date",
+  contract_type_col = "contract_type",
+  group_cols = NULL,
+  ...
+)
+
+\method{compute_tenure_panel}{default}(contracts, ...)
 }
 \arguments{
-\item{contracts}{Data.table containing the stacked contract panel.
-Must include personnel identifiers, contract identifiers, contract
+\item{contracts}{The stacked contract panel, as a data frame or a lazy
+database table (\code{tbl_dbi}). Must include personnel identifiers, contract
 start and end dates, reference dates, contract types, and any grouping
 variables supplied in \code{group_cols}.}
+
+\item{...}{Not used.}
 
 \item{personnel_id_col}{Character. Name of the personnel identifier column.
 Default is \code{"personnel_id"}.}
@@ -27,8 +49,8 @@ Default is \code{"personnel_id"}.}
 \item{ref_date_col}{Character. Name of the reference date column.
 Default is \code{"ref_date"}.}
 
-\item{contract_id_col}{Character. Name of the contract identifier column.
-Default is \code{"contract_id"}.}
+\item{contract_id_col}{Character. Not used: a contract seen more than once
+counts once without it. Kept so existing calls still work.}
 
 \item{start_date_col}{Character. Name of the contract start date column.
 Default is \code{"start_date"}.}
@@ -41,12 +63,13 @@ Default is \code{"contract_type"}.}
 
 \item{group_cols}{Optional character vector of additional variables over
 which tenure should be calculated independently (for example,
-establishment, occupation, or organization). Default is \code{NULL}.}
+establishment, occupation, or organization). Default is
+\code{NULL}.}
 }
 \value{
-A data.table with one row per unique combination of
-\code{personnel_id}, optional \code{group_cols}, and
-\code{ref_date}, containing:
+One row per unique combination of \code{personnel_id}, optional
+\code{group_cols}, and \code{ref_date} (a data.table for a data frame, a
+lazy table for a \code{tbl_dbi}), containing:
 \describe{
 \item{tenure_days}{Total employment tenure in days.}
 \item{tenure_years}{Total employment tenure in years, calculated as
@@ -64,6 +87,11 @@ total tenure.
 \details{
 Tenure is calculated independently within each combination of
 \code{personnel_id}, optional grouping variables supplied through
-\code{group_cols}, and \code{ref_date}.
+\code{group_cols}, and \code{ref_date}, from the contracts listed at that
+reference date.
+
+As in \code{\link[=compute_tenure]{compute_tenure()}}, each snapshot's contracts count only the part
+not already covered by the person's earlier-starting ones, a contract
+listed twice in a snapshot counts once (to its latest end), and missing
+contract types count as active.
 }
-\keyword{internal}

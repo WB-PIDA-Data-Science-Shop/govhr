@@ -5,3 +5,7 @@
 *.rds
 docs
 spielplatz/
+*.duckdb
+*.duckdb.wal
+data-raw/ideas
+data-raw/bench

@@ -20,15 +20,21 @@ convert_data <- function(dt_expanded, original_data) {
   return(dt_expanded)
 }
 
+# detect_personnel_event() is deprecated in favour of detect_movement(), so
+# every call warns; each test expects the warning while it is still exported
+
 test_that("detect_personnel_event detects hires correctly", {
-  res <- detect_personnel_event(
-    data = personnel_dt,
-    id_col = "personnel_id",
-    event_type = "hire",
-    start_date = "2015-01-01",
-    end_date = "2025-12-31",
-    freq = "year",
-    status_col = "employment_status"
+  expect_warning(
+    res <- detect_personnel_event(
+      data = personnel_dt,
+      id_col = "personnel_id",
+      event_type = "hire",
+      start_date = "2015-01-01",
+      end_date = "2025-12-31",
+      freq = "year",
+      status_col = "employment_status"
+    ),
+    "deprecated"
   )
 
   # Output should have only 'hire' events
@@ -42,14 +48,17 @@ test_that("detect_personnel_event detects hires correctly", {
 })
 
 test_that("detect_personnel_event detects fires correctly", {
-  res <- detect_personnel_event(
-    data = personnel_dt,
-    id_col = "personnel_id",
-    event_type = "fire",
-    start_date = "2015-01-01",
-    end_date = "2025-12-31",
-    freq = "year",
-    status_col = "employment_status"
+  expect_warning(
+    res <- detect_personnel_event(
+      data = personnel_dt,
+      id_col = "personnel_id",
+      event_type = "fire",
+      start_date = "2015-01-01",
+      end_date = "2025-12-31",
+      freq = "year",
+      status_col = "employment_status"
+    ),
+    "deprecated"
   )
 
   # Output should have only 'fire' events
@@ -67,14 +76,17 @@ test_that("detect_personnel_event ignores inactive personnel", {
   dt2 <- copy(personnel_dt)
   dt2[personnel_id == 1, employment_status := "inactive"]
 
-  res <- detect_personnel_event(
-    data = dt2,
-    id_col = "personnel_id",
-    event_type = "hire",
-    start_date = "2015-01-01",
-    end_date = "2025-12-31",
-    freq = "year",
-    status_col = "employment_status"
+  expect_warning(
+    res <- detect_personnel_event(
+      data = dt2,
+      id_col = "personnel_id",
+      event_type = "hire",
+      start_date = "2015-01-01",
+      end_date = "2025-12-31",
+      freq = "year",
+      status_col = "employment_status"
+    ),
+    "deprecated"
   )
 
   # personnel_id 1 should not appear
@@ -86,8 +98,8 @@ test_that("detect_personnel_event works with multiple personnel and dates", {
   dt3 <- copy(personnel_dt)
   dt3[, status := sample(c("active", "inactive"), .N, replace = TRUE)]
 
-  res_hire <- detect_personnel_event(dt3, "personnel_id", "hire", "2015-01-01", "2025-12-31", status_col = "employment_status")
-  res_fire <- detect_personnel_event(dt3, "personnel_id", "fire", "2015-01-01", "2025-12-31", status_col = "employment_status")
+  expect_warning(res_hire <- detect_personnel_event(dt3, "personnel_id", "hire", "2015-01-01", "2025-12-31", status_col = "employment_status"), "deprecated")
+  expect_warning(res_fire <- detect_personnel_event(dt3, "personnel_id", "fire", "2015-01-01", "2025-12-31", status_col = "employment_status"), "deprecated")
 
   # Should return data.tables with correct columns
   expect_true(all(c("personnel_id", "ref_date", "type_event") %in% names(res_hire)))
@@ -100,26 +112,31 @@ test_that("detect_personnel_event works with multiple personnel and dates", {
 
 test_that("detect_personnel_event output respects start_date / end_date filtering", {
   # Set start_date in the middle
-  res <- detect_personnel_event(
-    data = personnel_dt,
-    id_col = "personnel_id",
-    event_type = "hire",
-    start_date = "2020-01-01",
-    end_date = "2025-12-31",
-    status_col = "employment_status"
+  expect_warning(
+    res <- detect_personnel_event(
+      data = personnel_dt,
+      id_col = "personnel_id",
+      event_type = "hire",
+      start_date = "2020-01-01",
+      end_date = "2025-12-31",
+      status_col = "employment_status"
+    ),
+    "deprecated"
   )
 
   expect_true(all(res$ref_date > ymd("2020-01-01")))
 
-  res_fire <- detect_personnel_event(
-    data = personnel_dt,
-    id_col = "personnel_id",
-    event_type = "fire",
-    start_date = "2015-01-01",
-    end_date = "2020-01-01",
-    status_col = "employment_status"
+  expect_warning(
+    res_fire <- detect_personnel_event(
+      data = personnel_dt,
+      id_col = "personnel_id",
+      event_type = "fire",
+      start_date = "2015-01-01",
+      end_date = "2020-01-01",
+      status_col = "employment_status"
+    ),
+    "deprecated"
   )
 
   expect_true(all(res_fire$ref_date < ymd("2020-01-01")))
 })
-

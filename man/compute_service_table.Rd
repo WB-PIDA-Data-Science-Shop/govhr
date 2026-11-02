@@ -2,129 +2,114 @@
 % Please edit documentation in R/demographics.R
 \name{compute_service_table}
 \alias{compute_service_table}
-\title{Compute an actuarial service table from a personnel panel}
+\alias{compute_service_table.data.frame}
+\alias{compute_service_table.tbl_dbi}
+\alias{compute_service_table.default}
+\title{Compute a service table: expected years of service left}
 \usage{
-compute_service_table(
+compute_service_table(personnel, ...)
+
+\method{compute_service_table}{data.frame}(
   personnel,
-  age_col,
-  status_col,
-  personnel_id_col,
-  ref_date_col,
-  group_cols,
-  radix = 1e+05,
-  smooth = FALSE,
-  span = 0.75,
-  personnel_dt = NULL
-)
-}
-\arguments{
-\item{personnel}{A data.table (or data.frame/tibble, coerced
-automatically) containing the personnel panel. Passed straight through
-to \code{estimate_decrement_rates()}.}
-
-\item{age_col}{A single string naming the age column.}
-
-\item{status_col}{A single string naming the employment status column. The
-value \code{"active"} identifies the "stayed" outcome that the survival
-chain is built from.}
-
-\item{personnel_id_col}{A single string naming the personnel identifier
-column.}
-
-\item{ref_date_col}{A single string naming the reference date column.}
-
-\item{group_cols}{A character vector of additional columns (e.g. gender,
-service type) to compute a separate service table for, or \code{NULL}
-for a single table over the whole population.}
-
-\item{radix}{Numeric. The size of the synthetic starting cohort at the
-youngest observed age. Purely a normalizing constant -- it cancels out
-of \code{ex} and does not represent real people. Defaults to
-\code{100000}.}
-
-\item{smooth}{Logical. Whether to graduate the decrement rates via
-\code{smooth_decrement_rates()} before chaining. Defaults to
-\code{FALSE}: the raw pooled rates are chained directly, \emph{unless}
-a \code{group_cols} stratum has an age gap, in which case
-\code{compute_service_table()} smooths reactively (with a warning)
-regardless of this setting, since the chain cannot run on a gappy
-age sequence. Set to \code{TRUE} to always smooth up front, including
-for noise reduction on strata that have no gap at all.}
-
-\item{span}{Numeric. Forwarded to \code{smooth_decrement_rates()} when
-\code{smooth = TRUE}. Defaults to \code{0.75}.}
-
-\item{personnel_dt}{Deprecated. Use \code{personnel} instead.}
-}
-\value{
-A data.table with one row per age / \code{group_cols}:
-\describe{
-\item{age_col, group_cols}{As supplied.}
-\item{px}{Probability of remaining active from age x to x+1.}
-\item{lx}{Survivors at age x, out of \code{radix} at the youngest age:
-\eqn{l(x) = radix \prod_{y<x} p(y)}.}
-\item{lx_next}{Survivors at age x+1: \eqn{l(x) \cdot p(x)}.}
-\item{Lx}{Person-years of service between age x and x+1:
-\eqn{(l(x) + l_{next}(x)) / 2} (trapezoidal approximation, assuming
-exits are spread uniformly across the year).}
-\item{Tx}{Total remaining person-years of service from age x onward:
-\eqn{\sum_{y \ge x} L(y)}.}
-\item{ex}{Expected remaining years of service at age x:
-\eqn{T(x) / l(x)}.}
-}
-}
-\description{
-Builds a multiple-decrement service table: for each age (and any
-\code{group_cols} you supply), the number of survivors (\code{lx}), person-
-years of service (\code{Lx}, \code{Tx}), and expected remaining years of
-service (\code{ex}) for a synthetic cohort experiencing today's
-age-specific empirical decrement rates at every future age.
-
-This chains \code{estimate_decrement_rates()}'s pooled, age-indexed rates
-across \emph{age} -- a different axis from the time-pooling that function
-already did. By default the rates are graduated first via
-\code{smooth_decrement_rates()}, since the chain below requires a
-complete, gapless, reasonably stable \code{qx} curve to produce a sensible
-result.
-}
-\details{
-\strong{This is a stationary-cohort summary, not a projection of your real
-workforce headcount.} \code{lx} describe a hypothetical synthetic cohort
-that experiences today's cross-sectional age-specific rates at every
-future age -- they are not a forecast of how many of your actual current
-employees will retire in each future calendar year. For that, the raw
-output of \code{estimate_decrement_rates()} (applied to your real current
-headcount by age, stepped forward through calendar time) is the right
-input, not this table.
-
-\strong{Caveat.} The literal string \code{"active"} is hardcoded as the
-\code{status_col} value the survival chain is built from -- inherited
-directly from \code{estimate_decrement_rates()} and
-\code{.compute_decrement_pair()}, where the same caveat applies.
-}
-\examples{
-\dontrun{
-library(data.table)
-
-personnel_dt <- data.table(
-  personnel_id = c("P1", "P2", "P1", "P2"),
-  ref_date = as.Date(c("2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01")),
-  age = c(60L, 45L, 61L, 46L),
-  employment_status = c("active", "active", "pensioner", "active"),
-  gender = c("M", "F", "M", "F")
-)
-
-compute_service_table(
-  personnel_dt = personnel_dt,
-  age_col = "age",
+  duration_col,
   status_col = "employment_status",
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
-  group_cols = "gender"
+  group_cols = NULL,
+  include_all = TRUE,
+  ...
 )
+
+\method{compute_service_table}{tbl_dbi}(
+  personnel,
+  duration_col,
+  status_col = "employment_status",
+  personnel_id_col = "personnel_id",
+  ref_date_col = "ref_date",
+  group_cols = NULL,
+  include_all = TRUE,
+  ...
+)
+
+\method{compute_service_table}{default}(personnel, ...)
 }
+\arguments{
+\item{personnel}{A data frame, or a database table (\code{tbl_dbi}), with one
+row per person and snapshot.}
+
+\item{...}{Rarely needed settings:
+\itemize{
+\item \code{smooth}: \code{TRUE} to smooth the stay rates across durations first,
+which evens out durations with few people. Default \code{FALSE}.
+\item \code{span}: how much to smooth; larger is smoother. Default \code{0.75}.
+\item \code{radix}: the size of the imaginary group. Default \code{100000}. It only
+scales \code{lx}, \code{Lx} and \code{Tx}.
+}}
+
+\item{duration_col}{The column of \code{personnel} to build the table on, in
+years: e.g. \code{"age"}, or years of service from \code{\link[=compute_tenure_panel]{compute_tenure_panel()}}.
+Cut to whole years (2.9 counts as 2).}
+
+\item{status_col}{The employment status column. \code{"active"} means in
+service; any other value is a way of leaving.}
+
+\item{personnel_id_col, ref_date_col}{The person and snapshot date columns.}
+
+\item{group_cols}{Columns to build a separate table for, e.g. \code{"gender"},
+or \code{NULL} (the default) for one table.}
+
+\item{include_all}{\code{TRUE} (the default) for every column; \code{FALSE} for only
+the duration, the groups, \code{px} and \code{ex}.}
+}
+\value{
+A \code{service_table}: a data.table with one row per group and
+duration, from the lowest to the highest seen. \link[=plot.service_table]{plot()}
+draws it.
+\describe{
+\item{pop}{People in service at that duration, whom \code{px} is measured
+on. \code{NA} where smoothing filled in a missing duration.}
+\item{px}{The share of them still in service a year later.}
+\item{lx, lx_next}{How many of the imaginary group are in service at
+that duration, and a year later.}
+\item{Lx}{Years they serve in that year (someone who leaves counts
+half).}
+\item{Tx}{Years they serve from that duration to the end of the
+table.}
+\item{ex}{Expected years of service left: \code{Tx / lx}.}
+}
+}
+\description{
+For each value of a duration, such as age or years of service, estimates
+how many more years an employee in service at that duration stays, on
+average (\code{ex}).
+
+It works like a life table. From \code{\link[=estimate_decrement_rates]{estimate_decrement_rates()}} it takes the
+share of employees still in service a year later (\code{px}). It then follows an
+imaginary group of employees from the lowest duration to the highest,
+keeping a share \code{px} of them each year, and adds up the years they serve.
+}
+\details{
+\strong{Not a forecast.} The table assumes someone meets, at every later
+duration, the stay rates seen at that duration in your data. To project
+your own workforce, apply \code{\link[=estimate_decrement_rates]{estimate_decrement_rates()}} to it year by year.
+
+\strong{One snapshot a year.} \code{px} is read as the chance of staying a year, so
+with monthly data, keep one month a year first.
+
+\strong{Missing durations.} People with no \code{duration_col} are left out, with a
+warning. If a whole duration is missing in a group (no one in service at
+it), every group's rates are smoothed to fill the gap, with a warning.
+
+\strong{Where it ends.} The table stops at the highest duration seen, so \code{ex}
+counts no service after it. If everyone at some duration left, no one is
+left after it: \code{ex} is \code{NA} from there, with a warning.
+}
+\examples{
+st <- compute_service_table(bra_hrmis_personnel, "age", smooth = TRUE)
+subset(st, age \%in\% c(25, 40, 55), select = c(age, px, ex))
+plot(st)
 
 }
 \seealso{
-\code{\link{estimate_decrement_rates}}, \code{\link{smooth_decrement_rates}}
+\code{\link[=estimate_decrement_rates]{estimate_decrement_rates()}} for the rates of each way of leaving.
 }

@@ -79,6 +79,7 @@ if (getRversion() >= "2.15.1") {
     ".contrib",
     ".e",
     ".eff_end",
+    ".end",
     ".lag_max_e",
     ".pid",
     ".s",
@@ -88,8 +89,6 @@ if (getRversion() >= "2.15.1") {
     "n_moves",
     "n_pop",
     "period_key",
-    "period_prob",
-    "t0_date",
     "tenure_days",
     "tenure_years",
     "to_group",
@@ -140,8 +139,6 @@ if (getRversion() >= "2.15.1") {
     "mean_salary_t1",
     "median_salary_change",
     "replacement_rate",
-    "salary_change",
-    "salary_pct_change",
     "spell_years",
     "bin",
     "decile",
@@ -176,19 +173,24 @@ if (getRversion() >= "2.15.1") {
     "n_duplicates",
     "n_rows",
     "n_ids",
-    # .compute_transition_pair
+    # estimate_movement_rates
     ".pid",
     "from_group",
     "to_group",
     "n_moves",
-    "period_prob",
     "n_pop",
     # estimate_movement_baseline (formerly estimate_movement_rates)
-    "period_key",
-    "t0_date",
     "movement_rate",
     "from_period",
     "to_period",
+    ".group",
+    ".salary",
+    ".salary_raw",
+    ".salary_t0",
+    ".salary_t1",
+    ".change",
+    ".pct",
+    "i.n_pop",
     ".GRP",
     ".I",
     ".N",
@@ -219,12 +221,21 @@ if (getRversion() >= "2.15.1") {
     "conf.high",
     # transition network
     "nodes",
-    # .compute_decrement_pair
     "pop",
     "exits",
     "decrement_rate",
-    "t1_date",
-    ".status_t1",
+    # estimate_decrement_rates
+    ".snap",
+    ".status",
+    ".next_gap",
+    ".outcome",
+    "i.exits",
+    ".ref",
+    ".next_snap",
+    ".next_status",
+    ".n",
+    ".n_dup",
+    ".status_missing",
     # compute_service_table
     "px",
     "lx",
@@ -236,6 +247,15 @@ if (getRversion() >= "2.15.1") {
     "min_age",
     "max_age",
     "has_gap",
+    ".duration",
+    "i.pop",
+    # compute_tenure helpers
+    ".days",
+    ".prev_end",
+    ".start",
+    ".type",
+    "gap",
+    "end",
     # compute growth decomposition
     "ref_date",
     "transition_type",
@@ -322,131 +342,25 @@ if (getRversion() >= "2.15.1") {
     "projected_retirements",
     "projected_retirement_rate",
     # compute_wage
-    "wage_growth"
+    "wage_growth",
+    # used by several functions
+    ".next_pid",
+    ".pay",
+    ".tenure",
+    "measure",
+    "n",
+    "observed",
+    # build_survival_panel, fit_survival_model
+    ".band",
+    ".year",
+    ".cid",
+    ".interval",
+    ".next_seen",
+    ".pay_missing",
+    ".pay_order",
+    ".present",
+    "exit_type",
+    "exposure"
   ))
 }
 
-#' Validate column exists in data table
-#'
-#' @param dt Data.table to check.
-#' @param colname Character. Column name to validate.
-#' @param varname Character. Variable name for error messages.
-#'
-#' @returns Invisible TRUE if valid, stops with error otherwise
-#' @keywords internal
-validate_column_exists <- function(dt, colname, varname) {
-  if (!colname %in% names(dt)) {
-    stop(
-      "Column '",
-      colname,
-      "' not found in ",
-      varname,
-      call. = FALSE
-    )
-  }
-
-  return(invisible(TRUE))
-}
-
-#' Validate multiple columns exist
-#'
-#' @param dt Data.table to check.
-#' @param colnames A character vector. Column names to validate.
-#' @param varname Character. Variable name for error messages.
-#'
-#' @returns Invisible TRUE if valid, stops with error otherwise
-#' @keywords internal
-validate_columns_exist <- function(dt, colnames, varname) {
-  missing_cols <- setdiff(colnames, names(dt))
-
-  if (length(missing_cols) > 0) {
-    stop(
-      "Columns not found in ",
-      varname,
-      ": ",
-      paste(missing_cols, collapse = ", "),
-      call. = FALSE
-    )
-  }
-
-  return(invisible(TRUE))
-}
-
-#' Validate date format
-#'
-#' @param date Object to validate.
-#' @param varname Character. Variable name for error messages.
-#'
-#' @returns Invisible TRUE if valid, stops with error otherwise
-#' @keywords internal
-validate_date_format <- function(date, varname) {
-  # Accept both Date objects and character strings
-  if (is.character(date)) {
-    tryCatch(
-      {
-        date <- as.Date(date)
-      },
-      error = function(e) {
-        stop(
-          varname,
-          " must be a valid date string (e.g., '2024-01-01') or Date object. ",
-          "Error: ",
-          e$message,
-          call. = FALSE
-        )
-      }
-    )
-  }
-
-  if (!inherits(date, "Date")) {
-    stop(
-      varname,
-      " must be a Date object or date string (e.g., '2024-01-01')",
-      call. = FALSE
-    )
-  }
-
-  if (length(date) != 1) {
-    stop(varname, " must be a single Date value", call. = FALSE)
-  }
-
-  if (is.na(date)) {
-    stop(varname, " cannot be NA", call. = FALSE)
-  }
-
-  return(date)
-}
-
-# Support a renamed argument for one deprecation cycle.
-#
-# Returns the value for the new argument, warning if the caller supplied the
-# old name instead. `old` defaults to NULL in the wrapping function, so a
-# non-NULL value means the caller explicitly passed the deprecated argument.
-#' @noRd
-resolve_renamed_arg <- function(new, old, old_name, new_name) {
-  if (is.null(old)) {
-    return(new)
-  }
-
-  warning(
-    "`", old_name, "` is deprecated and will be removed in a future release; ",
-    "use `", new_name, "` instead.",
-    call. = FALSE
-  )
-
-  # `new` may be a required formal the caller never supplied, so probe it
-  # without letting the missing-argument error escape.
-  supplied <- !inherits(
-    tryCatch(force(new), error = function(e) e),
-    "error"
-  )
-
-  if (supplied && !is.null(new)) {
-    stop(
-      "Supply either `", new_name, "` or `", old_name, "`, not both.",
-      call. = FALSE
-    )
-  }
-
-  old
-}

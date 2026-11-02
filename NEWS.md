@@ -1,3 +1,9 @@
+# govhr 0.4.3
+This release: 
+- Simplifies the lifecycle functions to remove wage bill path growth from the compute_service_table() function. 
+- Includes the hazard modelling as well as plotting functions to estimate the relationship between survival/exit
+choice and harmonized contract and personnel variables.
+
 # govhr 0.4.2
 This release:
 - Fixes inconsistencies in how separations and hires were measured. Now they correspond to the same time period and the rates are consistent.
