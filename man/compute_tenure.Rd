@@ -2,9 +2,14 @@
 % Please edit documentation in R/tenure.R
 \name{compute_tenure}
 \alias{compute_tenure}
+\alias{compute_tenure.data.frame}
+\alias{compute_tenure.tbl_dbi}
+\alias{compute_tenure.default}
 \title{Compute employment tenure from contract history}
 \usage{
-compute_tenure(
+compute_tenure(contracts, ...)
+
+\method{compute_tenure}{data.frame}(
   contracts,
   ref_date,
   personnel_id_col = "personnel_id",
@@ -12,22 +17,39 @@ compute_tenure(
   start_date_col = "start_date",
   end_date_col = "end_date",
   contract_type_col = "contract_type",
-  group_cols = NULL
+  group_cols = NULL,
+  ...
 )
+
+\method{compute_tenure}{tbl_dbi}(
+  contracts,
+  ref_date,
+  personnel_id_col = "personnel_id",
+  contract_id_col = "contract_id",
+  start_date_col = "start_date",
+  end_date_col = "end_date",
+  contract_type_col = "contract_type",
+  group_cols = NULL,
+  ...
+)
+
+\method{compute_tenure}{default}(contracts, ...)
 }
 \arguments{
-\item{contracts}{Data.table containing the contract history. Must include
-personnel identifiers, contract identifiers, contract start and end
-dates, contract types, and any grouping variables supplied in
+\item{contracts}{The contract history, as a data frame or a lazy database
+table (\code{tbl_dbi}). Must include personnel identifiers, contract start
+and end dates, contract types, and any grouping variables supplied in
 \code{group_cols}.}
+
+\item{...}{Not used.}
 
 \item{ref_date}{Date. Reference date at which tenure is calculated.}
 
 \item{personnel_id_col}{Character. Name of the personnel identifier column.
 Default is \code{"personnel_id"}.}
 
-\item{contract_id_col}{Character. Name of the contract identifier column.
-Default is \code{"contract_id"}.}
+\item{contract_id_col}{Character. Not used: a contract seen more than once
+counts once without it. Kept so existing calls still work.}
 
 \item{start_date_col}{Character. Name of the contract start date column.
 Default is \code{"start_date"}.}
@@ -44,8 +66,9 @@ establishment, occupation, or organization). Default is
 \code{NULL}.}
 }
 \value{
-A data.table with one row per unique combination of
-\code{personnel_id} and optional \code{group_cols}, containing:
+One row per unique combination of \code{personnel_id} and
+optional \code{group_cols} (a data.table for a data frame, a lazy table
+for a \code{tbl_dbi}), containing:
 \describe{
 \item{tenure_days}{Total employment tenure in days.}
 \item{tenure_years}{Total employment tenure in years, calculated as
@@ -66,15 +89,23 @@ optionally, within additional grouping variables supplied through
 \code{group_cols}. Gaps between contracts are excluded from the total
 tenure.
 
-The implementation uses an interval-union algorithm based on
-\code{cummax()} to efficiently merge overlapping contract periods,
-resulting in an \eqn{O(n \log n)} algorithm dominated by the initial
-sorting step.
+\strong{Overlaps.} Contracts are sorted by start date, and each counts only the
+part not already covered by the person's earlier ones (the union of the
+intervals). This is \eqn{O(n \log n)}, dominated by the sort; the running
+maximum of earlier end dates is one vectorised pass for data frames and a
+window function in the database.
+
+\strong{A contract seen more than once} (e.g. at several snapshots of a panel)
+counts once, from its start to its latest recorded end. With
+\code{group_cols}, a contract seen in several groups (e.g. paygrades)
+counts in each.
+
+\strong{Missing contract types} count as active.
 }
 \examples{
 \dontrun{
 tenure_dt <- compute_tenure(
-  contract_dt = contract_data,
+  contracts = contract_data,
   ref_date = as.Date("2025-01-01")
 )
 }

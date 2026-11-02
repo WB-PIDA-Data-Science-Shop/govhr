@@ -5,7 +5,6 @@
 - Removes unused and legacy functions, including `detect_personnel_event()` (use `detect_movement()` and `detect_retirement()`), and standardizes `group_col` (one column) and `group_cols` (several columns) across functions.
 - Deprecated functions and arguments, such as `plot_transition_network()` and `group_cols` in single-column plots, now warn via lifecycle before removal.
 
-
 # govhr 0.4.2
 This release:
 - Fixes inconsistencies in how separations and hires were measured. Now they correspond to the same time period and the rates are consistent.

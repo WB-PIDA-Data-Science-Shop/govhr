@@ -123,12 +123,26 @@ reference:
       - add_contract_to_event
       - compute_pension_ratio
 
+  - title: Tenure
+    desc: "`R/tenure.R`: years of service from contract history."
+    contents:
+      - compute_tenure_panel
+
   - title: Demographics
     desc: "`R/demographics.R`: decrement rates and service tables."
     contents:
       - estimate_decrement_rates
       - smooth_decrement_rates
       - compute_service_table
+      - plot.service_table
+
+  - title: Survival models
+    desc: "`R/career_modelling.R`: hazard models of leaving the service."
+    contents:
+      - build_survival_panel
+      - fit_survival_model
+      - tidy.survival_model
+      - predict.survival_model
 
   - title: Workforce analytics
     desc: "`R/workforce.R`: the standard workforce indicators in one call."

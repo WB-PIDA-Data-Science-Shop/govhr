@@ -2,9 +2,14 @@
 % Please edit documentation in R/tenure.R
 \name{compute_employment_spells}
 \alias{compute_employment_spells}
+\alias{compute_employment_spells.data.frame}
+\alias{compute_employment_spells.tbl_dbi}
+\alias{compute_employment_spells.default}
 \title{Compute total time spent in each specific group per person (eg paygrade, occupation)}
 \usage{
-compute_employment_spells(
+compute_employment_spells(contracts, ...)
+
+\method{compute_employment_spells}{data.frame}(
   contracts,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
@@ -12,21 +17,39 @@ compute_employment_spells(
   start_date_col = "start_date",
   end_date_col = "end_date",
   contract_type_col = "contract_type",
-  group_cols = NULL
+  group_cols = NULL,
+  ...
 )
+
+\method{compute_employment_spells}{tbl_dbi}(
+  contracts,
+  personnel_id_col = "personnel_id",
+  ref_date_col = "ref_date",
+  contract_id_col = "contract_id",
+  start_date_col = "start_date",
+  end_date_col = "end_date",
+  contract_type_col = "contract_type",
+  group_cols = NULL,
+  ...
+)
+
+\method{compute_employment_spells}{default}(contracts, ...)
 }
 \arguments{
-\item{contracts}{Data.table. Stacked contract panel, as passed to
-\code{\link{compute_tenure_panel}}.}
+\item{contracts}{The stacked contract panel, as passed to
+\code{\link{compute_tenure_panel}}: a data frame or a lazy database
+table (\code{tbl_dbi}).}
 
-\item{personnel_id_col}{Character. Name of the personnel identifier
-column. Default is \code{"personnel_id"}.}
+\item{...}{Not used.}
+
+\item{personnel_id_col}{Character. Name of the personnel identifier column.
+Default is \code{"personnel_id"}.}
 
 \item{ref_date_col}{Character. Name of the reference date column.
 Default is \code{"ref_date"}.}
 
-\item{contract_id_col}{Character. Name of the contract identifier column.
-Default is \code{"contract_id"}.}
+\item{contract_id_col}{Character. Not used: a contract seen more than once
+counts once without it. Kept so existing calls still work.}
 
 \item{start_date_col}{Character. Name of the contract start date column.
 Default is \code{"start_date"}.}
@@ -37,13 +60,15 @@ Default is \code{"end_date"}.}
 \item{contract_type_col}{Character. Name of the contract type column.
 Default is \code{"contract_type"}.}
 
-\item{group_cols}{Optional character vector of additional variables
-over which tenure should be calculated independently (for example,
-establishment, occupation, or organization). Default is \code{NULL}.}
+\item{group_cols}{Optional character vector of additional variables over
+which tenure should be calculated independently (for example,
+establishment, occupation, or organization). Default is
+\code{NULL}.}
 }
 \value{
-A data.table with one row per unique combination of
-\code{personnel_id} and \code{group_cols}, containing:
+One row per unique combination of \code{personnel_id} and
+\code{group_cols} (a data.table for a data frame, a lazy table for a
+\code{tbl_dbi}), containing:
 \describe{
 \item{ref_date}{The last reference date at which the person was
 observed in this \code{group_cols} state.}
@@ -67,8 +92,7 @@ A \code{group_cols} combination (e.g. \code{paygrade}, or
 tenure panel once the person's recorded state changes, so the last
 \code{ref_date} at which a combination is observed marks the end of that
 spell. \code{spell_years} is the cumulative tenure value at that final
-snapshot, summed across any residual duplicate rows for the same
-combination and date.
+snapshot.
 
 Two caveats affect interpretation:
 \itemize{
