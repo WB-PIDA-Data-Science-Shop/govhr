@@ -32,14 +32,6 @@ expect_deprecated <- function(res, arg) {
   )
 }
 
-test_that("`group` still works and matches `group_cols`", {
-  data <- make_panel()
-
-  res <- with_warnings(compute_cross_section(data, group = "gender"))
-  expect_deprecated(res, "group")
-  expect_equal(res$value, compute_cross_section(data, group_cols = "gender"))
-})
-
 test_that("`group` still works and matches `group_col`", {
   data <- make_panel()
 

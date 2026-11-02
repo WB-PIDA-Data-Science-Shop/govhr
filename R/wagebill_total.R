@@ -3,25 +3,25 @@
 #' Computes the wagebill (total pay) for each group within each reference
 #' group, usually a reference date. It also reports each group's share of its
 #' reference group's total wagebill, and how much the wagebill grew since the
-#' previous reference group.
+#' previous reference date.
 #'
 #' @param data Data frame or remote database table (`tbl_dbi`) with the
-#'   column named in `reference_group_col` and the pay column named in
+#'   columns named in `reference_group_cols` and the pay column named in
 #'   `measure_col`.
 #' @param measure_col Character. Name of the pay column to add up. Default
 #'   `"gross_salary_lcu"`.
 #' @param group_cols Character vector of columns to group by, or `NULL` to
-#'   add up everyone together. Must not include `reference_group_col`.
-#' @param reference_group_col Character. Name of the column that defines the
-#'   reference groups, usually a date. Shares are computed within each
-#'   reference group, and growth compares each reference group with the one
-#'   before it in sorted order. Default `"ref_date"`.
+#'   add up everyone together. Must not overlap with `reference_group_cols`.
+#' @param reference_group_cols Character vector of the columns that together
+#'   define the reference groups, such as a date, or a date and a country.
+#'   Shares are computed within each combination of these columns. Must
+#'   include `ref_date`, over which growth is measured. Default `"ref_date"`.
 #' @param ... Arguments passed to methods.
 #'
-#' @returns A table with the grouping columns, `reference_group_col`,
+#' @returns A table with the grouping columns, `reference_group_cols`,
 #'   `wagebill`, `share_wagebill` (the group's share of its reference group's
 #'   total, between 0 and 1; only when `group_cols` is given) and
-#'   `wagebill_growth` (the change from the previous reference group as a
+#'   `wagebill_growth` (the change from the previous reference date as a
 #'   proportion, so `0.1` means 10% growth). A data.table for data frame
 #'   input; a lazy table for `tbl_dbi` input (use [dplyr::collect()] to bring
 #'   it into memory).
@@ -31,12 +31,16 @@
 #' group in a reference group is missing, its wagebill is `NA` rather than 0,
 #' so missing data is not mistaken for zero pay.
 #'
-#' When `group_cols` is given, every group appears in every reference group
-#' in `data`. A group with no records in a reference group gets
-#' `wagebill = NA`, so gaps stay visible instead of disappearing. Rows with a
-#' missing group value are kept as their own group.
+#' Growth follows each group from one reference date to the next, separately
+#' for every combination of the other reference columns: with
+#' `reference_group_cols = c("ref_date", "country")`, each country's groups
+#' form their own series.
 #'
-#' `wagebill_growth` is `NA` in the first reference group, and whenever the
+#' Every such series appears on every reference date in `data`. A series with
+#' no records on a date gets `wagebill = NA`, so gaps stay visible instead of
+#' disappearing. Rows with a missing group value are kept as their own group.
+#'
+#' `wagebill_growth` is `NA` on the first reference date, and whenever the
 #' current or previous wagebill is `NA`.
 #'
 #' @seealso [compute_growth_decomposition()] to split wagebill changes into
@@ -45,8 +49,7 @@
 #' @examples
 #' compute_wagebill(
 #'   bra_hrmis_contract,
-#'   group_cols = "contract_type",
-#'   reference_group_col = "ref_date"
+#'   group_cols = "contract_type"
 #' )
 #'
 #' @export
@@ -62,16 +65,23 @@ compute_wagebill.data.frame <- function(
   data,
   measure_col = "gross_salary_lcu",
   group_cols = NULL,
-  reference_group_col = "ref_date",
+  reference_group_cols = "ref_date",
   ...
 ) {
   rlang::check_dots_empty()
 
-  if (reference_group_col %in% group_cols) {
-    stop("`", reference_group_col, "` should not be included in `group_cols`")
+  overlap <- intersect(reference_group_cols, group_cols)
+
+  if (length(overlap) > 0) {
+    stop("`", paste(overlap, collapse = "`, `"), "` should not be included in `group_cols`")
   }
 
-  by_cols <- c(group_cols, reference_group_col)
+  if (!"ref_date" %in% reference_group_cols) {
+    stop("`reference_group_cols` must include `ref_date`, over which growth is measured")
+  }
+
+  by_cols <- c(group_cols, reference_group_cols)
+  series_cols <- c(group_cols, setdiff(reference_group_cols, "ref_date"))
   dt <- data.table::as.data.table(data)
 
   # leave out missing pay, so a group whose pay is all missing in a period has
@@ -86,30 +96,30 @@ compute_wagebill.data.frame <- function(
   if (!is.null(group_cols)) {
     wagebill[,
       share_wagebill := wagebill / sum(wagebill, na.rm = TRUE),
-      by = reference_group_col
+      by = reference_group_cols
     ]
   }
 
-  # complete the group x period panel, as in the tbl_dbi method, so a group
-  # absent in a period gets wagebill = NA instead of being dropped
-  reference_values <- unique(dt[, ..reference_group_col])
-  panel <- reference_values
+  # complete the series x date panel, as in the tbl_dbi method, so a series
+  # absent on a date gets wagebill = NA instead of being dropped
+  dates <- unique(dt[, "ref_date", with = FALSE])
+  panel <- dates
 
-  if (!is.null(group_cols)) {
-    # repeat every reference value for every group
-    panel <- unique(dt[, ..group_cols])[,
-      as.list(reference_values),
-      by = group_cols
+  if (length(series_cols) > 0) {
+    # repeat every date for every series
+    panel <- unique(dt[, series_cols, with = FALSE])[,
+      as.list(dates),
+      by = series_cols
     ]
   }
 
   wagebill <- wagebill[panel, on = by_cols]
 
-  data.table::setorderv(wagebill, by_cols)
+  data.table::setorderv(wagebill, c(series_cols, "ref_date"))
 
   wagebill[,
     wagebill_lag := data.table::shift(wagebill, type = "lag"),
-    by = group_cols
+    by = series_cols
   ]
   wagebill[, wagebill_growth := (wagebill - wagebill_lag) / wagebill_lag]
   wagebill[, wagebill_lag := NULL]
@@ -126,16 +136,23 @@ compute_wagebill.tbl_dbi <- function(
   data,
   measure_col = "gross_salary_lcu",
   group_cols = NULL,
-  reference_group_col = "ref_date",
+  reference_group_cols = "ref_date",
   ...
 ) {
   rlang::check_dots_empty()
 
-  if (reference_group_col %in% group_cols) {
-    stop("`", reference_group_col, "` should not be included in `group_cols`")
+  overlap <- intersect(reference_group_cols, group_cols)
+
+  if (length(overlap) > 0) {
+    stop("`", paste(overlap, collapse = "`, `"), "` should not be included in `group_cols`")
   }
 
-  by_cols <- c(group_cols, reference_group_col)
+  if (!"ref_date" %in% reference_group_cols) {
+    stop("`reference_group_cols` must include `ref_date`, over which growth is measured")
+  }
+
+  by_cols <- c(group_cols, reference_group_cols)
+  series_cols <- c(group_cols, setdiff(reference_group_cols, "ref_date"))
 
   wagebill <- data |>
     summarise(
@@ -148,22 +165,24 @@ compute_wagebill.tbl_dbi <- function(
     wagebill <- wagebill |>
       mutate(
         share_wagebill = wagebill / sum(wagebill, na.rm = TRUE),
-        .by = all_of(reference_group_col)
+        .by = all_of(reference_group_cols)
       )
+  }
 
-    # complete the group x period panel, crossing through a constant key, so
-    # a group absent in a period gets wagebill = NA instead of being dropped
-    reference_values <- data |>
-      distinct(across(all_of(reference_group_col)))
+  if (length(series_cols) > 0) {
+    # complete the series x date panel, crossing through a constant key, so
+    # a series absent on a date gets wagebill = NA instead of being dropped
+    dates <- data |>
+      distinct(ref_date)
 
-    group_values <- data |>
-      select(all_of(group_cols)) |>
+    series_values <- data |>
+      select(all_of(series_cols)) |>
       distinct()
 
-    wagebill <- reference_values |>
+    wagebill <- dates |>
       mutate(key = 1) |>
       inner_join(
-        group_values |> mutate(key = 1),
+        series_values |> mutate(key = 1),
         by = "key"
       ) |>
       select(-key) |>
@@ -177,13 +196,13 @@ compute_wagebill.tbl_dbi <- function(
 
   wagebill |>
     mutate(
-      wagebill_lag = lag(wagebill, order_by = .data[[reference_group_col]]),
+      wagebill_lag = lag(wagebill, order_by = ref_date),
       wagebill_growth = (wagebill - wagebill_lag) / wagebill_lag,
-      .by = all_of(group_cols)
+      .by = all_of(series_cols)
     ) |>
     select(
-      all_of(by_cols), 
-      everything(), 
+      all_of(by_cols),
+      everything(),
       -wagebill_lag
     )
 }

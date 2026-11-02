@@ -9,8 +9,10 @@ test_that("compute_retirement counts exits whose next status is pensioner", {
     as.Date(c("2020-01-01", "2021-01-01", "2022-01-01", "2023-01-01"))
   )
   expect_equal(result$headcount, c(7L, 3L, 3L, 2L))
-  expect_equal(result$retirements, c(2L, 1L, 1L, NA))
-  expect_equal(result$retirement_rate, c(2 / 7, 1 / 3, 1 / 3, NA))
+  # each retirement is counted on the first date the retiree is absent, out
+  # of the headcount on the date before
+  expect_equal(result$retirements, c(NA, 2L, 1L, 1L))
+  expect_equal(result$retirement_rate, c(NA, 2 / 7, 1 / 3, 1 / 3))
 })
 
 test_that("compute_retirement dates a lagged pension registration by the exit", {
@@ -19,7 +21,7 @@ test_that("compute_retirement dates a lagged pension registration by the exit", 
     dplyr::filter(.data[["personnel_id"]] %in% c("p3", "p6")) |>
     compute_retirement()
 
-  expect_equal(result$retirements, c(1L, 0L, 0L, NA))
+  expect_equal(result$retirements, c(NA, 1L, 0L, 0L))
 })
 
 test_that("compute_retirement ignores an exit followed by a return to work", {
@@ -27,15 +29,16 @@ test_that("compute_retirement ignores an exit followed by a return to work", {
     dplyr::filter(.data[["personnel_id"]] %in% c("p3", "p7")) |>
     compute_retirement()
 
-  expect_equal(result$retirements, c(0L, 0L, 1L, NA))
+  expect_equal(result$retirements, c(NA, 0L, 0L, 1L))
 })
 
 test_that("compute_retirement counts each person in their group on that date", {
   result <- compute_retirement(retirement_panel, group_cols = "unit")
 
-  expect_equal(result$unit, c("A", "B", "A", "B", "A", "B", "B"))
-  expect_equal(result$headcount, c(4L, 3L, 1L, 2L, 1L, 2L, 2L))
-  expect_equal(result$retirements, c(1L, 1L, 1L, 0L, 1L, 0L, NA))
+  # unit A is empty in 2023, after p7 retires from it
+  expect_equal(result$unit, rep(c("A", "B"), times = 4))
+  expect_equal(result$headcount, c(4L, 3L, 1L, 2L, 1L, 2L, 0L, 2L))
+  expect_equal(result$retirements, c(NA, NA, 1L, 1L, 1L, 0L, 1L, 0L))
 })
 
 test_that("compute_retirement counts only separations as retirements", {

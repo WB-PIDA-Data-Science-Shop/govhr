@@ -189,85 +189,6 @@ test_that("compute_percentile bins values and pct/cum_pct sum correctly within e
   expect_equal(as.numeric(last_cum), c(1, 1), tolerance = 1e-8)
 })
 
-# Tests for compute_time_trend() ------------------------------------------
-
-test_that("compute_time_trend counts rows per period when measure_col is NULL", {
-  df <- data.frame(
-    ref_date = as.Date(c("2020-01-01", "2020-01-01", "2020-02-01")),
-    group = c("A", "A", "A")
-  )
-
-  out <- compute_time_trend(df, group_col = "ref_date")
-
-  expect_equal(out$value, c(2, 1))
-})
-
-test_that("compute_time_trend sums measure_col per group and ref_date when supplied", {
-  df <- data.frame(
-    ref_date = as.Date(c("2020-01-01", "2020-01-01", "2020-02-01")),
-    group = c("A", "A", "A"),
-    wage = c(10, 20, 5)
-  )
-
-  out <- compute_time_trend(df, group_col = "group", measure_col = "wage")
-
-  expect_equal(sum(out$value), 35)
-})
-
-# Tests for rescale_baseline() --------------------------------------------
-
-test_that("rescale_baseline indexes the first ungrouped value to 100", {
-  df <- data.frame(
-    ref_date = as.Date(c("2020-01-01", "2020-02-01", "2020-03-01")),
-    value = c(50, 75, 100)
-  )
-
-  out <- rescale_baseline(df, group_col = "ref_date")
-
-  expect_equal(out$value[1], 100)
-  expect_equal(out$value[2], 150)
-})
-
-test_that("rescale_baseline indexes within each group separately", {
-  df <- data.frame(
-    ref_date = rep(as.Date(c("2020-01-01", "2020-02-01")), 2),
-    group = rep(c("A", "B"), each = 2),
-    value = c(10, 20, 5, 15)
-  )
-
-  out <- rescale_baseline(df, group_col = "group")
-
-  expect_equal(out$value[out$group == "A"], c(100, 200))
-  expect_equal(out$value[out$group == "B"], c(100, 300))
-})
-
-# Tests for compute_cross_section() ---------------------------------------
-
-test_that("compute_cross_section filters to the latest ref_date per group and sums measure_col", {
-  df <- data.frame(
-    group = c("A", "A", "B", "B"),
-    ref_date = as.Date(c("2020-01-01", "2020-02-01", "2020-01-01", "2020-02-01")),
-    wage = c(10, 20, 5, 15)
-  )
-
-  out <- compute_cross_section(df, group_cols = "group", measure_col = "wage")
-
-  expect_equal(out$value[out$group == "A"], 20)
-  expect_equal(out$value[out$group == "B"], 15)
-})
-
-test_that("compute_cross_section counts rows when measure_col is NULL", {
-  df <- data.frame(
-    group = c("A", "A", "A", "B"),
-    ref_date = as.Date(c("2020-01-01", "2020-02-01", "2020-02-01", "2020-01-01"))
-  )
-
-  out <- compute_cross_section(df, group_cols = "group")
-
-  expect_equal(out$value[out$group == "A"], 2)
-  expect_equal(out$value[out$group == "B"], 1)
-})
-
 # Tests for compute_growth() ----------------------------------------------
 
 test_that("compute_growth computes percentage change from first to last ref_date", {
@@ -291,4 +212,50 @@ test_that("compute_growth counts rows per group when measure_col is NULL", {
   out <- compute_growth(df, group_col = "group")
 
   expect_equal(out$growth_rate, 0)
+})
+
+# compute_growth() backs the wage bill overview, workforce overview and
+# movement panels. Endpoints are each group's own first and last reference
+# date, independent of the order rows arrive in.
+panel <- tibble::tibble(
+  ref_date = as.Date(c(
+    "2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01",
+    "2022-01-01", "2022-01-01"
+  )),
+  paygrade = c("G1", "G2", "G1", "G2", "G1", "G2"),
+  gross_salary_lcu = c(100, 200, 150, 250, 120, 300)
+)
+
+test_that("compute_growth is invariant to input row order", {
+  shuffled <- panel[c(4, 1, 6, 3, 2, 5), ]
+
+  expect_equal(
+    compute_growth(panel, group_col = "paygrade", measure_col = "gross_salary_lcu"),
+    compute_growth(shuffled, group_col = "paygrade", measure_col = "gross_salary_lcu")
+  )
+})
+
+test_that("compute_growth uses each group's own first and last date", {
+  # G1 is observed 2020-2022, G2 only 2021-2022
+  uneven <- panel[!(panel$paygrade == "G2" & panel$ref_date == as.Date("2020-01-01")), ]
+
+  result <- compute_growth(
+    uneven,
+    group_col = "paygrade",
+    measure_col = "gross_salary_lcu"
+  )
+
+  # G1: 100 -> 120 = +20%; G2: 250 -> 300 = +20%
+  expect_equal(result$growth_rate[result$paygrade == "G1"], 20)
+  expect_equal(result$growth_rate[result$paygrade == "G2"], 20)
+})
+
+test_that("compute_growth drops unlabelled groups", {
+  with_na <- panel
+  with_na$paygrade[c(2, 4, 6)] <- NA_character_
+
+  result <- compute_growth(with_na, group_col = "paygrade")
+
+  expect_false(anyNA(result$paygrade))
+  expect_equal(result$paygrade, "G1")
 })

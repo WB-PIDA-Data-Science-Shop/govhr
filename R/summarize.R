@@ -740,131 +740,6 @@ compute_compression_ratio.tbl_dbi <- function(
     )
 }
 
-#' Compute time trend
-#'
-#' Summarizes data over time by grouping variable, producing a tidy data frame
-#' with `ref_date`, optional group column, and `value`.
-#'
-#' When `measure_col` is `NULL`, counts rows per period (headcount). When a
-#' column name is supplied, sums that column per period (wage bill).
-#'
-#' @param data A data frame containing at least a `ref_date` column.
-#' @param group_col Character string naming the grouping column, or `"ref_date"` for
-#'   no grouping.
-#' @param measure_col Character string naming the numeric column to sum, or
-#'   `NULL` to count rows.
-#' @param group Deprecated. Use `group_col` instead.
-#'
-#' @returns A summarized data frame with columns `ref_date`, optionally `group`, and `value`. Value denotes either a sum or headcount (if `measure_col` is `NULL`).
-#'
-#' @importFrom data.table as.data.table
-#'
-#' @export
-compute_time_trend <- function(data, group_col, measure_col = NULL, group = NULL) {
-  group_col <- resolve_renamed_arg(group_col, group, "group", "group_col")
-  .data_dt <- data.table::as.data.table(data)
-
-  groups <- if (group_col == "ref_date") "ref_date" else c("ref_date", group_col)
-
-  if (is.null(measure_col)) {
-    # headcount by group
-    .data_dt <- .data_dt[, .(value = .N), by = groups]
-
-    # order by groups
-    data.table::setorderv(.data_dt, groups)
-
-    .data_dt
-  } else {
-    .data_dt |>
-      compute_fastsummary(
-        cols = measure_col,
-        fns = "sum",
-        group_cols = groups
-      )
-  }
-}
-
-#' Rescale to baseline index
-#'
-#' Rescales the `value` column so that the first observation equals 100,
-#' producing a baseline index. When a grouping variable is present, the
-#' rescaling is applied within each group.
-#'
-#' @param data A data frame with columns `ref_date` and `value`, as returned by
-#'   [compute_time_trend()].
-#' @param group_col Character string naming the grouping column, or `"ref_date"` for
-#'   no grouping.
-#' @param group Deprecated. Use `group_col` instead.
-#'
-#' @returns The input data frame with `value` rescaled to a baseline index.
-#'
-#' @importFrom dplyr arrange mutate across all_of ungroup first
-#'
-#' @export
-rescale_baseline <- function(data, group_col, group = NULL) {
-  group_col <- resolve_renamed_arg(group_col, group, "group", "group_col")
-  if (group_col == "ref_date") {
-    data |>
-      dplyr::arrange(.data[["ref_date"]]) |>
-      dplyr::mutate(
-        value = .data[["value"]] / dplyr::first(.data[["value"]]) * 100
-      )
-  } else {
-    data |>
-      dplyr::arrange(.data[["ref_date"]]) |>
-      dplyr::mutate(
-        value = .data[["value"]] / dplyr::first(.data[["value"]]) * 100,
-        .by = dplyr::all_of(group_col)
-      )
-  }
-}
-
-#' Compute cross-section summary table
-#'
-#' Filters to the latest reference date within each group, then aggregates to
-#' produce a per-group `value`. Used as the data source for total-by-group bar
-#' charts.
-#'
-#' When `measure_col` is `NULL`, counts rows (headcount). When a column name is
-#' supplied, sums that column (wage bill).
-#'
-#' @param data A data frame containing a `ref_date` column and the grouping
-#'   column.
-#' @param group_cols Character string naming the grouping column.
-#' @param measure_col Character string naming the numeric column to sum, or
-#'   `NULL` to count rows.
-#' @param group Deprecated. Use `group_cols` instead.
-#'
-#' @returns A data frame with the grouping column and a `value` column.
-#'
-#' @importFrom dplyr group_by across all_of filter ungroup summarise n
-#'
-#' @export
-compute_cross_section <- function(data, group_cols, measure_col = NULL, group = NULL) {
-  group_cols <- resolve_renamed_arg(group_cols, group, "group", "group_cols")
-  # only consider latest reference date
-  data_latest <- data |>
-    dplyr::filter(
-      .data[["ref_date"]] == max(.data[["ref_date"]]),
-      .by = dplyr::all_of(group_cols)
-    )
-
-  if (is.null(measure_col)) {
-    data_latest |>
-      fastcount(
-        dplyr::across(dplyr::all_of(group_cols)),
-        name = "value"
-      )
-  } else {
-    data_latest |>
-      compute_fastsummary(
-        cols = measure_col,
-        fns = "sum",
-        group_cols = group_cols
-      )
-  }
-}
-
 #' Compute growth rate summary table
 #'
 #' Filters to the first and last reference date within each group and computes
@@ -887,6 +762,7 @@ compute_cross_section <- function(data, group_cols, measure_col = NULL, group = 
 #' @export
 compute_growth <- function(data, group_col, measure_col = NULL, group = NULL) {
   group_col <- resolve_renamed_arg(group_col, group, "group", "group_col")
+  
   endpoints <- data |>
     dplyr::filter(
       .data[["ref_date"]] %in%

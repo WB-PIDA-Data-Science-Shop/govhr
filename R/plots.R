@@ -325,7 +325,7 @@ plot_segment <- function(data, col, group_col, group = NULL) {
 #' @returns A ggplot2 object.
 #'
 #' @details Dates with no hires or separations to compare with (`NA` in
-#'   `data`), such as the first date for hires, are left out of the plot.
+#'   `data`), such as the first date, are left out of the plot.
 #'
 #' @examples
 #' hr <- data.frame(

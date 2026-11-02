@@ -45,10 +45,16 @@ S3method(compute_wage,data.frame)
 S3method(compute_wage,tbl_dbi)
 S3method(compute_wagebill,data.frame)
 S3method(compute_wagebill,tbl_dbi)
+S3method(count_entity,data.frame)
+S3method(count_entity,tbl_dbi)
 S3method(detect_movement,data.frame)
 S3method(detect_movement,tbl_dbi)
 S3method(detect_retirement,data.frame)
 S3method(detect_retirement,tbl_dbi)
+S3method(detect_transition,data.frame)
+S3method(detect_transition,tbl_dbi)
+S3method(drop_duplicate,data.frame)
+S3method(drop_duplicate,tbl_dbi)
 S3method(estimate_decrement_rates,data.frame)
 S3method(estimate_decrement_rates,default)
 S3method(estimate_decrement_rates,tbl_dbi)
@@ -70,7 +76,6 @@ export(build_calendar)
 export(build_survival_panel)
 export(check_binwidth)
 export(check_required_cols)
-export(classify_personnel_event)
 export(classify_text)
 export(clean_hr_data)
 export(complete_columns)
@@ -78,7 +83,6 @@ export(complete_dates)
 export(compute_baseline_index)
 export(compute_compression_ratio)
 export(compute_coverage)
-export(compute_cross_section)
 export(compute_cross_section_summary)
 export(compute_decile)
 export(compute_employment_spells)
@@ -89,7 +93,6 @@ export(compute_global_consistency)
 export(compute_global_coverage)
 export(compute_growth)
 export(compute_growth_decomposition)
-export(compute_growth_summary)
 export(compute_headcount)
 export(compute_movement)
 export(compute_movement_cost)
@@ -102,7 +105,6 @@ export(compute_retirement_cost)
 export(compute_service_table)
 export(compute_tenure)
 export(compute_tenure_panel)
-export(compute_time_trend)
 export(compute_transition)
 export(compute_trend_summary)
 export(compute_value_consistency)
@@ -126,10 +128,10 @@ export(detect_inconsistent_cols)
 export(detect_movement)
 export(detect_personnel_event)
 export(detect_retirement)
+export(detect_transition)
 export(drop_missing)
 export(estimate_binwidth)
 export(estimate_decrement_rates)
-export(estimate_exit_rates)
 export(estimate_movement_rates)
 export(fastcount)
 export(fastprop)
@@ -171,14 +173,12 @@ export(plot_model_wage_fes)
 export(plot_movement)
 export(plot_movement_cost)
 export(plot_segment)
-export(plot_transfer_heatmap)
 export(plot_transition_network)
 export(plot_trend)
 export(project_retirement)
 export(prop)
 export(remove_duplicate_contracts)
 export(remove_duplicate_personnel)
-export(rescale_baseline)
 export(resolve_renamed_arg)
 export(sample_group)
 export(scale_plot_height)
@@ -188,7 +188,6 @@ export(validate_column_exists)
 export(validate_columns_exist)
 export(validate_data)
 export(validate_date_format)
-export(warn_duplicate_records)
 export(warn_missing_cpi)
 import(dplyr)
 import(ggplot2)
@@ -209,12 +208,12 @@ importFrom(data.table,
   is.data.table,
   melt,
   merge.data.table,
-  rbindlist,
   rleidv,
   set,
   setDT,
   setattr,
   setcolorder,
+  setkey,
   setkeyv,
   setnafill,
   setnames,
@@ -239,6 +238,7 @@ importFrom(dplyr,
   everything,
   filter,
   first,
+  full_join,
   group_by,
   if_else,
   inner_join,
@@ -270,17 +270,9 @@ importFrom(dplyr,
 importFrom(dtplyr,lazy_dt)
 importFrom(fixest,fixef)
 importFrom(forcats,fct_reorder)
-importFrom(ggiraph,
-  geom_point_interactive,
-  girafe,
-  opts_hover,
-  opts_sizing
-)
 importFrom(ggplot2,
   aes,
-  coord_cartesian,
   element_text,
-  expansion,
   facet_wrap,
   geom_col,
   geom_hline,
@@ -294,26 +286,15 @@ importFrom(ggplot2,
   guide_axis,
   label_wrap_gen,
   labs,
-  margin,
   scale_color_manual,
   scale_fill_manual,
-  scale_size_identity,
   scale_x_continuous,
   scale_y_continuous,
   scale_y_discrete,
   theme,
   theme_minimal,
-  theme_void,
   xlab,
   ylab
-)
-importFrom(ggraph,
-  geom_edge_arc,
-  geom_node_point,
-  geom_node_text,
-  ggraph,
-  scale_edge_alpha_identity,
-  scale_edge_width_continuous
 )
 importFrom(ggrepel,geom_text_repel)
 importFrom(ggstats,ggcoef_model)
@@ -326,7 +307,6 @@ importFrom(httr,
   modify_url,
   stop_for_status
 )
-importFrom(igraph,gorder)
 importFrom(janitor,clean_names)
 importFrom(jsonlite,fromJSON)
 importFrom(lubridate,
@@ -388,6 +368,5 @@ importFrom(tibble,
   is_tibble,
   tibble
 )
-importFrom(tidygraph,as_tbl_graph)
 importFrom(tidyr,pivot_wider)
 importFrom(tidyselect,eval_select)

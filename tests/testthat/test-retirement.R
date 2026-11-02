@@ -33,6 +33,12 @@ test_that("project_retirement projects only the current active workforce", {
   expect_equal(result$projected_retirements, c(0, 1, 0, 0, 1, 0, 0, 0, 0, 0))
   expect_equal(result$projected_retirement_rate, result$projected_retirements / 4)
   expect_false("projected_cost" %in% names(result))
+
+  # a shorter horizon stops early
+  short <- project_retirement(projection_panel, horizon = 3)
+
+  expect_equal(short$ref_date, as.Date(paste0(2021:2023, "-12-31")))
+  expect_equal(short$projected_retirements, c(0, 1, 0))
 })
 
 test_that("project_retirement costs each group's retirees separately", {
@@ -52,13 +58,6 @@ test_that("project_retirement costs each group's retirees separately", {
   # both of a's contracts are costed
   expect_equal(retiring$projected_cost, c((100 + 40) * 0.6, 200 * 0.6))
   expect_equal(sum(result$projected_cost), (100 + 40 + 200) * 0.6)
-})
-
-test_that("project_retirement stops at the horizon", {
-  result <- project_retirement(projection_panel, horizon = 3)
-
-  expect_equal(result$ref_date, as.Date(paste0(2021:2023, "-12-31")))
-  expect_equal(result$projected_retirements, c(0, 1, 0))
 })
 
 test_that("project_retirement rejects ref_date as a group", {

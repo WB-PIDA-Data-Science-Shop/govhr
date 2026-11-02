@@ -2,20 +2,41 @@
 % Please edit documentation in R/overview.R
 \name{count_entity}
 \alias{count_entity}
+\alias{count_entity.data.frame}
+\alias{count_entity.tbl_dbi}
 \title{Count unique entities by group}
 \usage{
-count_entity(data, id_col, group_cols = NULL)
+count_entity(data, ...)
+
+\method{count_entity}{data.frame}(data, id_col, group_cols = NULL, ...)
+
+\method{count_entity}{tbl_dbi}(data, id_col, group_cols = NULL, ...)
 }
 \arguments{
-\item{data}{Data frame containing the data.}
+\item{data}{Data frame or remote database table (\code{tbl_dbi}) containing
+\code{id_col} and \code{group_cols}.}
+
+\item{...}{Arguments passed to methods.}
 
 \item{id_col}{Character. Column name of the unique identifier for the entity.}
 
 \item{group_cols}{Character vector of column names to group by, or \code{NULL} for no grouping.}
 }
 \value{
-A data frame with the grouping columns and a \code{count} column representing the number of unique entities in each group.
+A table with the grouping columns and a \code{count} column representing
+the number of unique entities in each group. A data.table sorted by the
+grouping columns for data frame input; a lazy table for \code{tbl_dbi} input
+(use \code{\link[dplyr:collect]{dplyr::collect()}} to bring it into memory).
 }
 \description{
-Count unique entities by group
+Counts how many distinct entities, such as people or contracts, are in each
+group. Rows with a missing identifier are not counted.
+}
+\examples{
+hr <- data.frame(
+  personnel_id = c(1, 1, 2, NA),
+  est_id = c("A", "A", "B", "B")
+)
+count_entity(hr, id_col = "personnel_id", group_cols = "est_id")
+
 }

@@ -11,6 +11,217 @@ authors:
     href: "https://github.com/galileukim"
     roles: [cre, aut]
 
+reference:
+  - title: Harmonization
+    desc: "`R/harmonize.R`: align column names, identifiers and values across sources."
+    contents:
+      - find_inconsistent_colnames
+      - detect_inconsistent_cols
+      - harmonize_columns
+      - find_duplicate_ids
+      - dedup_values
+      - complete_columns
+      - guess_date_frequency
+      - convert_constant_ppp
+      - deflate_to_real
+
+  - title: Data treatment
+    desc: "`R/treatment.R`: remove duplicates and fix invalid records."
+    contents:
+      - clean_hr_data
+      - remove_duplicate_personnel
+      - remove_duplicate_contracts
+      - fix_invalid_dates
+      - fix_invalid_birthdates
+      - fix_underage_workers
+      - fix_retirement_age
+      - fix_working_hours
+      - fix_salary_components
+      - fix_negative_salaries
+
+  - title: Validation
+    desc: "`R/validation.R`: check data against quality rules."
+    contents:
+      - validate_data
+
+  - title: Coverage
+    desc: "`R/coverage.R`: how complete each column is."
+    contents:
+      - compute_coverage
+      - compute_global_coverage
+
+  - title: Consistency
+    desc: "`R/consistency.R`: how consistent records and values are over time."
+    contents:
+      - compute_record_consistency
+      - compute_value_consistency
+      - compute_global_consistency
+
+  - title: Quality check plots
+    desc: "`R/qcheck_plots.R`: plot coverage and consistency."
+    contents:
+      - plot_coverage_trend
+      - plot_coverage_bar
+      - plot_coverage_heatmap
+      - plot_consistency_trend
+      - plot_consistency_heatmap
+
+  - title: Headcount
+    desc: "`R/headcount.R`"
+    contents:
+      - compute_headcount
+
+  - title: Overview
+    desc: "`R/overview.R`: trends, cross-sections and growth by group."
+    contents:
+      - count_entity
+      - compute_trend_summary
+      - apply_baseline_index
+      - compute_cross_section_summary
+      - plot_trend
+      - plot_bar_total
+      - plot_bar_growth
+
+  - title: Movement
+    desc: "`R/movement.R`: hires, separations and retirements, and their cost."
+    contents:
+      - detect_movement
+      - compute_movement
+      - compute_movement_cost
+      - detect_retirement
+      - compute_retirement
+      - compute_retirement_cost
+      - detect_personnel_event
+      - complete_dates
+
+  - title: Transitions
+    desc: "`R/transition.R`: moves between groups, such as paygrades."
+    contents:
+      - detect_transition
+      - compute_transition
+      - plot_transition_network
+
+  - title: Retirement projections
+    desc: "`R/retirement.R`"
+    contents:
+      - project_retirement
+      - add_contract_to_event
+      - compute_pension_ratio
+
+  - title: Demographics
+    desc: "`R/demographics.R`: decrement rates and service tables."
+    contents:
+      - estimate_decrement_rates
+      - smooth_decrement_rates
+      - compute_service_table
+
+  - title: Workforce analytics
+    desc: "`R/workforce.R`: the standard workforce indicators in one call."
+    contents:
+      - compute_workforce_analytics
+
+  - title: Wages
+    desc: "`R/wage.R`"
+    contents:
+      - compute_wage
+
+  - title: Wage distribution
+    desc: "`R/distribution.R`"
+    contents:
+      - compute_percentile
+      - compute_decile
+
+  - title: Wage models
+    desc: "`R/wage_model.R`"
+    contents:
+      - model_wage
+      - plot_model_wage
+      - plot_model_wage_fes
+
+  - title: Wage bill
+    desc: "`R/wagebill_total.R`"
+    contents:
+      - compute_wagebill
+
+  - title: Wage bill growth
+    desc: "`R/wagebill_growth.R`: decompose wage bill and wage growth."
+    contents:
+      - compute_growth_decomposition
+      - compute_wage_decomposition
+
+  - title: Wage bill analytics
+    desc: "`R/wagebill.R`: the standard wage bill indicators in one call."
+    contents:
+      - compute_wagebill_analytics
+
+  - title: Reports
+    desc: "`R/report.R`"
+    contents:
+      - generate_standard_report
+
+  - title: Summary helpers
+    desc: "`R/summarize.R`: fast grouped summaries and summary statistics."
+    contents:
+      - compute_fastsummary
+      - compute_fastshare
+      - compute_fastchange
+      - fastcount
+      - fastprop
+      - compute_baseline_index
+      - compute_quantile
+      - compute_growth
+      - compute_compression_ratio
+      - define_fns
+      - cv
+      - cp_ratio
+      - count_unique
+
+  - title: Plot helpers
+    desc: "`R/plots.R`"
+    contents:
+      - scale_plot_height
+      - ggplot_point_line
+      - ggplot_segment
+      - ggplot_coef
+      - plot_segment
+      - plot_movement
+      - plot_movement_cost
+      - plot_decile
+      - plot_histogram
+      - plot_compression_ratio
+
+  - title: Sampling
+    desc: "`R/sample.R`"
+    contents:
+      - sample_group
+
+  - title: Data360 API
+    desc: "`R/data360api.R`: download World Bank Data360 datasets."
+    contents:
+      - get_data360_api
+      - pivot_data360
+      - get_metadata360
+
+  - title: Datasets
+    desc: "`R/data.R`"
+    contents:
+      - bra_hrmis
+      - bra_hrmis_personnel
+      - bra_hrmis_contract
+      - bra_hrmis_allowance
+      - bra_hrmis_est
+      - dictionary
+      - contract_rules
+      - personnel_rules
+      - cpi
+      - countryclass
+      - macro_indicators
+      - wwbi
+      - enterprise_surveys
+      - social_sustainability
+      - cofog_taxonomy
+      - isco
+
 articles:
   - title: "Harmonization"
     contents:

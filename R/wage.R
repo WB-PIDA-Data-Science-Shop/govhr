@@ -1,38 +1,33 @@
 #' Compute the average wage
 #'
-#' Computes the average wage for each group within each reference group,
-#' usually a reference date, and how much it grew since the previous
-#' reference group.
+#' Computes the average wage for each group on each reference date, and how
+#' much it grew since the previous reference date.
 #'
-#' @param data Data frame or remote database table (`tbl_dbi`) with the
-#'   column named in `reference_group_col` and the pay column named in
-#'   `measure_col`.
+#' @param data Data frame or remote database table (`tbl_dbi`) with a
+#'   `ref_date` column and the pay column named in `measure_col`.
 #' @param measure_col Character. Name of the pay column to average. Default
 #'   `"gross_salary_lcu"`.
 #' @param group_cols Character vector of columns to group by, or `NULL` to
-#'   average over everyone. Must not include `reference_group_col`.
-#' @param reference_group_col Character. Name of the column that defines the
-#'   reference groups, usually a date. Growth compares each reference group
-#'   with the one before it in sorted order. Default `"ref_date"`.
+#'   average over everyone. Must not include `ref_date`.
 #' @param ... Arguments passed to methods.
 #'
-#' @returns A table with the grouping columns, `reference_group_col`, `wage`
-#'   (the average of `measure_col`) and `wage_growth` (the change from the
-#'   previous reference group as a proportion, so `0.1` means 10% growth). A
-#'   data.table for data frame input; a lazy table for `tbl_dbi` input (use
+#' @returns A table with the grouping columns, `ref_date`, `wage` (the average
+#'   of `measure_col`) and `wage_growth` (the change from the previous
+#'   reference date as a proportion, so `0.1` means 10% growth). A data.table
+#'   for data frame input; a lazy table for `tbl_dbi` input (use
 #'   [dplyr::collect()] to bring it into memory).
 #'
 #' @details
 #' The average is taken over rows, so with contract data it is the average
 #' pay per contract. Missing wage values are skipped. If every wage value for
-#' a group in a reference group is missing, its wage is `NA`.
+#' a group on a reference date is missing, its wage is `NA`.
 #'
-#' As in [compute_wagebill()], every group appears in every reference group in
-#' `data`. A group with no records in a reference group gets `wage = NA`, so
-#' gaps stay visible and growth is never measured across a gap.
+#' As in [compute_wagebill()], every group appears on every reference date in
+#' `data`. A group with no records on a date gets `wage = NA`, so gaps stay
+#' visible and growth is never measured across a gap.
 #'
-#' `wage_growth` is `NA` in the first reference group, and whenever the
-#' current or previous wage is `NA`.
+#' `wage_growth` is `NA` on the first reference date, and whenever the current
+#' or previous wage is `NA`.
 #'
 #' @examples
 #' compute_wage(
@@ -53,16 +48,15 @@ compute_wage.data.frame <- function(
   data,
   measure_col = "gross_salary_lcu",
   group_cols = NULL,
-  reference_group_col = "ref_date",
   ...
 ) {
   rlang::check_dots_empty()
 
-  if (reference_group_col %in% group_cols) {
-    stop("`", reference_group_col, "` should not be included in `group_cols`")
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
   }
 
-  by_cols <- c(group_cols, reference_group_col)
+  by_cols <- c(group_cols, "ref_date")
   dt <- data.table::as.data.table(data)
 
   # leave out missing pay, so a group whose pay is all missing in a period has
@@ -75,13 +69,13 @@ compute_wage.data.frame <- function(
 
   # complete the group x period panel, as in the tbl_dbi method, so a group
   # absent in a period gets wage = NA instead of being dropped
-  reference_values <- unique(dt[, ..reference_group_col])
-  panel <- reference_values
+  dates <- unique(dt[, "ref_date", with = FALSE])
+  panel <- dates
 
   if (!is.null(group_cols)) {
-    # repeat every reference value for every group
+    # repeat every date for every group
     panel <- unique(dt[, ..group_cols])[,
-      as.list(reference_values),
+      as.list(dates),
       by = group_cols
     ]
   }
@@ -109,16 +103,15 @@ compute_wage.tbl_dbi <- function(
   data,
   measure_col = "gross_salary_lcu",
   group_cols = NULL,
-  reference_group_col = "ref_date",
   ...
 ) {
   rlang::check_dots_empty()
 
-  if (reference_group_col %in% group_cols) {
-    stop("`", reference_group_col, "` should not be included in `group_cols`")
+  if ("ref_date" %in% group_cols) {
+    stop("`ref_date` should not be included in `group_cols`")
   }
 
-  by_cols <- c(group_cols, reference_group_col)
+  by_cols <- c(group_cols, "ref_date")
 
   wage <- data |>
     summarise(
@@ -130,14 +123,14 @@ compute_wage.tbl_dbi <- function(
   if (!is.null(group_cols)) {
     # complete the group x period panel, crossing through a constant key, so
     # a group absent in a period gets wage = NA instead of being dropped
-    reference_values <- data |>
-      distinct(across(all_of(reference_group_col)))
+    dates <- data |>
+      distinct(ref_date)
 
     group_values <- data |>
       select(all_of(group_cols)) |>
       distinct()
 
-    wage <- reference_values |>
+    wage <- dates |>
       mutate(key = 1) |>
       inner_join(
         group_values |> mutate(key = 1),
@@ -154,7 +147,7 @@ compute_wage.tbl_dbi <- function(
 
   wage |>
     mutate(
-      wage_lag = lag(wage, order_by = .data[[reference_group_col]]),
+      wage_lag = lag(wage, order_by = ref_date),
       wage_growth = (wage - wage_lag) / wage_lag,
       .by = all_of(group_cols)
     ) |>

@@ -1,3 +1,8 @@
+# govhr 0.4.2
+This release:
+- Fixes inconsistencies in how separations and hires were measured. Now they correspond to the same time period and the rates are consistent.
+- Makes compute transitions more flexible, where transitions are considered as general changes in group membership of a given entity.
+
 # govhr 0.4.1
 This release:
 - Standardizes an architecture for workforce and wage bill analytics.

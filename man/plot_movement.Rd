@@ -33,7 +33,7 @@ from the output of \code{\link[=compute_movement]{compute_movement()}}.
 }
 \details{
 Dates with no hires or separations to compare with (\code{NA} in
-\code{data}), such as the first date for hires, are left out of the plot.
+\code{data}), such as the first date, are left out of the plot.
 }
 \examples{
 hr <- data.frame(

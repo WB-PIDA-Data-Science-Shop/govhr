@@ -8,7 +8,7 @@ plot_transition_network(data, interactive = TRUE)
 }
 \arguments{
 \item{data}{Data frame with one row per move and \code{from} and \code{to} columns,
-as returned by \code{\link[=compute_transition]{compute_transition()}} with \code{summarize = FALSE}.}
+as returned by \code{\link[=detect_transition]{detect_transition()}}.}
 
 \item{interactive}{Logical. If \code{TRUE} (default), return an interactive
 chart that shows each establishment's name on hover. If \code{FALSE}, return a

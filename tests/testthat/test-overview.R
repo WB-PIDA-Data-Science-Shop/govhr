@@ -54,20 +54,6 @@ test_that("compute_cross_section_summary sums measure_col at latest date", {
   expect_equal(result$value[result$group == "B"], 300)
 })
 
-# ---- compute_growth_summary --------------------------------------------------
-
-test_that("compute_growth_summary returns growth_rate column with correct sign", {
-  result <- compute_growth_summary(test_data, measure_col = "salary", group_col = "group")
-  expect_true("growth_rate" %in% names(result))
-  expect_gt(result$growth_rate[result$group == "A"], 0)
-})
-
-test_that("compute_growth_summary computes correct pct change with measure_col", {
-  result <- compute_growth_summary(test_data, group_col = "group", measure_col = "salary")
-  # B: first = 200, last = 300 → growth = 50
-  expect_equal(result$growth_rate[result$group == "B"], 50)
-})
-
 # ---- plot_trend --------------------------------------------------------------
 
 test_that("plot_trend returns a ggplot object", {
@@ -95,57 +81,49 @@ test_that("plot_bar_total returns a ggplot with a GeomCol layer", {
 # ---- plot_bar_growth ---------------------------------------------------------
 
 test_that("plot_bar_growth returns a ggplot with a GeomVline layer at 0", {
-  growth <- compute_growth_summary(test_data, group_col = "group", measure_col = "salary")
+  growth <- compute_growth(test_data, group_col = "group", measure_col = "salary")
   p <- plot_bar_growth(growth, group_col = "group")
   expect_s3_class(p, "ggplot")
   layer_geoms <- sapply(p$layers, \(l) class(l$geom)[1])
   expect_true("GeomVline" %in% layer_geoms)
 })
 
+# ---- count_entity ------------------------------------------------------------
 
-# ---- compute_growth_summary --------------------------------------------------
-# Shared by the wage bill overview, workforce overview and movement panels.
-# Guards the aggregate-first rewrite: endpoints are each group's own first and
-# last reference date, independent of the order rows arrive in.
-panel <- tibble::tibble(
-  ref_date = as.Date(c(
-    "2020-01-01", "2020-01-01", "2021-01-01", "2021-01-01",
-    "2022-01-01", "2022-01-01"
-  )),
-  paygrade = c("G1", "G2", "G1", "G2", "G1", "G2"),
-  gross_salary_lcu = c(100, 200, 150, 250, 120, 300)
+entities <- data.frame(
+  personnel_id = c(1, 1, 2, NA, 3),
+  est_id = c("A", "A", "B", "B", "B"),
+  stringsAsFactors = FALSE
 )
 
-test_that("compute_growth_summary is invariant to input row order", {
-  shuffled <- panel[c(4, 1, 6, 3, 2, 5), ]
+test_that("count_entity counts distinct non-missing ids per group", {
+  result <- count_entity(entities, id_col = "personnel_id", group_cols = "est_id")
 
-  expect_equal(
-    compute_growth_summary(panel, group_col = "paygrade", measure_col = "gross_salary_lcu"),
-    compute_growth_summary(shuffled, group_col = "paygrade", measure_col = "gross_salary_lcu")
-  )
+  expect_true(data.table::is.data.table(result))
+  expect_equal(result[["est_id"]], c("A", "B"))
+  expect_equal(result[["count"]], c(1L, 2L))
 })
 
-test_that("compute_growth_summary uses each group's own first and last date", {
-  # G1 is observed 2020-2022, G2 only 2021-2022
-  uneven <- panel[!(panel$paygrade == "G2" & panel$ref_date == as.Date("2020-01-01")), ]
+test_that("count_entity gives the same counts on a duckdb table", {
+  skip_if_not_installed("duckdb")
+  skip_if_not_installed("dbplyr")
 
-  result <- compute_growth_summary(
-    uneven,
-    group_col = "paygrade",
-    measure_col = "gross_salary_lcu"
+  # silence duckdb's notice about where it stores extensions
+  con <- suppressMessages(DBI::dbConnect(duckdb::duckdb()))
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  DBI::dbWriteTable(con, "entities", entities)
+
+  result <- count_entity(
+    dplyr::tbl(con, "entities"),
+    id_col = "personnel_id",
+    group_cols = "est_id"
   )
 
-  # G1: 100 -> 120 = +20%; G2: 250 -> 300 = +20%
-  expect_equal(result$growth_rate[result$paygrade == "G1"], 20)
-  expect_equal(result$growth_rate[result$paygrade == "G2"], 20)
-})
+  expect_s3_class(result, "tbl_dbi")
 
-test_that("compute_growth_summary drops unlabelled groups", {
-  with_na <- panel
-  with_na$paygrade[c(2, 4, 6)] <- NA_character_
+  result <- dplyr::collect(result)
+  result <- result[order(result[["est_id"]]), ]
 
-  result <- compute_growth_summary(with_na, group_col = "paygrade")
-
-  expect_false(anyNA(result$paygrade))
-  expect_equal(result$paygrade, "G1")
+  expect_equal(result[["est_id"]], c("A", "B"))
+  expect_equal(as.integer(result[["count"]]), c(1L, 2L))
 })

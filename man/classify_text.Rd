@@ -51,3 +51,4 @@ A data.table with columns: <id_col>, class_id, class_label, score
 \description{
 Classify free-text items against a user-supplied taxonomy using TF-IDF
 }
+\keyword{internal}

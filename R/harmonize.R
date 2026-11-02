@@ -524,6 +524,7 @@ merge_wrapper <- function(...) {
 #' @returns A data.table with columns: <id_col>, class_id, class_label, score
 #'
 #' @importFrom rlang .data
+#' @keywords internal
 #'
 #' @export
 classify_text <- function(
@@ -639,7 +640,7 @@ classify_text <- function(
     tokens <- strsplit(cleanse(texts), " ")
     names(tokens) <- ids
     tokens <- lapply(tokens, function(tk) tk[tk != "" & !tk %in% sw])
-    rbindlist(lapply(tokens, data.table), idcol = "id") |>
+    data.table::rbindlist(lapply(tokens, data.table), idcol = "id") |>
       setnames(c("id", "term"))
   }
 
@@ -784,6 +785,7 @@ classify_text <- function(
 #' }
 #'
 #' @importFrom tibble as_tibble
+#' @keywords internal
 #'
 #' @export
 convert_data <- function(data, data_original) {

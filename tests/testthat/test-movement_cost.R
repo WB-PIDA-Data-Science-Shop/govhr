@@ -16,13 +16,13 @@ test_that("compute_movement_cost adds up the movers' pay on each date", {
   expect_equal(result$ref_date, rep(cost_dates, 2))
   expect_equal(result$movement_type, rep(c("hire", "separation"), each = 4))
 
-  # the first date has nothing to detect hires against, and the last nothing
-  # to detect separations against
+  # the first date has nothing to compare with. separations are costed at
+  # their last active pay but counted on the first date they are absent
   expect_equal(
     result$movement_cost,
     c(
       NA, 0, 180, 0,
-      20 + 60 + 70 + 80, 90, 180, NA
+      NA, 20 + 60 + 70 + 80, 90, 180
     )
   )
 })
@@ -35,10 +35,13 @@ test_that("compute_movement_cost counts pay in the group of its record", {
     group_cols = "unit"
   )
 
-  # every unit with active personnel on a date appears for that date, so only
-  # unit B on the last
-  expect_equal(result$unit, c("A", "B", "A", "B", "A", "B", "B"))
-  expect_equal(result$movement_cost, c(20 + 70 + 80, 60, 90, 0, 180, 0, NA))
+  # every unit with active personnel on a date or the date before appears, so
+  # unit A still appears on the last date, when p7 leaves it
+  expect_equal(result$unit, rep(c("A", "B"), times = 4))
+  expect_equal(
+    result$movement_cost,
+    c(NA, NA, 20 + 70 + 80, 60, 90, 0, 180, 0)
+  )
 })
 
 test_that("compute_movement_cost costs every active contract of a mover", {
@@ -74,9 +77,9 @@ test_that("compute_retirement_cost adds up the retirees' pay on each date", {
   result <- compute_retirement_cost(cost_panel, measure_col = "pay")
 
   expect_equal(result$ref_date, cost_dates)
-  # p7's 2020 exit is followed by a return to work, so is not costed; the last
-  # date has nothing to compare with
-  expect_equal(result$retirement_cost, c(60 + 70, 90, 180, NA))
+  # p7's 2020 exit is followed by a return to work, so is not costed; the
+  # first date has nothing to compare with
+  expect_equal(result$retirement_cost, c(NA, 60 + 70, 90, 180))
 })
 
 test_that("compute_retirement_cost counts pay in the group of its record", {
@@ -86,8 +89,8 @@ test_that("compute_retirement_cost counts pay in the group of its record", {
     group_cols = "unit"
   )
 
-  expect_equal(result$unit, c("A", "B", "A", "B", "A", "B", "B"))
-  expect_equal(result$retirement_cost, c(70, 60, 90, 0, 180, 0, NA))
+  expect_equal(result$unit, rep(c("A", "B"), times = 4))
+  expect_equal(result$retirement_cost, c(NA, NA, 70, 60, 90, 0, 180, 0))
 })
 
 test_that("compute_retirement_cost rejects ref_date as a group", {
