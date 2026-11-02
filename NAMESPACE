@@ -118,7 +118,6 @@ export(compute_wagebill)
 export(compute_wagebill_analytics)
 export(compute_workforce_analytics)
 export(convert_constant_ppp)
-export(convert_data)
 export(count_entity)
 export(count_unique)
 export(cp_ratio)
@@ -152,10 +151,6 @@ export(fix_working_hours)
 export(generate_standard_report)
 export(get_data360_api)
 export(get_metadata360)
-export(ggplot_coef)
-export(ggplot_point_line)
-export(ggplot_segment)
-export(group_color_scale)
 export(guess_date_frequency)
 export(harmonize_columns)
 export(keep_active_contracts)
@@ -198,12 +193,14 @@ export(warn_missing_cpi)
 import(dplyr)
 import(ggplot2)
 import(httr)
+importFrom(broom,tidy)
 importFrom(collapse,fquantile)
 importFrom(data.table,
   ":=",
   .N,
   .SD,
   as.data.table,
+  copy,
   data.table,
   dcast,
   fcase,

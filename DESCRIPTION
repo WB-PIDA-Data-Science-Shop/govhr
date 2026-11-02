@@ -18,6 +18,7 @@ Imports:
     stringr,
     scales,
     validate,
+    broom,
     dtplyr,
     glue,
     httr,
