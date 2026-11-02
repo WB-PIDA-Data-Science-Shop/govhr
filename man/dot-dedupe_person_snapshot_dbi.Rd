@@ -4,7 +4,12 @@
 \alias{.dedupe_person_snapshot_dbi}
 \title{Keep one row per person and snapshot of a lazy personnel table}
 \usage{
-.dedupe_person_snapshot_dbi(panel, personnel_id_col, ref_date_col)
+.dedupe_person_snapshot_dbi(
+  panel,
+  personnel_id_col,
+  ref_date_col,
+  tiebreak_col = NULL
+)
 }
 \arguments{
 \item{panel}{A lazy table (\code{tbl_dbi}) with the columns \code{.pid}, \code{.ref} and
@@ -12,6 +17,10 @@
 
 \item{personnel_id_col, ref_date_col}{Character. The original person and
 snapshot date column names, for the warning.}
+
+\item{tiebreak_col}{Character or \code{NULL}. A column of \code{panel} that orders
+rows with the same status (e.g. tenure, lowest first), so the row kept
+does not depend on the database.}
 }
 \value{
 \code{panel}, lazily filtered to one row per \code{.pid} and \code{.ref}, or
@@ -21,7 +30,8 @@ unchanged if there were no duplicates. Counting them runs one query.
 The database counterpart of the de-duplication in the data.frame methods
 of \code{estimate_decrement_rates()} and \code{build_survival_panel()}: if any
 person has several rows at one snapshot, warns with their number and keeps
-the first by status, with a missing status last. The missing-last order is
-spelled out, because databases differ in where they sort NULLs.
+the first by status, then by \code{tiebreak_col} if given, missing values last.
+The missing-last order is spelled out, because databases differ in where
+they sort NULLs.
 }
 \keyword{internal}

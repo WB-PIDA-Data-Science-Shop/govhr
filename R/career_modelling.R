@@ -4,22 +4,27 @@
 #' Turns HRMIS snapshots into the table a model of exits is fitted on: one
 #' row per person and interval between two snapshots in which they could
 #' leave, with how long they were at risk (`exposure`), whether and how they
-#' left by the next snapshot (`exit_type`), and their pay and covariates at
-#' the start of the interval.
+#' left by the next snapshot (`exit_type`), and their covariates (and pay, if
+#' asked for) at the start of the interval.
 #'
 #' @param personnel Personnel snapshots: one row per person and `ref_date`,
 #'   as a data frame or a lazy database table (`tbl_dbi`).
-#' @param contracts Contract snapshots: one row per contract and `ref_date`,
-#'   of the same kind as `personnel`.
+#' @param contracts Contract snapshots (one row per contract and `ref_date`,
+#'   of the same kind as `personnel`), or `NULL` (the default) to build the
+#'   panel from `personnel` alone. Needed for pay and for contract covariates
+#'   such as occupation; give `salary_col` with it.
 #' @param tenure_col Character. The `personnel` column with years of service,
 #'   e.g. from [compute_tenure_panel()]. It must count from hiring, not from
 #'   the first snapshot.
-#' @param salary_col Character. The `contracts` pay column, summed across a
-#'   person's contracts. Deflate it first ([deflate_to_real()]) to compare
-#'   years.
-#' @param status_col Character or `NULL`. The `personnel` status column:
-#'   `"active"` can leave, `"pensioner"` has retired. `NULL` (the default)
-#'   treats everyone as active, so every exit is `"other"`.
+#' @param salary_col Character or `NULL`. The `contracts` pay column, summed
+#'   across a person's contracts and carried into the panel. Deflate it first
+#'   ([deflate_to_real()]) to compare years. To model pay, cut it into bands
+#'   (e.g. quintiles) and name the band column in [fit_survival_model()]'s
+#'   `covariate_cols` (see there). Required with `contracts`.
+#' @param status_col Character or `NULL`. The `personnel` status column,
+#'   default `"employment_status"`: `"active"` can leave, `"pensioner"` has
+#'   retired. `NULL`, for data with no status, treats everyone on the payroll
+#'   as active, so every exit is `"other"`.
 #' @param covariate_cols Character vector or `NULL`. Columns to carry into
 #'   the panel, from `personnel` (e.g. gender) or `contracts` (e.g.
 #'   occupation, from the contract chosen by `select_contract`).
@@ -41,7 +46,8 @@
 #'       for someone who left.}
 #'     \item{exit_type}{At the next snapshot: `"none"` (still active),
 #'       `"retired"` (a pensioner) or `"other"` (gone, or any other status).}
-#'     \item{salary_col}{Total pay at the start; `NA` with no contract.}
+#'     \item{salary_col}{With `contracts`: total pay at the start; `NA` with
+#'       no contract.}
 #'     \item{covariate_cols}{As at the start of the interval.}
 #'   }
 #'   It remembers the column arguments, so [fit_survival_model()] needs none.
@@ -50,6 +56,12 @@
 #' **Model.** A Poisson regression of exits with a `log(exposure)` offset on
 #' this panel is a piecewise-constant proportional hazards model;
 #' [fit_survival_model()] fits one per exit type (cause-specific hazards).
+#'
+#' **Two exit types, from fixed statuses.** Only `"active"` and
+#' `"pensioner"` are read from `status_col`: an active person who is a
+#' pensioner at the next snapshot retired, and one who is gone or has any
+#' other status (e.g. `"deceased"`, `"transferred"`) left otherwise. Recode
+#' your statuses to these two first if they differ.
 #'
 #' **Risk set and censoring.** Everyone active at a snapshot that has a next
 #' one; pensioners are not at risk. The last snapshot is right-censored: it
@@ -68,23 +80,31 @@
 #' 2020 is 31/366), and a snapshot missing for everyone makes the interval
 #' longer rather than counting as exits.
 #'
-#' **Duplicates.** A person seen twice at one snapshot is kept once (the
-#' first by status, a missing status last), with a warning.
+#' **Duplicates.** A person seen twice at one snapshot is kept once, with a
+#' warning: the row first by status, then with the lowest tenure (missing
+#' values last). Rows that tie on both may differ in which one each backend
+#' keeps.
 #'
 #' @examples
 #' library(data.table)
 #' contracts <- as.data.table(bra_hrmis_contract)
 #' personnel <- as.data.table(bra_hrmis_personnel)
-#' contracts[, gross_salary_real := deflate_to_real(gross_salary_lcu, ref_date, "BRA")]
 #' tenure <- compute_tenure_panel(contracts)
 #' personnel <- merge(personnel, tenure, by = c("personnel_id", "ref_date"), all.x = TRUE)
 #'
+#' # from personnel alone, with gender
+#' panel <- build_survival_panel(
+#'   personnel, tenure_col = "tenure_years", covariate_cols = "gender"
+#' )
+#' panel[, .N, by = exit_type]
+#'
+#' # with real pay and the occupation of each person's highest-paid contract
+#' contracts[, gross_salary_real := deflate_to_real(gross_salary_lcu, ref_date, "BRA")]
 #' panel <- build_survival_panel(
 #'   personnel, contracts,
 #'   tenure_col = "tenure_years", salary_col = "gross_salary_real",
-#'   status_col = "employment_status", covariate_cols = "gender"
+#'   covariate_cols = c("gender", "paygrade")
 #' )
-#' panel[, .N, by = exit_type]
 #'
 #' @seealso [fit_survival_model()] to model the exits; [compute_service_table()]
 #'   for expected years of service by tenure without covariates.
@@ -97,10 +117,10 @@ build_survival_panel <- function(personnel, ...) {
 #' @importFrom data.table := as.data.table fcase fifelse setnames setorderv shift
 #' @export
 build_survival_panel.data.frame <- function(personnel,
-                                            contracts,
+                                            contracts = NULL,
                                             tenure_col,
-                                            salary_col,
-                                            status_col = NULL,
+                                            salary_col = NULL,
+                                            status_col = "employment_status",
                                             covariate_cols = NULL,
                                             personnel_id_col = "personnel_id",
                                             ref_date_col = "ref_date",
@@ -120,19 +140,22 @@ build_survival_panel.data.frame <- function(personnel,
   contract_covariates <- intersect(covariate_cols, colnames(contracts))
   person_year <- c(personnel_id_col, ref_date_col)
 
-  ### one row per person and snapshot: total pay across their contracts,
-  ### and the contract covariates of the selected contract
-  pay_dt <- .pay_by_person_snapshot(
-    contracts, person_year, contract_id_col, salary_col,
-    contract_covariates, select_contract
-  )
-  setnames(pay_dt, ".pay", salary_col)
-
-  ### join pay and contract covariates onto every personnel record
-  panel <- pay_dt[as.data.table(personnel)[,
+  panel <- as.data.table(personnel)[,
     c(person_year, status_col, tenure_col, person_covariates),
     with = FALSE
-  ], on = person_year]
+  ]
+
+  ### with contracts: total pay across each person's contracts at each
+  ### snapshot, and the covariates of the selected contract, joined onto
+  ### every personnel record
+  if (!is.null(contracts)) {
+    pay_dt <- .pay_by_person_snapshot(
+      contracts, person_year, contract_id_col, salary_col,
+      contract_covariates, select_contract
+    )
+    setnames(pay_dt, ".pay", salary_col)
+    panel <- pay_dt[panel, on = person_year]
+  }
   setnames(panel, person_year, c(".pid", ".ref"))
 
   ### without a status column, everyone on the payroll is active
@@ -142,9 +165,9 @@ build_survival_panel.data.frame <- function(personnel,
     setnames(panel, status_col, ".status")
   }
 
-  ### one row per person and snapshot, keeping the first by status, missing
-  ### last (as the database method does)
-  setorderv(panel, c(".pid", ".ref", ".status"), na.last = TRUE)
+  ### one row per person and snapshot, keeping the first by status, then the
+  ### lowest tenure, missing last (as the database method does)
+  setorderv(panel, c(".pid", ".ref", ".status", tenure_col), na.last = TRUE)
   n_dup <- sum(duplicated(panel, by = c(".pid", ".ref")))
   if (n_dup > 0L) {
     .warn_duplicates(n_dup, personnel_id_col, ref_date_col)
@@ -193,10 +216,10 @@ build_survival_panel.data.frame <- function(personnel,
 #' @importFrom rlang .data !!
 #' @export
 build_survival_panel.tbl_dbi <- function(personnel,
-                                         contracts,
+                                         contracts = NULL,
                                          tenure_col,
-                                         salary_col,
-                                         status_col = NULL,
+                                         salary_col = NULL,
+                                         status_col = "employment_status",
                                          covariate_cols = NULL,
                                          personnel_id_col = "personnel_id",
                                          ref_date_col = "ref_date",
@@ -214,31 +237,6 @@ build_survival_panel.tbl_dbi <- function(personnel,
   ### dbplyr turns into SQL -- the panel itself never leaves the database
   person_covariates <- intersect(covariate_cols, colnames(personnel))
   contract_covariates <- intersect(covariate_cols, colnames(contracts))
-  contracts <- rename(contracts, all_of(c(.pid = personnel_id_col, .ref = ref_date_col)))
-
-  ### total pay per person and snapshot (SUM skips missing pay, and is
-  ### missing only if all of it is)
-  pay <- contracts |>
-    group_by(.pid, .ref) |>
-    summarise(!!salary_col := sum(.data[[salary_col]], na.rm = TRUE), .groups = "drop")
-
-  ### contract covariates from the highest (or lowest) paid contract: missing
-  ### pay last, ties to the lowest contract id, as .choose_contract()
-  if (length(contract_covariates) > 0L) {
-    pay_sign <- if (select_contract == "highest_paid") -1 else 1
-    chosen <- contracts |>
-      mutate(
-        .pay_missing = is.na(.data[[salary_col]]),
-        .pay_order = !!pay_sign * .data[[salary_col]],
-        .cid = .data[[contract_id_col]]
-      ) |>
-      group_by(.pid, .ref) |>
-      dbplyr::window_order(.pay_missing, .pay_order, .cid) |>
-      filter(row_number() == 1L) |>
-      ungroup() |>
-      select(all_of(c(".pid", ".ref", contract_covariates)))
-    pay <- left_join(pay, chosen, by = c(".pid", ".ref"))
-  }
 
   panel <- personnel |>
     select(all_of(c(
@@ -249,8 +247,38 @@ build_survival_panel.tbl_dbi <- function(personnel,
     panel <- mutate(panel, .status = "active")
   }
 
-  ### one row per person and snapshot, keeping the first by status
-  panel <- .dedupe_person_snapshot_dbi(panel, personnel_id_col, ref_date_col)
+  ### one row per person and snapshot, keeping the first by status, then the
+  ### lowest tenure
+  panel <- .dedupe_person_snapshot_dbi(panel, personnel_id_col, ref_date_col, tenure_col)
+
+  ### with contracts: total pay per person and snapshot (SUM skips missing
+  ### pay, and is missing only if all of it is), and the covariates of the
+  ### highest (or lowest) paid contract: missing pay last, ties to the lowest
+  ### contract id, as .choose_contract()
+  if (!is.null(contracts)) {
+    contracts <- rename(contracts, all_of(c(.pid = personnel_id_col, .ref = ref_date_col)))
+    pay <- contracts |>
+      group_by(.pid, .ref) |>
+      summarise(!!salary_col := sum(.data[[salary_col]], na.rm = TRUE), .groups = "drop")
+
+    if (length(contract_covariates) > 0L) {
+      pay_sign <- if (select_contract == "highest_paid") -1 else 1
+      chosen <- contracts |>
+        mutate(
+          .pay_missing = is.na(.data[[salary_col]]),
+          .pay_order = !!pay_sign * .data[[salary_col]],
+          .cid = .data[[contract_id_col]]
+        ) |>
+        group_by(.pid, .ref) |>
+        dbplyr::window_order(.pay_missing, .pay_order, .cid) |>
+        filter(row_number() == 1L) |>
+        ungroup() |>
+        select(all_of(c(".pid", ".ref", contract_covariates)))
+      pay <- left_join(pay, chosen, by = c(".pid", ".ref"))
+    }
+
+    panel <- left_join(panel, pay, by = c(".pid", ".ref"))
+  }
 
   ### the calendar is built in R and sent in inline (no write access
   ### needed), so both methods measure intervals the same way
@@ -262,7 +290,6 @@ build_survival_panel.tbl_dbi <- function(personnel,
   ### each person's next record with a LEAD() window ordered by snapshot;
   ### joining the calendar drops the last snapshot, which is censored
   panel <- panel |>
-    left_join(pay, by = c(".pid", ".ref")) |>
     group_by(.pid) |>
     dbplyr::window_order(.ref) |>
     mutate(.next_seen = lead(.ref), .next_status = lead(.status)) |>
@@ -309,8 +336,14 @@ build_survival_panel.default <- function(personnel, ...) {
 #'   or in a database.
 #' @param covariate_cols Character vector. The covariates to model. Defaults
 #'   to those the panel was built with; `character(0)` for tenure (and year)
-#'   effects only. Character columns become categories, numeric ones enter
-#'   linearly.
+#'   effects only.
+#'   * A character column becomes categories, compared with its first value
+#'     in alphabetical order. To compare with another, make it a factor with
+#'     that level first.
+#'   * A numeric column enters linearly, per unit: for pay, that is per unit
+#'     of currency. Cut it into bands first (e.g. pay quintiles): the hazard
+#'     ratios are easier to read, and people stay added up into few groups
+#'     (a column with a value per person makes a group per person).
 #' @param exit_types Any of `"retired"` and `"other"` (both by default). An
 #'   exit type no one had is left out, with a warning.
 #' @param band_width Number. The width in years of the tenure bands within
@@ -320,8 +353,9 @@ build_survival_panel.default <- function(personnel, ...) {
 #'   year.
 #' @param make_tidy_output Logical. If `TRUE`, return the hazard ratio table
 #'   from [tidy.survival_model()] instead of the model. Default `FALSE`.
-#' @param ... Passed to [fixest::fepois()], e.g. `nthreads`. Not `fml`,
-#'   `data`, `offset`, `vcov`, `ssc`, `weights` or `cluster` (see Details).
+#' @param ... Passed to [fixest::fepois()], e.g. `nthreads`, or `notes = TRUE`
+#'   to see fixest's own notes (off by default). Not `fml`, `data`, `offset`,
+#'   `vcov`, `ssc`, `weights` or `cluster` (see Details).
 #'
 #' @returns A `survival_model`, for [tidy.survival_model()] and
 #'   [predict.survival_model()]; fixest's own functions (`summary()`,
@@ -342,6 +376,10 @@ build_survival_panel.default <- function(personnel, ...) {
 #' sufficient statistics for a Poisson model, so the estimates and standard
 #' errors equal those on the person-level panel; fixest's number of
 #' observations is the number of groups.
+#'
+#' **Missing values.** A person-interval with no tenure or a missing
+#' covariate cannot be modelled: it is left out, with a warning that counts
+#' them.
 #'
 #' **Standard errors** are the model's own (`vcov = "iid"`), with no
 #' small-sample adjustment, which would depend on the number of groups. As
@@ -400,6 +438,7 @@ fit_survival_model.data.frame <- function(panel,
   cells[, .band := floor(get(tenure_col) / band_width) * band_width]
   cells <- cells[,
     .(
+      .n = .N,
       exit_retired = sum(exit_type == "retired"),
       exit_other = sum(exit_type == "other"),
       exposure = sum(exposure)
@@ -434,6 +473,7 @@ fit_survival_model.tbl_dbi <- function(panel,
     mutate(.band = floor(.data[[tenure_col]] / !!band_width) * !!band_width) |>
     group_by(across(all_of(c(".band", ".ref", covariate_cols)))) |>
     summarise(
+      .n = as.integer(n()),
       exit_retired = sum(if_else(exit_type == "retired", 1, 0), na.rm = TRUE),
       exit_other = sum(if_else(exit_type == "other", 1, 0), na.rm = TRUE),
       exposure = sum(exposure, na.rm = TRUE),
@@ -470,6 +510,9 @@ fit_survival_model.default <- function(panel, ...) {
 #'     \item{exit_type}{`"retired"` or `"other"`.}
 #'     \item{term}{The covariate as fixest names it: a category's column and
 #'       level (e.g. `genderM`), or a numeric column's name.}
+#'     \item{covariate, level}{The term split in two: the column (`gender`)
+#'       and the category compared with the reference (`M`). `level` is `NA`
+#'       for a numeric covariate.}
 #'     \item{estimate}{The hazard ratio: e.g. `0.8` is a 20% lower chance of
 #'       leaving in a given year than the reference category (or per unit of
 #'       a numeric covariate).}
@@ -517,15 +560,22 @@ tidy.survival_model <- function(x, conf.level = 0.95, ...) {
   ### every column of the table, typed, so a model with no covariates (for
   ### which broom gives only conf.low and conf.high) still has all of them
   columns <- tibble(
-    exit_type = character(), term = character(), estimate = numeric(),
-    std.error = numeric(), statistic = numeric(), p.value = numeric(),
-    conf.low = numeric(), conf.high = numeric()
+    exit_type = character(), term = character(), covariate = character(),
+    level = character(), estimate = numeric(), std.error = numeric(),
+    statistic = numeric(), p.value = numeric(), conf.low = numeric(),
+    conf.high = numeric()
   )
+  out <- bind_rows(columns, bind_rows(rows))
+
+  ### each term's covariate and level (genderM is gender, M)
+  terms <- .split_terms(out$term, attr(x, "survival_settings")$covariate_cols)
 
   ### hazard ratios. as.numeric() drops the vcov_type attribute broom leaves
   ### on the columns; std.error, statistic and p.value stay on the log scale
-  bind_rows(columns, bind_rows(rows)) |>
+  out |>
     mutate(
+      covariate = terms$covariate,
+      level = terms$level,
       across(all_of(c("estimate", "conf.low", "conf.high")), function(col) exp(as.numeric(col))),
       across(all_of(c("std.error", "statistic", "p.value")), as.numeric)
     )

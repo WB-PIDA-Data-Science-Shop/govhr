@@ -35,13 +35,22 @@ fit_survival_model(panel, ...)
 \item{panel}{A \code{survival_panel} from \code{\link[=build_survival_panel]{build_survival_panel()}}, in memory
 or in a database.}
 
-\item{...}{Passed to \code{\link[fixest:fepois]{fixest::fepois()}}, e.g. \code{nthreads}. Not \code{fml},
-\code{data}, \code{offset}, \code{vcov}, \code{ssc}, \code{weights} or \code{cluster} (see Details).}
+\item{...}{Passed to \code{\link[fixest:fepois]{fixest::fepois()}}, e.g. \code{nthreads}, or \code{notes = TRUE}
+to see fixest's own notes (off by default). Not \code{fml}, \code{data}, \code{offset},
+\code{vcov}, \code{ssc}, \code{weights} or \code{cluster} (see Details).}
 
 \item{covariate_cols}{Character vector. The covariates to model. Defaults
 to those the panel was built with; \code{character(0)} for tenure (and year)
-effects only. Character columns become categories, numeric ones enter
-linearly.}
+effects only.
+\itemize{
+\item A character column becomes categories, compared with its first value
+in alphabetical order. To compare with another, make it a factor with
+that level first.
+\item A numeric column enters linearly, per unit: for pay, that is per unit
+of currency. Cut it into bands first (e.g. pay quintiles): the hazard
+ratios are easier to read, and people stay added up into few groups
+(a column with a value per person makes a group per person).
+}}
 
 \item{exit_types}{Any of \code{"retired"} and \code{"other"} (both by default). An
 exit type no one had is left out, with a warning.}
@@ -85,6 +94,10 @@ database, for a database panel). Exit counts and years at risk are
 sufficient statistics for a Poisson model, so the estimates and standard
 errors equal those on the person-level panel; fixest's number of
 observations is the number of groups.
+
+\strong{Missing values.} A person-interval with no tenure or a missing
+covariate cannot be modelled: it is left out, with a warning that counts
+them.
 
 \strong{Standard errors} are the model's own (\code{vcov = "iid"}), with no
 small-sample adjustment, which would depend on the number of groups. As

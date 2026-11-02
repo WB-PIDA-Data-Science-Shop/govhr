@@ -16,9 +16,11 @@ run_survival_panel <- function(backend, personnel, contracts, ...) {
     on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
 
     DBI::dbWriteTable(con, "personnel", as.data.frame(personnel))
-    DBI::dbWriteTable(con, "contracts", as.data.frame(contracts))
     personnel <- dplyr::tbl(con, "personnel")
-    contracts <- dplyr::tbl(con, "contracts")
+    if (!is.null(contracts)) {
+      DBI::dbWriteTable(con, "contracts", as.data.frame(contracts))
+      contracts <- dplyr::tbl(con, "contracts")
+    }
   }
 
   # the data only: a plain data frame without the survival_panel attributes
@@ -186,12 +188,50 @@ for (backend in backends) {
   test_that(paste0("without a status column everyone is active and every exit is other (", backend, ")"), {
     result <- do.call(run_survival_panel, c(
       list(backend, survival_personnel(), survival_contracts()),
-      survival_args[c("tenure_col", "salary_col")]
+      survival_args[c("tenure_col", "salary_col")], list(status_col = NULL)
     ))
 
     # P3 is now active in 2021 and gone in 2022
     expect_equal(result$personnel_id, c("P1", "P1", "P2", "P3", "P3", "P4"))
     expect_equal(result$exit_type, c("none", "none", "other", "none", "other", "none"))
+  })
+
+  test_that(paste0("status_col defaults to employment_status, so retirements are found (", backend, ")"), {
+    result <- run_survival_panel(
+      backend, survival_personnel(), survival_contracts(),
+      tenure_col = "tenure", salary_col = "pay"
+    )
+    expect_equal(result$exit_type, c("none", "none", "other", "retired", "none"))
+  })
+
+  test_that(paste0("a panel from personnel alone has the same rows, without pay (", backend, ")"), {
+    with_pay <- do.call(run_survival_panel, c(
+      list(backend, survival_personnel(), survival_contracts()),
+      survival_args, list(covariate_cols = "gender")
+    ))
+    alone <- run_survival_panel(
+      backend, survival_personnel(), NULL,
+      tenure_col = "tenure", covariate_cols = "gender"
+    )
+    expect_equal(alone, with_pay[setdiff(names(with_pay), "pay")])
+  })
+
+  test_that(paste0("without a status column, duplicates keep the lowest tenure (", backend, ")"), {
+    # P1/2020 is also recorded with tenure 5, listed first: tenure breaks the
+    # tie, so both backends keep tenure 0 whatever the row order
+    personnel <- survival_personnel()
+    personnel$employment_status <- NULL
+    dup <- personnel[1, ]
+    dup$tenure <- 5
+    personnel <- rbind(dup, personnel)
+
+    expect_warning(
+      result <- run_survival_panel(
+        backend, personnel, NULL, tenure_col = "tenure", status_col = NULL
+      ),
+      "1 duplicate rows"
+    )
+    expect_equal(result$tenure[result$personnel_id == "P1"], c(0, 1))
   })
 
   test_that(paste0("a next status other than active or pensioner is an other exit (", backend, ")"), {
@@ -343,6 +383,21 @@ test_that("a duplicate keeps a missing status last even where the database sorts
   expect_equal(sort(result$personnel_id), c("P1", "P1", "P2", "P3", "P4"))
 })
 
+test_that("contracts and salary_col come together, and contract covariates need contracts", {
+  expect_error(
+    build_survival_panel(survival_personnel(), survival_contracts(), tenure_col = "tenure"),
+    "`contracts` and `salary_col`"
+  )
+  expect_error(
+    build_survival_panel(survival_personnel(), tenure_col = "tenure", salary_col = "pay"),
+    "`contracts` and `salary_col`"
+  )
+  expect_error(
+    build_survival_panel(survival_personnel(), tenure_col = "tenure", covariate_cols = "occupation"),
+    "`occupation` is in neither"
+  )
+})
+
 test_that("an unsupported input errors", {
   expect_error(
     build_survival_panel(as.matrix(survival_personnel()), survival_contracts(), "tenure", "pay"),
@@ -421,7 +476,7 @@ two_group_panel <- function() {
 }
 
 two_group_args <- list(
-  tenure_col = "tenure", salary_col = "pay", covariate_cols = "gender"
+  tenure_col = "tenure", salary_col = "pay", status_col = NULL, covariate_cols = "gender"
 )
 
 for (backend in backends) {
@@ -432,6 +487,23 @@ for (backend in backends) {
 
     expect_s3_class(fit, "fixest")
     expect_equal(exp(unname(stats::coef(fit)["genderM"])), 7 / 3)
+  })
+
+  test_that(paste0("person-intervals with no tenure or a missing covariate are left out, with a warning (", backend, ")"), {
+    # X1 (no tenure) and X2 (no gender) both leave: kept, they would change
+    # the hazard ratio of 7 / 3
+    data <- two_group_panel()
+    data$personnel <- rbind(data$personnel, data.frame(
+      personnel_id = c("X1", "X2"), ref_date = as.Date("2020-01-01"),
+      tenure = c(NA, 0), gender = c("F", NA)
+    ))
+
+    expect_warning(
+      fit <- fit_on(backend, data$personnel, data$contracts, two_group_args, exit_types = "other"),
+      "2 person-intervals have a missing value in `tenure` or `gender` and are left out"
+    )
+    expect_equal(exp(unname(stats::coef(fit)["genderM"])), 7 / 3)
+    expect_false(anyNA(attr(fit, "cells")$gender))
   })
 
   test_that(paste0("an exit type with no exits is left out, with a warning naming it (", backend, ")"), {
@@ -503,8 +575,8 @@ test_that("both backends fit the same models on the bundled data: both exit type
     status_col = "employment_status", covariate_cols = "gender"
   )
 
-  from_df <- suppressMessages(fit_on("data.frame", personnel, contracts, panel_args, band_width = 5))
-  from_db <- suppressMessages(fit_on("duckdb", personnel, contracts, panel_args, band_width = 5))
+  from_df <- suppressWarnings(fit_on("data.frame", personnel, contracts, panel_args, band_width = 5))
+  from_db <- suppressWarnings(fit_on("duckdb", personnel, contracts, panel_args, band_width = 5))
 
   expect_s3_class(from_df, "fixest_multi")
   expect_equal(fixest::models(from_df)$lhs, c("exit_retired", "exit_other"))
@@ -551,7 +623,7 @@ two_exit_panel <- function() {
   data
 }
 
-two_exit_args <- c(two_group_args, status_col = "employment_status")
+two_exit_args <- utils::modifyList(two_group_args, list(status_col = "employment_status"))
 
 for (backend in backends) {
   test_that(paste0("tidy() gives hazard ratios and their interval, one row per exit type and term (", backend, ")"), {
@@ -561,11 +633,13 @@ for (backend in backends) {
     out <- broom::tidy(fit, conf.level = 0.9)
 
     expect_named(out, c(
-      "exit_type", "term", "estimate", "std.error", "statistic", "p.value",
-      "conf.low", "conf.high"
+      "exit_type", "term", "covariate", "level", "estimate", "std.error",
+      "statistic", "p.value", "conf.low", "conf.high"
     ))
     expect_equal(out$exit_type, c("retired", "other"))
     expect_equal(out$term, c("genderM", "genderM"))
+    expect_equal(out$covariate, c("gender", "gender"))
+    expect_equal(out$level, c("M", "M"))
     for (i in 1:2) {
       expect_equal(out$estimate[i], exp(unname(stats::coef(fit[[i]]))))
       expect_equal(out$std.error[i], unname(fixest::se(fit[[i]])), ignore_attr = TRUE)
@@ -587,6 +661,28 @@ for (backend in backends) {
   })
 }
 
+test_that("tidy() gives a numeric covariate's name and no level", {
+  data <- two_group_panel()
+  data$personnel$age <- c(30, 35, 40, 45, 31, 36, 52, 47, 31, 36, 41, 32, 37)
+  args <- utils::modifyList(two_group_args, list(covariate_cols = c("gender", "age")))
+  fit <- fit_on("data.frame", data$personnel, data$contracts, args, exit_types = "other")
+
+  out <- broom::tidy(fit)
+
+  expect_equal(out$term, c("genderM", "age"))
+  expect_equal(out$covariate, c("gender", "age"))
+  expect_equal(out$level, c("M", NA))
+})
+
+test_that("terms are split by the longest covariate name they start with", {
+  out <- .split_terms(
+    c("gradeA", "grade_bandB", "age", "genderM"),
+    c("grade", "grade_band", "age", "gender")
+  )
+  expect_equal(out$covariate, c("grade", "grade_band", "age", "gender"))
+  expect_equal(out$level, c("A", "B", NA, "M"))
+})
+
 test_that("tidy() of a model with one exit type gives that exit type", {
   data <- two_group_panel()
   fit <- fit_on("data.frame", data$personnel, data$contracts, two_group_args, exit_types = "other")
@@ -607,13 +703,13 @@ test_that("tidy() of a model with no covariates gives no rows, with the same col
     personnel, contracts,
     tenure_col = "tenure_years", salary_col = "gross_salary_lcu"
   )
-  fit <- suppressMessages(fit_survival_model(panel, exit_types = "other", band_width = 5))
+  fit <- suppressWarnings(fit_survival_model(panel, exit_types = "other", band_width = 5))
 
   out <- broom::tidy(fit)
 
   expect_equal(nrow(out), 0L)
   expect_named(out, c(
-    "exit_type", "term", "estimate", "std.error", "statistic", "p.value",
+    "exit_type", "term", "covariate", "level", "estimate", "std.error", "statistic", "p.value",
     "conf.low", "conf.high"
   ))
 })
@@ -679,20 +775,32 @@ for (backend in backends) {
   })
 }
 
-test_that("predict() of the cells adds up to the exits seen, gives 0 where fixest dropped a band for no exits, and NA without tenure", {
-  fit <- suppressMessages(fit_survival_model(bundled_survival_panel(), band_width = 5))
+test_that("predict() of the cells adds up to the exits seen, gives 0 where fixest dropped a band for no exits, and has no cells without tenure", {
+  fit <- suppressWarnings(fit_survival_model(bundled_survival_panel(), band_width = 5))
 
   out <- predict(fit)
 
-  kept <- !is.na(out$tenure_band)
-  expect_equal(sum(out$pred_retired[kept]), sum(out$exit_retired[kept]), tolerance = 1e-6)
-  expect_equal(sum(out$pred_other[kept]), sum(out$exit_other[kept]), tolerance = 1e-6)
+  expect_false(anyNA(out$tenure_band))
+  expect_equal(sum(out$pred_retired), sum(out$exit_retired), tolerance = 1e-6)
+  expect_equal(sum(out$pred_other), sum(out$exit_other), tolerance = 1e-6)
   expect_true(all(out$pred_retired[out$tenure_band %in% 0] == 0))
-  expect_true(all(is.na(out$pred_retired[!kept])))
+})
+
+test_that("fixest's notes are off, and notes = TRUE through ... turns them back on", {
+  panel <- bundled_survival_panel()
+  expect_no_message(suppressWarnings(fit_survival_model(panel, band_width = 5)))
+  expect_message(suppressWarnings(fit_survival_model(panel, band_width = 5, notes = TRUE)))
+})
+
+test_that("missing tenure on the bundled data: 54 person-intervals left out, with a warning", {
+  expect_warning(
+    fit_survival_model(bundled_survival_panel(), band_width = 5),
+    "54 person-intervals have a missing value in `tenure_years` or `gender`"
+  )
 })
 
 test_that("predict() with newdata gives 0 for a band seen with no exits, NA for one never seen", {
-  fit <- suppressMessages(fit_survival_model(bundled_survival_panel(), band_width = 5))
+  fit <- suppressWarnings(fit_survival_model(bundled_survival_panel(), band_width = 5))
   newdata <- data.frame(
     tenure_years = c(2, 12, 200), ref_date = as.Date("2012-01-01"), gender = "FEMININO"
   )

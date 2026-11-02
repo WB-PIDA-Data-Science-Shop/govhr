@@ -18,10 +18,10 @@
 }
 \arguments{
 \item{personnel, contracts}{The personnel and contract tables, as data
-frames or lazy database tables.}
+frames or lazy database tables. \code{contracts} may be \code{NULL}.}
 
 \item{tenure_col, salary_col, status_col}{Character. The tenure (in
-\code{personnel}), pay (in \code{contracts}) and employment status (in
+\code{personnel}), pay (in \code{contracts}, or \code{NULL}) and employment status (in
 \code{personnel}, or \code{NULL}) columns.}
 
 \item{covariate_cols}{Character vector or \code{NULL}. Covariates, each from
@@ -35,8 +35,8 @@ person, snapshot date and contract id columns.}
 }
 \description{
 Shared by the data.frame and tbl_dbi methods, so the checks cannot drift
-apart. Stops with an error if a required column is missing from
-\code{personnel} or \code{contracts}, or if a covariate is in both tables
-(ambiguous) or in neither.
+apart. Stops with an error if only one of \code{contracts} and \code{salary_col} is
+given, if a required column is missing from \code{personnel} or \code{contracts},
+or if a covariate is in both tables (ambiguous) or in neither.
 }
 \keyword{internal}

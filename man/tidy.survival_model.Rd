@@ -20,6 +20,9 @@ model has no covariates:
 \item{exit_type}{\code{"retired"} or \code{"other"}.}
 \item{term}{The covariate as fixest names it: a category's column and
 level (e.g. \code{genderM}), or a numeric column's name.}
+\item{covariate, level}{The term split in two: the column (\code{gender})
+and the category compared with the reference (\code{M}). \code{level} is \code{NA}
+for a numeric covariate.}
 \item{estimate}{The hazard ratio: e.g. \code{0.8} is a 20\% lower chance of
 leaving in a given year than the reference category (or per unit of
 a numeric covariate).}

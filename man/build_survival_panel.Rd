@@ -11,10 +11,10 @@ build_survival_panel(personnel, ...)
 
 \method{build_survival_panel}{data.frame}(
   personnel,
-  contracts,
+  contracts = NULL,
   tenure_col,
-  salary_col,
-  status_col = NULL,
+  salary_col = NULL,
+  status_col = "employment_status",
   covariate_cols = NULL,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
@@ -25,10 +25,10 @@ build_survival_panel(personnel, ...)
 
 \method{build_survival_panel}{tbl_dbi}(
   personnel,
-  contracts,
+  contracts = NULL,
   tenure_col,
-  salary_col,
-  status_col = NULL,
+  salary_col = NULL,
+  status_col = "employment_status",
   covariate_cols = NULL,
   personnel_id_col = "personnel_id",
   ref_date_col = "ref_date",
@@ -45,20 +45,25 @@ as a data frame or a lazy database table (\code{tbl_dbi}).}
 
 \item{...}{Not used.}
 
-\item{contracts}{Contract snapshots: one row per contract and \code{ref_date},
-of the same kind as \code{personnel}.}
+\item{contracts}{Contract snapshots (one row per contract and \code{ref_date},
+of the same kind as \code{personnel}), or \code{NULL} (the default) to build the
+panel from \code{personnel} alone. Needed for pay and for contract covariates
+such as occupation; give \code{salary_col} with it.}
 
 \item{tenure_col}{Character. The \code{personnel} column with years of service,
 e.g. from \code{\link[=compute_tenure_panel]{compute_tenure_panel()}}. It must count from hiring, not from
 the first snapshot.}
 
-\item{salary_col}{Character. The \code{contracts} pay column, summed across a
-person's contracts. Deflate it first (\code{\link[=deflate_to_real]{deflate_to_real()}}) to compare
-years.}
+\item{salary_col}{Character or \code{NULL}. The \code{contracts} pay column, summed
+across a person's contracts and carried into the panel. Deflate it first
+(\code{\link[=deflate_to_real]{deflate_to_real()}}) to compare years. To model pay, cut it into bands
+(e.g. quintiles) and name the band column in \code{\link[=fit_survival_model]{fit_survival_model()}}'s
+\code{covariate_cols} (see there). Required with \code{contracts}.}
 
-\item{status_col}{Character or \code{NULL}. The \code{personnel} status column:
-\code{"active"} can leave, \code{"pensioner"} has retired. \code{NULL} (the default)
-treats everyone as active, so every exit is \code{"other"}.}
+\item{status_col}{Character or \code{NULL}. The \code{personnel} status column,
+default \code{"employment_status"}: \code{"active"} can leave, \code{"pensioner"} has
+retired. \code{NULL}, for data with no status, treats everyone on the payroll
+as active, so every exit is \code{"other"}.}
 
 \item{covariate_cols}{Character vector or \code{NULL}. Columns to carry into
 the panel, from \code{personnel} (e.g. gender) or \code{contracts} (e.g.
@@ -83,7 +88,8 @@ interval.}
 for someone who left.}
 \item{exit_type}{At the next snapshot: \code{"none"} (still active),
 \code{"retired"} (a pensioner) or \code{"other"} (gone, or any other status).}
-\item{salary_col}{Total pay at the start; \code{NA} with no contract.}
+\item{salary_col}{With \code{contracts}: total pay at the start; \code{NA} with
+no contract.}
 \item{covariate_cols}{As at the start of the interval.}
 }
 It remembers the column arguments, so \code{\link[=fit_survival_model]{fit_survival_model()}} needs none.
@@ -92,13 +98,19 @@ It remembers the column arguments, so \code{\link[=fit_survival_model]{fit_survi
 Turns HRMIS snapshots into the table a model of exits is fitted on: one
 row per person and interval between two snapshots in which they could
 leave, with how long they were at risk (\code{exposure}), whether and how they
-left by the next snapshot (\code{exit_type}), and their pay and covariates at
-the start of the interval.
+left by the next snapshot (\code{exit_type}), and their covariates (and pay, if
+asked for) at the start of the interval.
 }
 \details{
 \strong{Model.} A Poisson regression of exits with a \code{log(exposure)} offset on
 this panel is a piecewise-constant proportional hazards model;
 \code{\link[=fit_survival_model]{fit_survival_model()}} fits one per exit type (cause-specific hazards).
+
+\strong{Two exit types, from fixed statuses.} Only \code{"active"} and
+\code{"pensioner"} are read from \code{status_col}: an active person who is a
+pensioner at the next snapshot retired, and one who is gone or has any
+other status (e.g. \code{"deceased"}, \code{"transferred"}) left otherwise. Recode
+your statuses to these two first if they differ.
 
 \strong{Risk set and censoring.} Everyone active at a snapshot that has a next
 one; pensioners are not at risk. The last snapshot is right-censored: it
@@ -117,23 +129,31 @@ monthly or irregular snapshots work: exposure is always in years (January
 2020 is 31/366), and a snapshot missing for everyone makes the interval
 longer rather than counting as exits.
 
-\strong{Duplicates.} A person seen twice at one snapshot is kept once (the
-first by status, a missing status last), with a warning.
+\strong{Duplicates.} A person seen twice at one snapshot is kept once, with a
+warning: the row first by status, then with the lowest tenure (missing
+values last). Rows that tie on both may differ in which one each backend
+keeps.
 }
 \examples{
 library(data.table)
 contracts <- as.data.table(bra_hrmis_contract)
 personnel <- as.data.table(bra_hrmis_personnel)
-contracts[, gross_salary_real := deflate_to_real(gross_salary_lcu, ref_date, "BRA")]
 tenure <- compute_tenure_panel(contracts)
 personnel <- merge(personnel, tenure, by = c("personnel_id", "ref_date"), all.x = TRUE)
 
+# from personnel alone, with gender
+panel <- build_survival_panel(
+  personnel, tenure_col = "tenure_years", covariate_cols = "gender"
+)
+panel[, .N, by = exit_type]
+
+# with real pay and the occupation of each person's highest-paid contract
+contracts[, gross_salary_real := deflate_to_real(gross_salary_lcu, ref_date, "BRA")]
 panel <- build_survival_panel(
   personnel, contracts,
   tenure_col = "tenure_years", salary_col = "gross_salary_real",
-  status_col = "employment_status", covariate_cols = "gender"
+  covariate_cols = c("gender", "paygrade")
 )
-panel[, .N, by = exit_type]
 
 }
 \seealso{

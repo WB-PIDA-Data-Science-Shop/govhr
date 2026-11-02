@@ -573,6 +573,48 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
   contract_dt[!duplicated(contract_dt, by = person_year)]
 }
 
+#' Split model terms into their covariate and level
+#'
+#' fixest names a category's coefficient by pasting the column name and the
+#' level (`genderM`), and a numeric covariate's by its name alone (`age`).
+#' Used by `tidy.survival_model()` to give each term its covariate and level.
+#'
+#' @param terms Character vector of coefficient names.
+#' @param covariate_cols Character vector of the model's covariates.
+#'
+#' @returns A list of two character vectors as long as `terms`: `covariate`
+#'   (the longest covariate name the term starts with, so `grade_bandB` is
+#'   `grade_band`, not `grade`) and `level` (the rest; `NA` for a numeric
+#'   covariate).
+#' @keywords internal
+.split_terms <- function(terms, covariate_cols) {
+  terms <- gsub("`", "", terms)
+  candidates <- covariate_cols[order(-nchar(covariate_cols))]
+  covariate <- vapply(terms, function(term) {
+    starts <- candidates[startsWith(term, candidates)]
+    if (length(starts) == 0L) NA_character_ else starts[1L]
+  }, character(1), USE.NAMES = FALSE)
+
+  level <- substring(terms, nchar(covariate) + 1L)
+  level[is.na(covariate) | level == ""] <- NA_character_
+  list(covariate = covariate, level = level)
+}
+
+#' Join words into an "or" list for a message
+#'
+#' `"a"`, `"a or b"`, `"a, b or c"`.
+#'
+#' @param x A character vector.
+#'
+#' @returns A single string.
+#' @keywords internal
+.or_list <- function(x) {
+  if (length(x) < 2L) {
+    return(x)
+  }
+  paste(paste(x[-length(x)], collapse = ", "), "or", x[length(x)])
+}
+
 #' Name the groups of a table in a message
 #'
 #' Labels each row of `dt` by its group values, e.g. `"gender = F,
@@ -765,14 +807,14 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
 #' Check the inputs of build_survival_panel()
 #'
 #' Shared by the data.frame and tbl_dbi methods, so the checks cannot drift
-#' apart. Stops with an error if a required column is missing from
-#' `personnel` or `contracts`, or if a covariate is in both tables
-#' (ambiguous) or in neither.
+#' apart. Stops with an error if only one of `contracts` and `salary_col` is
+#' given, if a required column is missing from `personnel` or `contracts`,
+#' or if a covariate is in both tables (ambiguous) or in neither.
 #'
 #' @param personnel,contracts The personnel and contract tables, as data
-#'   frames or lazy database tables.
+#'   frames or lazy database tables. `contracts` may be `NULL`.
 #' @param tenure_col,salary_col,status_col Character. The tenure (in
-#'   `personnel`), pay (in `contracts`) and employment status (in
+#'   `personnel`), pay (in `contracts`, or `NULL`) and employment status (in
 #'   `personnel`, or `NULL`) columns.
 #' @param covariate_cols Character vector or `NULL`. Covariates, each from
 #'   exactly one of the two tables.
@@ -784,14 +826,23 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
 .check_survival_args <- function(personnel, contracts, tenure_col, salary_col,
                                  status_col, covariate_cols, personnel_id_col,
                                  ref_date_col, contract_id_col) {
+  if (is.null(contracts) != is.null(salary_col)) {
+    stop(
+      "`contracts` and `salary_col` go together: give both to add pay and ",
+      "contract covariates, or neither.",
+      call. = FALSE
+    )
+  }
   check_required_cols(
     personnel, c(personnel_id_col, ref_date_col, status_col, tenure_col),
     "personnel"
   )
-  check_required_cols(
-    contracts, c(contract_id_col, personnel_id_col, ref_date_col, salary_col),
-    "contracts"
-  )
+  if (!is.null(contracts)) {
+    check_required_cols(
+      contracts, c(contract_id_col, personnel_id_col, ref_date_col, salary_col),
+      "contracts"
+    )
+  }
   .check_column_sources(covariate_cols, personnel, contracts, "covariate")
 
   invisible(NULL)
@@ -848,18 +899,23 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
 #' The database counterpart of the de-duplication in the data.frame methods
 #' of `estimate_decrement_rates()` and `build_survival_panel()`: if any
 #' person has several rows at one snapshot, warns with their number and keeps
-#' the first by status, with a missing status last. The missing-last order is
-#' spelled out, because databases differ in where they sort NULLs.
+#' the first by status, then by `tiebreak_col` if given, missing values last.
+#' The missing-last order is spelled out, because databases differ in where
+#' they sort NULLs.
 #'
 #' @param panel A lazy table (`tbl_dbi`) with the columns `.pid`, `.ref` and
 #'   `.status`.
 #' @param personnel_id_col,ref_date_col Character. The original person and
 #'   snapshot date column names, for the warning.
+#' @param tiebreak_col Character or `NULL`. A column of `panel` that orders
+#'   rows with the same status (e.g. tenure, lowest first), so the row kept
+#'   does not depend on the database.
 #'
 #' @returns `panel`, lazily filtered to one row per `.pid` and `.ref`, or
 #'   unchanged if there were no duplicates. Counting them runs one query.
 #' @keywords internal
-.dedupe_person_snapshot_dbi <- function(panel, personnel_id_col, ref_date_col) {
+.dedupe_person_snapshot_dbi <- function(panel, personnel_id_col, ref_date_col,
+                                        tiebreak_col = NULL) {
   n_dup <- panel |>
     count(.pid, .ref, name = ".n") |>
     filter(.n > 1L) |>
@@ -868,17 +924,23 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
   if (!isTRUE(n_dup > 0)) {
     return(panel)
   }
-
-  ### window_order() takes columns only, so the missing flag (0/1, which
-  ### sorts the same on every database) gets a column of its own
   .warn_duplicates(n_dup, personnel_id_col, ref_date_col)
+
+  ### window_order() takes columns only, so each missing flag (0/1, which
+  ### sorts the same on every database) gets a column of its own
+  order_cols <- c(".status_missing", ".status")
+  panel <- mutate(panel, .status_missing = if_else(is.na(.status), 1L, 0L))
+  if (!is.null(tiebreak_col)) {
+    order_cols <- c(order_cols, ".tiebreak_missing", tiebreak_col)
+    panel <- mutate(panel, .tiebreak_missing = if_else(is.na(.data[[tiebreak_col]]), 1L, 0L))
+  }
+
   panel |>
-    mutate(.status_missing = if_else(is.na(.status), 1L, 0L)) |>
     group_by(.pid, .ref) |>
-    dbplyr::window_order(.status_missing, .status) |>
+    dbplyr::window_order(!!!rlang::syms(order_cols)) |>
     filter(row_number() == 1L) |>
     ungroup() |>
-    select(-".status_missing")
+    select(-any_of(c(".status_missing", ".tiebreak_missing")))
 }
 
 #' Tag a panel as a survival_panel
@@ -1008,6 +1070,19 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
                                 period_effects,
                                 make_tidy_output,
                                 ...) {
+  ### a person-interval with no tenure (so no band) or a missing covariate
+  ### cannot be modelled: leave it out, counting people rather than cells
+  model_cols <- c(attr(panel, "tenure_col"), covariate_cols)
+  incomplete <- !stats::complete.cases(cells[, c(".band", covariate_cols), with = FALSE])
+  if (any(incomplete)) {
+    warning(
+      sum(cells$.n[incomplete]), " person-intervals have a missing value in ",
+      .or_list(paste0("`", model_cols, "`")), " and are left out of the model.",
+      call. = FALSE
+    )
+    cells <- cells[!incomplete]
+  }
+
   ### an exit type no one had cannot be fitted: leave it out
   has_exits <- vapply(
     exit_types,
@@ -1043,14 +1118,22 @@ resolve_renamed_arg <- function(new, old, old_name, new_name) {
 
   ### the model's own standard errors, with no small-sample adjustment: it
   ### depends on the number of rows, which summing to cells changes
-  fit <- fixest::fepois(
-    stats::as.formula(paste(lhs, "~", rhs, "|", fixed_effects)),
+  ### fixest's notes (observations removed, singletons) are off: missing
+  ### values are reported above in people, and a band or year with no exits
+  ### is handled by predict(). notes = TRUE through ... turns them back on
+  dots <- list(...)
+  notes <- if ("notes" %in% names(dots)) dots$notes else FALSE
+  dots$notes <- NULL
+  fml <- stats::as.formula(paste(lhs, "~", rhs, "|", fixed_effects))
+  fit <- rlang::inject(fixest::fepois(
+    fml,
     data = cells,
     offset = ~ log(exposure),
     vcov = "iid",
     ssc = fixest::ssc(K.adj = FALSE, K.fixef = "none"),
-    ...
-  )
+    notes = !!notes,
+    !!!dots
+  ))
 
   ### a class of our own, so tidy() gives hazard ratios; fixest's own
   ### methods (coef, fixef, summary, etable) still work on the class below
